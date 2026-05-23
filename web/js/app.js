@@ -120,6 +120,7 @@ function formatHighwayType(type) {
 // Shared map interaction handlers (re-bound after each style reload)
 const mapHandlers = {
   onBuildingClick(e) {
+    _layerClickHandled = true;
     if (!e.features?.length) return;
     const p = e.features[0].properties;
     showPlaceDetail({
@@ -131,7 +132,10 @@ const mapHandlers = {
     });
   },
   onRoadClick(e) {
+    _layerClickHandled = true;
     if (!e.features?.length) return;
+    // If a sheet is already open, close it instead of opening a road sheet
+    if (selectedPlace) { closePlaceSheet(); removeCoordPin(); return; }
     const p = e.features[0].properties;
     const hasName = p.name && p.name !== p.highway_type;
     showPlaceDetail({
@@ -147,7 +151,10 @@ const mapHandlers = {
     });
   },
   onAreaClick(e) {
+    _layerClickHandled = true;
     if (!e.features?.length) return;
+    // If a sheet is already open, treat tap as dismiss rather than opening the area sheet
+    if (selectedPlace) { closePlaceSheet(); removeCoordPin(); return; }
     const p = e.features[0].properties;
     showPlaceDetail({
       name: p.name,
@@ -158,6 +165,7 @@ const mapHandlers = {
     });
   },
   onPlaceClick(e) {
+    _layerClickHandled = true;
     if (!e.features?.length) return;
     const p = e.features[0].properties;
     const c = e.features[0].geometry.coordinates;
@@ -233,6 +241,8 @@ async function fetchGeoJSON(url) {
   }
 }
 let map, userLocation, selectedPlace, activeCategory;
+// Set to true by layer click handlers so the general map.on('click') doesn't double-handle
+let _layerClickHandled = false;
 let locationMarker = null;
 let locationAccuracyMarker = null;   // accuracy circle HTML el
 let headingDeg = null;               // device compass bearing
@@ -963,16 +973,19 @@ function setupSearch() {
   });
 
   map.on('click', (e) => {
-    const hitLayers = ['buildings-fill', 'buildings-3d', 'campus-roads-hit', 'areas-fill', 'places-circles'];
-    const hits = map.queryRenderedFeatures(e.point, { layers: hitLayers.filter(id => map.getLayer(id)) });
-
     results.classList.add('hidden');
     document.getElementById('layer-panel').classList.add('hidden');
 
-    if (!hits.length) {
-      closePlaceSheet();
-      showCoordPin(e.lngLat);
+    // A layer handler (building/place/area/road) already dealt with this click
+    if (_layerClickHandled) {
+      _layerClickHandled = false;
+      return;
     }
+
+    // Genuine empty-space tap: close any open sheet, drop a coord pin
+    closePlaceSheet();
+    removeCoordPin();
+    showCoordPin(e.lngLat);
   });
 }
 
@@ -1373,7 +1386,8 @@ function flyToUserLocation() {
 // Re-add location layers after style reload
 function restoreLocationLayer() {
   if (!userLocation) return;
-  locationMarker = null; // force re-create
+  // Must remove old marker from map before nulling — it persists across style reloads
+  if (locationMarker) { locationMarker.remove(); locationMarker = null; }
   if (map.getSource('user-accuracy')) {
     try { map.removeLayer('user-accuracy-circle'); } catch (_) {}
     try { map.removeSource('user-accuracy'); } catch (_) {}

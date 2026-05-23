@@ -141,15 +141,6 @@ const IITJRouter = (() => {
   function computeRoute(fromLat, fromLng, toLat, toLng) {
     if (!_loaded) throw new Error('IITJRouter not initialised — call IITJRouter.init() first');
 
-    const CAMPUS = { minLat: 26.45, maxLat: 26.49, minLng: 73.09, maxLng: 73.14 };
-    const inBounds = (lat, lng) =>
-      lat >= CAMPUS.minLat && lat <= CAMPUS.maxLat &&
-      lng >= CAMPUS.minLng && lng <= CAMPUS.maxLng;
-
-    if (!inBounds(fromLat, fromLng) || !inBounds(toLat, toLng)) {
-      return { error: 'Coordinates outside campus bounds' };
-    }
-
     let coords = [], distance = 0, usingGraph = false;
 
     const fromNode = findNearestNode(fromLat, fromLng);
