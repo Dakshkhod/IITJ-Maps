@@ -1032,9 +1032,114 @@ async function performSearch(query) {
 // ============================================================
 // Place Detail Bottom Sheet
 // ============================================================
+let sheetHistoryActive = false;
+
+function resetSheetTransform() {
+  const sheet = document.getElementById('place-sheet');
+  sheet.style.transform = '';
+  sheet.style.transition = '';
+  sheet.classList.remove('sheet-closing');
+}
+
+function closePlaceSheetInternal() {
+  const sheet = document.getElementById('place-sheet');
+  if (sheet.classList.contains('hidden')) return false;
+  sheet.classList.add('hidden');
+  resetSheetTransform();
+  selectedPlace = null;
+  removeCoordPin();
+  return true;
+}
+
+function openPlaceSheetHistory() {
+  if (!sheetHistoryActive) {
+    history.pushState({ iitjSheet: true }, '');
+    sheetHistoryActive = true;
+  }
+}
+
+function closePlaceSheet() {
+  const didClose = closePlaceSheetInternal();
+  if (!didClose) return;
+  if (sheetHistoryActive) {
+    sheetHistoryActive = false;
+    history.back();
+  }
+}
+
+function closePlaceSheetAnimated() {
+  const sheet = document.getElementById('place-sheet');
+  if (sheet.classList.contains('hidden')) return;
+  sheet.classList.add('sheet-closing');
+  sheet.style.transition = 'transform 0.22s ease';
+  sheet.style.transform = 'translateY(100%)';
+  const onEnd = () => {
+    sheet.removeEventListener('transitionend', onEnd);
+    closePlaceSheet();
+  };
+  sheet.addEventListener('transitionend', onEnd);
+}
+
+function setupSheetGestures() {
+  const sheet = document.getElementById('place-sheet');
+  let dragStartY = 0;
+  let dragCurrentY = 0;
+  let dragging = false;
+
+  function canStartDrag(target) {
+    return target.closest('.sheet-drag-zone') || target.closest('.sheet-header');
+  }
+
+  sheet.addEventListener('touchstart', (e) => {
+    if (sheet.classList.contains('hidden')) return;
+    if (!canStartDrag(e.target)) return;
+    dragStartY = e.touches[0].clientY;
+    dragCurrentY = 0;
+    dragging = true;
+    sheet.style.transition = 'none';
+  }, { passive: true });
+
+  sheet.addEventListener('touchmove', (e) => {
+    if (!dragging) return;
+    const delta = e.touches[0].clientY - dragStartY;
+    if (delta < 0) return;
+    dragCurrentY = delta;
+    sheet.style.transform = `translateY(${delta}px)`;
+  }, { passive: true });
+
+  function endDrag() {
+    if (!dragging) return;
+    dragging = false;
+    const threshold = Math.min(100, sheet.offsetHeight * 0.22);
+    if (dragCurrentY > threshold) {
+      closePlaceSheetAnimated();
+    } else {
+      sheet.style.transition = 'transform 0.22s ease';
+      sheet.style.transform = '';
+      sheet.addEventListener('transitionend', () => {
+        sheet.style.transition = '';
+      }, { once: true });
+    }
+  }
+
+  sheet.addEventListener('touchend', endDrag);
+  sheet.addEventListener('touchcancel', endDrag);
+
+  window.addEventListener('popstate', () => {
+    const el = document.getElementById('place-sheet');
+    if (!el.classList.contains('hidden')) {
+      sheetHistoryActive = false;
+      closePlaceSheetInternal();
+    }
+  });
+}
+
 function showPlaceDetail(place) {
   removeCoordPin(); // remove any old pin before new one is created by showCoordPin
   selectedPlace = place;
+  const sheet = document.getElementById('place-sheet');
+  const wasHidden = sheet.classList.contains('hidden');
+  resetSheetTransform();
   const style = CATEGORY_STYLES[place.category] || CATEGORY_STYLES.other;
 
   document.getElementById('sheet-badge').textContent = `${style.icon} ${style.label || place.category}`;
@@ -1066,13 +1171,8 @@ function showPlaceDetail(place) {
   }
 
   document.getElementById('place-sheet').classList.remove('hidden');
+  if (wasHidden) openPlaceSheetHistory();
   if (!place._noFly) map.flyTo({ center: [place.lng, place.lat], zoom: 17, duration: 800 });
-}
-
-function closePlaceSheet() {
-  document.getElementById('place-sheet').classList.add('hidden');
-  selectedPlace = null;
-  removeCoordPin();
 }
 
 // ============================================================
@@ -1463,6 +1563,7 @@ function hideLoadingToast() {
 // ============================================================
 function setupEventListeners() {
   setupSearch();
+  setupSheetGestures();
 
   document.getElementById('btn-locate').addEventListener('click',   flyToUserLocation);
   document.getElementById('btn-satellite').addEventListener('click', toggleSatellite);
