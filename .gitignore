@@ -1,0 +1,12 @@
+node_modules/
+backend/node_modules/
+.vercel/
+.env
+.env.*
+*.log
+.DS_Store
+Thumbs.db
+
+# Local archives / duplicates (not needed for deploy)
+iitj-maps-extracted/
+iitj-maps.zip

@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>IITJ Maps — Smart Campus Navigation</title>
+  <meta name="description" content="Navigate IIT Jodhpur campus with interactive maps, search, and turn-by-turn directions">
+  <meta name="theme-color" content="#0f172a">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+  <link href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" rel="stylesheet">
+  <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+  <!-- Loading Splash -->
+  <div id="splash" class="splash">
+    <div class="splash-content">
+      <div class="splash-logo">
+        <svg width="56" height="56" viewBox="0 0 56 56" fill="none">
+          <rect width="56" height="56" rx="16" fill="#2563eb"/>
+          <path d="M28 14C22.477 14 18 18.477 18 24C18 31 28 42 28 42C28 42 38 31 38 24C38 18.477 33.523 14 28 14Z" fill="white" fill-opacity="0.95"/>
+          <circle cx="28" cy="24" r="5" fill="#2563eb"/>
+        </svg>
+      </div>
+      <h1 class="splash-title">IITJ Maps</h1>
+      <p class="splash-subtitle">Smart Campus Navigation</p>
+      <div class="splash-loader">
+        <div class="loader-bar"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main App -->
+  <div id="app" class="app hidden">
+    <!-- Map Container -->
+    <div id="map"></div>
+
+    <!-- Search Bar -->
+    <div id="search-container" class="search-container">
+      <div class="search-bar" id="search-bar">
+        <button class="search-icon-btn" id="menu-btn" aria-label="Menu">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+          </svg>
+        </button>
+        <input type="text" id="search-input" placeholder="Search buildings, departments…" autocomplete="off" spellcheck="false">
+        <button class="search-icon-btn search-clear hidden" id="search-clear" aria-label="Clear">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+      <div class="category-chips" id="category-chips"></div>
+    </div>
+
+    <!-- Search Results -->
+    <div id="search-results" class="search-results hidden"></div>
+
+    <!-- Map Controls -->
+    <div class="map-controls">
+      <button class="map-ctrl-btn" id="btn-locate" aria-label="My Location" title="My Location">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="3"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/>
+        </svg>
+      </button>
+      <button class="map-ctrl-btn" id="btn-3d" aria-label="Toggle 3D View" title="3D Buildings">
+        <span class="btn-3d-label">3D</span>
+      </button>
+      <button class="map-ctrl-btn" id="btn-satellite" aria-label="Satellite View" title="Satellite View">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/>
+          <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+        </svg>
+      </button>
+      <button class="map-ctrl-btn" id="btn-layers" aria-label="Map Layers" title="Toggle Layers">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/>
+        </svg>
+      </button>
+      <button class="map-ctrl-btn" id="btn-dark" aria-label="Toggle Dark Mode" title="Dark Mode">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Layer Panel -->
+    <div id="layer-panel" class="layer-panel hidden">
+      <div class="layer-panel-title">Map Layers</div>
+      <label class="layer-toggle-row">
+        <span class="layer-toggle-label">
+          <span class="layer-toggle-icon">🏗️</span> Buildings
+        </span>
+        <input type="checkbox" id="layer-toggle-buildings" checked>
+        <span class="toggle-track"><span class="toggle-thumb"></span></span>
+      </label>
+      <label class="layer-toggle-row">
+        <span class="layer-toggle-label">
+          <span class="layer-toggle-icon">🛤️</span> Roads & Paths
+        </span>
+        <input type="checkbox" id="layer-toggle-roads" checked>
+        <span class="toggle-track"><span class="toggle-thumb"></span></span>
+      </label>
+      <label class="layer-toggle-row">
+        <span class="layer-toggle-label">
+          <span class="layer-toggle-icon">📍</span> Place Markers
+        </span>
+        <input type="checkbox" id="layer-toggle-markers" checked>
+        <span class="toggle-track"><span class="toggle-thumb"></span></span>
+      </label>
+    </div>
+
+    <!-- Place Detail Bottom Sheet -->
+    <div id="place-sheet" class="bottom-sheet hidden">
+      <div class="sheet-handle"></div>
+      <div class="sheet-content">
+        <div class="sheet-header">
+          <div class="sheet-category-badge" id="sheet-badge"></div>
+          <h2 class="sheet-title" id="sheet-title"></h2>
+          <p class="sheet-description" id="sheet-description"></p>
+          <div class="sheet-meta">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="3"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/>
+            </svg>
+            <span class="sheet-distance" id="sheet-distance"></span>
+          </div>
+          <div class="sheet-coords" id="sheet-coords" style="display:none">
+            <span class="sheet-coords-text" id="sheet-coords-text"></span>
+            <button class="sheet-coords-copy" id="sheet-coords-copy">Copy</button>
+          </div>
+        </div>
+        <div class="sheet-actions">
+          <button class="action-btn action-primary" id="btn-directions">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M3 11l19-9-9 19-2-8-8-2z"/>
+            </svg>
+            Directions
+          </button>
+          <button class="action-btn action-secondary" id="btn-share">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
+              <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/>
+              <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+            </svg>
+            Share
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Navigation Panel -->
+    <div id="nav-panel" class="nav-panel hidden">
+      <div class="nav-progress-bar"><div id="nav-progress" class="nav-progress-fill"></div></div>
+      <div class="nav-header">
+        <div class="nav-destination" id="nav-destination"></div>
+        <div class="nav-stats">
+          <span class="nav-eta-badge" id="nav-eta"></span>
+          <span class="nav-dist" id="nav-distance"></span>
+        </div>
+        <button class="nav-close" id="nav-close">End</button>
+      </div>
+      <div class="nav-body">
+        <div class="nav-instruction">
+          <div class="nav-icon-wrap" id="nav-icon">↑</div>
+          <div class="nav-text-wrap">
+            <div class="nav-text" id="nav-text"></div>
+            <div class="nav-next hidden" id="nav-next"></div>
+          </div>
+        </div>
+        <div class="nav-step-btns">
+          <button class="nav-step-btn" id="nav-prev" title="Previous step">‹</button>
+          <button class="nav-step-btn" id="nav-next-btn" title="Next step">›</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Side Menu -->
+    <div id="side-menu" class="side-menu hidden">
+      <div class="menu-header">
+        <div class="menu-logo">
+          <svg width="32" height="32" viewBox="0 0 56 56" fill="none">
+            <rect width="56" height="56" rx="12" fill="#2563eb"/>
+            <path d="M28 14C22.477 14 18 18.477 18 24C18 31 28 42 28 42C28 42 38 31 38 24C38 18.477 33.523 14 28 14Z" fill="white" fill-opacity="0.95"/>
+            <circle cx="28" cy="24" r="5" fill="#2563eb"/>
+          </svg>
+        </div>
+        <div>
+          <div class="menu-title">IITJ Maps</div>
+          <div class="menu-subtitle">IIT Jodhpur Campus</div>
+        </div>
+        <button class="menu-close" id="menu-close">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+      <div class="menu-items">
+        <a class="menu-item" id="menu-explore">
+          <span class="menu-item-icon">🧭</span>
+          <span>Explore Campus</span>
+        </a>
+        <a class="menu-item" id="menu-share-location">
+          <span class="menu-item-icon">📡</span>
+          <span>Share My Location</span>
+        </a>
+        <a class="menu-item" id="menu-about">
+          <span class="menu-item-icon">ℹ️</span>
+          <span>About IITJ Maps</span>
+        </a>
+      </div>
+      <div class="menu-footer">IIT Jodhpur · Campus Navigation</div>
+    </div>
+    <div id="menu-overlay" class="menu-overlay hidden"></div>
+  </div>
+
+  <script src="js/search.js"></script>
+  <script src="js/routing.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

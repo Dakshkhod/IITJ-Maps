@@ -1,0 +1,1590 @@
+/**
+ * IITJ Maps — Main Application v3
+ * 3D buildings (fill-extrusion) + road-network routing + GPS
+ * No HTML markers — all places rendered as MapLibre circle+label layers
+ */
+
+// Legacy API base kept for reference — all calls replaced with local modules (IITJData, IITJRouter)
+const CAMPUS_CENTER = [73.1147, 26.4727];
+const CAMPUS_ZOOM = 15.5;
+const CAMPUS_BOUNDS = [[73.0900, 26.4450], [73.1350, 26.4950]];
+
+// Category display config (for UI only — not used in map expressions)
+const CATEGORY_STYLES = {
+  academic:       { color: '#2563eb', icon: '🏛️', bg: '#dbeafe', label: 'Academic' },
+  hostel:         { color: '#ea580c', icon: '🏠', bg: '#fed7aa', label: 'Hostel' },
+  dining:         { color: '#dc2626', icon: '🍽️', bg: '#fecaca', label: 'Dining' },
+  sports:         { color: '#16a34a', icon: '⚽', bg: '#bbf7d0', label: 'Sports' },
+  medical:        { color: '#be123c', icon: '🏥', bg: '#ffe4e6', label: 'Medical' },
+  gate:           { color: '#7c3aed', icon: '🚪', bg: '#ede9fe', label: 'Gate' },
+  parking:        { color: '#0284c7', icon: '🅿️', bg: '#e0f2fe', label: 'Parking' },
+  utility:        { color: '#64748b', icon: '🔧', bg: '#f1f5f9', label: 'Utility' },
+  administrative: { color: '#334155', icon: '🏢', bg: '#e2e8f0', label: 'Admin' },
+  transport:      { color: '#0d9488', icon: '🚌', bg: '#ccfbf1', label: 'Transport' },
+  recreation:     { color: '#9333ea', icon: '🎭', bg: '#f3e8ff', label: 'Recreation' },
+  residential:    { color: '#b45309', icon: '🏘️', bg: '#fef3c7', label: 'Residential' },
+  bank:           { color: '#059669', icon: '🏦', bg: '#d1fae5', label: 'Bank/ATM' },
+  building:       { color: '#6b7280', icon: '🏗️', bg: '#f3f4f6', label: 'Building' },
+  university:     { color: '#2563eb', icon: '🎓', bg: '#dbeafe', label: 'University' },
+  poi:            { color: '#6366f1', icon: '📌', bg: '#e0e7ff', label: 'POI' },
+  other:          { color: '#9ca3af', icon: '📍', bg: '#f9fafb', label: 'Other' },
+};
+
+// MapLibre match expression for category → color (used in map layers)
+function categoryColorExpr() {
+  return ['match', ['get', 'category'],
+    'academic',       '#2563eb',
+    'hostel',         '#ea580c',
+    'dining',         '#dc2626',
+    'sports',         '#16a34a',
+    'medical',        '#be123c',
+    'gate',           '#7c3aed',
+    'parking',        '#0284c7',
+    'utility',        '#64748b',
+    'administrative', '#334155',
+    'transport',      '#0d9488',
+    'recreation',     '#9333ea',
+    'residential',    '#b45309',
+    'bank',           '#059669',
+    'university',     '#2563eb',
+    '#6b7280'
+  ];
+}
+
+// 3D extrusion height by category (metres)
+function buildingHeightExpr() {
+  return [
+    'case',
+    // If OSM levels data exists, use it (3.2m per floor)
+    ['all', ['has', 'levels'], ['!=', ['get', 'levels'], null]],
+    ['*', ['to-number', ['get', 'levels'], 3], 3.2],
+    // Otherwise fall back to category defaults
+    ['match', ['get', 'category'],
+      'academic',       15,
+      'hostel',         18,
+      'administrative', 12,
+      'dining',          8,
+      'sports',          7,
+      'medical',        10,
+      'residential',    14,
+      'university',     15,
+      9  // default
+    ]
+  ];
+}
+
+function labelPaint() {
+  const onSatellite = isSatellite;
+  return {
+    'text-color': onSatellite ? '#ffffff' : (isDark ? '#e2e8f0' : '#374151'),
+    'text-halo-color': onSatellite ? 'rgba(0,0,0,0.85)' : (isDark ? 'rgba(15,23,42,0.85)' : 'rgba(255,255,255,0.9)'),
+    'text-halo-width': onSatellite ? 2 : 1.5
+  };
+}
+
+function buildingFillOpacity() {
+  if (isSatellite) return 0;
+  return ['interpolate', ['linear'], ['zoom'], 14, 0.5, 17, 0.65];
+}
+
+function buildingFillColor() {
+  return isDark ? '#475569' : '#f1f5f9';
+}
+
+function areaFillOpacity() {
+  return isSatellite ? 0 : 0.35;
+}
+
+function buildingOutlineOpacity() {
+  return isSatellite ? 0 : 0.95;
+}
+
+function areaOutlineOpacity() {
+  return isSatellite ? 0 : 0.5;
+}
+
+function markerCircleOpacity() {
+  return isSatellite ? 0 : 0.95;
+}
+
+function formatHighwayType(type) {
+  const labels = {
+    footway: 'Footpath', path: 'Walking Path', steps: 'Steps', cycleway: 'Cycle Path',
+    service: 'Service Road', residential: 'Campus Road', unclassified: 'Campus Road',
+    tertiary: 'Main Road', secondary: 'Main Road', primary: 'Main Road',
+    track: 'Track', living_street: 'Living Street',
+  };
+  return labels[type] || (type ? type.replace(/_/g, ' ') : 'Path');
+}
+
+// Shared map interaction handlers (re-bound after each style reload)
+const mapHandlers = {
+  onBuildingClick(e) {
+    if (!e.features?.length) return;
+    const p = e.features[0].properties;
+    showPlaceDetail({
+      name: p.name,
+      category: p.category || 'building',
+      description: p.description || p.amenity || p.building_type || '',
+      lat: e.lngLat.lat,
+      lng: e.lngLat.lng,
+    });
+  },
+  onRoadClick(e) {
+    if (!e.features?.length) return;
+    const p = e.features[0].properties;
+    const hasName = p.name && p.name !== p.highway_type;
+    showPlaceDetail({
+      name: hasName ? p.name : formatHighwayType(p.highway_type),
+      category: 'transport',
+      description: [
+        formatHighwayType(p.highway_type),
+        p.surface ? `Surface: ${p.surface}` : '',
+        p.lit === 'yes' ? 'Lit at night' : '',
+      ].filter(Boolean).join(' · '),
+      lat: e.lngLat.lat,
+      lng: e.lngLat.lng,
+    });
+  },
+  onAreaClick(e) {
+    if (!e.features?.length) return;
+    const p = e.features[0].properties;
+    showPlaceDetail({
+      name: p.name,
+      category: p.category || 'recreation',
+      description: p.area_type ? p.area_type.replace(/_/g, ' ') : 'Campus area',
+      lat: e.lngLat.lat,
+      lng: e.lngLat.lng,
+    });
+  },
+  onPlaceClick(e) {
+    if (!e.features?.length) return;
+    const p = e.features[0].properties;
+    const c = e.features[0].geometry.coordinates;
+    showPlaceDetail({
+      name: p.name,
+      category: p.category,
+      description: p.description,
+      lat: c[1],
+      lng: c[0],
+      is_proposed: p.is_proposed,
+    });
+  },
+  onPointer() { map.getCanvas().style.cursor = 'pointer'; },
+  onPointerLeave() { map.getCanvas().style.cursor = ''; },
+};
+
+function bindMapLayer(layerId, events) {
+  if (!map.getLayer(layerId)) return;
+  for (const [event, fn] of Object.entries(events)) {
+    try { map.off(event, layerId, fn); } catch (_) {}
+    map.on(event, layerId, fn);
+  }
+}
+
+function bindMapInteractions() {
+  bindMapLayer('buildings-fill', {
+    click: mapHandlers.onBuildingClick,
+    mouseenter: mapHandlers.onPointer,
+    mouseleave: mapHandlers.onPointerLeave,
+  });
+  bindMapLayer('buildings-3d', {
+    click: mapHandlers.onBuildingClick,
+    mouseenter: mapHandlers.onPointer,
+    mouseleave: mapHandlers.onPointerLeave,
+  });
+  bindMapLayer('campus-roads-hit', {
+    click: mapHandlers.onRoadClick,
+    mouseenter: mapHandlers.onPointer,
+    mouseleave: mapHandlers.onPointerLeave,
+  });
+  bindMapLayer('areas-fill', {
+    click: mapHandlers.onAreaClick,
+    mouseenter: mapHandlers.onPointer,
+    mouseleave: mapHandlers.onPointerLeave,
+  });
+  bindMapLayer('places-circles', {
+    click: mapHandlers.onPlaceClick,
+    mouseenter: mapHandlers.onPointer,
+    mouseleave: mapHandlers.onPointerLeave,
+  });
+}
+
+function finishMapLayers() {
+  bindMapInteractions();
+  restoreLocationLayer();
+}
+
+const LAYERS = { buildings: true, roads: true, markers: true };
+
+const EMPTY_FC = { type: 'FeatureCollection', features: [] };
+
+async function fetchGeoJSON(url) {
+  try {
+    const res = await fetch(url);
+    if (!res.ok) {
+      console.warn(`API ${url} returned ${res.status}`);
+      return EMPTY_FC;
+    }
+    return res.json();
+  } catch (err) {
+    console.warn(`API ${url} failed:`, err);
+    return EMPTY_FC;
+  }
+}
+let map, userLocation, selectedPlace, activeCategory;
+let locationMarker = null;
+let locationAccuracyMarker = null;   // accuracy circle HTML el
+let headingDeg = null;               // device compass bearing
+let autoFollow = false;              // map pans to keep user centred
+let watchId = null;                  // geolocation watchPosition handle
+let isDark = false, is3D = false, isSatellite = false;
+let labeledNames = new Set();
+let searchTimeout;
+let currentRoute = null;
+let navDestination = null;           // preserved so re-route works after sheet close
+let navigationActive = false;
+let navInstructionIndex = 0;
+
+// ============================================================
+// Initialize
+// ============================================================
+async function init() {
+  map = new maplibregl.Map({
+    container: 'map',
+    style: getMapStyle(),
+    center: CAMPUS_CENTER,
+    zoom: CAMPUS_ZOOM,
+    maxBounds: CAMPUS_BOUNDS,
+    minZoom: 13,
+    maxZoom: 19,
+    pitch: 0,
+    bearing: 0,
+    attributionControl: false,
+    pitchWithRotate: true,
+  });
+
+  map.addControl(new maplibregl.AttributionControl({ compact: true }), 'bottom-left');
+  map.addControl(new maplibregl.ScaleControl({ maxWidth: 150, unit: 'metric' }), 'bottom-left');
+
+  map.dragRotate.enable();
+
+  // Disable auto-follow when user manually pans
+  map.on('dragstart', () => {
+    if (autoFollow) {
+      setAutoFollow(false);
+      document.getElementById('btn-locate').classList.remove('location-follow');
+    }
+  });
+
+  map.on('error', (e) => console.error('MapLibre error:', e.error?.message || e));
+
+  map.on('load', async () => {
+    await loadMapData();
+    hideSplash();
+    setupEventListeners();
+    handleDeepLink();
+    requestUserLocation();
+  });
+}
+
+// ============================================================
+// Map Style — streets (light/dark) or satellite imagery
+// ============================================================
+function getMapStyle() {
+  if (isSatellite) {
+    return {
+      version: 8,
+      glyphs: 'https://fonts.openmaptiles.org/{fontstack}/{range}.pbf',
+      sources: {
+        'satellite-tiles': {
+          type: 'raster',
+          tiles: [
+            'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+          ],
+          tileSize: 256,
+          maxzoom: 19,
+          attribution: '© Esri, Maxar, Earthstar Geographics, GIS User Community'
+        }
+      },
+      layers: [{
+        id: 'satellite-tiles',
+        type: 'raster',
+        source: 'satellite-tiles',
+        paint: { 'raster-opacity': 1, 'raster-brightness-min': 0, 'raster-brightness-max': 1 },
+      }]
+    };
+  }
+
+  const tiles = isDark
+    ? [
+        'https://a.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}.png',
+        'https://b.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}.png',
+        'https://c.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}.png',
+      ]
+    : [
+        'https://a.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}.png',
+        'https://b.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}.png',
+        'https://c.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}.png',
+      ];
+
+  return {
+    version: 8,
+    glyphs: 'https://fonts.openmaptiles.org/{fontstack}/{range}.pbf',
+    sources: {
+      'carto-tiles': {
+        type: 'raster',
+        tiles,
+        tileSize: 256,
+        attribution: '© OpenStreetMap contributors © CARTO'
+      }
+    },
+    layers: [{
+      id: 'carto-tiles',
+      type: 'raster',
+      source: 'carto-tiles',
+    }]
+  };
+}
+
+let styleLoadGeneration = 0;
+
+// Reload base map tiles and restore all overlay layers
+async function applyMapStyle() {
+  const savedCenter  = map.getCenter();
+  const savedZoom    = map.getZoom();
+  const savedPitch   = map.getPitch();
+  const savedBearing = map.getBearing();
+  const generation   = ++styleLoadGeneration;
+
+  return new Promise((resolve) => {
+    let restored = false;
+
+    const restoreOverlays = async () => {
+      if (restored || generation !== styleLoadGeneration) return;
+      if (!map.isStyleLoaded()) return;
+      restored = true;
+
+      try {
+        const placesRes    = IITJData.getPlaces(activeCategory || null);
+        const buildingsRes = IITJData.getBuildings();
+        const roadsRes     = IITJData.getRoads();
+        const areasRes     = IITJData.getAreas();
+
+        labeledNames = new Set([
+          ...areasRes.features.map(f => (f.properties.name || '').toLowerCase().trim()),
+          ...buildingsRes.features
+            .filter(f => f.geometry.type === 'Polygon' && f.properties.name)
+            .map(f => f.properties.name.toLowerCase().trim()),
+        ].filter(Boolean));
+
+        addRoadsLayer(roadsRes);
+        addAreasLayer(areasRes);
+        addBuildingsLayer(buildingsRes);
+        addPlacesLayer(placesRes.features || []);
+        if (currentRoute) drawRoute(currentRoute.geometry);
+
+        map.jumpTo({ center: savedCenter, zoom: savedZoom, pitch: savedPitch, bearing: savedBearing });
+
+        if (is3D && !isSatellite) {
+          if (map.getLayer('buildings-fill'))    map.setLayoutProperty('buildings-fill',    'visibility', 'none');
+          if (map.getLayer('buildings-outline')) map.setLayoutProperty('buildings-outline', 'visibility', 'none');
+          if (map.getLayer('buildings-3d'))      map.setLayoutProperty('buildings-3d',      'visibility', 'visible');
+        }
+
+        updateBaseMapButtons();
+        finishMapLayers();
+        restoreLocationLayer();
+      } catch (err) {
+        console.error('Failed to restore map layers after style change:', err);
+      } finally {
+        resolve();
+      }
+    };
+
+    const waitForStyle = () => {
+      if (generation !== styleLoadGeneration) {
+        resolve();
+        return;
+      }
+      if (map.isStyleLoaded()) {
+        restoreOverlays();
+      } else {
+        map.once('idle', waitForStyle);
+      }
+    };
+
+    map.setStyle(getMapStyle());
+    waitForStyle();
+  });
+}
+
+function updateBaseMapButtons() {
+  document.getElementById('btn-satellite').classList.toggle('active', isSatellite);
+  document.getElementById('btn-dark').classList.toggle('active', isDark && !isSatellite);
+  document.getElementById('btn-dark').disabled = isSatellite;
+  document.getElementById('btn-dark').style.opacity = isSatellite ? '0.45' : '';
+}
+
+// ============================================================
+// Load Map Data
+// ============================================================
+async function loadMapData() {
+  try {
+    // All data loaded locally via IITJData (no backend required)
+    await IITJData.init();
+    await IITJRouter.init();
+
+    const placesRes    = IITJData.getPlaces();
+    const buildingsRes = IITJData.getBuildings();
+    const roadsRes     = IITJData.getRoads();
+    const areasRes     = IITJData.getAreas();
+    const categoriesRes = IITJData.getCategories();
+
+    // Names already labeled on buildings/areas layers — exclude from point markers
+    labeledNames = new Set([
+      ...areasRes.features.map(f => (f.properties.name || '').toLowerCase().trim()),
+      ...buildingsRes.features
+        .filter(f => f.geometry.type === 'Polygon' && f.properties.name)
+        .map(f => f.properties.name.toLowerCase().trim()),
+    ].filter(Boolean));
+
+    addRoadsLayer(roadsRes);
+    addAreasLayer(areasRes);
+    addBuildingsLayer(buildingsRes);
+    addPlacesLayer(placesRes.features || []);
+    renderCategoryChips(categoriesRes);
+    finishMapLayers();
+  } catch (err) {
+    console.error('Failed to load map data:', err);
+  }
+}
+
+// ============================================================
+// Remove all custom layers (used on style/dark-mode reload)
+// ============================================================
+function removeCustomLayers() {
+  const layers = [
+    'areas-fill', 'areas-outline', 'areas-labels',
+    'campus-roads-casing', 'campus-roads-line', 'campus-roads-ped', 'campus-roads-hit', 'campus-roads-labels',
+    'buildings-fill', 'buildings-outline', 'buildings-3d', 'buildings-labels',
+    'places-circles', 'places-labels',
+    'route-glow', 'route-casing', 'route-line',
+  ];
+  const sources = ['named-areas', 'area-labels-src', 'campus-roads', 'buildings', 'places-points', 'route'];
+  layers.forEach(id => { try { if (map.getLayer(id)) map.removeLayer(id); } catch (_) {} });
+  sources.forEach(id => { try { if (map.getSource(id)) map.removeSource(id); } catch (_) {} });
+}
+
+// ============================================================
+// Named Areas Layer (grounds, gardens, pitches — label only, no heavy fill)
+// ============================================================
+function dedupeAreaLabels(features) {
+  const groups = new Map();
+  for (const f of features) {
+    if (!f.centroid || !f.properties.name) continue;
+    const key = f.properties.name.toLowerCase().trim();
+    if (!groups.has(key)) groups.set(key, { name: f.properties.name, category: f.properties.category, lats: [], lngs: [] });
+    const g = groups.get(key);
+    g.lats.push(f.centroid.lat);
+    g.lngs.push(f.centroid.lng);
+  }
+  return [...groups.values()].map(g => ({
+    type: 'Feature',
+    geometry: {
+      type: 'Point',
+      coordinates: [g.lngs.reduce((a, b) => a + b, 0) / g.lngs.length, g.lats.reduce((a, b) => a + b, 0) / g.lats.length]
+    },
+    properties: { name: g.name, category: g.category }
+  }));
+}
+
+function addAreasLayer(data) {
+  const labelFeatures = dedupeAreaLabels(data.features);
+  const labelData = { type: 'FeatureCollection', features: labelFeatures };
+
+  if (map.getSource('named-areas')) {
+    map.getSource('named-areas').setData(data);
+    if (map.getSource('area-labels-src')) map.getSource('area-labels-src').setData(labelData);
+    return;
+  }
+
+  map.addSource('named-areas', { type: 'geojson', data });
+
+  // Transparent on satellite; tinted on normal map
+  map.addLayer({
+    id: 'areas-fill',
+    type: 'fill',
+    source: 'named-areas',
+    layout: { visibility: 'visible' },
+    paint: {
+      'fill-color': [
+        'match', ['get', 'category'],
+        'sports',     '#bbf7d0',
+        'recreation', '#d1fae5',
+        'residential','#fef3c7',
+        'academic',   '#dbeafe',
+        '#e5e7eb'
+      ],
+      'fill-opacity': areaFillOpacity()
+    }
+  });
+
+  map.addLayer({
+    id: 'areas-outline',
+    type: 'line',
+    source: 'named-areas',
+    layout: { visibility: 'visible' },
+    paint: {
+      'line-color': [
+        'match', ['get', 'category'],
+        'sports',     '#16a34a',
+        'recreation', '#059669',
+        'residential','#d97706',
+        'academic',   '#2563eb',
+        '#6b7280'
+      ],
+      'line-width': 1,
+      'line-opacity': areaOutlineOpacity(),
+      'line-dasharray': [3, 2]
+    }
+  });
+
+  // One label per unique area name (deduped centroids)
+  map.addSource('area-labels-src', { type: 'geojson', data: labelData });
+
+  map.addLayer({
+    id: 'areas-labels',
+    type: 'symbol',
+    source: 'area-labels-src',
+    minzoom: 14,
+    layout: {
+      'text-field': ['get', 'name'],
+      'text-size': ['interpolate', ['linear'], ['zoom'], 14, 10, 18, 13],
+      'text-font': ['Open Sans Regular'],
+      'text-anchor': 'center',
+      'text-max-width': 10,
+      'text-allow-overlap': false,
+      visibility: 'visible'
+    },
+    paint: labelPaint()
+  });
+}
+
+// ============================================================
+// Roads Layer — styled for map & satellite, clickable, labeled
+// ============================================================
+function addRoadsLayer(data) {
+  const roadVis = LAYERS.roads ? 'visible' : 'none';
+  const pedFilter = ['any',
+    ['==', ['get', 'highway_type'], 'footway'],
+    ['==', ['get', 'highway_type'], 'path'],
+    ['==', ['get', 'highway_type'], 'steps'],
+  ];
+  const vehFilter = ['!', ['any',
+    ['==', ['get', 'highway_type'], 'footway'],
+    ['==', ['get', 'highway_type'], 'path'],
+    ['==', ['get', 'highway_type'], 'steps'],
+  ]];
+
+  if (map.getSource('campus-roads')) {
+    map.getSource('campus-roads').setData(data);
+    return;
+  }
+
+  map.addSource('campus-roads', { type: 'geojson', data });
+
+  map.addLayer({
+    id: 'campus-roads-casing',
+    type: 'line',
+    source: 'campus-roads',
+    layout: {
+      'line-join': 'round', 'line-cap': 'round',
+      visibility: roadVis
+    },
+    paint: isSatellite ? {
+      'line-color': '#ffffff',
+      'line-width': 0,
+      'line-opacity': 0
+    } : {
+      'line-color': isDark ? '#1e293b' : '#cbd5e1',
+      'line-width': ['interpolate', ['linear'], ['zoom'], 13, 2.5, 16, 6, 19, 10],
+      'line-opacity': 0.9
+    }
+  });
+
+  map.addLayer({
+    id: 'campus-roads-line',
+    type: 'line',
+    source: 'campus-roads',
+    filter: vehFilter,
+    layout: {
+      'line-join': 'round', 'line-cap': 'round',
+      visibility: roadVis
+    },
+    paint: isSatellite ? {
+      'line-color': '#ffffff',
+      'line-width': ['interpolate', ['linear'], ['zoom'], 13, 1.2, 16, 3, 19, 5],
+      'line-opacity': 0.92
+    } : {
+      'line-color': [
+        'match', ['get', 'highway_type'],
+        'service', '#f59e0b',
+        'residential', '#cbd5e1',
+        'tertiary', '#fbbf24',
+        'secondary', '#fde68a',
+        isDark ? '#818cf8' : '#6366f1'
+      ],
+      'line-width': ['interpolate', ['linear'], ['zoom'], 13, 1.5, 16, 3.5, 19, 5],
+      'line-opacity': 0.9
+    }
+  });
+
+  map.addLayer({
+    id: 'campus-roads-ped',
+    type: 'line',
+    source: 'campus-roads',
+    filter: pedFilter,
+    layout: {
+      'line-join': 'round', 'line-cap': 'round',
+      visibility: roadVis
+    },
+    paint: isSatellite ? {
+      'line-color': '#ffffff',
+      'line-width': ['interpolate', ['linear'], ['zoom'], 13, 0.8, 16, 2, 19, 3],
+      'line-opacity': 0.75,
+      'line-dasharray': [2, 1.5]
+    } : {
+      'line-color': isDark ? '#94a3b8' : '#64748b',
+      'line-width': ['interpolate', ['linear'], ['zoom'], 13, 1, 16, 2.5, 19, 4],
+      'line-opacity': 0.85,
+      'line-dasharray': [2, 1.5]
+    }
+  });
+
+  map.addLayer({
+    id: 'campus-roads-hit',
+    type: 'line',
+    source: 'campus-roads',
+    layout: { 'line-join': 'round', 'line-cap': 'round', visibility: roadVis },
+    paint: {
+      'line-color': '#000000',
+      'line-width': ['interpolate', ['linear'], ['zoom'], 13, 8, 16, 14, 19, 18],
+      'line-opacity': 0
+    }
+  });
+
+  map.addLayer({
+    id: 'campus-roads-labels',
+    type: 'symbol',
+    source: 'campus-roads',
+    minzoom: 15,
+    filter: ['all',
+      ['has', 'name'],
+      ['!=', ['get', 'name'], ''],
+      ['!=', ['get', 'name'], ['get', 'highway_type']]
+    ],
+    layout: {
+      'symbol-placement': 'line',
+      'text-field': ['get', 'name'],
+      'text-size': ['interpolate', ['linear'], ['zoom'], 15, 10, 18, 12],
+      'text-font': ['Open Sans Regular'],
+      'text-max-angle': 30,
+      'text-allow-overlap': false,
+      visibility: roadVis
+    },
+    paint: labelPaint()
+  });
+}
+
+// ============================================================
+// Buildings Layer: 2D fill + 3D extrusion + labels
+// ============================================================
+function addBuildingsLayer(data) {
+  if (map.getSource('buildings')) {
+    map.getSource('buildings').setData(data);
+    return;
+  }
+
+  map.addSource('buildings', { type: 'geojson', data });
+
+  const colorExpr = categoryColorExpr();
+  const polyFilter = ['==', ['geometry-type'], 'Polygon'];
+
+  // Light uniform fill; category colour on boundary only
+  map.addLayer({
+    id: 'buildings-fill',
+    type: 'fill',
+    source: 'buildings',
+    filter: polyFilter,
+    layout: { visibility: (LAYERS.buildings && !is3D) ? 'visible' : 'none' },
+    paint: {
+      'fill-color': buildingFillColor(),
+      'fill-opacity': buildingFillOpacity()
+    }
+  });
+
+  map.addLayer({
+    id: 'buildings-outline',
+    type: 'line',
+    source: 'buildings',
+    filter: polyFilter,
+    layout: { visibility: (LAYERS.buildings && !is3D) ? 'visible' : 'none' },
+    paint: {
+      'line-color': colorExpr,
+      'line-width': ['interpolate', ['linear'], ['zoom'], 14, 1.5, 17, 3],
+      'line-opacity': buildingOutlineOpacity()
+    }
+  });
+
+  map.addLayer({
+    id: 'buildings-3d',
+    type: 'fill-extrusion',
+    source: 'buildings',
+    filter: polyFilter,
+    layout: { visibility: (LAYERS.buildings && is3D && !isSatellite) ? 'visible' : 'none' },
+    paint: {
+      'fill-extrusion-color': buildingFillColor(),
+      'fill-extrusion-height': buildingHeightExpr(),
+      'fill-extrusion-base': 0,
+      'fill-extrusion-opacity': 0.82,
+      'fill-extrusion-vertical-gradient': true
+    }
+  });
+
+  // Name labels at high zoom
+  map.addLayer({
+    id: 'buildings-labels',
+    type: 'symbol',
+    source: 'buildings',
+    filter: ['all', polyFilter, ['!=', ['get', 'name'], '']],
+    minzoom: 16,
+    layout: {
+      'text-field': ['get', 'name'],
+      'text-size': ['interpolate', ['linear'], ['zoom'], 16, 10, 18, 13],
+      'text-font': ['Open Sans Regular'],
+      'text-anchor': 'center',
+      'text-max-width': 8,
+      visibility: LAYERS.buildings ? 'visible' : 'none'
+    },
+    paint: labelPaint()
+  });
+}
+
+// ============================================================
+// Places Layer — MapLibre circles + text labels (no HTML markers)
+// ============================================================
+function addPlacesLayer(features) {
+  // Point POIs only — skip anything already labeled on buildings/areas layers
+  const pointFeatures = features.map(f => {
+    if (f.geometry.type === 'Polygon' || f.geometry.type === 'MultiPolygon') return null;
+
+    const name = (f.properties.name || '').trim();
+    if (!name) return null;
+    if (labeledNames.has(name.toLowerCase())) return null;
+
+    let coords;
+    if (f.geometry.type === 'Point') {
+      coords = f.geometry.coordinates;
+    } else if (f.centroid) {
+      coords = [f.centroid.lng, f.centroid.lat];
+    } else return null;
+
+    if (!coords || isNaN(coords[0]) || isNaN(coords[1])) return null;
+
+    return {
+      type: 'Feature',
+      geometry: { type: 'Point', coordinates: coords },
+      properties: {
+        name,
+        category:    f.properties.category || 'other',
+        description: f.properties.description || '',
+        source:      f.properties.source || 'osm',
+        is_proposed: f.properties.is_proposed || false,
+      }
+    };
+  }).filter(Boolean);
+
+  const data = { type: 'FeatureCollection', features: pointFeatures };
+
+  // Update existing source if present
+  if (map.getSource('places-points')) {
+    map.getSource('places-points').setData(data);
+    return;
+  }
+
+  map.addSource('places-points', { type: 'geojson', data });
+
+  const colorExpr = categoryColorExpr();
+
+  map.addLayer({
+    id: 'places-circles',
+    type: 'circle',
+    source: 'places-points',
+    layout: { visibility: LAYERS.markers ? 'visible' : 'none' },
+    paint: {
+      'circle-color': colorExpr,
+      'circle-radius': ['interpolate', ['linear'], ['zoom'], 13, 4, 16, 7, 19, 10],
+      'circle-stroke-width': isSatellite ? 0 : ['interpolate', ['linear'], ['zoom'], 13, 1.5, 17, 2.5],
+      'circle-stroke-color': '#ffffff',
+      'circle-opacity': markerCircleOpacity(),
+    }
+  });
+
+  // Text labels (shown at zoom 15+, with collision avoidance)
+  map.addLayer({
+    id: 'places-labels',
+    type: 'symbol',
+    source: 'places-points',
+    minzoom: 15,
+    layout: {
+      'text-field': ['get', 'name'],
+      'text-size': ['interpolate', ['linear'], ['zoom'], 15, 10, 18, 13],
+      'text-offset': [0, 1.2],
+      'text-anchor': 'top',
+      'text-max-width': 9,
+      'text-font': ['Open Sans Regular'],
+      'text-allow-overlap': false,
+      visibility: LAYERS.markers ? 'visible' : 'none'
+    },
+    paint: labelPaint()
+  });
+}
+
+// ============================================================
+// 3D Toggle
+// ============================================================
+function toggle3D() {
+  is3D = !is3D;
+  document.getElementById('btn-3d').classList.toggle('active', is3D);
+
+  if (is3D) {
+    if (!isSatellite && LAYERS.buildings) {
+      if (map.getLayer('buildings-fill'))    map.setLayoutProperty('buildings-fill',    'visibility', 'none');
+      if (map.getLayer('buildings-outline')) map.setLayoutProperty('buildings-outline', 'visibility', 'none');
+      if (map.getLayer('buildings-3d'))      map.setLayoutProperty('buildings-3d',      'visibility', 'visible');
+    }
+    map.easeTo({ pitch: 52, bearing: -18, duration: 900 });
+    showToast('3D view — drag to rotate', 'info');
+  } else {
+    if (map.getLayer('buildings-3d')) map.setLayoutProperty('buildings-3d', 'visibility', 'none');
+    if (!isSatellite && LAYERS.buildings) {
+      if (map.getLayer('buildings-fill'))    map.setLayoutProperty('buildings-fill',    'visibility', 'visible');
+      if (map.getLayer('buildings-outline')) map.setLayoutProperty('buildings-outline', 'visibility', 'visible');
+    }
+    map.easeTo({ pitch: 0, bearing: 0, duration: 900 });
+  }
+}
+
+// ============================================================
+// Layer Toggle Panel
+// ============================================================
+function toggleLayer(layerName) {
+  LAYERS[layerName] = !LAYERS[layerName];
+  const vis = LAYERS[layerName] ? 'visible' : 'none';
+
+  const layerMap = {
+    buildings: is3D
+      ? ['buildings-3d', 'buildings-labels']
+      : ['buildings-fill', 'buildings-outline', 'buildings-labels'],
+    roads: ['campus-roads-casing', 'campus-roads-line', 'campus-roads-ped', 'campus-roads-hit', 'campus-roads-labels'],
+    markers: ['places-circles', 'places-labels'],
+  };
+
+  for (const id of (layerMap[layerName] || [])) {
+    if (map.getLayer(id)) map.setLayoutProperty(id, 'visibility', vis);
+  }
+}
+
+function showLayerPanel() {
+  const panel = document.getElementById('layer-panel');
+  panel.classList.toggle('hidden');
+  if (!panel.classList.contains('hidden')) {
+    document.getElementById('layer-toggle-buildings').checked = LAYERS.buildings;
+    document.getElementById('layer-toggle-roads').checked     = LAYERS.roads;
+    document.getElementById('layer-toggle-markers').checked  = LAYERS.markers;
+  }
+}
+
+// ============================================================
+// Category Filter Chips
+// ============================================================
+function renderCategoryChips(categoriesData) {
+  const container = document.getElementById('category-chips');
+  container.appendChild(createChip('All', '🗺️', null, true));
+  for (const cat of categoriesData) {
+    if (['other', 'building'].includes(cat.id)) continue;
+    container.appendChild(createChip(cat.name, cat.icon, cat.id, false));
+  }
+}
+
+function createChip(name, icon, categoryId, isActive) {
+  const chip = document.createElement('div');
+  chip.className = `category-chip${isActive ? ' active' : ''}`;
+  chip.innerHTML = `<span class="chip-icon">${icon}</span>${name}`;
+  chip.addEventListener('click', () => filterByCategory(categoryId, chip));
+  return chip;
+}
+
+async function filterByCategory(categoryId, chipEl) {
+  document.querySelectorAll('.category-chip').forEach(c => c.classList.remove('active'));
+  chipEl.classList.add('active');
+  activeCategory = categoryId;
+
+  const data = IITJData.getPlaces(categoryId || null);
+  addPlacesLayer(data.features);
+}
+
+// ============================================================
+// Search
+// ============================================================
+function setupSearch() {
+  const input   = document.getElementById('search-input');
+  const results = document.getElementById('search-results');
+  const clearBtn = document.getElementById('search-clear');
+
+  input.addEventListener('input', () => {
+    const q = input.value.trim();
+    clearBtn.classList.toggle('hidden', !q.length);
+    clearTimeout(searchTimeout);
+    if (!q) { results.classList.add('hidden'); return; }
+    searchTimeout = setTimeout(() => performSearch(q), 250);
+  });
+
+  input.addEventListener('focus', () => {
+    if (input.value.trim()) performSearch(input.value.trim());
+  });
+
+  clearBtn.addEventListener('click', () => {
+    input.value = '';
+    results.classList.add('hidden');
+    clearBtn.classList.add('hidden');
+    input.focus();
+  });
+
+  map.on('click', (e) => {
+    const hitLayers = ['buildings-fill', 'buildings-3d', 'campus-roads-hit', 'areas-fill', 'places-circles'];
+    const hits = map.queryRenderedFeatures(e.point, { layers: hitLayers.filter(id => map.getLayer(id)) });
+
+    results.classList.add('hidden');
+    document.getElementById('layer-panel').classList.add('hidden');
+
+    if (!hits.length) {
+      closePlaceSheet();
+      showCoordPin(e.lngLat);
+    }
+  });
+}
+
+async function performSearch(query) {
+  const results = document.getElementById('search-results');
+  try {
+    const data = IITJData.search(query, 8);
+
+    if (!data.length) {
+      results.innerHTML = `<div class="search-empty"><div class="empty-icon">🔍</div><div class="empty-text">No results for "<strong>${escapeHtml(query)}</strong>"</div></div>`;
+      results.classList.remove('hidden');
+      return;
+    }
+
+    results.innerHTML = data.map(item => {
+      const style = CATEGORY_STYLES[item.category] || CATEGORY_STYLES.other;
+      const dist  = userLocation ? `<span class="result-distance">${formatDist(haversine(userLocation.lat, userLocation.lng, item.lat, item.lng))}</span>` : '';
+      const badge = item.is_proposed ? `<span class="proposed-badge">Proposed</span>` : '';
+      return `
+        <div class="search-result-item"
+             data-lat="${item.lat}" data-lng="${item.lng}"
+             data-name="${escapeHtml(item.name)}"
+             data-category="${item.category}"
+             data-desc="${escapeHtml(item.description || '')}">
+          <div class="result-icon" style="background:${style.bg};color:${style.color}">${style.icon}</div>
+          <div class="result-info">
+            <div class="result-name">${escapeHtml(item.name)}${badge}</div>
+            <div class="result-category">${style.label || item.category}</div>
+          </div>
+          ${dist}
+        </div>`;
+    }).join('');
+
+    results.querySelectorAll('.search-result-item').forEach(el => {
+      el.addEventListener('click', () => {
+        const lat = parseFloat(el.dataset.lat);
+        const lng = parseFloat(el.dataset.lng);
+        results.classList.add('hidden');
+        document.getElementById('search-input').value = el.dataset.name;
+        map.flyTo({ center: [lng, lat], zoom: 17, duration: 1000 });
+        showPlaceDetail({ name: el.dataset.name, category: el.dataset.category, description: el.dataset.desc, lat, lng });
+      });
+    });
+
+    results.classList.remove('hidden');
+  } catch (err) {
+    console.error('Search error:', err);
+  }
+}
+
+// ============================================================
+// Place Detail Bottom Sheet
+// ============================================================
+function showPlaceDetail(place) {
+  removeCoordPin();
+  selectedPlace = place;
+  const style = CATEGORY_STYLES[place.category] || CATEGORY_STYLES.other;
+
+  document.getElementById('sheet-badge').textContent = `${style.icon} ${style.label || place.category}`;
+  document.getElementById('sheet-badge').style.cssText = `background:${style.bg};color:${style.color}`;
+  document.getElementById('sheet-title').textContent = place.name;
+
+  let desc = place.description || `${style.label || place.category} at IIT Jodhpur`;
+  if (place.is_proposed) desc = '🔜 Proposed — ' + desc;
+  document.getElementById('sheet-description').textContent = desc;
+
+  if (userLocation) {
+    const d = haversine(userLocation.lat, userLocation.lng, place.lat, place.lng);
+    document.getElementById('sheet-distance').textContent = `${formatDist(d)} · ${Math.max(1, Math.round(d / 83))} min walk`;
+  } else {
+    document.getElementById('sheet-distance').textContent = 'Enable GPS for distance';
+  }
+
+  if (place.lat != null && place.lng != null) {
+    const coordText = `${Number(place.lat).toFixed(6)}, ${Number(place.lng).toFixed(6)}`;
+    document.getElementById('sheet-coords-text').textContent = coordText;
+    document.getElementById('sheet-coords').style.display = 'flex';
+    const copyBtn = document.getElementById('sheet-coords-copy');
+    copyBtn.onclick = () => {
+      navigator.clipboard?.writeText(coordText).then(() => showToast('Coordinates copied', 'info'))
+        .catch(() => showToast(coordText, 'info'));
+    };
+  } else {
+    document.getElementById('sheet-coords').style.display = 'none';
+  }
+
+  document.getElementById('place-sheet').classList.remove('hidden');
+  map.flyTo({ center: [place.lng, place.lat], zoom: 17, duration: 800 });
+}
+
+function closePlaceSheet() {
+  document.getElementById('place-sheet').classList.add('hidden');
+  selectedPlace = null;
+}
+
+// ============================================================
+// Coordinate Pin — "What's here?" on empty map tap
+// ============================================================
+let coordMarker = null;
+
+function removeCoordPin() {
+  if (coordMarker) { coordMarker.remove(); coordMarker = null; }
+  const old = document.getElementById('coord-popup');
+  if (old) old.remove();
+}
+
+function showCoordPin(lngLat) {
+  removeCoordPin();
+
+  const lat = lngLat.lat.toFixed(6);
+  const lng = lngLat.lng.toFixed(6);
+  const coordText = `${lat}, ${lng}`;
+
+  // Drop pin marker
+  const el = document.createElement('div');
+  el.className = 'coord-pin-dot';
+  coordMarker = new maplibregl.Marker({ element: el, anchor: 'bottom' })
+    .setLngLat(lngLat)
+    .addTo(map);
+
+  // Popup card
+  const popup = document.createElement('div');
+  popup.id = 'coord-popup';
+  popup.innerHTML = `
+    <div class="coord-popup-inner">
+      <span class="coord-popup-text">${coordText}</span>
+      <button class="coord-copy-btn" title="Copy coordinates">Copy</button>
+      <button class="coord-close-btn" title="Close">✕</button>
+    </div>`;
+  document.body.appendChild(popup);
+
+  popup.querySelector('.coord-copy-btn').addEventListener('click', () => {
+    navigator.clipboard?.writeText(coordText).then(() => showToast('Coordinates copied', 'info'))
+      .catch(() => showToast(coordText, 'info'));
+  });
+  popup.querySelector('.coord-close-btn').addEventListener('click', removeCoordPin);
+}
+
+// ============================================================
+// Navigation
+// ============================================================
+async function reRoute() {
+  if (!navDestination || !userLocation) return;
+  selectedPlace = navDestination;
+  await startNavigation();
+}
+
+async function startNavigation() {
+  if (!selectedPlace) return;
+  if (!userLocation) {
+    showToast('Enable GPS to get directions', 'warn');
+    if (!watchId) requestUserLocation();
+    return;
+  }
+
+  navDestination = { ...selectedPlace }; // save before sheet closes
+  closePlaceSheet();
+  setAutoFollow(true);
+  showLoadingToast('Calculating route…');
+
+  try {
+    const route = IITJRouter.computeRoute(
+      userLocation.lat, userLocation.lng,
+      selectedPlace.lat, selectedPlace.lng
+    );
+
+    hideLoadingToast();
+    if (route.error) { showToast(route.error, 'error'); return; }
+
+    currentRoute         = route;
+    navInstructionIndex  = 0;
+    navigationActive     = true;
+
+    drawRoute(route.geometry);
+
+    document.getElementById('nav-destination').textContent = selectedPlace.name;
+    document.getElementById('nav-eta').textContent         = `${route.eta_minutes} min`;
+    document.getElementById('nav-distance').textContent    = formatDist(route.distance);
+    updateNavInstruction();
+    document.getElementById('nav-panel').classList.remove('hidden');
+
+    const coords = route.geometry.coordinates;
+    const bounds = coords.reduce((b, c) => b.extend(c), new maplibregl.LngLatBounds(coords[0], coords[0]));
+    map.fitBounds(bounds, { padding: { top: 80, bottom: 220, left: 40, right: 40 }, duration: 1000 });
+
+    showToast(
+      route.using_road_network ? 'Road-network route ✓' : 'Straight-line route (no road nearby)',
+      route.using_road_network ? 'success' : 'warn'
+    );
+  } catch (err) {
+    hideLoadingToast();
+    console.error('Routing error:', err);
+    showToast('Could not calculate route', 'error');
+  }
+}
+
+function drawRoute(geometry) {
+  const data = { type: 'Feature', geometry };
+
+  // Remove old route layers so they can be re-added on top after style reload
+  ['route-line', 'route-casing', 'route-glow'].forEach(id => {
+    if (map.getLayer(id)) map.removeLayer(id);
+  });
+  if (map.getSource('route')) map.removeSource('route');
+
+  map.addSource('route', { type: 'geojson', data });
+  map.addLayer({
+    id: 'route-glow', type: 'line', source: 'route',
+    layout: { 'line-join': 'round', 'line-cap': 'round' },
+    paint: { 'line-color': '#3b82f6', 'line-width': isSatellite ? 16 : 14, 'line-opacity': isSatellite ? 0.35 : 0.15 }
+  });
+  map.addLayer({
+    id: 'route-casing', type: 'line', source: 'route',
+    layout: { 'line-join': 'round', 'line-cap': 'round' },
+    paint: { 'line-color': '#1d4ed8', 'line-width': 8, 'line-opacity': 0.95 }
+  });
+  map.addLayer({
+    id: 'route-line', type: 'line', source: 'route',
+    layout: { 'line-join': 'round', 'line-cap': 'round' },
+    paint: { 'line-color': '#ffffff', 'line-width': 4, 'line-opacity': 1 }
+  });
+}
+
+function updateNavInstruction() {
+  if (!currentRoute?.instructions) return;
+  const instr = currentRoute.instructions[navInstructionIndex];
+  if (!instr) return;
+
+  const txt = instr.text.toLowerCase();
+  const icon = instr.type === 'arrive' ? '🏁' : (txt.includes('right') ? '↱' : (txt.includes('left') ? '↰' : '↑'));
+  document.getElementById('nav-icon').textContent = icon;
+  document.getElementById('nav-text').textContent = instr.text;
+
+  const next   = currentRoute.instructions[navInstructionIndex + 1];
+  const nextEl = document.getElementById('nav-next');
+  if (next) { nextEl.textContent = `Then: ${next.text}`; nextEl.classList.remove('hidden'); }
+  else nextEl.classList.add('hidden');
+
+  const pct = Math.round(navInstructionIndex / Math.max(1, currentRoute.instructions.length - 1) * 100);
+  document.getElementById('nav-progress').style.width = `${pct}%`;
+}
+
+function endNavigation() {
+  navigationActive = false;
+  currentRoute     = null;
+  navDestination   = null;
+  document.getElementById('nav-panel').classList.add('hidden');
+  ['route-line', 'route-casing', 'route-glow'].forEach(id => { if (map.getLayer(id)) map.removeLayer(id); });
+  if (map.getSource('route')) map.removeSource('route');
+  showToast('Navigation ended', 'info');
+}
+
+// ============================================================
+// User Location — accuracy circle, heading, auto-follow
+// ============================================================
+function requestUserLocation() {
+  if (!navigator.geolocation) { showToast('Location not supported on this device', 'error'); return; }
+  if (watchId !== null) return; // already watching
+
+  showToast('Finding your location…', 'info');
+
+  watchId = navigator.geolocation.watchPosition(
+    (pos) => {
+      const loc = {
+        lat:      pos.coords.latitude,
+        lng:      pos.coords.longitude,
+        accuracy: pos.coords.accuracy,
+        heading:  pos.coords.heading,
+        speed:    pos.coords.speed,
+      };
+
+      // Auto-reroute when navigating and off-course
+      if (navigationActive && currentRoute && userLocation) {
+        const offRoute = Math.min(...currentRoute.geometry.coordinates.map(c =>
+          haversine(loc.lat, loc.lng, c[1], c[0])));
+        if (offRoute > 40) {
+          showToast('Recalculating…', 'info');
+          reRoute();
+        } else {
+          const coords = currentRoute.geometry.coordinates;
+          const frac   = (navInstructionIndex + 1) / currentRoute.instructions.length;
+          const wpIdx  = Math.min(Math.round(frac * (coords.length - 1)), coords.length - 1);
+          if (haversine(loc.lat, loc.lng, coords[wpIdx][1], coords[wpIdx][0]) < 25) {
+            navInstructionIndex = Math.min(navInstructionIndex + 1, currentRoute.instructions.length - 1);
+            updateNavInstruction();
+          }
+        }
+      }
+
+      const firstFix = !userLocation;
+      userLocation = loc;
+      if (loc.heading != null) headingDeg = loc.heading;
+
+      updateLocationMarker();
+
+      if (firstFix) {
+        showToast('Location found', 'success');
+        setAutoFollow(true);
+        document.getElementById('btn-locate').classList.add('location-active');
+      } else if (autoFollow) {
+        map.easeTo({ center: [loc.lng, loc.lat], duration: 400 });
+      }
+    },
+    (err) => {
+      watchId = null;
+      const msgs = { 1: 'Location access denied — enable in browser settings', 2: 'Location unavailable', 3: 'Location request timed out' };
+      showToast(msgs[err.code] || 'Location error', 'warn');
+      document.getElementById('btn-locate').classList.remove('location-active', 'location-follow');
+    },
+    { enableHighAccuracy: true, maximumAge: 2000, timeout: 15000 }
+  );
+
+  // Compass heading on mobile
+  if (window.DeviceOrientationEvent && typeof DeviceOrientationEvent.requestPermission === 'function') {
+    DeviceOrientationEvent.requestPermission().catch(() => {});
+  }
+  window.addEventListener('deviceorientationabsolute', onDeviceOrientation, { passive: true });
+  window.addEventListener('deviceorientation',         onDeviceOrientation, { passive: true });
+}
+
+function onDeviceOrientation(e) {
+  const deg = e.alpha != null ? (360 - e.alpha) % 360 : null;
+  if (deg != null) {
+    headingDeg = deg;
+    const dot = document.querySelector('.location-dot');
+    if (dot) dot.style.transform = `rotate(${deg}deg)`;
+  }
+}
+
+function updateLocationMarker() {
+  if (!userLocation) return;
+
+  const lngLat = [userLocation.lng, userLocation.lat];
+
+  // Accuracy circle — MapLibre circle layer for precision
+  const accuracyGeoJSON = {
+    type: 'FeatureCollection',
+    features: [{ type: 'Feature', geometry: { type: 'Point', coordinates: lngLat } }]
+  };
+  if (map.getSource('user-accuracy')) {
+    map.getSource('user-accuracy').setData(accuracyGeoJSON);
+    const metersPerPx = 156543.03392 * Math.cos(userLocation.lat * Math.PI / 180) / Math.pow(2, map.getZoom());
+    const radiusPx = Math.max(8, (userLocation.accuracy || 10) / metersPerPx);
+    if (map.getLayer('user-accuracy-circle')) map.setPaintProperty('user-accuracy-circle', 'circle-radius', radiusPx);
+  } else if (map.isStyleLoaded()) {
+    map.addSource('user-accuracy', { type: 'geojson', data: accuracyGeoJSON });
+    const metersPerPx = 156543.03392 * Math.cos(userLocation.lat * Math.PI / 180) / Math.pow(2, map.getZoom());
+    const radiusPx = Math.max(8, (userLocation.accuracy || 10) / metersPerPx);
+    map.addLayer({
+      id: 'user-accuracy-circle', type: 'circle', source: 'user-accuracy',
+      paint: { 'circle-color': '#3b82f6', 'circle-opacity': 0.12, 'circle-radius': radiusPx, 'circle-stroke-width': 1, 'circle-stroke-color': '#3b82f6', 'circle-stroke-opacity': 0.35 }
+    });
+  }
+
+  // Blue dot marker
+  if (locationMarker) {
+    locationMarker.setLngLat(lngLat);
+  } else {
+    const el = document.createElement('div');
+    el.className = 'location-marker';
+    el.innerHTML = `<div class="location-dot"></div><div class="location-pulse"></div>`;
+    locationMarker = new maplibregl.Marker({ element: el, anchor: 'center' }).setLngLat(lngLat).addTo(map);
+  }
+
+  // Update zoom-based accuracy circle radius when zoom changes
+  if (!map._locationZoomBound) {
+    map._locationZoomBound = true;
+    map.on('zoom', () => {
+      if (!userLocation || !map.getLayer('user-accuracy-circle')) return;
+      const mpp = 156543.03392 * Math.cos(userLocation.lat * Math.PI / 180) / Math.pow(2, map.getZoom());
+      map.setPaintProperty('user-accuracy-circle', 'circle-radius', Math.max(8, (userLocation.accuracy || 10) / mpp));
+    });
+  }
+}
+
+function setAutoFollow(on) {
+  autoFollow = on;
+  const btn = document.getElementById('btn-locate');
+  btn.classList.toggle('location-follow', on);
+  if (on && userLocation) map.flyTo({ center: [userLocation.lng, userLocation.lat], zoom: 17, duration: 800 });
+}
+
+function flyToUserLocation() {
+  if (!watchId) {
+    requestUserLocation();
+    return;
+  }
+  if (autoFollow) {
+    setAutoFollow(false);
+    showToast('Auto-follow off', 'info');
+  } else {
+    setAutoFollow(true);
+    if (!userLocation) showToast('Waiting for GPS signal…', 'info');
+    else showToast('Following your location', 'info');
+  }
+}
+
+// Re-add location layers after style reload
+function restoreLocationLayer() {
+  if (!userLocation) return;
+  locationMarker = null; // force re-create
+  if (map.getSource('user-accuracy')) {
+    try { map.removeLayer('user-accuracy-circle'); } catch (_) {}
+    try { map.removeSource('user-accuracy'); } catch (_) {}
+  }
+  updateLocationMarker();
+}
+
+// ============================================================
+// Base map toggles — satellite / dark mode
+// ============================================================
+// Esri World Imagery tiles become "not yet available" above zoom 17
+const SATELLITE_MAX_ZOOM = 17;
+
+async function toggleSatellite() {
+  isSatellite = !isSatellite;
+  if (isSatellite) {
+    isDark = false;
+    document.documentElement.removeAttribute('data-theme');
+    map.setMaxZoom(SATELLITE_MAX_ZOOM);
+    if (map.getZoom() > SATELLITE_MAX_ZOOM) map.zoomTo(SATELLITE_MAX_ZOOM);
+  } else {
+    map.setMaxZoom(19);
+  }
+  showToast(isSatellite ? 'Satellite view' : 'Map view', 'info');
+  await applyMapStyle();
+}
+
+async function toggleDarkMode() {
+  if (isSatellite) {
+    isSatellite = false;
+    showToast('Switched to map view', 'info');
+  }
+  isDark = !isDark;
+  document.documentElement.setAttribute('data-theme', isDark ? 'dark' : '');
+  await applyMapStyle();
+}
+
+// ============================================================
+// Toast Notifications
+// ============================================================
+function showToast(msg, type = 'info', duration = 2800) {
+  const old = document.getElementById('toast');
+  if (old) old.remove();
+  const icons = { info: 'ℹ️', success: '✅', warn: '⚠️', error: '❌' };
+  const t = document.createElement('div');
+  t.id = 'toast';
+  t.className = `toast toast-${type}`;
+  t.innerHTML = `<span class="toast-icon">${icons[type] || ''}</span><span>${msg}</span>`;
+  document.body.appendChild(t);
+  requestAnimationFrame(() => t.classList.add('visible'));
+  setTimeout(() => { t.classList.remove('visible'); setTimeout(() => t.remove(), 300); }, duration);
+}
+
+function showLoadingToast(msg) {
+  const old = document.getElementById('toast-loading');
+  if (old) old.remove();
+  const t = document.createElement('div');
+  t.id = 'toast-loading';
+  t.className = 'toast toast-info';
+  t.innerHTML = `<span class="toast-spinner"></span><span>${msg}</span>`;
+  document.body.appendChild(t);
+  requestAnimationFrame(() => t.classList.add('visible'));
+}
+
+function hideLoadingToast() {
+  const t = document.getElementById('toast-loading');
+  if (t) { t.classList.remove('visible'); setTimeout(() => t.remove(), 300); }
+}
+
+// ============================================================
+// Event Listeners
+// ============================================================
+function setupEventListeners() {
+  setupSearch();
+
+  document.getElementById('btn-locate').addEventListener('click',   flyToUserLocation);
+  document.getElementById('btn-satellite').addEventListener('click', toggleSatellite);
+  document.getElementById('btn-dark').addEventListener('click',     toggleDarkMode);
+  document.getElementById('btn-layers').addEventListener('click',    showLayerPanel);
+  document.getElementById('btn-3d').addEventListener('click',        toggle3D);
+
+  document.getElementById('layer-toggle-buildings').addEventListener('change', () => toggleLayer('buildings'));
+  document.getElementById('layer-toggle-roads').addEventListener('change',     () => toggleLayer('roads'));
+  document.getElementById('layer-toggle-markers').addEventListener('change',   () => toggleLayer('markers'));
+
+  document.getElementById('btn-directions').addEventListener('click', startNavigation);
+  document.getElementById('btn-share').addEventListener('click', () => {
+    if (selectedPlace) sharePlaceOrLocation(selectedPlace);
+  });
+
+  document.getElementById('nav-close').addEventListener('click',    endNavigation);
+  document.getElementById('nav-prev').addEventListener('click', () => {
+    if (navInstructionIndex > 0) { navInstructionIndex--; updateNavInstruction(); }
+  });
+  document.getElementById('nav-next-btn').addEventListener('click', () => {
+    if (currentRoute && navInstructionIndex < currentRoute.instructions.length - 1) { navInstructionIndex++; updateNavInstruction(); }
+  });
+
+  document.getElementById('menu-btn').addEventListener('click',     openMenu);
+  document.getElementById('menu-close').addEventListener('click',   closeMenu);
+  document.getElementById('menu-overlay').addEventListener('click', closeMenu);
+
+  document.getElementById('menu-explore').addEventListener('click', () => {
+    closeMenu();
+    map.flyTo({ center: CAMPUS_CENTER, zoom: CAMPUS_ZOOM, duration: 900 });
+  });
+  document.getElementById('menu-share-location').addEventListener('click', () => {
+    closeMenu();
+    shareMyLocation();
+  });
+  document.getElementById('menu-about').addEventListener('click', () => {
+    closeMenu();
+    showToast('IITJ Maps v3 — Campus Navigation, IIT Jodhpur', 'info');
+  });
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+      closeMenu();
+      closePlaceSheet();
+      removeCoordPin();
+      document.getElementById('search-results').classList.add('hidden');
+      document.getElementById('layer-panel').classList.add('hidden');
+    }
+    if (e.key === '/' && document.activeElement !== document.getElementById('search-input')) {
+      e.preventDefault();
+      document.getElementById('search-input').focus();
+    }
+  });
+}
+
+function openMenu()  { document.getElementById('side-menu').classList.remove('hidden'); document.getElementById('menu-overlay').classList.remove('hidden'); }
+function closeMenu() { document.getElementById('side-menu').classList.add('hidden');    document.getElementById('menu-overlay').classList.add('hidden');    }
+
+// ============================================================
+// Utilities
+// ============================================================
+function haversine(lat1, lng1, lat2, lng2) {
+  const R = 6371000;
+  const a = Math.sin((lat2-lat1)*Math.PI/360)**2 +
+    Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin((lng2-lng1)*Math.PI/360)**2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+}
+
+function formatDist(m) { return m < 1000 ? `${Math.round(m)}m` : `${(m/1000).toFixed(1)}km`; }
+
+function escapeHtml(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+
+// ============================================================
+// Deep Linking — ?lat=&lng=&place=&zoom=
+// ============================================================
+function handleDeepLink() {
+  const p = new URLSearchParams(location.search);
+  const lat  = parseFloat(p.get('lat'));
+  const lng  = parseFloat(p.get('lng'));
+  const name = p.get('place');
+  const zoom = parseFloat(p.get('zoom')) || 17;
+
+  if (!isNaN(lat) && !isNaN(lng)) {
+    map.flyTo({ center: [lng, lat], zoom, duration: 800 });
+    if (name) {
+      showPlaceDetail({
+        name: decodeURIComponent(name),
+        category: p.get('category') || 'other',
+        description: p.get('desc') ? decodeURIComponent(p.get('desc')) : '',
+        lat, lng,
+      });
+    } else {
+      setTimeout(() => showCoordPin({ lat, lng }), 900);
+    }
+  }
+}
+
+function buildShareURL(place) {
+  const base = `${location.origin}${location.pathname}`;
+  const params = new URLSearchParams({
+    lat:  place.lat.toFixed(6),
+    lng:  place.lng.toFixed(6),
+    zoom: 17,
+    ...(place.name     ? { place:    encodeURIComponent(place.name)        } : {}),
+    ...(place.category ? { category: place.category                        } : {}),
+    ...(place.description ? { desc:  encodeURIComponent(place.description) } : {}),
+  });
+  return `${base}?${params}`;
+}
+
+function sharePlaceOrLocation(place) {
+  const url  = buildShareURL(place);
+  const text = place.name ? `${place.name} — IITJ Maps` : 'Location on IITJ Maps';
+  if (navigator.share) {
+    navigator.share({ title: text, url }).catch(() => {});
+  } else {
+    navigator.clipboard?.writeText(url)
+      .then(() => showToast('Share link copied!', 'success'))
+      .catch(() => showToast(url, 'info'));
+  }
+}
+
+function shareMyLocation() {
+  if (!userLocation) {
+    showToast('Enable GPS first', 'warn');
+    return;
+  }
+  sharePlaceOrLocation({ lat: userLocation.lat, lng: userLocation.lng, name: 'My Location' });
+}
+
+function hideSplash() {
+  const splash = document.getElementById('splash');
+  splash.style.transition = 'opacity 0.5s ease';
+  splash.style.opacity = '0';
+  document.getElementById('app').classList.remove('hidden');
+  setTimeout(() => splash.remove(), 500);
+}
+
+document.addEventListener('DOMContentLoaded', init);

@@ -1,0 +1,92 @@
+[
+  {
+    "id": "academic",
+    "name": "Academic",
+    "icon": "🏛️",
+    "color": "#4A90D9"
+  },
+  {
+    "id": "hostel",
+    "name": "Hostels",
+    "icon": "🏠",
+    "color": "#E67E22"
+  },
+  {
+    "id": "dining",
+    "name": "Food & Dining",
+    "icon": "🍽️",
+    "color": "#E74C3C"
+  },
+  {
+    "id": "sports",
+    "name": "Sports",
+    "icon": "⚽",
+    "color": "#2ECC71"
+  },
+  {
+    "id": "medical",
+    "name": "Medical",
+    "icon": "🏥",
+    "color": "#E74C3C"
+  },
+  {
+    "id": "gate",
+    "name": "Gates",
+    "icon": "🚪",
+    "color": "#8E44AD"
+  },
+  {
+    "id": "parking",
+    "name": "Parking",
+    "icon": "🅿️",
+    "color": "#3498DB"
+  },
+  {
+    "id": "utility",
+    "name": "Utilities",
+    "icon": "🔧",
+    "color": "#95A5A6"
+  },
+  {
+    "id": "administrative",
+    "name": "Admin",
+    "icon": "🏢",
+    "color": "#34495E"
+  },
+  {
+    "id": "transport",
+    "name": "Transport",
+    "icon": "🚌",
+    "color": "#1ABC9C"
+  },
+  {
+    "id": "recreation",
+    "name": "Recreation",
+    "icon": "🎭",
+    "color": "#9B59B6"
+  },
+  {
+    "id": "residential",
+    "name": "Residential",
+    "icon": "🏘️",
+    "color": "#D35400"
+  },
+  {
+    "id": "bank",
+    "name": "Bank / ATM",
+    "icon": "🏦",
+    "color": "#059669"
+  },
+  {
+    "id": "building",
+    "name": "Buildings",
+    "icon": "🏗️",
+    "color": "#7F8C8D"
+  },
+  {
+    "id": "other",
+    "name": "Other",
+    "icon": "📍",
+    "color": "#BDC3C7"
+  }
+]
