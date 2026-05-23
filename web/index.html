@@ -56,8 +56,54 @@
             <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
           </svg>
         </button>
+        <button class="search-icon-btn" id="btn-open-directions" aria-label="Directions" title="Directions">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 11l19-9-9 19-2-8-8-2z"/>
+          </svg>
+        </button>
       </div>
       <div class="category-chips" id="category-chips"></div>
+    </div>
+
+    <!-- Directions Panel -->
+    <div id="directions-panel" class="directions-panel hidden">
+      <div class="dir-top">
+        <button class="dir-back-btn" id="dir-close" type="button" aria-label="Close directions">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+        <span class="dir-title">Directions</span>
+      </div>
+      <div class="dir-inputs-wrap">
+        <div class="dir-inputs">
+          <div class="dir-input-row">
+            <span class="dir-dot dir-dot-from"></span>
+            <input type="text" id="dir-from" placeholder="Choose starting point…" autocomplete="off" spellcheck="false">
+            <button class="dir-pick-btn" type="button" data-pick="from" title="Pick on map">📍</button>
+          </div>
+          <div class="dir-input-row">
+            <span class="dir-dot dir-dot-to"></span>
+            <input type="text" id="dir-to" placeholder="Choose destination…" autocomplete="off" spellcheck="false">
+            <button class="dir-pick-btn" type="button" data-pick="to" title="Pick on map">📍</button>
+          </div>
+        </div>
+        <button class="dir-swap-btn" id="dir-swap" type="button" title="Swap start and destination">⇅</button>
+      </div>
+      <button class="dir-your-location" id="dir-your-location" type="button">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="3"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/>
+        </svg>
+        Your location
+      </button>
+      <div id="dir-from-results" class="dir-results hidden"></div>
+      <div id="dir-to-results" class="dir-results hidden"></div>
+      <div id="dir-pick-hint" class="dir-pick-hint hidden">Tap the map to set this point</div>
+      <button class="dir-go-btn" id="dir-go" type="button" disabled>Get directions</button>
+      <div id="dir-summary" class="dir-summary hidden">
+        <span id="dir-summary-text"></span>
+        <span id="dir-summary-type" class="dir-summary-type"></span>
+      </div>
     </div>
 
     <!-- Search Results -->
@@ -209,6 +255,10 @@
         </button>
       </div>
       <div class="menu-items">
+        <a class="menu-item" id="menu-directions">
+          <span class="menu-item-icon">🧭</span>
+          <span>Get Directions</span>
+        </a>
         <a class="menu-item" id="menu-explore">
           <span class="menu-item-icon">🧭</span>
           <span>Explore Campus</span>

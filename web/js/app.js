@@ -118,11 +118,30 @@ function formatHighwayType(type) {
 }
 
 // Shared map interaction handlers (re-bound after each style reload)
+function tryDirectionsMapPick(e, name) {
+  if (!directionsPickTarget) return false;
+  _layerClickHandled = true;
+  const lat = typeof e.lngLat.lat === 'number' ? e.lngLat.lat : e.lngLat.getLat();
+  const lng = typeof e.lngLat.lng === 'number' ? e.lngLat.lng : e.lngLat.getLng();
+  setDirectionsPoint(directionsPickTarget, {
+    lat, lng,
+    name: name || `${lat.toFixed(5)}, ${lng.toFixed(5)}`,
+  });
+  clearDirectionsPickMode();
+  return true;
+}
+
+function shouldSuppressMapUI() {
+  return directionsOpen && !directionsPickTarget;
+}
+
 const mapHandlers = {
   onBuildingClick(e) {
     _layerClickHandled = true;
     if (!e.features?.length) return;
     const p = e.features[0].properties;
+    if (tryDirectionsMapPick(e, p.name)) return;
+    if (shouldSuppressMapUI()) return;
     showCoordPin(e.lngLat, {
       name: p.name,
       category: p.category || 'building',
@@ -132,6 +151,8 @@ const mapHandlers = {
   onRoadClick(e) {
     _layerClickHandled = true;
     if (!e.features?.length) return;
+    if (tryDirectionsMapPick(e)) return;
+    if (shouldSuppressMapUI()) return;
     // Roads are background — first tap closes any open sheet
     if (selectedPlace) { closePlaceSheet(); return; }
     const p = e.features[0].properties;
@@ -149,9 +170,11 @@ const mapHandlers = {
   onAreaClick(e) {
     _layerClickHandled = true;
     if (!e.features?.length) return;
+    const p = e.features[0].properties;
+    if (tryDirectionsMapPick(e, p.name)) return;
+    if (shouldSuppressMapUI()) return;
     // Areas cover the whole campus — first tap anywhere closes any open sheet
     if (selectedPlace) { closePlaceSheet(); return; }
-    const p = e.features[0].properties;
     showCoordPin(e.lngLat, {
       name: p.name,
       category: p.category || 'recreation',
@@ -163,6 +186,8 @@ const mapHandlers = {
     if (!e.features?.length) return;
     const p = e.features[0].properties;
     const c = e.features[0].geometry.coordinates;
+    if (tryDirectionsMapPick({ lngLat: { lat: c[1], lng: c[0] } }, p.name)) return;
+    if (shouldSuppressMapUI()) return;
     showCoordPin({ lat: c[1], lng: c[0] }, {
       name: p.name,
       category: p.category,
@@ -213,6 +238,7 @@ function bindMapInteractions() {
 function finishMapLayers() {
   bindMapInteractions();
   restoreLocationLayer();
+  if (directionsOpen) updateDirectionsMarkers();
 }
 
 const LAYERS = { buildings: true, roads: true, markers: true };
@@ -247,6 +273,15 @@ let currentRoute = null;
 let navDestination = null;           // preserved so re-route works after sheet close
 let navigationActive = false;
 let navInstructionIndex = 0;
+
+// Directions panel state
+let directionsOpen = false;
+let directionsPickTarget = null; // 'from' | 'to' | null
+let directionsFrom = null;
+let directionsTo = null;
+let directionsFromMarker = null;
+let directionsToMarker = null;
+let dirSearchTimeout = null;
 
 // ============================================================
 // Initialize
@@ -968,13 +1003,25 @@ function setupSearch() {
     results.classList.add('hidden');
     document.getElementById('layer-panel').classList.add('hidden');
 
+    if (directionsPickTarget) {
+      _layerClickHandled = false;
+      setDirectionsPoint(directionsPickTarget, {
+        lat: e.lngLat.lat,
+        lng: e.lngLat.lng,
+        name: `${e.lngLat.lat.toFixed(5)}, ${e.lngLat.lng.toFixed(5)}`,
+      });
+      clearDirectionsPickMode();
+      return;
+    }
+
     // A layer handler (building/place/area/road) already dealt with this click
     if (_layerClickHandled) {
       _layerClickHandled = false;
       return;
     }
 
-    // Genuine empty-space tap: close sheet first; only drop coord pin on second tap
+    // Genuine empty-space tap
+    if (shouldSuppressMapUI()) return;
     if (selectedPlace) { closePlaceSheet(); return; }
     removeCoordPin();
     showCoordPin(e.lngLat);
@@ -1226,43 +1273,226 @@ function showCoordPin(lngLat, info = {}) {
 }
 
 // ============================================================
-// Navigation
+// Directions Panel — start/end by search or map pick
 // ============================================================
-async function reRoute() {
-  if (!navDestination || !userLocation) return;
-  selectedPlace = navDestination;
-  await startNavigation();
+function openDirectionsPanel(initial = {}) {
+  directionsOpen = true;
+  closePlaceSheet();
+  removeCoordPin();
+  document.getElementById('search-container').classList.add('hidden');
+  document.getElementById('search-results').classList.add('hidden');
+  document.getElementById('directions-panel').classList.remove('hidden');
+
+  if (initial.from) setDirectionsPoint('from', initial.from, false);
+  else if (!directionsFrom) document.getElementById('dir-from').value = '';
+
+  if (initial.to) setDirectionsPoint('to', initial.to, false);
+  else if (!directionsTo) document.getElementById('dir-to').value = '';
+
+  updateDirectionsGoButton();
+  updateDirectionsMarkers();
+  clearDirectionsPickMode();
 }
 
-async function startNavigation() {
-  if (!selectedPlace) return;
-  if (!userLocation) {
-    showToast('Enable GPS to get directions', 'warn');
-    if (!watchId) requestUserLocation();
+function closeDirectionsPanel() {
+  directionsOpen = false;
+  clearDirectionsPickMode();
+  document.getElementById('directions-panel').classList.add('hidden');
+  document.getElementById('search-container').classList.remove('hidden');
+  hideAllDirResults();
+  document.getElementById('dir-summary').classList.add('hidden');
+  clearRoute();
+  removeDirectionsMarkers();
+  directionsFrom = null;
+  directionsTo = null;
+  document.getElementById('dir-from').value = '';
+  document.getElementById('dir-to').value = '';
+}
+
+function setDirectionsPoint(target, point, autoRoute = true) {
+  if (target === 'from') {
+    directionsFrom = { lat: point.lat, lng: point.lng, name: point.name };
+    document.getElementById('dir-from').value = point.name;
+  } else {
+    directionsTo = { lat: point.lat, lng: point.lng, name: point.name };
+    document.getElementById('dir-to').value = point.name;
+  }
+  updateDirectionsMarkers();
+  updateDirectionsGoButton();
+  hideDirResults(target);
+  if (autoRoute && directionsFrom && directionsTo) calculateDirectionsRoute();
+}
+
+function updateDirectionsGoButton() {
+  document.getElementById('dir-go').disabled = !(directionsFrom && directionsTo);
+}
+
+function setDirectionsPickMode(target) {
+  directionsPickTarget = target;
+  document.querySelectorAll('.dir-pick-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.pick === target);
+  });
+  const hint = document.getElementById('dir-pick-hint');
+  hint.textContent = target === 'from'
+    ? 'Tap the map to set starting point'
+    : 'Tap the map to set destination';
+  hint.classList.remove('hidden');
+  showToast(hint.textContent, 'info');
+}
+
+function clearDirectionsPickMode() {
+  directionsPickTarget = null;
+  document.querySelectorAll('.dir-pick-btn').forEach(btn => btn.classList.remove('active'));
+  document.getElementById('dir-pick-hint').classList.add('hidden');
+}
+
+function removeDirectionsMarkers() {
+  if (directionsFromMarker) { directionsFromMarker.remove(); directionsFromMarker = null; }
+  if (directionsToMarker) { directionsToMarker.remove(); directionsToMarker = null; }
+}
+
+function updateDirectionsMarkers() {
+  removeDirectionsMarkers();
+  if (directionsFrom) {
+    const el = document.createElement('div');
+    el.className = 'dir-from-marker';
+    directionsFromMarker = new maplibregl.Marker({ element: el, anchor: 'center' })
+      .setLngLat([directionsFrom.lng, directionsFrom.lat]).addTo(map);
+  }
+  if (directionsTo) {
+    const el = document.createElement('div');
+    el.className = 'dir-to-marker';
+    directionsToMarker = new maplibregl.Marker({ element: el, anchor: 'bottom' })
+      .setLngLat([directionsTo.lng, directionsTo.lat]).addTo(map);
+  }
+}
+
+function swapDirectionsPoints() {
+  [directionsFrom, directionsTo] = [directionsTo, directionsFrom];
+  document.getElementById('dir-from').value = directionsFrom?.name || '';
+  document.getElementById('dir-to').value = directionsTo?.name || '';
+  updateDirectionsMarkers();
+  updateDirectionsGoButton();
+  if (directionsFrom && directionsTo) calculateDirectionsRoute();
+}
+
+function hideDirResults(target) {
+  document.getElementById(`dir-${target}-results`).classList.add('hidden');
+}
+
+function hideAllDirResults() {
+  hideDirResults('from');
+  hideDirResults('to');
+}
+
+function renderDirResults(target, query) {
+  const container = document.getElementById(`dir-${target}-results`);
+  if (!query || query.length < 1) {
+    container.classList.add('hidden');
+    return;
+  }
+  const data = IITJData.search(query, 6);
+  if (!data.length) {
+    container.innerHTML = `<div class="dir-result-item"><span class="result-name">No results</span></div>`;
+    container.classList.remove('hidden');
+    return;
+  }
+  container.innerHTML = data.map(item => {
+    const style = CATEGORY_STYLES[item.category] || CATEGORY_STYLES.other;
+    return `<div class="dir-result-item" data-lat="${item.lat}" data-lng="${item.lng}" data-name="${escapeHtml(item.name)}">
+      <div class="result-icon" style="background:${style.bg};color:${style.color}">${style.icon}</div>
+      <div class="result-info"><div class="result-name">${escapeHtml(item.name)}</div>
+      <div class="result-category">${style.label || item.category}</div></div>
+    </div>`;
+  }).join('');
+  container.querySelectorAll('.dir-result-item[data-lat]').forEach(el => {
+    el.addEventListener('click', () => {
+      setDirectionsPoint(target, {
+        lat: parseFloat(el.dataset.lat),
+        lng: parseFloat(el.dataset.lng),
+        name: el.dataset.name,
+      });
+    });
+  });
+  container.classList.remove('hidden');
+  hideDirResults(target === 'from' ? 'to' : 'from');
+}
+
+function setupDirectionsPanel() {
+  const fromInput = document.getElementById('dir-from');
+  const toInput   = document.getElementById('dir-to');
+
+  fromInput.addEventListener('input', () => {
+    directionsFrom = null;
+    updateDirectionsGoButton();
+    clearTimeout(dirSearchTimeout);
+    dirSearchTimeout = setTimeout(() => renderDirResults('from', fromInput.value.trim()), 200);
+  });
+  toInput.addEventListener('input', () => {
+    directionsTo = null;
+    updateDirectionsGoButton();
+    clearTimeout(dirSearchTimeout);
+    dirSearchTimeout = setTimeout(() => renderDirResults('to', toInput.value.trim()), 200);
+  });
+
+  fromInput.addEventListener('focus', () => hideDirResults('to'));
+  toInput.addEventListener('focus', () => hideDirResults('from'));
+
+  document.querySelectorAll('.dir-pick-btn').forEach(btn => {
+    btn.addEventListener('click', () => setDirectionsPickMode(btn.dataset.pick));
+  });
+
+  document.getElementById('dir-swap').addEventListener('click', swapDirectionsPoints);
+  document.getElementById('dir-go').addEventListener('click', calculateDirectionsRoute);
+  document.getElementById('dir-close').addEventListener('click', closeDirectionsPanel);
+
+  document.getElementById('dir-your-location').addEventListener('click', () => {
+    if (!userLocation) {
+      showToast('Enable GPS first', 'warn');
+      if (!watchId) requestUserLocation();
+      return;
+    }
+    setDirectionsPoint('from', {
+      lat: userLocation.lat,
+      lng: userLocation.lng,
+      name: 'Your location',
+    });
+  });
+}
+
+async function calculateDirectionsRoute() {
+  if (!directionsFrom || !directionsTo) {
+    showToast('Set both starting point and destination', 'warn');
     return;
   }
 
-  navDestination = { ...selectedPlace }; // save before sheet closes
   closePlaceSheet();
-  setAutoFollow(true);
+  clearDirectionsPickMode();
   showLoadingToast('Calculating route…');
 
   try {
     const route = IITJRouter.computeRoute(
-      userLocation.lat, userLocation.lng,
-      selectedPlace.lat, selectedPlace.lng
+      directionsFrom.lat, directionsFrom.lng,
+      directionsTo.lat, directionsTo.lng
     );
 
     hideLoadingToast();
     if (route.error) { showToast(route.error, 'error'); return; }
 
-    currentRoute         = route;
-    navInstructionIndex  = 0;
-    navigationActive     = true;
+    currentRoute        = route;
+    navInstructionIndex = 0;
+    navigationActive    = true;
+    navDestination      = { ...directionsTo };
 
     drawRoute(route.geometry);
 
-    document.getElementById('nav-destination').textContent = selectedPlace.name;
+    document.getElementById('dir-summary').classList.remove('hidden');
+    document.getElementById('dir-summary-text').textContent =
+      `${formatDist(route.distance)} · ${route.eta_minutes} min walk`;
+    document.getElementById('dir-summary-type').textContent =
+      route.using_road_network ? 'Walking · campus roads' : 'Walking · direct path';
+
+    document.getElementById('nav-destination').textContent = directionsTo.name;
     document.getElementById('nav-eta').textContent         = `${route.eta_minutes} min`;
     document.getElementById('nav-distance').textContent    = formatDist(route.distance);
     updateNavInstruction();
@@ -1270,16 +1500,45 @@ async function startNavigation() {
 
     const coords = route.geometry.coordinates;
     const bounds = coords.reduce((b, c) => b.extend(c), new maplibregl.LngLatBounds(coords[0], coords[0]));
-    map.fitBounds(bounds, { padding: { top: 80, bottom: 220, left: 40, right: 40 }, duration: 1000 });
+    map.fitBounds(bounds, { padding: { top: 140, bottom: 220, left: 40, right: 40 }, duration: 1000 });
 
     showToast(
-      route.using_road_network ? 'Road-network route ✓' : 'Straight-line route (no road nearby)',
+      route.using_road_network ? 'Best route found ✓' : 'Direct route (no road nearby)',
       route.using_road_network ? 'success' : 'warn'
     );
   } catch (err) {
     hideLoadingToast();
     console.error('Routing error:', err);
     showToast('Could not calculate route', 'error');
+  }
+}
+
+// ============================================================
+// Navigation
+// ============================================================
+async function reRoute() {
+  if (!navDestination) return;
+  if (directionsFrom && directionsTo) {
+    await calculateDirectionsRoute();
+    return;
+  }
+  if (!userLocation) return;
+  selectedPlace = navDestination;
+  await startNavigation();
+}
+
+async function startNavigation() {
+  if (!selectedPlace) return;
+  const to = { lat: selectedPlace.lat, lng: selectedPlace.lng, name: selectedPlace.name };
+  const from = userLocation
+    ? { lat: userLocation.lat, lng: userLocation.lng, name: 'Your location' }
+    : null;
+  closePlaceSheet();
+  openDirectionsPanel({ from, to });
+  if (from && to) calculateDirectionsRoute();
+  else if (!from) {
+    showToast('Set starting point or enable GPS', 'warn');
+    if (!watchId) requestUserLocation();
   }
 }
 
@@ -1329,13 +1588,17 @@ function updateNavInstruction() {
   document.getElementById('nav-progress').style.width = `${pct}%`;
 }
 
-function endNavigation() {
+function clearRoute() {
   navigationActive = false;
   currentRoute     = null;
   navDestination   = null;
   document.getElementById('nav-panel').classList.add('hidden');
   ['route-line', 'route-casing', 'route-glow'].forEach(id => { if (map.getLayer(id)) map.removeLayer(id); });
   if (map.getSource('route')) map.removeSource('route');
+}
+
+function endNavigation() {
+  clearRoute();
   showToast('Navigation ended', 'info');
 }
 
@@ -1564,6 +1827,13 @@ function hideLoadingToast() {
 function setupEventListeners() {
   setupSearch();
   setupSheetGestures();
+  setupDirectionsPanel();
+
+  document.getElementById('btn-open-directions').addEventListener('click', () => openDirectionsPanel());
+  document.getElementById('menu-directions').addEventListener('click', () => {
+    closeMenu();
+    openDirectionsPanel();
+  });
 
   document.getElementById('btn-locate').addEventListener('click',   flyToUserLocation);
   document.getElementById('btn-satellite').addEventListener('click', toggleSatellite);
@@ -1609,7 +1879,8 @@ function setupEventListeners() {
   document.addEventListener('keydown', e => {
     if (e.key === 'Escape') {
       closeMenu();
-      closePlaceSheet();
+      if (directionsOpen) closeDirectionsPanel();
+      else closePlaceSheet();
       removeCoordPin();
       document.getElementById('search-results').classList.add('hidden');
       document.getElementById('layer-panel').classList.add('hidden');
