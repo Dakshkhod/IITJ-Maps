@@ -132,6 +132,8 @@ const mapHandlers = {
   onRoadClick(e) {
     _layerClickHandled = true;
     if (!e.features?.length) return;
+    // Roads are background — first tap closes any open sheet
+    if (selectedPlace) { closePlaceSheet(); return; }
     const p = e.features[0].properties;
     const hasName = p.name && p.name !== p.highway_type;
     showCoordPin(e.lngLat, {
@@ -147,6 +149,8 @@ const mapHandlers = {
   onAreaClick(e) {
     _layerClickHandled = true;
     if (!e.features?.length) return;
+    // Areas cover the whole campus — first tap anywhere closes any open sheet
+    if (selectedPlace) { closePlaceSheet(); return; }
     const p = e.features[0].properties;
     showCoordPin(e.lngLat, {
       name: p.name,
@@ -970,8 +974,8 @@ function setupSearch() {
       return;
     }
 
-    // Genuine empty-space tap: close any open sheet, drop a coord pin
-    closePlaceSheet();
+    // Genuine empty-space tap: close sheet first; only drop coord pin on second tap
+    if (selectedPlace) { closePlaceSheet(); return; }
     removeCoordPin();
     showCoordPin(e.lngLat);
   });
