@@ -1282,6 +1282,7 @@ function openDirectionsPanel(initial = {}) {
   document.getElementById('search-container').classList.add('hidden');
   document.getElementById('search-results').classList.add('hidden');
   document.getElementById('directions-panel').classList.remove('hidden');
+  expandDirectionsPanel();
 
   if (initial.from) setDirectionsPoint('from', initial.from, false);
   else if (!directionsFrom) document.getElementById('dir-from').value = '';
@@ -1294,10 +1295,26 @@ function openDirectionsPanel(initial = {}) {
   clearDirectionsPickMode();
 }
 
+function expandDirectionsPanel() {
+  document.getElementById('directions-panel').classList.remove('minimized');
+}
+
+function minimizeDirectionsPanel() {
+  const panel = document.getElementById('directions-panel');
+  panel.classList.add('minimized');
+  document.getElementById('dir-collapsed-route').textContent =
+    `${directionsFrom?.name || 'Start'} → ${directionsTo?.name || 'End'}`;
+  document.getElementById('dir-collapsed-meta').textContent =
+    document.getElementById('dir-summary-text').textContent || '';
+  hideAllDirResults();
+  clearDirectionsPickMode();
+}
+
 function closeDirectionsPanel() {
   directionsOpen = false;
   clearDirectionsPickMode();
   document.getElementById('directions-panel').classList.add('hidden');
+  document.getElementById('directions-panel').classList.remove('minimized');
   document.getElementById('search-container').classList.remove('hidden');
   hideAllDirResults();
   document.getElementById('dir-summary').classList.add('hidden');
@@ -1445,6 +1462,9 @@ function setupDirectionsPanel() {
   document.getElementById('dir-swap').addEventListener('click', swapDirectionsPoints);
   document.getElementById('dir-go').addEventListener('click', calculateDirectionsRoute);
   document.getElementById('dir-close').addEventListener('click', closeDirectionsPanel);
+  document.getElementById('dir-close-mini').addEventListener('click', closeDirectionsPanel);
+  document.getElementById('dir-expand').addEventListener('click', expandDirectionsPanel);
+  document.getElementById('dir-expand-icon').addEventListener('click', expandDirectionsPanel);
 
   document.getElementById('dir-your-location').addEventListener('click', () => {
     if (!userLocation) {
@@ -1498,9 +1518,11 @@ async function calculateDirectionsRoute() {
     updateNavInstruction();
     document.getElementById('nav-panel').classList.remove('hidden');
 
+    minimizeDirectionsPanel();
+
     const coords = route.geometry.coordinates;
     const bounds = coords.reduce((b, c) => b.extend(c), new maplibregl.LngLatBounds(coords[0], coords[0]));
-    map.fitBounds(bounds, { padding: { top: 140, bottom: 220, left: 40, right: 40 }, duration: 1000 });
+    map.fitBounds(bounds, { padding: { top: 72, bottom: 200, left: 40, right: 40 }, duration: 1000 });
 
     showToast(
       route.using_road_network ? 'Best route found ✓' : 'Direct route (no road nearby)',

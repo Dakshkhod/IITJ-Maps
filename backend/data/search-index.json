@@ -1104,12 +1104,12 @@
   },
   {
     "id": "773587402",
-    "name": "Akaash Complex",
+    "name": "Aakash Sports Complex",
     "category": "sports",
     "description": "sports_centre",
-    "keywords": [],
-    "lat": 26.47683558,
-    "lng": 73.11945922,
+    "keywords": ["aakash", "akaash", "sports complex"],
+    "lat": 26.47633,
+    "lng": 73.11937,
     "source": "osm",
     "is_proposed": false
   },
