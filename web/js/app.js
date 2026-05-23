@@ -123,22 +123,18 @@ const mapHandlers = {
     _layerClickHandled = true;
     if (!e.features?.length) return;
     const p = e.features[0].properties;
-    showPlaceDetail({
+    showCoordPin(e.lngLat, {
       name: p.name,
       category: p.category || 'building',
       description: p.description || p.amenity || p.building_type || '',
-      lat: e.lngLat.lat,
-      lng: e.lngLat.lng,
     });
   },
   onRoadClick(e) {
     _layerClickHandled = true;
     if (!e.features?.length) return;
-    // If a sheet is already open, close it instead of opening a road sheet
-    if (selectedPlace) { closePlaceSheet(); removeCoordPin(); return; }
     const p = e.features[0].properties;
     const hasName = p.name && p.name !== p.highway_type;
-    showPlaceDetail({
+    showCoordPin(e.lngLat, {
       name: hasName ? p.name : formatHighwayType(p.highway_type),
       category: 'transport',
       description: [
@@ -146,22 +142,16 @@ const mapHandlers = {
         p.surface ? `Surface: ${p.surface}` : '',
         p.lit === 'yes' ? 'Lit at night' : '',
       ].filter(Boolean).join(' · '),
-      lat: e.lngLat.lat,
-      lng: e.lngLat.lng,
     });
   },
   onAreaClick(e) {
     _layerClickHandled = true;
     if (!e.features?.length) return;
-    // If a sheet is already open, treat tap as dismiss rather than opening the area sheet
-    if (selectedPlace) { closePlaceSheet(); removeCoordPin(); return; }
     const p = e.features[0].properties;
-    showPlaceDetail({
+    showCoordPin(e.lngLat, {
       name: p.name,
       category: p.category || 'recreation',
       description: p.area_type ? p.area_type.replace(/_/g, ' ') : 'Campus area',
-      lat: e.lngLat.lat,
-      lng: e.lngLat.lng,
     });
   },
   onPlaceClick(e) {
@@ -169,12 +159,10 @@ const mapHandlers = {
     if (!e.features?.length) return;
     const p = e.features[0].properties;
     const c = e.features[0].geometry.coordinates;
-    showPlaceDetail({
+    showCoordPin({ lat: c[1], lng: c[0] }, {
       name: p.name,
       category: p.category,
       description: p.description,
-      lat: c[1],
-      lng: c[0],
       is_proposed: p.is_proposed,
     });
   },
@@ -1026,7 +1014,8 @@ async function performSearch(query) {
         results.classList.add('hidden');
         document.getElementById('search-input').value = el.dataset.name;
         map.flyTo({ center: [lng, lat], zoom: 17, duration: 1000 });
-        showPlaceDetail({ name: el.dataset.name, category: el.dataset.category, description: el.dataset.desc, lat, lng });
+        // Drop pin at the search result's exact location
+        showCoordPin({ lat, lng }, { name: el.dataset.name, category: el.dataset.category, description: el.dataset.desc });
       });
     });
 
@@ -1040,7 +1029,7 @@ async function performSearch(query) {
 // Place Detail Bottom Sheet
 // ============================================================
 function showPlaceDetail(place) {
-  removeCoordPin();
+  removeCoordPin(); // remove any old pin before new one is created by showCoordPin
   selectedPlace = place;
   const style = CATEGORY_STYLES[place.category] || CATEGORY_STYLES.other;
 
@@ -1073,55 +1062,61 @@ function showPlaceDetail(place) {
   }
 
   document.getElementById('place-sheet').classList.remove('hidden');
-  map.flyTo({ center: [place.lng, place.lat], zoom: 17, duration: 800 });
+  if (!place._noFly) map.flyTo({ center: [place.lng, place.lat], zoom: 17, duration: 800 });
 }
 
 function closePlaceSheet() {
   document.getElementById('place-sheet').classList.add('hidden');
   selectedPlace = null;
+  removeCoordPin();
 }
 
 // ============================================================
-// Coordinate Pin — "What's here?" on empty map tap
+// Coordinate Pin — drops on every map tap, shows place sheet
 // ============================================================
 let coordMarker = null;
 
 function removeCoordPin() {
   if (coordMarker) { coordMarker.remove(); coordMarker = null; }
-  const old = document.getElementById('coord-popup');
-  if (old) old.remove();
 }
 
-function showCoordPin(lngLat) {
-  removeCoordPin();
-
-  const lat = lngLat.lat.toFixed(6);
-  const lng = lngLat.lng.toFixed(6);
-  const coordText = `${lat}, ${lng}`;
-
-  // Drop pin marker
-  const el = document.createElement('div');
-  el.className = 'coord-pin-dot';
-  coordMarker = new maplibregl.Marker({ element: el, anchor: 'bottom' })
-    .setLngLat(lngLat)
-    .addTo(map);
-
-  // Popup card
-  const popup = document.createElement('div');
-  popup.id = 'coord-popup';
-  popup.innerHTML = `
-    <div class="coord-popup-inner">
-      <span class="coord-popup-text">${coordText}</span>
-      <button class="coord-copy-btn" title="Copy coordinates">Copy</button>
-      <button class="coord-close-btn" title="Close">✕</button>
-    </div>`;
-  document.body.appendChild(popup);
-
-  popup.querySelector('.coord-copy-btn').addEventListener('click', () => {
-    navigator.clipboard?.writeText(coordText).then(() => showToast('Coordinates copied', 'info'))
-      .catch(() => showToast(coordText, 'info'));
+/**
+ * Drop a visible location pin at lngLat and open the place sheet.
+ * @param {object} lngLat  — { lat, lng } or maplibregl.LngLat
+ * @param {object} info    — optional { name, category, description, is_proposed }
+ */
+function showCoordPin(lngLat, info = {}) {
+  // showPlaceDetail calls removeCoordPin internally, so call it first
+  // then create the new marker so it survives that removal
+  showPlaceDetail({
+    name: info.name || 'Dropped Pin',
+    category: info.category || 'poi',
+    description: info.description || null,
+    lat: typeof lngLat.lat === 'number' ? lngLat.lat : lngLat.getLat(),
+    lng: typeof lngLat.lng === 'number' ? lngLat.lng : lngLat.getLng(),
+    is_proposed: info.is_proposed || false,
+    _noFly: !!info.name,   // don't re-fly when user tapped a named feature (already on screen)
   });
-  popup.querySelector('.coord-close-btn').addEventListener('click', removeCoordPin);
+
+  // Create the SVG drop-pin marker AFTER showPlaceDetail (which calls removeCoordPin)
+  const el = document.createElement('div');
+  el.className = 'coord-pin-wrapper';
+  el.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 32" width="32" height="42">
+    <defs>
+      <filter id="pshadow" x="-30%" y="-30%" width="160%" height="160%">
+        <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="rgba(0,0,0,0.40)"/>
+      </filter>
+    </defs>
+    <path d="M12 0C7.03 0 3 4.03 3 9c0 6.75 9 18 9 18s9-11.25 9-18c0-4.97-4.03-9-9-9z"
+          fill="#1558d6" filter="url(#pshadow)"/>
+    <circle cx="12" cy="9" r="4" fill="white"/>
+  </svg>`;
+  coordMarker = new maplibregl.Marker({ element: el, anchor: 'bottom' })
+    .setLngLat([
+      typeof lngLat.lng === 'number' ? lngLat.lng : lngLat.getLng(),
+      typeof lngLat.lat === 'number' ? lngLat.lat : lngLat.getLat(),
+    ])
+    .addTo(map);
 }
 
 // ============================================================
