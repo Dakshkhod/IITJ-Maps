@@ -1246,7 +1246,7 @@ function showCoordPin(lngLat, info = {}) {
     lat: typeof lngLat.lat === 'number' ? lngLat.lat : lngLat.getLat(),
     lng: typeof lngLat.lng === 'number' ? lngLat.lng : lngLat.getLng(),
     is_proposed: info.is_proposed || false,
-    _noFly: !!info.name,   // don't re-fly when user tapped a named feature (already on screen)
+    _noFly: info._noFly ?? !!info.name,
   });
 
   // Create the SVG drop-pin marker AFTER showPlaceDetail (which calls removeCoordPin)
@@ -1938,21 +1938,21 @@ function handleDeepLink() {
   const p = new URLSearchParams(location.search);
   const lat  = parseFloat(p.get('lat'));
   const lng  = parseFloat(p.get('lng'));
-  const name = p.get('place');
+  const placeParam = p.get('place');
   const zoom = parseFloat(p.get('zoom')) || 17;
 
   if (!isNaN(lat) && !isNaN(lng)) {
     map.flyTo({ center: [lng, lat], zoom, duration: 800 });
-    if (name) {
-      showPlaceDetail({
-        name: decodeURIComponent(name),
-        category: p.get('category') || 'other',
-        description: p.get('desc') ? decodeURIComponent(p.get('desc')) : '',
-        lat, lng,
-      });
-    } else {
-      setTimeout(() => showCoordPin({ lat, lng }), 900);
+    const info = { _noFly: true };
+    if (placeParam) {
+      info.name = placeParam;
+      const cat = p.get('category');
+      if (cat) info.category = cat;
+      const desc = p.get('desc');
+      if (desc) info.description = desc;
     }
+    // Wait for flyTo, then drop pin + open place sheet (named shares included)
+    setTimeout(() => showCoordPin({ lat, lng }, info), 900);
   }
 }
 
@@ -1962,9 +1962,9 @@ function buildShareURL(place) {
     lat:  place.lat.toFixed(6),
     lng:  place.lng.toFixed(6),
     zoom: 17,
-    ...(place.name     ? { place:    encodeURIComponent(place.name)        } : {}),
-    ...(place.category ? { category: place.category                        } : {}),
-    ...(place.description ? { desc:  encodeURIComponent(place.description) } : {}),
+    ...(place.name        ? { place: place.name }        : {}),
+    ...(place.category    ? { category: place.category } : {}),
+    ...(place.description ? { desc: place.description }  : {}),
   });
   return `${base}?${params}`;
 }
