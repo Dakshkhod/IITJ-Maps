@@ -1478,6 +1478,7 @@ function setupEventListeners() {
   document.getElementById('btn-share').addEventListener('click', () => {
     if (selectedPlace) sharePlaceOrLocation(selectedPlace);
   });
+  document.getElementById('sheet-close').addEventListener('click', closePlaceSheet);
 
   document.getElementById('nav-close').addEventListener('click',    endNavigation);
   document.getElementById('nav-prev').addEventListener('click', () => {

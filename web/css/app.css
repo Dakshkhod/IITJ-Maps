@@ -265,7 +265,29 @@ input[type="checkbox"]:checked + .toggle-track .toggle-thumb { transform: transl
   border-radius: 99px; margin: 10px auto 0;
 }
 
-.sheet-content { padding: 12px 20px 24px; }
+.sheet-close-btn {
+  position: absolute;
+  top: 12px;
+  right: 14px;
+  z-index: 2;
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 50%;
+  background: var(--surface);
+  color: var(--text-secondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s, color 0.15s;
+}
+.sheet-close-btn:hover {
+  background: var(--border);
+  color: var(--text-primary);
+}
+
+.sheet-content { padding: 12px 20px 24px; padding-right: 52px; }
 .sheet-header { margin-bottom: 16px; }
 
 .sheet-category-badge {
@@ -496,7 +518,7 @@ input[type="checkbox"]:checked + .toggle-track .toggle-thumb { transform: transl
 @media (pointer: coarse) {
   .map-ctrl-btn { width: 48px; height: 48px; }
   .action-btn   { padding: 15px; font-size: 15px; }
-  .sheet-content { padding: 12px 20px 28px; }
+  .sheet-content { padding: 12px 52px 28px 20px; }
 }
 
 @media (prefers-color-scheme: dark) {
