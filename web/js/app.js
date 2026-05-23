@@ -1101,17 +1101,19 @@ function showCoordPin(lngLat, info = {}) {
   // Create the SVG drop-pin marker AFTER showPlaceDetail (which calls removeCoordPin)
   const el = document.createElement('div');
   el.className = 'coord-pin-wrapper';
-  el.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 32" width="32" height="42">
+  // viewBox "0 0 24 27": path tip is at (12,27) = exact bottom of viewBox,
+  // so anchor:'bottom' places the pin tip precisely on the clicked coordinate.
+  el.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 27" width="32" height="36">
     <defs>
-      <filter id="pshadow" x="-30%" y="-30%" width="160%" height="160%">
-        <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="rgba(0,0,0,0.40)"/>
+      <filter id="pshadow" x="-40%" y="-20%" width="180%" height="160%">
+        <feDropShadow dx="0" dy="2" stdDeviation="2.5" flood-color="rgba(0,0,0,0.40)"/>
       </filter>
     </defs>
     <path d="M12 0C7.03 0 3 4.03 3 9c0 6.75 9 18 9 18s9-11.25 9-18c0-4.97-4.03-9-9-9z"
           fill="#1558d6" filter="url(#pshadow)"/>
     <circle cx="12" cy="9" r="4" fill="white"/>
   </svg>`;
-  coordMarker = new maplibregl.Marker({ element: el, anchor: 'bottom' })
+  coordMarker = new maplibregl.Marker({ element: el, anchor: 'bottom', offset: [0, 0] })
     .setLngLat([
       typeof lngLat.lng === 'number' ? lngLat.lng : lngLat.getLng(),
       typeof lngLat.lat === 'number' ? lngLat.lat : lngLat.getLat(),
