@@ -2,91 +2,91 @@
   {
     "id": "academic",
     "name": "Academic",
-    "icon": "🏛️",
-    "color": "#4A90D9"
+    "abbr": "AC",
+    "color": "#525252"
   },
   {
     "id": "hostel",
     "name": "Hostels",
-    "icon": "🏠",
-    "color": "#E67E22"
+    "abbr": "HO",
+    "color": "#737373"
   },
   {
     "id": "dining",
     "name": "Food & Dining",
-    "icon": "🍽️",
-    "color": "#E74C3C"
+    "abbr": "FD",
+    "color": "#404040"
   },
   {
     "id": "sports",
     "name": "Sports",
-    "icon": "⚽",
-    "color": "#2ECC71"
+    "abbr": "SP",
+    "color": "#525252"
   },
   {
     "id": "medical",
     "name": "Medical",
-    "icon": "🏥",
-    "color": "#E74C3C"
+    "abbr": "MD",
+    "color": "#737373"
   },
   {
     "id": "gate",
     "name": "Gates",
-    "icon": "🚪",
-    "color": "#8E44AD"
+    "abbr": "GT",
+    "color": "#404040"
   },
   {
     "id": "parking",
     "name": "Parking",
-    "icon": "🅿️",
-    "color": "#3498DB"
+    "abbr": "PK",
+    "color": "#525252"
   },
   {
     "id": "utility",
     "name": "Utilities",
-    "icon": "🔧",
-    "color": "#95A5A6"
+    "abbr": "UT",
+    "color": "#737373"
   },
   {
     "id": "administrative",
     "name": "Admin",
-    "icon": "🏢",
-    "color": "#34495E"
+    "abbr": "AD",
+    "color": "#404040"
   },
   {
     "id": "transport",
     "name": "Transport",
-    "icon": "🚌",
-    "color": "#1ABC9C"
+    "abbr": "TR",
+    "color": "#525252"
   },
   {
     "id": "recreation",
     "name": "Recreation",
-    "icon": "🎭",
-    "color": "#9B59B6"
+    "abbr": "RC",
+    "color": "#737373"
   },
   {
     "id": "residential",
     "name": "Residential",
-    "icon": "🏘️",
-    "color": "#D35400"
+    "abbr": "RS",
+    "color": "#404040"
   },
   {
     "id": "bank",
     "name": "Bank / ATM",
-    "icon": "🏦",
-    "color": "#059669"
+    "abbr": "BK",
+    "color": "#525252"
   },
   {
     "id": "building",
     "name": "Buildings",
-    "icon": "🏗️",
-    "color": "#7F8C8D"
+    "abbr": "BL",
+    "color": "#737373"
   },
   {
     "id": "other",
     "name": "Other",
-    "icon": "📍",
-    "color": "#BDC3C7"
+    "abbr": "OT",
+    "color": "#a3a3a3"
   }
 ]

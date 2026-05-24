@@ -11,24 +11,28 @@ const CAMPUS_BOUNDS = [[73.0900, 26.4450], [73.1350, 26.4950]];
 
 // Category display config (for UI only — not used in map expressions)
 const CATEGORY_STYLES = {
-  academic:       { color: '#2563eb', icon: '🏛️', bg: '#dbeafe', label: 'Academic' },
-  hostel:         { color: '#ea580c', icon: '🏠', bg: '#fed7aa', label: 'Hostel' },
-  dining:         { color: '#dc2626', icon: '🍽️', bg: '#fecaca', label: 'Dining' },
-  sports:         { color: '#16a34a', icon: '⚽', bg: '#bbf7d0', label: 'Sports' },
-  medical:        { color: '#be123c', icon: '🏥', bg: '#ffe4e6', label: 'Medical' },
-  gate:           { color: '#7c3aed', icon: '🚪', bg: '#ede9fe', label: 'Gate' },
-  parking:        { color: '#0284c7', icon: '🅿️', bg: '#e0f2fe', label: 'Parking' },
-  utility:        { color: '#64748b', icon: '🔧', bg: '#f1f5f9', label: 'Utility' },
-  administrative: { color: '#334155', icon: '🏢', bg: '#e2e8f0', label: 'Admin' },
-  transport:      { color: '#0d9488', icon: '🚌', bg: '#ccfbf1', label: 'Transport' },
-  recreation:     { color: '#9333ea', icon: '🎭', bg: '#f3e8ff', label: 'Recreation' },
-  residential:    { color: '#b45309', icon: '🏘️', bg: '#fef3c7', label: 'Residential' },
-  bank:           { color: '#059669', icon: '🏦', bg: '#d1fae5', label: 'Bank/ATM' },
-  building:       { color: '#6b7280', icon: '🏗️', bg: '#f3f4f6', label: 'Building' },
-  university:     { color: '#2563eb', icon: '🎓', bg: '#dbeafe', label: 'University' },
-  poi:            { color: '#6366f1', icon: '📌', bg: '#e0e7ff', label: 'POI' },
-  other:          { color: '#9ca3af', icon: '📍', bg: '#f9fafb', label: 'Other' },
+  academic:       { abbr: 'AC', label: 'Academic' },
+  hostel:         { abbr: 'HO', label: 'Hostel' },
+  dining:         { abbr: 'FD', label: 'Dining' },
+  sports:         { abbr: 'SP', label: 'Sports' },
+  medical:        { abbr: 'MD', label: 'Medical' },
+  gate:           { abbr: 'GT', label: 'Gate' },
+  parking:        { abbr: 'PK', label: 'Parking' },
+  utility:        { abbr: 'UT', label: 'Utility' },
+  administrative: { abbr: 'AD', label: 'Admin' },
+  transport:      { abbr: 'TR', label: 'Transport' },
+  recreation:     { abbr: 'RC', label: 'Recreation' },
+  residential:    { abbr: 'RS', label: 'Residential' },
+  bank:           { abbr: 'BK', label: 'Bank/ATM' },
+  building:       { abbr: 'BL', label: 'Building' },
+  university:     { abbr: 'UN', label: 'University' },
+  poi:            { abbr: 'PO', label: 'POI' },
+  other:          { abbr: 'OT', label: 'Other' },
 };
+
+function categoryAbbr(category) {
+  return (CATEGORY_STYLES[category] || CATEGORY_STYLES.other).abbr;
+}
 
 // MapLibre match expression for category → color (used in map layers)
 function categoryColorExpr() {
@@ -948,17 +952,17 @@ function showLayerPanel() {
 // ============================================================
 function renderCategoryChips(categoriesData) {
   const container = document.getElementById('category-chips');
-  container.appendChild(createChip('All', '🗺️', null, true));
+  container.appendChild(createChip('All', null, true));
   for (const cat of categoriesData) {
     if (['other', 'building'].includes(cat.id)) continue;
-    container.appendChild(createChip(cat.name, cat.icon, cat.id, false));
+    container.appendChild(createChip(cat.name, cat.id, false));
   }
 }
 
-function createChip(name, icon, categoryId, isActive) {
+function createChip(name, categoryId, isActive) {
   const chip = document.createElement('div');
   chip.className = `category-chip${isActive ? ' active' : ''}`;
-  chip.innerHTML = `<span class="chip-icon">${icon}</span>${name}`;
+  chip.textContent = name;
   chip.addEventListener('click', () => filterByCategory(categoryId, chip));
   return chip;
 }
@@ -1034,7 +1038,7 @@ async function performSearch(query) {
     const data = IITJData.search(query, 8);
 
     if (!data.length) {
-      results.innerHTML = `<div class="search-empty"><div class="empty-icon">🔍</div><div class="empty-text">No results for "<strong>${escapeHtml(query)}</strong>"</div></div>`;
+      results.innerHTML = `<div class="search-empty"><div class="empty-text">No results for "<strong>${escapeHtml(query)}</strong>"</div></div>`;
       results.classList.remove('hidden');
       return;
     }
@@ -1049,7 +1053,7 @@ async function performSearch(query) {
              data-name="${escapeHtml(item.name)}"
              data-category="${item.category}"
              data-desc="${escapeHtml(item.description || '')}">
-          <div class="result-icon" style="background:${style.bg};color:${style.color}">${style.icon}</div>
+          <div class="result-icon">${style.abbr}</div>
           <div class="result-info">
             <div class="result-name">${escapeHtml(item.name)}${badge}</div>
             <div class="result-category">${style.label || item.category}</div>
@@ -1189,12 +1193,11 @@ function showPlaceDetail(place) {
   resetSheetTransform();
   const style = CATEGORY_STYLES[place.category] || CATEGORY_STYLES.other;
 
-  document.getElementById('sheet-badge').textContent = `${style.icon} ${style.label || place.category}`;
-  document.getElementById('sheet-badge').style.cssText = `background:${style.bg};color:${style.color}`;
+  document.getElementById('sheet-badge').textContent = style.label || place.category;
   document.getElementById('sheet-title').textContent = place.name;
 
   let desc = place.description || `${style.label || place.category} at IIT Jodhpur`;
-  if (place.is_proposed) desc = '🔜 Proposed — ' + desc;
+  if (place.is_proposed) desc = 'Proposed — ' + desc;
   document.getElementById('sheet-description').textContent = desc;
 
   if (userLocation) {
@@ -1261,7 +1264,7 @@ function showCoordPin(lngLat, info = {}) {
       </filter>
     </defs>
     <path d="M12 0C7.03 0 3 4.03 3 9c0 6.75 9 18 9 18s9-11.25 9-18c0-4.97-4.03-9-9-9z"
-          fill="#1558d6" filter="url(#pshadow)"/>
+          fill="#0a0a0a" filter="url(#pshadow)"/>
     <circle cx="12" cy="9" r="4" fill="white"/>
   </svg>`;
   coordMarker = new maplibregl.Marker({ element: el, anchor: 'bottom', offset: [0, 0] })
@@ -1417,7 +1420,7 @@ function renderDirResults(target, query) {
   container.innerHTML = data.map(item => {
     const style = CATEGORY_STYLES[item.category] || CATEGORY_STYLES.other;
     return `<div class="dir-result-item" data-lat="${item.lat}" data-lng="${item.lng}" data-name="${escapeHtml(item.name)}">
-      <div class="result-icon" style="background:${style.bg};color:${style.color}">${style.icon}</div>
+      <div class="result-icon">${style.abbr}</div>
       <div class="result-info"><div class="result-name">${escapeHtml(item.name)}</div>
       <div class="result-category">${style.label || item.category}</div></div>
     </div>`;
@@ -1525,7 +1528,7 @@ async function calculateDirectionsRoute() {
     map.fitBounds(bounds, { padding: { top: 72, bottom: 200, left: 40, right: 40 }, duration: 1000 });
 
     showToast(
-      route.using_road_network ? 'Best route found ✓' : 'Direct route (no road nearby)',
+      route.using_road_network ? 'Best route found' : 'Direct route (no road nearby)',
       route.using_road_network ? 'success' : 'warn'
     );
   } catch (err) {
@@ -1577,17 +1580,17 @@ function drawRoute(geometry) {
   map.addLayer({
     id: 'route-glow', type: 'line', source: 'route',
     layout: { 'line-join': 'round', 'line-cap': 'round' },
-    paint: { 'line-color': '#3b82f6', 'line-width': isSatellite ? 16 : 14, 'line-opacity': isSatellite ? 0.35 : 0.15 }
+    paint: { 'line-color': '#0a0a0a', 'line-width': isSatellite ? 14 : 12, 'line-opacity': isSatellite ? 0.2 : 0.12 }
   });
   map.addLayer({
     id: 'route-casing', type: 'line', source: 'route',
     layout: { 'line-join': 'round', 'line-cap': 'round' },
-    paint: { 'line-color': '#1d4ed8', 'line-width': 8, 'line-opacity': 0.95 }
+    paint: { 'line-color': '#262626', 'line-width': 7, 'line-opacity': 0.9 }
   });
   map.addLayer({
     id: 'route-line', type: 'line', source: 'route',
     layout: { 'line-join': 'round', 'line-cap': 'round' },
-    paint: { 'line-color': '#ffffff', 'line-width': 4, 'line-opacity': 1 }
+    paint: { 'line-color': '#ffffff', 'line-width': 3.5, 'line-opacity': 1 }
   });
 }
 
@@ -1597,7 +1600,7 @@ function updateNavInstruction() {
   if (!instr) return;
 
   const txt = instr.text.toLowerCase();
-  const icon = instr.type === 'arrive' ? '🏁' : (txt.includes('right') ? '↱' : (txt.includes('left') ? '↰' : '↑'));
+  const icon = instr.type === 'arrive' ? '—' : (txt.includes('right') ? 'R' : (txt.includes('left') ? 'L' : '↑'));
   document.getElementById('nav-icon').textContent = icon;
   document.getElementById('nav-text').textContent = instr.text;
 
@@ -1722,11 +1725,11 @@ function updateLocationMarker() {
     const radiusPx = Math.max(8, (userLocation.accuracy || 10) / metersPerPx);
     map.addLayer({
       id: 'user-accuracy-circle', type: 'circle', source: 'user-accuracy',
-      paint: { 'circle-color': '#3b82f6', 'circle-opacity': 0.12, 'circle-radius': radiusPx, 'circle-stroke-width': 1, 'circle-stroke-color': '#3b82f6', 'circle-stroke-opacity': 0.35 }
+      paint: { 'circle-color': '#0a0a0a', 'circle-opacity': 0.1, 'circle-radius': radiusPx, 'circle-stroke-width': 1, 'circle-stroke-color': '#525252', 'circle-stroke-opacity': 0.3 }
     });
   }
 
-  // Blue dot marker
+  // User location dot marker
   if (locationMarker) {
     locationMarker.setLngLat(lngLat);
   } else {
@@ -1817,11 +1820,10 @@ async function toggleDarkMode() {
 function showToast(msg, type = 'info', duration = 2800) {
   const old = document.getElementById('toast');
   if (old) old.remove();
-  const icons = { info: 'ℹ️', success: '✅', warn: '⚠️', error: '❌' };
   const t = document.createElement('div');
   t.id = 'toast';
   t.className = `toast toast-${type}`;
-  t.innerHTML = `<span class="toast-icon">${icons[type] || ''}</span><span>${msg}</span>`;
+  t.innerHTML = `<span class="toast-dot"></span><span>${msg}</span>`;
   document.body.appendChild(t);
   requestAnimationFrame(() => t.classList.add('visible'));
   setTimeout(() => { t.classList.remove('visible'); setTimeout(() => t.remove(), 300); }, duration);

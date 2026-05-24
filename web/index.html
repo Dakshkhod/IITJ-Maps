@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>IITJ Maps — Smart Campus Navigation</title>
   <meta name="description" content="Navigate IIT Jodhpur campus with interactive maps, search, and turn-by-turn directions">
-  <meta name="theme-color" content="#0f172a">
+  <meta name="theme-color" content="#0a0a0a">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -24,9 +24,9 @@
     <div class="splash-content">
       <div class="splash-logo">
         <svg width="56" height="56" viewBox="0 0 56 56" fill="none">
-          <rect width="56" height="56" rx="16" fill="#2563eb"/>
-          <path d="M28 14C22.477 14 18 18.477 18 24C18 31 28 42 28 42C28 42 38 31 38 24C38 18.477 33.523 14 28 14Z" fill="white" fill-opacity="0.95"/>
-          <circle cx="28" cy="24" r="5" fill="#2563eb"/>
+          <rect width="56" height="56" rx="16" fill="#fafafa"/>
+          <path d="M28 14C22.477 14 18 18.477 18 24C18 31 28 42 28 42C28 42 38 31 38 24C38 18.477 33.523 14 28 14Z" fill="#0a0a0a" fill-opacity="0.92"/>
+          <circle cx="28" cy="24" r="5" fill="#fafafa"/>
         </svg>
       </div>
       <h1 class="splash-title">IITJ Maps</h1>
@@ -78,7 +78,9 @@
           <span id="dir-collapsed-route" class="dir-collapsed-route"></span>
           <span id="dir-collapsed-meta" class="dir-collapsed-meta"></span>
         </button>
-        <button class="dir-expand-btn" id="dir-expand-icon" type="button" aria-label="Edit route">⌃</button>
+        <button class="dir-expand-btn" id="dir-expand-icon" type="button" aria-label="Edit route">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="18 15 12 9 6 15"/></svg>
+        </button>
       </div>
 
       <div id="dir-form-body" class="dir-form-body">
@@ -95,12 +97,16 @@
           <div class="dir-input-row">
             <span class="dir-dot dir-dot-from"></span>
             <input type="text" id="dir-from" placeholder="Choose starting point…" autocomplete="off" spellcheck="false">
-            <button class="dir-pick-btn" type="button" data-pick="from" title="Pick on map">📍</button>
+            <button class="dir-pick-btn" type="button" data-pick="from" title="Pick on map">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            </button>
           </div>
           <div class="dir-input-row">
             <span class="dir-dot dir-dot-to"></span>
             <input type="text" id="dir-to" placeholder="Choose destination…" autocomplete="off" spellcheck="false">
-            <button class="dir-pick-btn" type="button" data-pick="to" title="Pick on map">📍</button>
+            <button class="dir-pick-btn" type="button" data-pick="to" title="Pick on map">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            </button>
           </div>
         </div>
         <button class="dir-swap-btn" id="dir-swap" type="button" title="Swap start and destination">⇅</button>
@@ -157,23 +163,17 @@
     <div id="layer-panel" class="layer-panel hidden">
       <div class="layer-panel-title">Map Layers</div>
       <label class="layer-toggle-row">
-        <span class="layer-toggle-label">
-          <span class="layer-toggle-icon">🏗️</span> Buildings
-        </span>
+        <span class="layer-toggle-label">Buildings</span>
         <input type="checkbox" id="layer-toggle-buildings" checked>
         <span class="toggle-track"><span class="toggle-thumb"></span></span>
       </label>
       <label class="layer-toggle-row">
-        <span class="layer-toggle-label">
-          <span class="layer-toggle-icon">🛤️</span> Roads & Paths
-        </span>
+        <span class="layer-toggle-label">Roads & Paths</span>
         <input type="checkbox" id="layer-toggle-roads" checked>
         <span class="toggle-track"><span class="toggle-thumb"></span></span>
       </label>
       <label class="layer-toggle-row">
-        <span class="layer-toggle-label">
-          <span class="layer-toggle-icon">📍</span> Place Markers
-        </span>
+        <span class="layer-toggle-label">Place Markers</span>
         <input type="checkbox" id="layer-toggle-markers" checked>
         <span class="toggle-track"><span class="toggle-thumb"></span></span>
       </label>
@@ -255,9 +255,9 @@
       <div class="menu-header">
         <div class="menu-logo">
           <svg width="32" height="32" viewBox="0 0 56 56" fill="none">
-            <rect width="56" height="56" rx="12" fill="#2563eb"/>
-            <path d="M28 14C22.477 14 18 18.477 18 24C18 31 28 42 28 42C28 42 38 31 38 24C38 18.477 33.523 14 28 14Z" fill="white" fill-opacity="0.95"/>
-            <circle cx="28" cy="24" r="5" fill="#2563eb"/>
+            <rect width="56" height="56" rx="12" fill="#fafafa"/>
+            <path d="M28 14C22.477 14 18 18.477 18 24C18 31 28 42 28 42C28 42 38 31 38 24C38 18.477 33.523 14 28 14Z" fill="#0a0a0a" fill-opacity="0.92"/>
+            <circle cx="28" cy="24" r="5" fill="#fafafa"/>
           </svg>
         </div>
         <div>
@@ -272,19 +272,19 @@
       </div>
       <div class="menu-items">
         <a class="menu-item" id="menu-directions">
-          <span class="menu-item-icon">🧭</span>
+          <span class="menu-item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l19-9-9 19-2-8-8-2z"/></svg></span>
           <span>Get Directions</span>
         </a>
         <a class="menu-item" id="menu-explore">
-          <span class="menu-item-icon">🧭</span>
+          <span class="menu-item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg></span>
           <span>Explore Campus</span>
         </a>
         <a class="menu-item" id="menu-share-location">
-          <span class="menu-item-icon">📡</span>
+          <span class="menu-item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></span>
           <span>Share My Location</span>
         </a>
         <a class="menu-item" id="menu-about">
-          <span class="menu-item-icon">ℹ️</span>
+          <span class="menu-item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg></span>
           <span>About IITJ Maps</span>
         </a>
       </div>
