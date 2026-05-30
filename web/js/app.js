@@ -432,6 +432,7 @@ async function applyMapStyle() {
           if (map.getLayer('buildings-fill'))    map.setLayoutProperty('buildings-fill',    'visibility', 'none');
           if (map.getLayer('buildings-outline')) map.setLayoutProperty('buildings-outline', 'visibility', 'none');
           if (map.getLayer('buildings-3d'))      map.setLayoutProperty('buildings-3d',      'visibility', 'visible');
+          showBrainTree3D();
         }
 
         updateBaseMapButtons();
@@ -512,6 +513,7 @@ function removeCustomLayers() {
     'buildings-fill', 'buildings-outline', 'buildings-3d', 'buildings-labels',
     'places-circles', 'places-labels',
     'route-glow', 'route-casing', 'route-line',
+    'brain-tree-3d',
   ];
   const sources = ['named-areas', 'area-labels-src', 'campus-roads', 'buildings', 'places-points', 'route'];
   layers.forEach(id => { try { if (map.getLayer(id)) map.removeLayer(id); } catch (_) {} });
@@ -906,16 +908,29 @@ function toggle3D() {
       if (map.getLayer('buildings-outline')) map.setLayoutProperty('buildings-outline', 'visibility', 'none');
       if (map.getLayer('buildings-3d'))      map.setLayoutProperty('buildings-3d',      'visibility', 'visible');
     }
+    showBrainTree3D();
     map.easeTo({ pitch: 52, bearing: -18, duration: 900 });
     showToast('3D view — drag to rotate', 'info');
   } else {
     if (map.getLayer('buildings-3d')) map.setLayoutProperty('buildings-3d', 'visibility', 'none');
+    if (typeof BrainTree3D !== 'undefined') BrainTree3D.hide();
     if (!isSatellite && LAYERS.buildings) {
       if (map.getLayer('buildings-fill'))    map.setLayoutProperty('buildings-fill',    'visibility', 'visible');
       if (map.getLayer('buildings-outline')) map.setLayoutProperty('buildings-outline', 'visibility', 'visible');
     }
     map.easeTo({ pitch: 0, bearing: 0, duration: 900 });
   }
+}
+
+// Lazy-init Brain Tree custom layer (waits for three.js if needed)
+function showBrainTree3D(attempts = 0) {
+  if (typeof BrainTree3D === 'undefined') return;
+  if (typeof THREE === 'undefined' || !THREE.OBJLoader) {
+    if (attempts < 50) setTimeout(() => showBrainTree3D(attempts + 1), 100);
+    return;
+  }
+  BrainTree3D.init(map);
+  BrainTree3D.show();
 }
 
 // ============================================================
