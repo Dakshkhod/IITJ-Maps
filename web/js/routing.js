@@ -70,8 +70,21 @@ const IITJRouter = (() => {
     }
   }
 
+  // Drivable highway types — anything a car can navigate on campus.
+  // Walking mode adds footway/cycleway/path on top of these.
+  const DRIVABLE_TYPES = new Set([
+    'trunk', 'trunk_link', 'primary', 'primary_link',
+    'secondary', 'secondary_link', 'tertiary', 'tertiary_link',
+    'residential', 'service', 'unclassified', 'track', 'road', 'unknown',
+  ]);
+
+  function isAllowedEdge(edge, mode) {
+    if (mode === 'walk') return true;
+    return DRIVABLE_TYPES.has(edge.type);
+  }
+
   // ── Dijkstra ──────────────────────────────────────────────────
-  function dijkstra(startId, endId) {
+  function dijkstra(startId, endId, mode = 'drive') {
     const dist = { [startId]: 0 };
     const prev = {};
     const visited = new Set();
@@ -84,9 +97,11 @@ const IITJRouter = (() => {
       visited.add(cur);
       if (cur === endId) break;
 
-      for (const { id: nb, dist: edgeDist } of (_graph[cur] || [])) {
+      for (const edge of (_graph[cur] || [])) {
+        if (!isAllowedEdge(edge, mode)) continue;
+        const nb = edge.id;
         if (visited.has(nb)) continue;
-        const nd = curDist + edgeDist;
+        const nd = curDist + edge.dist;
         if (nd < (dist[nb] ?? Infinity)) {
           dist[nb] = nd;
           prev[nb] = cur;
@@ -102,9 +117,12 @@ const IITJRouter = (() => {
     return { nodes, distance: dist[endId] };
   }
 
-  function findNearestNode(lat, lng, radiusM = 400) {
+  // Nearest node that participates in at least one edge allowed by the mode.
+  function findNearestNode(lat, lng, radiusM = 400, mode = 'drive') {
     let nearest = null, minDist = Infinity;
     for (const [id, coords] of Object.entries(_nodeCoords)) {
+      const edges = _graph[id] || [];
+      if (!edges.some(e => isAllowedEdge(e, mode))) continue;
       const d = haversine(lat, lng, coords[1], coords[0]);
       if (d < minDist && d < radiusM) { minDist = d; nearest = id; }
     }
@@ -138,28 +156,44 @@ const IITJRouter = (() => {
   }
 
   // ── Public: compute route ─────────────────────────────────────
-  function computeRoute(fromLat, fromLng, toLat, toLng) {
+  // mode: 'drive' (default — main roads only, car-passable) or 'walk' (also
+  // uses footways, cycleways, paths — shortcuts allowed).
+  function computeRoute(fromLat, fromLng, toLat, toLng, mode = 'drive') {
     if (!_loaded) throw new Error('IITJRouter not initialised — call IITJRouter.init() first');
+    if (mode !== 'walk') mode = 'drive';
 
-    let coords = [], distance = 0, usingGraph = false;
+    let coords = [], distance = 0, usingGraph = false, fellBackToWalk = false;
 
-    const fromNode = findNearestNode(fromLat, fromLng);
-    const toNode   = findNearestNode(toLat, toLng);
-
-    if (fromNode && toNode && fromNode !== toNode) {
-      const path = dijkstra(fromNode, toNode);
-      if (path && path.nodes.length >= 2) {
-        usingGraph = true;
-        coords = [[fromLng, fromLat]];
-        for (const id of path.nodes) { const c = _nodeCoords[id]; if (c) coords.push(c); }
-        coords.push([toLng, toLat]);
-        distance = path.distance
-          + haversine(fromLat, fromLng, _nodeCoords[fromNode][1], _nodeCoords[fromNode][0])
-          + haversine(toLat, toLng, _nodeCoords[toNode][1], _nodeCoords[toNode][0]);
-      }
+    function tryMode(m) {
+      const fromNode = findNearestNode(fromLat, fromLng, 400, m);
+      const toNode   = findNearestNode(toLat,   toLng,   400, m);
+      if (!fromNode || !toNode || fromNode === toNode) return null;
+      const path = dijkstra(fromNode, toNode, m);
+      if (!path || path.nodes.length < 2) return null;
+      return { path, fromNode, toNode };
     }
 
-    // Straight-line fallback
+    let result = tryMode(mode);
+    // Driving may fail when one endpoint is only reachable by a footway
+    // (e.g. inside hostel quad). Fall back to walking so the user still
+    // gets a route, but flag it so the UI can mention it.
+    if (!result && mode === 'drive') {
+      result = tryMode('walk');
+      if (result) fellBackToWalk = true;
+    }
+
+    if (result) {
+      usingGraph = true;
+      const { path, fromNode, toNode } = result;
+      coords = [[fromLng, fromLat]];
+      for (const id of path.nodes) { const c = _nodeCoords[id]; if (c) coords.push(c); }
+      coords.push([toLng, toLat]);
+      distance = path.distance
+        + haversine(fromLat, fromLng, _nodeCoords[fromNode][1], _nodeCoords[fromNode][0])
+        + haversine(toLat, toLng,     _nodeCoords[toNode][1],   _nodeCoords[toNode][0]);
+    }
+
+    // Straight-line fallback (no graph reachable at all)
     if (!usingGraph) {
       distance = haversine(fromLat, fromLng, toLat, toLng);
       const steps = Math.max(5, Math.round(distance / 20));
@@ -171,7 +205,10 @@ const IITJRouter = (() => {
       coords.push([toLng, toLat]);
     }
 
-    const etaSec = Math.round(distance / 1.4);
+    // Driving ≈ 25 km/h on internal campus roads (≈7 m/s); walking ≈ 1.4 m/s
+    const effectiveMode = fellBackToWalk ? 'walk' : mode;
+    const speedMps = effectiveMode === 'drive' ? 7 : 1.4;
+    const etaSec = Math.round(distance / speedMps);
     const etaMin = Math.max(1, Math.round(etaSec / 60));
 
     return {
@@ -180,7 +217,9 @@ const IITJRouter = (() => {
       eta_minutes: etaMin,
       geometry: { type: 'LineString', coordinates: coords },
       instructions: generateInstructions(coords, distance, etaMin),
-      profile: 'walking',
+      profile: effectiveMode === 'drive' ? 'driving' : 'walking',
+      requested_mode: mode,
+      fell_back_to_walk: fellBackToWalk,
       using_road_network: usingGraph,
     };
   }

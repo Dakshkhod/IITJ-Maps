@@ -471,6 +471,43 @@ html, body {
   color: var(--text-primary);
 }
 
+.dir-mode-toggle {
+  display: flex;
+  gap: 6px;
+  margin-top: 12px;
+  padding: 4px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 99px;
+  pointer-events: all;
+}
+
+.dir-mode-btn {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background: transparent;
+  border: none;
+  border-radius: 99px;
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.dir-mode-btn:hover { color: var(--text-primary); }
+
+.dir-mode-btn.dir-mode-active {
+  background: var(--accent);
+  color: var(--accent-inverse);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+}
+
 .dir-results {
   margin-top: 8px;
   background: var(--bg-elevated);

@@ -286,6 +286,7 @@ let directionsTo = null;
 let directionsFromMarker = null;
 let directionsToMarker = null;
 let dirSearchTimeout = null;
+let directionsMode = 'drive';  // 'drive' (main roads only) | 'walk' (shortcuts allowed)
 
 // ============================================================
 // Initialize
@@ -1296,6 +1297,12 @@ function openDirectionsPanel(initial = {}) {
   updateDirectionsGoButton();
   updateDirectionsMarkers();
   clearDirectionsPickMode();
+  // Sync the mode toggle visuals with the current mode state
+  document.querySelectorAll('.dir-mode-btn').forEach(b => {
+    const active = b.dataset.mode === directionsMode;
+    b.classList.toggle('dir-mode-active', active);
+    b.setAttribute('aria-selected', active ? 'true' : 'false');
+  });
 }
 
 function expandDirectionsPanel() {
@@ -1481,6 +1488,21 @@ function setupDirectionsPanel() {
       name: 'Your location',
     });
   });
+
+  document.querySelectorAll('.dir-mode-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const mode = btn.dataset.mode === 'walk' ? 'walk' : 'drive';
+      if (directionsMode === mode) return;
+      directionsMode = mode;
+      document.querySelectorAll('.dir-mode-btn').forEach(b => {
+        const active = b.dataset.mode === mode;
+        b.classList.toggle('dir-mode-active', active);
+        b.setAttribute('aria-selected', active ? 'true' : 'false');
+      });
+      // Recompute on-the-fly if a route is already on screen
+      if (currentRoute && directionsFrom && directionsTo) calculateDirectionsRoute();
+    });
+  });
 }
 
 async function calculateDirectionsRoute() {
@@ -1505,7 +1527,8 @@ async function calculateDirectionsRoute() {
 
     const route = IITJRouter.computeRoute(
       routeFromLat, routeFromLng,
-      routeToLat,   routeToLng
+      routeToLat,   routeToLng,
+      directionsMode
     );
 
     hideLoadingToast();
@@ -1519,13 +1542,18 @@ async function calculateDirectionsRoute() {
     drawRoute(route.geometry);
 
     document.getElementById('dir-summary').classList.remove('hidden');
+    const travelVerb = route.profile === 'driving' ? 'drive' : 'walk';
     document.getElementById('dir-summary-text').textContent =
-      `${formatDist(route.distance)} · ${route.eta_minutes} min walk`;
-    document.getElementById('dir-summary-type').textContent =
-      route.using_road_network ? 'Walking · campus roads' : 'Walking · direct path';
+      `${formatDist(route.distance)} · ${route.eta_minutes} min ${travelVerb}`;
+    let summaryType;
+    if (!route.using_road_network) summaryType = 'Direct path · no road nearby';
+    else if (route.fell_back_to_walk) summaryType = 'Walking · no drivable road here';
+    else summaryType = route.profile === 'driving' ? 'Driving · main roads' : 'Walking · campus paths';
+    document.getElementById('dir-summary-type').textContent = summaryType;
 
     document.getElementById('nav-destination').textContent = directionsTo.name;
-    document.getElementById('nav-eta').textContent         = `${route.eta_minutes} min`;
+    document.getElementById('nav-eta').textContent         =
+      `${route.eta_minutes} min ${route.profile === 'driving' ? 'drive' : 'walk'}`;
     document.getElementById('nav-distance').textContent    = formatDist(route.distance);
     updateNavInstruction();
     document.getElementById('nav-panel').classList.remove('hidden');

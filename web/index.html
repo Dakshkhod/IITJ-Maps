@@ -117,6 +117,21 @@
         </svg>
         Your location
       </button>
+      <div class="dir-mode-toggle" role="tablist" aria-label="Travel mode">
+        <button class="dir-mode-btn dir-mode-active" id="dir-mode-drive" type="button" role="tab" aria-selected="true" data-mode="drive">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M5 17h14M5 17v-5l2-5h10l2 5v5M5 17v2M19 17v2M7 12h10"/>
+            <circle cx="8" cy="17" r="1.5"/><circle cx="16" cy="17" r="1.5"/>
+          </svg>
+          Drive
+        </button>
+        <button class="dir-mode-btn" id="dir-mode-walk" type="button" role="tab" aria-selected="false" data-mode="walk">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="13" cy="4" r="2"/><path d="M9 20l3-6 3 3 3-3M9 14l2-4 4 2"/>
+          </svg>
+          Walk
+        </button>
+      </div>
       <div id="dir-from-results" class="dir-results hidden"></div>
       <div id="dir-to-results" class="dir-results hidden"></div>
       <div id="dir-pick-hint" class="dir-pick-hint hidden">Tap the map to set this point</div>
