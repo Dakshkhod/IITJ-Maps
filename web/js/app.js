@@ -1494,9 +1494,18 @@ async function calculateDirectionsRoute() {
   showLoadingToast('Calculating route…');
 
   try {
+    // Snap to the registered entrance gate if the destination has one
+    // (e.g. hostels route to their actual entry gate, not the building centroid)
+    const fromEntry = IITJData.getEntrance(directionsFrom.name);
+    const toEntry   = IITJData.getEntrance(directionsTo.name);
+    const routeFromLat = fromEntry ? fromEntry.lat : directionsFrom.lat;
+    const routeFromLng = fromEntry ? fromEntry.lng : directionsFrom.lng;
+    const routeToLat   = toEntry   ? toEntry.lat   : directionsTo.lat;
+    const routeToLng   = toEntry   ? toEntry.lng   : directionsTo.lng;
+
     const route = IITJRouter.computeRoute(
-      directionsFrom.lat, directionsFrom.lng,
-      directionsTo.lat, directionsTo.lng
+      routeFromLat, routeFromLng,
+      routeToLat,   routeToLng
     );
 
     hideLoadingToast();

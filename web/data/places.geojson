@@ -6070,62 +6070,6 @@
     {
       "type": "Feature",
       "properties": {
-        "id": "curated_0",
-        "name": "Gate 1 (Main Gate - NH62)",
-        "category": "gate",
-        "description": "Principal campus entrance from NH-62",
-        "keywords": [
-          "gate",
-          "entrance",
-          "exit",
-          "main gate",
-          "nh62",
-          "security"
-        ],
-        "source": "curated"
-      },
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          73.1103,
-          26.4587
-        ]
-      },
-      "centroid": {
-        "lat": 26.4587,
-        "lng": 73.1103
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
-        "id": "curated_1",
-        "name": "Gate 2 (South Gate)",
-        "category": "gate",
-        "description": "South campus gate",
-        "keywords": [
-          "gate 2",
-          "south gate",
-          "entrance",
-          "exit"
-        ],
-        "source": "curated"
-      },
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          73.1078,
-          26.4666
-        ]
-      },
-      "centroid": {
-        "lat": 26.4666,
-        "lng": 73.1078
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
         "id": "curated_2",
         "name": "Primary Health Centre (PHC)",
         "category": "medical",
@@ -6234,33 +6178,6 @@
       "centroid": {
         "lat": 26.4591,
         "lng": 73.1106
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
-        "id": "curated_6",
-        "name": "Amphitheatre",
-        "category": "recreation",
-        "description": "Open-air amphitheatre for cultural events",
-        "keywords": [
-          "amphitheatre",
-          "stage",
-          "performance",
-          "cultural"
-        ],
-        "source": "curated"
-      },
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          73.1152,
-          26.4762
-        ]
-      },
-      "centroid": {
-        "lat": 26.4762,
-        "lng": 73.1152
       }
     },
     {
@@ -6794,321 +6711,6 @@
     {
       "type": "Feature",
       "properties": {
-        "osm_id": "7220643470",
-        "name": "Hostel I2 Gate",
-        "category": "gate",
-        "source": "osm",
-        "description": "Entry gate · Hostel I2"
-      },
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          73.1151545,
-          26.4715779
-        ]
-      },
-      "centroid": {
-        "lat": 26.4715779,
-        "lng": 73.1151545
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
-        "osm_id": "12979131715",
-        "name": "Hostel I3 Gate",
-        "category": "gate",
-        "source": "osm",
-        "description": "Entry gate · Hostel I3"
-      },
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          73.1161287,
-          26.4714967
-        ]
-      },
-      "centroid": {
-        "lat": 26.4714967,
-        "lng": 73.1161287
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
-        "osm_id": "12980134795",
-        "name": "Hostel B5 Gate",
-        "category": "gate",
-        "source": "osm",
-        "description": "Entry gate · Hostel B5"
-      },
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          73.1152908,
-          26.472436
-        ]
-      },
-      "centroid": {
-        "lat": 26.472436,
-        "lng": 73.1152908
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
-        "osm_id": "12980134796",
-        "name": "Hostel B1 Gate",
-        "category": "gate",
-        "source": "osm",
-        "description": "Entry gate · Hostel B1"
-      },
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          73.1152956,
-          26.4725379
-        ]
-      },
-      "centroid": {
-        "lat": 26.4725379,
-        "lng": 73.1152956
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
-        "osm_id": "12980134797",
-        "name": "Hostel B2 Gate",
-        "category": "gate",
-        "source": "osm",
-        "description": "Entry gate · Hostel B2"
-      },
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          73.1162576,
-          26.4724512
-        ]
-      },
-      "centroid": {
-        "lat": 26.4724512,
-        "lng": 73.1162576
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
-        "osm_id": "12980134799",
-        "name": "Hostel B4 Gate",
-        "category": "gate",
-        "source": "osm",
-        "description": "Entry gate · Hostel B4"
-      },
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          73.1162479,
-          26.4723935
-        ]
-      },
-      "centroid": {
-        "lat": 26.4723935,
-        "lng": 73.1162479
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
-        "osm_id": "12980144648",
-        "name": "Hostel G3 Gate",
-        "category": "gate",
-        "source": "osm",
-        "description": "Entry gate · Hostel G3"
-      },
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          73.1172199,
-          26.4733416
-        ]
-      },
-      "centroid": {
-        "lat": 26.4733416,
-        "lng": 73.1172199
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
-        "osm_id": "12980144652",
-        "name": "Hostel G6 Gate",
-        "category": "gate",
-        "source": "osm",
-        "description": "Entry gate · Hostel G6"
-      },
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          73.1155144,
-          26.4733978
-        ]
-      },
-      "centroid": {
-        "lat": 26.4733978,
-        "lng": 73.1155144
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
-        "osm_id": "12980144654",
-        "name": "Hostel G2 Gate",
-        "category": "gate",
-        "source": "osm",
-        "description": "Entry gate · Hostel G2"
-      },
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          73.1164229,
-          26.4734278
-        ]
-      },
-      "centroid": {
-        "lat": 26.4734278,
-        "lng": 73.1164229
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
-        "osm_id": "12980144655",
-        "name": "Hostel G1 Gate",
-        "category": "gate",
-        "source": "osm",
-        "description": "Entry gate · Hostel G1"
-      },
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          73.1155989,
-          26.4734938
-        ]
-      },
-      "centroid": {
-        "lat": 26.4734938,
-        "lng": 73.1155989
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
-        "osm_id": "12980144870",
-        "name": "Hostel Y4 Gate",
-        "category": "gate",
-        "source": "osm",
-        "description": "Entry gate · Hostel Y4"
-      },
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          73.1169261,
-          26.4741948
-        ]
-      },
-      "centroid": {
-        "lat": 26.4741948,
-        "lng": 73.1169261
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
-        "osm_id": "12980144872",
-        "name": "Hostel Y3 Gate",
-        "category": "gate",
-        "source": "osm",
-        "description": "Entry gate · Hostel Y3"
-      },
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          73.1170959,
-          26.4742427
-        ]
-      },
-      "centroid": {
-        "lat": 26.4742427,
-        "lng": 73.1170959
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
-        "osm_id": "12981437709",
-        "name": "Hostel G5 Gate",
-        "category": "gate",
-        "source": "osm",
-        "description": "Entry gate · Hostel G5"
-      },
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          73.1163995,
-          26.4733145
-        ]
-      },
-      "centroid": {
-        "lat": 26.4733145,
-        "lng": 73.1163995
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
-        "osm_id": "12981437711",
-        "name": "Hostel G4 Gate",
-        "category": "gate",
-        "source": "osm",
-        "description": "Entry gate · Hostel G4"
-      },
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          73.1170384,
-          26.4732575
-        ]
-      },
-      "centroid": {
-        "lat": 26.4732575,
-        "lng": 73.1170384
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
-        "osm_id": "13878739744",
-        "name": "Aakash Sports Complex Gate",
-        "category": "gate",
-        "source": "osm",
-        "description": "Entry to Akaash Sports Complex"
-      },
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          73.1194166,
-          26.4764512
-        ]
-      },
-      "centroid": {
-        "lat": 26.4764512,
-        "lng": 73.1194166
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
         "osm_id": "13878739753",
         "name": "E-18 — Art Club",
         "category": "recreation",
@@ -7340,48 +6942,6 @@
     {
       "type": "Feature",
       "properties": {
-        "osm_id": "13885088516",
-        "name": "Hostel O4 Gate",
-        "category": "gate",
-        "source": "osm",
-        "description": "Entry gate · Hostel O4"
-      },
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          73.1171937,
-          26.4751209
-        ]
-      },
-      "centroid": {
-        "lat": 26.4751209,
-        "lng": 73.1171937
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
-        "osm_id": "13885088517",
-        "name": "Hostel O3 Gate",
-        "category": "gate",
-        "source": "osm",
-        "description": "Entry gate · Hostel O3"
-      },
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          73.1173121,
-          26.4752205
-        ]
-      },
-      "centroid": {
-        "lat": 26.4752205,
-        "lng": 73.1173121
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
         "osm_id": "1412504064",
         "name": "Baap of Rolls",
         "category": "dining",
@@ -7506,6 +7066,62 @@
       "centroid": {
         "lat": 26.47670016,
         "lng": 73.11417424
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "curated_0",
+        "name": "Gate 1 (Main Gate - NH62)",
+        "category": "gate",
+        "description": "Principal campus entrance from NH-62",
+        "keywords": [
+          "gate",
+          "entrance",
+          "exit",
+          "main gate",
+          "nh62",
+          "security"
+        ],
+        "source": "curated"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          73.1103,
+          26.4587
+        ]
+      },
+      "centroid": {
+        "lat": 26.4587,
+        "lng": 73.1103
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "curated_1",
+        "name": "Gate 2 (South Gate)",
+        "category": "gate",
+        "description": "South campus gate",
+        "keywords": [
+          "gate 2",
+          "south gate",
+          "entrance",
+          "exit"
+        ],
+        "source": "curated"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          73.1078,
+          26.4666
+        ]
+      },
+      "centroid": {
+        "lat": 26.4666,
+        "lng": 73.1078
       }
     }
   ]

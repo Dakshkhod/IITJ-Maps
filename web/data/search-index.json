@@ -913,40 +913,6 @@
     "is_proposed": true
   },
   {
-    "id": "curated_0",
-    "name": "Gate 1 (Main Gate - NH62)",
-    "category": "gate",
-    "description": "Principal campus entrance from NH-62",
-    "keywords": [
-      "gate",
-      "entrance",
-      "exit",
-      "main gate",
-      "nh62",
-      "security"
-    ],
-    "lat": 26.4587,
-    "lng": 73.1103,
-    "source": "curated",
-    "is_proposed": false
-  },
-  {
-    "id": "curated_1",
-    "name": "Gate 2 (South Gate)",
-    "category": "gate",
-    "description": "South campus gate",
-    "keywords": [
-      "gate 2",
-      "south gate",
-      "entrance",
-      "exit"
-    ],
-    "lat": 26.4666,
-    "lng": 73.1078,
-    "source": "curated",
-    "is_proposed": false
-  },
-  {
     "id": "curated_2",
     "name": "Primary Health Centre (PHC)",
     "category": "medical",
@@ -1012,22 +978,6 @@
     ],
     "lat": 26.4591,
     "lng": 73.1106,
-    "source": "curated",
-    "is_proposed": false
-  },
-  {
-    "id": "curated_6",
-    "name": "Amphitheatre",
-    "category": "recreation",
-    "description": "Open-air amphitheatre for cultural events",
-    "keywords": [
-      "amphitheatre",
-      "stage",
-      "performance",
-      "cultural"
-    ],
-    "lat": 26.4762,
-    "lng": 73.1152,
     "source": "curated",
     "is_proposed": false
   },
@@ -1448,304 +1398,6 @@
     "is_proposed": false
   },
   {
-    "id": "7220643470",
-    "name": "Hostel I2 Gate",
-    "category": "gate",
-    "description": "Entry gate · Hostel I2",
-    "keywords": [
-      "hostel I2",
-      "I2 entry",
-      "I2 gate",
-      "I-2",
-      "entrance",
-      "entry",
-      "gate",
-      "I2"
-    ],
-    "lat": 26.4715779,
-    "lng": 73.1151545,
-    "source": "osm",
-    "is_proposed": false
-  },
-  {
-    "id": "12979131715",
-    "name": "Hostel I3 Gate",
-    "category": "gate",
-    "description": "Entry gate · Hostel I3",
-    "keywords": [
-      "hostel I3",
-      "I3 entry",
-      "I3 gate",
-      "I-3",
-      "entrance",
-      "entry",
-      "gate",
-      "I3"
-    ],
-    "lat": 26.4714967,
-    "lng": 73.1161287,
-    "source": "osm",
-    "is_proposed": false
-  },
-  {
-    "id": "12980134795",
-    "name": "Hostel B5 Gate",
-    "category": "gate",
-    "description": "Entry gate · Hostel B5",
-    "keywords": [
-      "hostel B5",
-      "B5 entry",
-      "B5 gate",
-      "B-5",
-      "entrance",
-      "entry",
-      "gate",
-      "B5"
-    ],
-    "lat": 26.472436,
-    "lng": 73.1152908,
-    "source": "osm",
-    "is_proposed": false
-  },
-  {
-    "id": "12980134796",
-    "name": "Hostel B1 Gate",
-    "category": "gate",
-    "description": "Entry gate · Hostel B1",
-    "keywords": [
-      "hostel B1",
-      "B1 entry",
-      "B1 gate",
-      "B-1",
-      "entrance",
-      "entry",
-      "gate",
-      "B1"
-    ],
-    "lat": 26.4725379,
-    "lng": 73.1152956,
-    "source": "osm",
-    "is_proposed": false
-  },
-  {
-    "id": "12980134797",
-    "name": "Hostel B2 Gate",
-    "category": "gate",
-    "description": "Entry gate · Hostel B2",
-    "keywords": [
-      "hostel B2",
-      "B2 entry",
-      "B2 gate",
-      "B-2",
-      "entrance",
-      "entry",
-      "gate",
-      "B2"
-    ],
-    "lat": 26.4724512,
-    "lng": 73.1162576,
-    "source": "osm",
-    "is_proposed": false
-  },
-  {
-    "id": "12980134799",
-    "name": "Hostel B4 Gate",
-    "category": "gate",
-    "description": "Entry gate · Hostel B4",
-    "keywords": [
-      "hostel B4",
-      "B4 entry",
-      "B4 gate",
-      "B-4",
-      "entrance",
-      "entry",
-      "gate",
-      "B4"
-    ],
-    "lat": 26.4723935,
-    "lng": 73.1162479,
-    "source": "osm",
-    "is_proposed": false
-  },
-  {
-    "id": "12980144648",
-    "name": "Hostel G3 Gate",
-    "category": "gate",
-    "description": "Entry gate · Hostel G3",
-    "keywords": [
-      "hostel G3",
-      "G3 entry",
-      "G3 gate",
-      "G-3",
-      "entrance",
-      "entry",
-      "gate",
-      "G3"
-    ],
-    "lat": 26.4733416,
-    "lng": 73.1172199,
-    "source": "osm",
-    "is_proposed": false
-  },
-  {
-    "id": "12980144652",
-    "name": "Hostel G6 Gate",
-    "category": "gate",
-    "description": "Entry gate · Hostel G6",
-    "keywords": [
-      "hostel G6",
-      "G6 entry",
-      "G6 gate",
-      "G-6",
-      "entrance",
-      "entry",
-      "gate",
-      "G6"
-    ],
-    "lat": 26.4733978,
-    "lng": 73.1155144,
-    "source": "osm",
-    "is_proposed": false
-  },
-  {
-    "id": "12980144654",
-    "name": "Hostel G2 Gate",
-    "category": "gate",
-    "description": "Entry gate · Hostel G2",
-    "keywords": [
-      "hostel G2",
-      "G2 entry",
-      "G2 gate",
-      "G-2",
-      "entrance",
-      "entry",
-      "gate",
-      "G2"
-    ],
-    "lat": 26.4734278,
-    "lng": 73.1164229,
-    "source": "osm",
-    "is_proposed": false
-  },
-  {
-    "id": "12980144655",
-    "name": "Hostel G1 Gate",
-    "category": "gate",
-    "description": "Entry gate · Hostel G1",
-    "keywords": [
-      "hostel G1",
-      "G1 entry",
-      "G1 gate",
-      "G-1",
-      "entrance",
-      "entry",
-      "gate",
-      "G1"
-    ],
-    "lat": 26.4734938,
-    "lng": 73.1155989,
-    "source": "osm",
-    "is_proposed": false
-  },
-  {
-    "id": "12980144870",
-    "name": "Hostel Y4 Gate",
-    "category": "gate",
-    "description": "Entry gate · Hostel Y4",
-    "keywords": [
-      "hostel Y4",
-      "Y4 entry",
-      "Y4 gate",
-      "Y-4",
-      "entrance",
-      "entry",
-      "gate",
-      "Y4"
-    ],
-    "lat": 26.4741948,
-    "lng": 73.1169261,
-    "source": "osm",
-    "is_proposed": false
-  },
-  {
-    "id": "12980144872",
-    "name": "Hostel Y3 Gate",
-    "category": "gate",
-    "description": "Entry gate · Hostel Y3",
-    "keywords": [
-      "hostel Y3",
-      "Y3 entry",
-      "Y3 gate",
-      "Y-3",
-      "entrance",
-      "entry",
-      "gate",
-      "Y3"
-    ],
-    "lat": 26.4742427,
-    "lng": 73.1170959,
-    "source": "osm",
-    "is_proposed": false
-  },
-  {
-    "id": "12981437709",
-    "name": "Hostel G5 Gate",
-    "category": "gate",
-    "description": "Entry gate · Hostel G5",
-    "keywords": [
-      "hostel G5",
-      "G5 entry",
-      "G5 gate",
-      "G-5",
-      "entrance",
-      "entry",
-      "gate",
-      "G5"
-    ],
-    "lat": 26.4733145,
-    "lng": 73.1163995,
-    "source": "osm",
-    "is_proposed": false
-  },
-  {
-    "id": "12981437711",
-    "name": "Hostel G4 Gate",
-    "category": "gate",
-    "description": "Entry gate · Hostel G4",
-    "keywords": [
-      "hostel G4",
-      "G4 entry",
-      "G4 gate",
-      "G-4",
-      "entrance",
-      "entry",
-      "gate",
-      "G4"
-    ],
-    "lat": 26.4732575,
-    "lng": 73.1170384,
-    "source": "osm",
-    "is_proposed": false
-  },
-  {
-    "id": "13878739744",
-    "name": "Aakash Sports Complex Gate",
-    "category": "gate",
-    "description": "Entry to Akaash Sports Complex",
-    "keywords": [
-      "entrance",
-      "entry",
-      "gate",
-      "aakash",
-      "akaash",
-      "sports complex"
-    ],
-    "lat": 26.4764512,
-    "lng": 73.1194166,
-    "source": "osm",
-    "is_proposed": false
-  },
-  {
     "id": "13878739753",
     "name": "E-18 — Art Club",
     "category": "recreation",
@@ -1935,46 +1587,6 @@
     "is_proposed": false
   },
   {
-    "id": "13885088516",
-    "name": "Hostel O4 Gate",
-    "category": "gate",
-    "description": "Entry gate · Hostel O4",
-    "keywords": [
-      "hostel O4",
-      "O4 entry",
-      "O4 gate",
-      "O-4",
-      "entrance",
-      "entry",
-      "gate",
-      "O4"
-    ],
-    "lat": 26.4751209,
-    "lng": 73.1171937,
-    "source": "osm",
-    "is_proposed": false
-  },
-  {
-    "id": "13885088517",
-    "name": "Hostel O3 Gate",
-    "category": "gate",
-    "description": "Entry gate · Hostel O3",
-    "keywords": [
-      "hostel O3",
-      "O3 entry",
-      "O3 gate",
-      "O-3",
-      "entrance",
-      "entry",
-      "gate",
-      "O3"
-    ],
-    "lat": 26.4752205,
-    "lng": 73.1173121,
-    "source": "osm",
-    "is_proposed": false
-  },
-  {
     "id": "1412504064",
     "name": "Baap of Rolls",
     "category": "dining",
@@ -2005,6 +1617,40 @@
     "lat": 26.47670016,
     "lng": 73.11417424,
     "source": "osm",
+    "is_proposed": false
+  },
+  {
+    "id": "curated_0",
+    "name": "Gate 1 (Main Gate - NH62)",
+    "category": "gate",
+    "description": "Principal campus entrance from NH-62",
+    "keywords": [
+      "gate",
+      "entrance",
+      "exit",
+      "main gate",
+      "nh62",
+      "security"
+    ],
+    "lat": 26.4587,
+    "lng": 73.1103,
+    "source": "curated",
+    "is_proposed": false
+  },
+  {
+    "id": "curated_1",
+    "name": "Gate 2 (South Gate)",
+    "category": "gate",
+    "description": "South campus gate",
+    "keywords": [
+      "gate 2",
+      "south gate",
+      "entrance",
+      "exit"
+    ],
+    "lat": 26.4666,
+    "lng": 73.1078,
+    "source": "curated",
     "is_proposed": false
   }
 ]

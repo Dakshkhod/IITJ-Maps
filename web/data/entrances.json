@@ -1,0 +1,120 @@
+{
+  "Gate 1 (Main Gate - NH62)": {
+    "lat": 26.4587,
+    "lng": 73.1103,
+    "gate_name": "Gate 1 (Main Gate - NH62)"
+  },
+  "Gate 2 (South Gate)": {
+    "lat": 26.4666,
+    "lng": 73.1078,
+    "gate_name": "Gate 2 (South Gate)"
+  },
+  "Hostel I2": {
+    "lat": 26.4715779,
+    "lng": 73.1151545,
+    "osm_id": "7220643470",
+    "gate_name": "Hostel I2 Gate"
+  },
+  "Hostel I3": {
+    "lat": 26.4714967,
+    "lng": 73.1161287,
+    "osm_id": "12979131715",
+    "gate_name": "Hostel I3 Gate"
+  },
+  "Hostel B5": {
+    "lat": 26.472436,
+    "lng": 73.1152908,
+    "osm_id": "12980134795",
+    "gate_name": "Hostel B5 Gate"
+  },
+  "Hostel B1": {
+    "lat": 26.4725379,
+    "lng": 73.1152956,
+    "osm_id": "12980134796",
+    "gate_name": "Hostel B1 Gate"
+  },
+  "Hostel B2": {
+    "lat": 26.4724512,
+    "lng": 73.1162576,
+    "osm_id": "12980134797",
+    "gate_name": "Hostel B2 Gate"
+  },
+  "Hostel B4": {
+    "lat": 26.4723935,
+    "lng": 73.1162479,
+    "osm_id": "12980134799",
+    "gate_name": "Hostel B4 Gate"
+  },
+  "Hostel G3": {
+    "lat": 26.4733416,
+    "lng": 73.1172199,
+    "osm_id": "12980144648",
+    "gate_name": "Hostel G3 Gate"
+  },
+  "Hostel G6": {
+    "lat": 26.4733978,
+    "lng": 73.1155144,
+    "osm_id": "12980144652",
+    "gate_name": "Hostel G6 Gate"
+  },
+  "Hostel G2": {
+    "lat": 26.4734278,
+    "lng": 73.1164229,
+    "osm_id": "12980144654",
+    "gate_name": "Hostel G2 Gate"
+  },
+  "Hostel G1": {
+    "lat": 26.4734938,
+    "lng": 73.1155989,
+    "osm_id": "12980144655",
+    "gate_name": "Hostel G1 Gate"
+  },
+  "Hostel Y4": {
+    "lat": 26.4741948,
+    "lng": 73.1169261,
+    "osm_id": "12980144870",
+    "gate_name": "Hostel Y4 Gate"
+  },
+  "Hostel Y3": {
+    "lat": 26.4742427,
+    "lng": 73.1170959,
+    "osm_id": "12980144872",
+    "gate_name": "Hostel Y3 Gate"
+  },
+  "Hostel G5": {
+    "lat": 26.4733145,
+    "lng": 73.1163995,
+    "osm_id": "12981437709",
+    "gate_name": "Hostel G5 Gate"
+  },
+  "Hostel G4": {
+    "lat": 26.4732575,
+    "lng": 73.1170384,
+    "osm_id": "12981437711",
+    "gate_name": "Hostel G4 Gate"
+  },
+  "Aakash Sports Complex": {
+    "lat": 26.4764512,
+    "lng": 73.1194166,
+    "osm_id": "13878739744",
+    "gate_name": "Aakash Sports Complex Gate"
+  },
+  "Hostel O4": {
+    "lat": 26.4751209,
+    "lng": 73.1171937,
+    "osm_id": "13885088516",
+    "gate_name": "Hostel O4 Gate"
+  },
+  "Hostel O3": {
+    "lat": 26.4752205,
+    "lng": 73.1173121,
+    "osm_id": "13885088517",
+    "gate_name": "Hostel O3 Gate"
+  },
+  "Akaash Complex": {
+    "lat": 26.4764512,
+    "lng": 73.1194166,
+    "osm_id": "13878739744",
+    "gate_name": "Aakash Sports Complex Gate"
+  }
+}

@@ -11,6 +11,7 @@ const IITJData = (() => {
   let _roads       = null;
   let _areas       = null;
   let _categories  = null;
+  let _entrances   = null;   // { "Hostel B1": { lat, lng, gate_name, osm_id } }
   let _searchTokens = null;
   let _ready       = false;
   const _readyCallbacks = [];
@@ -18,13 +19,14 @@ const IITJData = (() => {
   // ── Loader ──────────────────────────────────────────────────
   async function init() {
     const base = '/data';
-    const [places, buildings, roads, areas, searchIndex, categories] = await Promise.all([
+    const [places, buildings, roads, areas, searchIndex, categories, entrances] = await Promise.all([
       fetch(`${base}/places.geojson`).then(r => r.json()),
       fetch(`${base}/buildings.geojson`).then(r => r.json()),
       fetch(`${base}/roads.geojson`).then(r => r.json()),
       fetch(`${base}/areas.geojson`).then(r => r.json()),
       fetch(`${base}/search-index.json`).then(r => r.json()),
       fetch(`${base}/categories.json`).then(r => r.json()),
+      fetch(`${base}/entrances.json`).then(r => r.ok ? r.json() : {}).catch(() => ({})),
     ]);
 
     _places     = places;
@@ -32,6 +34,7 @@ const IITJData = (() => {
     _roads      = roads;
     _areas      = areas;
     _categories = categories;
+    _entrances  = entrances || {};
 
     // Pre-build search token strings once
     _searchTokens = searchIndex.map(entry => ({
@@ -113,6 +116,13 @@ const IITJData = (() => {
   function getAreas()     { return _areas     || { type: 'FeatureCollection', features: [] }; }
   function getCategories(){ return _categories || []; }
 
+  // Returns the entry-point coordinates for a destination if one is mapped
+  // (e.g. "Hostel B1" → { lat, lng } of its gate). Otherwise null.
+  function getEntrance(name) {
+    if (!_entrances || !name) return null;
+    return _entrances[name] || _entrances[name.trim()] || null;
+  }
+
   function nearby(lat, lng, radiusM = 500, limit = 10) {
     if (!_searchTokens) return [];
     return _searchTokens
@@ -124,5 +134,5 @@ const IITJData = (() => {
 
   function isReady() { return _ready; }
 
-  return { init, onReady, isReady, search, getPlaces, getBuildings, getRoads, getAreas, getCategories, nearby };
+  return { init, onReady, isReady, search, getPlaces, getBuildings, getRoads, getAreas, getCategories, getEntrance, nearby };
 })();
