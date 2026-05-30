@@ -6344,6 +6344,1169 @@
         "lat": 26.4682,
         "lng": 73.1127
       }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "osm_id": "1521877038",
+        "name": "Dining Block D3",
+        "category": "dining",
+        "source": "osm",
+        "building_type": "yes",
+        "amenity": "restaurant",
+        "levels": null
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              73.1174016,
+              26.4741175
+            ],
+            [
+              73.1173503,
+              26.4737992
+            ],
+            [
+              73.1176689,
+              26.4737788
+            ],
+            [
+              73.1177093,
+              26.4740773
+            ],
+            [
+              73.1174016,
+              26.4741175
+            ]
+          ]
+        ]
+      },
+      "centroid": {
+        "lat": 26.47397806,
+        "lng": 73.11750634
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "osm_id": "1521877039",
+        "name": "Dining Block D-4",
+        "category": "dining",
+        "source": "osm",
+        "building_type": "yes",
+        "amenity": "restaurant",
+        "levels": null
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              73.1175162,
+              26.4750486
+            ],
+            [
+              73.1174724,
+              26.4747333
+            ],
+            [
+              73.117774,
+              26.4747102
+            ],
+            [
+              73.1177991,
+              26.4750167
+            ],
+            [
+              73.1175162,
+              26.4750486
+            ]
+          ]
+        ]
+      },
+      "centroid": {
+        "lat": 26.474911480000003,
+        "lng": 73.11761558
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "osm_id": "1521877040",
+        "name": "Rishabh Centre for Research & Innovation in Clean Energy",
+        "category": "academic",
+        "source": "osm",
+        "building_type": "college",
+        "amenity": null,
+        "levels": null
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              73.1149797,
+              26.4797885
+            ],
+            [
+              73.114934,
+              26.4796688
+            ],
+            [
+              73.1150184,
+              26.4796436
+            ],
+            [
+              73.115,
+              26.4795568
+            ],
+            [
+              73.11489,
+              26.4795223
+            ],
+            [
+              73.114846,
+              26.4793758
+            ],
+            [
+              73.1153141,
+              26.4792466
+            ],
+            [
+              73.1154936,
+              26.4796436
+            ],
+            [
+              73.1149797,
+              26.4797885
+            ]
+          ]
+        ]
+      },
+      "centroid": {
+        "lat": 26.47958161111111,
+        "lng": 73.11505061111113
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "osm_id": "1521877041",
+        "name": "Academic Building",
+        "category": "academic",
+        "source": "osm",
+        "building_type": "school",
+        "amenity": null,
+        "levels": null
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              73.1150298,
+              26.4762704
+            ],
+            [
+              73.1149124,
+              26.4758277
+            ],
+            [
+              73.1153935,
+              26.4757089
+            ],
+            [
+              73.1154878,
+              26.4761601
+            ],
+            [
+              73.1150298,
+              26.4762704
+            ]
+          ]
+        ]
+      },
+      "centroid": {
+        "lat": 26.4760475,
+        "lng": 73.11517065999999
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "osm_id": "1523529514",
+        "name": "B.R cycle service",
+        "category": "other",
+        "source": "osm",
+        "building_type": "yes",
+        "amenity": null,
+        "levels": null
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              73.117672,
+              26.4752838
+            ],
+            [
+              73.1176644,
+              26.4752146
+            ],
+            [
+              73.1177275,
+              26.4752071
+            ],
+            [
+              73.1177384,
+              26.4752739
+            ],
+            [
+              73.117672,
+              26.4752838
+            ]
+          ]
+        ]
+      },
+      "centroid": {
+        "lat": 26.475252639999997,
+        "lng": 73.11769486
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "osm_id": "1524213392",
+        "name": "Waffcha",
+        "category": "dining",
+        "source": "osm",
+        "building_type": "yes",
+        "amenity": "cafe",
+        "levels": null
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              73.114267,
+              26.4766916
+            ],
+            [
+              73.1142536,
+              26.4766546
+            ],
+            [
+              73.1142869,
+              26.476645
+            ],
+            [
+              73.1142987,
+              26.4766834
+            ],
+            [
+              73.114267,
+              26.4766916
+            ]
+          ]
+        ]
+      },
+      "centroid": {
+        "lat": 26.476673240000004,
+        "lng": 73.11427463999999
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "osm_id": "1524213393",
+        "name": "Prasadanam",
+        "category": "dining",
+        "source": "osm",
+        "building_type": "yes",
+        "amenity": "cafe",
+        "levels": null
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              73.114304,
+              26.4769026
+            ],
+            [
+              73.114369,
+              26.4768841
+            ],
+            [
+              73.1143588,
+              26.4768447
+            ],
+            [
+              73.1142897,
+              26.4768642
+            ],
+            [
+              73.114304,
+              26.4769026
+            ]
+          ]
+        ]
+      },
+      "centroid": {
+        "lat": 26.47687964,
+        "lng": 73.1143251
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "osm_id": "1524213394",
+        "name": "Zorko",
+        "category": "dining",
+        "source": "osm",
+        "building_type": "yes",
+        "amenity": "cafe",
+        "levels": null
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              73.114303,
+              26.4768347
+            ],
+            [
+              73.1143438,
+              26.4768227
+            ],
+            [
+              73.1143298,
+              26.4767722
+            ],
+            [
+              73.1142821,
+              26.4767823
+            ],
+            [
+              73.114303,
+              26.4768347
+            ]
+          ]
+        ]
+      },
+      "centroid": {
+        "lat": 26.47680932,
+        "lng": 73.11431234
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "osm_id": "1524213395",
+        "name": "Patiala Chicken",
+        "category": "dining",
+        "source": "osm",
+        "building_type": "yes",
+        "amenity": "cafe",
+        "levels": null
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              73.1142821,
+              26.4767823
+            ],
+            [
+              73.114268,
+              26.4767355
+            ],
+            [
+              73.1143122,
+              26.4767225
+            ],
+            [
+              73.1143298,
+              26.4767722
+            ],
+            [
+              73.1142821,
+              26.4767823
+            ]
+          ]
+        ]
+      },
+      "centroid": {
+        "lat": 26.47675896,
+        "lng": 73.11429484
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "osm_id": "1524214289",
+        "name": "Neem Cafe",
+        "category": "dining",
+        "source": "osm",
+        "building_type": "yes",
+        "amenity": "cafe",
+        "levels": null
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              73.1118363,
+              26.4661472
+            ],
+            [
+              73.1118226,
+              26.466092
+            ],
+            [
+              73.1120271,
+              26.466049
+            ],
+            [
+              73.1120339,
+              26.4661032
+            ],
+            [
+              73.1118363,
+              26.4661472
+            ]
+          ]
+        ]
+      },
+      "centroid": {
+        "lat": 26.466107719999997,
+        "lng": 73.11191124
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "osm_id": "7220643470",
+        "name": "Hostel I2 Gate",
+        "category": "gate",
+        "source": "osm",
+        "description": "Entry gate · Hostel I2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          73.1151545,
+          26.4715779
+        ]
+      },
+      "centroid": {
+        "lat": 26.4715779,
+        "lng": 73.1151545
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "osm_id": "12979131715",
+        "name": "Hostel I3 Gate",
+        "category": "gate",
+        "source": "osm",
+        "description": "Entry gate · Hostel I3"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          73.1161287,
+          26.4714967
+        ]
+      },
+      "centroid": {
+        "lat": 26.4714967,
+        "lng": 73.1161287
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "osm_id": "12980134795",
+        "name": "Hostel B5 Gate",
+        "category": "gate",
+        "source": "osm",
+        "description": "Entry gate · Hostel B5"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          73.1152908,
+          26.472436
+        ]
+      },
+      "centroid": {
+        "lat": 26.472436,
+        "lng": 73.1152908
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "osm_id": "12980134796",
+        "name": "Hostel B1 Gate",
+        "category": "gate",
+        "source": "osm",
+        "description": "Entry gate · Hostel B1"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          73.1152956,
+          26.4725379
+        ]
+      },
+      "centroid": {
+        "lat": 26.4725379,
+        "lng": 73.1152956
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "osm_id": "12980134797",
+        "name": "Hostel B2 Gate",
+        "category": "gate",
+        "source": "osm",
+        "description": "Entry gate · Hostel B2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          73.1162576,
+          26.4724512
+        ]
+      },
+      "centroid": {
+        "lat": 26.4724512,
+        "lng": 73.1162576
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "osm_id": "12980134799",
+        "name": "Hostel B4 Gate",
+        "category": "gate",
+        "source": "osm",
+        "description": "Entry gate · Hostel B4"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          73.1162479,
+          26.4723935
+        ]
+      },
+      "centroid": {
+        "lat": 26.4723935,
+        "lng": 73.1162479
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "osm_id": "12980144648",
+        "name": "Hostel G3 Gate",
+        "category": "gate",
+        "source": "osm",
+        "description": "Entry gate · Hostel G3"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          73.1172199,
+          26.4733416
+        ]
+      },
+      "centroid": {
+        "lat": 26.4733416,
+        "lng": 73.1172199
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "osm_id": "12980144652",
+        "name": "Hostel G6 Gate",
+        "category": "gate",
+        "source": "osm",
+        "description": "Entry gate · Hostel G6"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          73.1155144,
+          26.4733978
+        ]
+      },
+      "centroid": {
+        "lat": 26.4733978,
+        "lng": 73.1155144
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "osm_id": "12980144654",
+        "name": "Hostel G2 Gate",
+        "category": "gate",
+        "source": "osm",
+        "description": "Entry gate · Hostel G2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          73.1164229,
+          26.4734278
+        ]
+      },
+      "centroid": {
+        "lat": 26.4734278,
+        "lng": 73.1164229
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "osm_id": "12980144655",
+        "name": "Hostel G1 Gate",
+        "category": "gate",
+        "source": "osm",
+        "description": "Entry gate · Hostel G1"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          73.1155989,
+          26.4734938
+        ]
+      },
+      "centroid": {
+        "lat": 26.4734938,
+        "lng": 73.1155989
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "osm_id": "12980144870",
+        "name": "Hostel Y4 Gate",
+        "category": "gate",
+        "source": "osm",
+        "description": "Entry gate · Hostel Y4"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          73.1169261,
+          26.4741948
+        ]
+      },
+      "centroid": {
+        "lat": 26.4741948,
+        "lng": 73.1169261
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "osm_id": "12980144872",
+        "name": "Hostel Y3 Gate",
+        "category": "gate",
+        "source": "osm",
+        "description": "Entry gate · Hostel Y3"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          73.1170959,
+          26.4742427
+        ]
+      },
+      "centroid": {
+        "lat": 26.4742427,
+        "lng": 73.1170959
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "osm_id": "12981437709",
+        "name": "Hostel G5 Gate",
+        "category": "gate",
+        "source": "osm",
+        "description": "Entry gate · Hostel G5"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          73.1163995,
+          26.4733145
+        ]
+      },
+      "centroid": {
+        "lat": 26.4733145,
+        "lng": 73.1163995
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "osm_id": "12981437711",
+        "name": "Hostel G4 Gate",
+        "category": "gate",
+        "source": "osm",
+        "description": "Entry gate · Hostel G4"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          73.1170384,
+          26.4732575
+        ]
+      },
+      "centroid": {
+        "lat": 26.4732575,
+        "lng": 73.1170384
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "osm_id": "13878739744",
+        "name": "Aakash Sports Complex Gate",
+        "category": "gate",
+        "source": "osm",
+        "description": "Entry to Akaash Sports Complex"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          73.1194166,
+          26.4764512
+        ]
+      },
+      "centroid": {
+        "lat": 26.4764512,
+        "lng": 73.1194166
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "osm_id": "13878739753",
+        "name": "E-18 — Art Club",
+        "category": "recreation",
+        "source": "osm",
+        "description": "Art club"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          73.1179784,
+          26.4746446
+        ]
+      },
+      "centroid": {
+        "lat": 26.4746446,
+        "lng": 73.1179784
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "osm_id": "13878739754",
+        "name": "E-14 — Anand Rathi Tinkering Lab",
+        "category": "academic",
+        "source": "osm",
+        "description": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          73.117866,
+          26.4734192
+        ]
+      },
+      "centroid": {
+        "lat": 26.4734192,
+        "lng": 73.117866
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "osm_id": "13878739755",
+        "name": "E-15 — Chess Club",
+        "category": "recreation",
+        "source": "osm",
+        "description": "Sport club"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          73.1178976,
+          26.4736816
+        ]
+      },
+      "centroid": {
+        "lat": 26.4736816,
+        "lng": 73.1178976
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "osm_id": "13878739756",
+        "name": "E-16 — Anand Rathi Tinkering Lab",
+        "category": "academic",
+        "source": "osm",
+        "description": "Anand Rathi Tinkering lab"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          73.1179292,
+          26.4739314
+        ]
+      },
+      "centroid": {
+        "lat": 26.4739314,
+        "lng": 73.1179292
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "osm_id": "13878739757",
+        "name": "E-17 — Culture Club",
+        "category": "recreation",
+        "source": "osm",
+        "description": "Culture club"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          73.1179467,
+          26.4743178
+        ]
+      },
+      "centroid": {
+        "lat": 26.4743178,
+        "lng": 73.1179467
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "osm_id": "13878739774",
+        "name": "W-28",
+        "category": "other",
+        "source": "osm",
+        "description": "Institute store"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          73.1122407,
+          26.4777931
+        ]
+      },
+      "centroid": {
+        "lat": 26.4777931,
+        "lng": 73.1122407
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "osm_id": "13878739775",
+        "name": "W-27",
+        "category": "other",
+        "source": "osm",
+        "description": "Institute store"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          73.1120838,
+          26.4776482
+        ]
+      },
+      "centroid": {
+        "lat": 26.4776482,
+        "lng": 73.1120838
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "osm_id": "13878739776",
+        "name": "W-26",
+        "category": "other",
+        "source": "osm",
+        "description": "Institute store"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          73.1118478,
+          26.4774148
+        ]
+      },
+      "centroid": {
+        "lat": 26.4774148,
+        "lng": 73.1118478
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "osm_id": "13878739777",
+        "name": "W-25",
+        "category": "other",
+        "source": "osm",
+        "description": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          73.1113094,
+          26.4768672
+        ]
+      },
+      "centroid": {
+        "lat": 26.4768672,
+        "lng": 73.1113094
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "osm_id": "13878739778",
+        "name": "W-24",
+        "category": "other",
+        "source": "osm",
+        "description": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          73.1111476,
+          26.4766884
+        ]
+      },
+      "centroid": {
+        "lat": 26.4766884,
+        "lng": 73.1111476
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "osm_id": "13878739779",
+        "name": "W-23",
+        "category": "other",
+        "source": "osm",
+        "description": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          73.1110001,
+          26.4765252
+        ]
+      },
+      "centroid": {
+        "lat": 26.4765252,
+        "lng": 73.1110001
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "osm_id": "13885088516",
+        "name": "Hostel O4 Gate",
+        "category": "gate",
+        "source": "osm",
+        "description": "Entry gate · Hostel O4"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          73.1171937,
+          26.4751209
+        ]
+      },
+      "centroid": {
+        "lat": 26.4751209,
+        "lng": 73.1171937
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "osm_id": "13885088517",
+        "name": "Hostel O3 Gate",
+        "category": "gate",
+        "source": "osm",
+        "description": "Entry gate · Hostel O3"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          73.1173121,
+          26.4752205
+        ]
+      },
+      "centroid": {
+        "lat": 26.4752205,
+        "lng": 73.1173121
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "osm_id": "1412504064",
+        "name": "Baap of Rolls",
+        "category": "dining",
+        "source": "osm",
+        "building_type": "yes",
+        "amenity": "cafe",
+        "levels": null
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              73.1142346,
+              26.4769253
+            ],
+            [
+              73.114304,
+              26.4769026
+            ],
+            [
+              73.1142897,
+              26.4768642
+            ],
+            [
+              73.114217,
+              26.4768874
+            ],
+            [
+              73.1142346,
+              26.4769253
+            ]
+          ]
+        ]
+      },
+      "centroid": {
+        "lat": 26.476900960000002,
+        "lng": 73.11425598000001
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "osm_id": "1412504065",
+        "name": "Amritsari Kulcha",
+        "category": "dining",
+        "source": "osm",
+        "building_type": "yes",
+        "amenity": "cafe",
+        "levels": null
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              73.1141553,
+              26.4768227
+            ],
+            [
+              73.1142681,
+              26.4767914
+            ],
+            [
+              73.1142517,
+              26.4767501
+            ],
+            [
+              73.1141355,
+              26.4767824
+            ],
+            [
+              73.1141553,
+              26.4768227
+            ]
+          ]
+        ]
+      },
+      "centroid": {
+        "lat": 26.476793859999997,
+        "lng": 73.11419318
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "osm_id": "1412504066",
+        "name": "Tealogy",
+        "category": "dining",
+        "source": "osm",
+        "building_type": "yes",
+        "amenity": "cafe",
+        "levels": null
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              73.1141401,
+              26.4767282
+            ],
+            [
+              73.1142414,
+              26.4766962
+            ],
+            [
+              73.1142297,
+              26.4766594
+            ],
+            [
+              73.1141199,
+              26.4766888
+            ],
+            [
+              73.1141401,
+              26.4767282
+            ]
+          ]
+        ]
+      },
+      "centroid": {
+        "lat": 26.47670016,
+        "lng": 73.11417424
+      }
     }
   ]
 }
