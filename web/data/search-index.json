@@ -932,24 +932,6 @@
     "is_proposed": false
   },
   {
-    "id": "curated_3",
-    "name": "ATM (SBI)",
-    "category": "bank",
-    "description": "SBI ATM near academic area",
-    "keywords": [
-      "atm",
-      "cash",
-      "money",
-      "bank",
-      "withdraw",
-      "sbi"
-    ],
-    "lat": 26.4718,
-    "lng": 73.1133,
-    "source": "curated",
-    "is_proposed": false
-  },
-  {
     "id": "curated_5",
     "name": "Bus Stop (Main Gate)",
     "category": "transport",
