@@ -90,12 +90,13 @@ const Landmarks3D = (() => {
   function buildLibraryComplex() {
     const g = new THREE.Group();
 
-    // Footprint matches OSM polygon (~35m × ~48m). The mesh is built with
-    // its long axis along local X; the landmark's `bearingOffset` rotates
-    // it so that axis aligns with the polygon's actual N-S orientation.
-    const BODY_W  = 46;          // long axis — fits inside the 48 m polygon span with margin
-    const BODY_D  = 28;          // short axis — colonnade adds ~5 m more, fitting under 35 m span
-    const BODY_H  = 18;          // sandstone main mass height
+    // Footprint matches OSM polygon (~35m × ~48m). Mesh built long-axis-X;
+    // landmark's `bearingOffset` rotates it onto the polygon's real N-S.
+    // Total long-axis extent = BODY_W + tower overhang (~5.5 m), so we
+    // size BODY_W conservatively to keep the model inside the 48 m polygon.
+    const BODY_W  = 38;
+    const BODY_D  = 26;          // colonnade adds ~5 m, total still under 35 m
+    const BODY_H  = 18;
 
     // ── Main body ──────────────────────────────────────────────────
     const body = new THREE.Mesh(new THREE.BoxGeometry(BODY_W, BODY_H, BODY_D), MAT.sandstone);
@@ -322,14 +323,18 @@ const Landmarks3D = (() => {
       render(gl, matrix) {
         const mc = maplibregl.MercatorCoordinate.fromLngLat([cfg.lng, cfg.lat], 0);
         const metersToMerc = mc.meterInMercatorCoordinateUnits();
+        // Y-up → Z-up correction (must come BEFORE bearing rotation in the
+        // multiply chain, so it's applied FIRST to vertices and bearing
+        // then rotates around the world's vertical axis instead of around
+        // a horizontal axis in mesh-local space).
         const rotX = new THREE.Matrix4().makeRotationAxis(new THREE.Vector3(1, 0, 0), cfg.rotateMeshToUp);
         const rotZ = new THREE.Matrix4().makeRotationAxis(new THREE.Vector3(0, 0, 1), cfg.bearingOffset);
         const m = new THREE.Matrix4().fromArray(matrix);
         const l = new THREE.Matrix4()
           .makeTranslation(mc.x, mc.y, mc.z)
           .scale(new THREE.Vector3(metersToMerc, -metersToMerc, metersToMerc))
-          .multiply(rotX)
-          .multiply(rotZ);
+          .multiply(rotZ)   // applied SECOND to vertex (rotate around world Z = vertical)
+          .multiply(rotX);  // applied FIRST  to vertex (Y-up → Z-up)
         this.camera.projectionMatrix = m.multiply(l);
         this.renderer.resetState();
         this.renderer.render(this.scene, this.camera);
