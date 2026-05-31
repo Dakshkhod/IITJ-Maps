@@ -116,9 +116,11 @@ const Landmarks3D = (() => {
   function buildLibraryComplex() {
     const g = new THREE.Group();
 
-    // Footprint matches OSM polygon (~35m × ~48m); long axis along X.
-    const BODY_W  = 48;          // X — long axis (E-W after bearing rotation)
-    const BODY_D  = 32;          // Z — short axis
+    // Footprint matches OSM polygon (~35m × ~48m). The mesh is built with
+    // its long axis along local X; the landmark's `bearingOffset` rotates
+    // it so that axis aligns with the polygon's actual N-S orientation.
+    const BODY_W  = 46;          // long axis — fits inside the 48 m polygon span with margin
+    const BODY_D  = 28;          // short axis — colonnade adds ~5 m more, fitting under 35 m span
     const BODY_H  = 18;          // sandstone main mass height
 
     // ── Main body ──────────────────────────────────────────────────
@@ -266,7 +268,10 @@ const Landmarks3D = (() => {
       // null → use the builder's native metre-scale (no auto-fit)
       heightMeters: null,
       rotateMeshToUp: Y_UP_TO_Z_UP,
-      bearingOffset: 0,
+      // Rotate the mesh's long axis (X) onto the polygon's N-S long axis.
+      // Colonnade faces +Z in mesh space → after this rotation it faces
+      // East on the map; clock tower at −X ends up at the South.
+      bearingOffset: -Math.PI / 2,
       replacesOsmBuildings: ['773563507'],
     },
   ];

@@ -805,12 +805,16 @@ function addBuildingsLayer(data) {
     }
   });
 
-  // Name labels at high zoom
+  // Name labels at high zoom — hide labels for buildings replaced by a 3D
+  // landmark so the text doesn't float underneath the model.
+  const labelsFilter = replacedIds.length
+    ? ['all', polyFilter, ['!=', ['get', 'name'], ''], ['!', ['in', ['get', 'osm_id'], ['literal', replacedIds]]]]
+    : ['all', polyFilter, ['!=', ['get', 'name'], '']];
   map.addLayer({
     id: 'buildings-labels',
     type: 'symbol',
     source: 'buildings',
-    filter: ['all', polyFilter, ['!=', ['get', 'name'], '']],
+    filter: labelsFilter,
     minzoom: 16,
     layout: {
       'text-field': ['get', 'name'],
