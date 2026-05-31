@@ -42,25 +42,27 @@ const Landmarks3D = (() => {
   // The sculpture itself sits on top via its own landmark + yOffsetMeters.
   function buildBrainTreeBase() {
     const g = new THREE.Group();
-    // Outer→inner: radius, thickness (height), material
+    // Outer → inner. Each tier is one full circular step that can be
+    // climbed from ANY direction — the structure itself is the staircase,
+    // radially symmetric like an amphitheatre.
     const tiers = [
-      { r: 30, h: 0.25, m: MAT.grass   },   // grass apron at ground
-      { r: 24, h: 0.55, m: MAT.pebble  },   // white pebble ring
-      { r: 18, h: 1.00, m: MAT.saffron },   // saffron ring
-      { r: 12, h: 1.40, m: MAT.sandTop },   // tan inner platform
+      { r: 44, h: 0.20, m: MAT.grass   },   // grass apron fills the roundabout
+      { r: 36, h: 0.45, m: MAT.pebble  },   // white pebble ring
+      { r: 28, h: 0.55, m: MAT.saffron },   // saffron ring
+      { r: 20, h: 0.65, m: MAT.sandTop },   // tan inner platform
     ];
 
     let topY = 0;
-    tiers.forEach((t, i) => {
+    tiers.forEach((t) => {
       const cyl = new THREE.Mesh(
-        new THREE.CylinderGeometry(t.r, t.r, t.h, 64),
+        new THREE.CylinderGeometry(t.r, t.r, t.h, 96),
         t.m,
       );
       cyl.position.y = topY + t.h / 2;
       g.add(cyl);
-      // Brick edge ring around the rim of every tier (it shows in the photo)
+      // Brick edge ring around the rim of every tier (matches the photo)
       const ring = new THREE.Mesh(
-        new THREE.TorusGeometry(t.r - 0.05, 0.18, 8, 64),
+        new THREE.TorusGeometry(t.r - 0.05, 0.16, 8, 96),
         MAT.brick,
       );
       ring.position.y = topY + t.h;
@@ -73,39 +75,11 @@ const Landmarks3D = (() => {
     const PED_R = 4.0;
     const PED_H = 0.8;
     const pedestal = new THREE.Mesh(
-      new THREE.CylinderGeometry(PED_R, PED_R + 0.5, PED_H, 32),
+      new THREE.CylinderGeometry(PED_R, PED_R + 0.5, PED_H, 48),
       MAT.brick,
     );
     pedestal.position.y = topY + PED_H / 2;
     g.add(pedestal);
-    topY += PED_H;
-
-    // ── Staircase wedge on the +Z side, climbing from grass to tan ────
-    const STAIR_COUNT  = 10;
-    const STAIR_WIDTH  = 6;                          // arc width
-    const STAIR_OUT_R  = tiers[0].r;                 // outer = grass edge
-    const STAIR_IN_R   = tiers[tiers.length - 1].r;  // inner = tan tier edge
-    const stepDepth    = (STAIR_OUT_R - STAIR_IN_R) / STAIR_COUNT;
-    const totalRise    = tiers.reduce((s, t) => s + t.h, 0);  // up to tan tier top
-    const stepRise     = totalRise / STAIR_COUNT;
-    for (let i = 0; i < STAIR_COUNT; i++) {
-      // Step i sits between outer-i and outer-(i+1), at rising height
-      const r = STAIR_OUT_R - (i + 0.5) * stepDepth;
-      const stepTopY = (i + 1) * stepRise;
-      const step = new THREE.Mesh(
-        new THREE.BoxGeometry(STAIR_WIDTH, stepTopY, stepDepth + 0.05),
-        MAT.sandTop,
-      );
-      step.position.set(0, stepTopY / 2, r);
-      g.add(step);
-    }
-    // Brick edge band along the front of the staircase (top step)
-    const stairBrick = new THREE.Mesh(
-      new THREE.BoxGeometry(STAIR_WIDTH + 0.3, 0.15, 0.4),
-      MAT.brick,
-    );
-    stairBrick.position.set(0, totalRise + 0.05, STAIR_IN_R);
-    g.add(stairBrick);
 
     return g;
   }
@@ -236,7 +210,7 @@ const Landmarks3D = (() => {
   // ── Landmark registry ───────────────────────────────────────────────────
   // Height of the tiered base that the Brain Tree sits on top of.
   // Sum of all tier thicknesses + pedestal in buildBrainTreeBase().
-  const BRAIN_TREE_BASE_TOP_Y = 0.25 + 0.55 + 1.00 + 1.40 + 0.8;
+  const BRAIN_TREE_BASE_TOP_Y = 0.20 + 0.45 + 0.55 + 0.65 + 0.8;  // 2.65 m
 
   const LANDMARKS = [
     {
@@ -314,18 +288,19 @@ const Landmarks3D = (() => {
               }
             });
           }
-          // Centre horizontally, then auto-fit to heightMeters if given
-          // (procedural builds keep their native metre scale by passing null).
+          // Auto-fit to heightMeters first (procedural builds pass null to
+          // keep their native metre scale).
           const bbox = new THREE.Box3().setFromObject(root);
           const size = new THREE.Vector3();   bbox.getSize(size);
           const center = new THREE.Vector3(); bbox.getCenter(center);
-          root.position.set(-center.x, -bbox.min.y, -center.z);
-          if (cfg.heightMeters && size.y > 0) {
-            const s = cfg.heightMeters / size.y;
-            root.scale.set(s, s, s);
-          }
-          // Lift above ground (used to stack a landmark on top of another,
-          // e.g. the Brain Tree sculpture on top of its tiered base)
+          const s = (cfg.heightMeters && size.y > 0) ? cfg.heightMeters / size.y : 1;
+          if (s !== 1) root.scale.set(s, s, s);
+          // Position is in WORLD units, so scale the (model-space) bbox
+          // offsets by `s` before applying them — otherwise scaling the
+          // mesh up sinks its base below y=0.
+          root.position.set(-center.x * s, -bbox.min.y * s, -center.z * s);
+          // Optional lift for stacking landmarks (e.g. Brain Tree on its
+          // tiered base).
           if (cfg.yOffsetMeters) root.position.y += cfg.yOffsetMeters;
           this.group.add(root);
         };
