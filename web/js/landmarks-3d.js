@@ -247,10 +247,11 @@ const Landmarks3D = (() => {
       // null → use the builder's native metre-scale (no auto-fit)
       heightMeters: null,
       rotateMeshToUp: Y_UP_TO_Z_UP,
-      // OSM polygon's longest edge runs E-W (bearing 90.6°). Align the
-      // mesh's long axis (X) onto that edge and rotate so the colonnade
-      // (+Z face) ends up facing south — toward Office of Students.
-      bearingOffset: Math.PI,
+      // Long axis E-W (matching the polygon's 35.5 m main edge). Flipped
+      // 180° so the clock tower sits at the WEST end (matching the small
+      // rectangle in the Google Maps layout) and the colonnade faces
+      // SOUTH toward Office of Students / Office of Administration.
+      bearingOffset: 0,
       replacesOsmBuildings: ['773563507'],
     },
   ];
