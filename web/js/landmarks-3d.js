@@ -116,9 +116,15 @@ const Landmarks3D = (() => {
     hallCornice.position.set(HALL_CX, H + 0.5, -HALL_CN);
     g.add(hallCornice);
 
-    // South wing — narrower rectangle running south
-    const WING_W = 19, WING_D = 27;
-    const WING_CX = 3, WING_CN = -14.5;
+    // South wing — narrower rectangle running south. Extend its north edge
+    // up INTO the hall so the two blocks merge into one continuous mass
+    // (no visible seam between hall and wing). Hall south edge is at
+    // polygon-Y ≈ 7.5; wing's new north edge reaches Y ≈ 9, overlapping
+    // by ~1.5 m so the geometry welds together.
+    const WING_W = 19;
+    const WING_D = 38;                        // was 27, +11 m northward
+    const WING_CX = 3;
+    const WING_CN = -10;                      // was -14.5, shifted north
     const wing = new THREE.Mesh(new THREE.BoxGeometry(WING_W, H, WING_D), MAT.sandstone);
     wing.position.set(WING_CX, H / 2, -WING_CN);
     g.add(wing);
@@ -248,8 +254,9 @@ const Landmarks3D = (() => {
       id: 'library-3d',
       format: 'procedural',
       build: buildLibraryComplex,
-      // True OSM polygon centroid (mean of all 14 vertices)
-      lng: 73.1134681, lat: 26.4715806,
+      // True OSM polygon centroid (26.4715806, 73.1134681) shifted ~3 m
+      // west so the wing's east edge clears the road on that side.
+      lng: 73.1134379, lat: 26.4715806,
       heightMeters: null,                       // builder is already in metres
       rotateMeshToUp: Y_UP_TO_Z_UP,
       // Mesh is built in polygon-local coords with +X = east and −Z = north
