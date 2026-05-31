@@ -781,11 +781,20 @@ function addBuildingsLayer(data) {
     }
   });
 
+  // Buildings replaced by a detailed 3D model (Library etc.) — hide their
+  // plain extrusion so the GLB sits cleanly on the ground instead of poking
+  // through a featureless white box.
+  const replacedIds = (typeof Landmarks3D !== 'undefined' && Landmarks3D.replacedBuildingIds)
+    ? Landmarks3D.replacedBuildingIds() : [];
+  const extrusionFilter = replacedIds.length
+    ? ['all', polyFilter, ['!', ['in', ['get', 'osm_id'], ['literal', replacedIds]]]]
+    : polyFilter;
+
   map.addLayer({
     id: 'buildings-3d',
     type: 'fill-extrusion',
     source: 'buildings',
-    filter: polyFilter,
+    filter: extrusionFilter,
     layout: { visibility: (LAYERS.buildings && is3D && !isSatellite) ? 'visible' : 'none' },
     paint: {
       'fill-extrusion-color': buildingFillColor(),

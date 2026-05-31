@@ -27,22 +27,26 @@ const Landmarks3D = (() => {
       bearingOffset: 0,
     },
     {
+      // OSM library polygon centroid — replaces the plain extrusion in
+      // buildings-3d via the SUPPRESS_BUILDING_3D_IDS filter below.
       id: 'library-3d',
       file: 'assets/models/library.glb',
       format: 'gltf',
-      lng: 73.1134931, lat: 26.4715422,
-      heightMeters: 22,            // main library mass without the tower
+      lng: 73.1134521, lat: 26.4715926,
+      heightMeters: 22,
       material: MATERIAL_SANDSTONE,
       rotateMeshToUp: Y_UP_TO_Z_UP,
       bearingOffset: 0,
+      // OSM building polygons this model replaces (hide their extrusion)
+      replacesOsmBuildings: ['773563507'],
     },
     {
+      // Clock tower sits at the WSW corner of the library complex
       id: 'clock-tower-3d',
       file: 'assets/models/clock-tower.glb',
       format: 'gltf',
-      // Clock tower sits on the western corner of the library footprint
-      lng: 73.1133581, lat: 26.4715872,
-      heightMeters: 38,            // tower is the tallest piece of the complex
+      lng: 73.1133171, lat: 26.4716376,
+      heightMeters: 38,
       material: MATERIAL_SANDSTONE,
       rotateMeshToUp: Y_UP_TO_Z_UP,
       bearingOffset: 0,
@@ -170,5 +174,16 @@ const Landmarks3D = (() => {
   function isVisible() { return _visible; }
   function listIds() { return LANDMARKS.map(l => l.id); }
 
-  return { init, show, hide, isVisible, listIds };
+  // OSM building IDs that should be hidden in buildings-3d because a
+  // detailed GLB landmark replaces them (so the plain white extrusion
+  // doesn't poke out underneath the model).
+  function replacedBuildingIds() {
+    const ids = [];
+    for (const l of LANDMARKS) {
+      if (Array.isArray(l.replacesOsmBuildings)) ids.push(...l.replacesOsmBuildings);
+    }
+    return ids;
+  }
+
+  return { init, show, hide, isVisible, listIds, replacedBuildingIds };
 })();
