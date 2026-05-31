@@ -5438,27 +5438,6 @@
     {
       "type": "Feature",
       "properties": {
-        "name": "Dining hall 2",
-        "source": "kml",
-        "category": "dining",
-        "is_proposed": false,
-        "description": "Dining hall 2"
-      },
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          73.11737822760072,
-          26.4745341244339
-        ]
-      },
-      "centroid": {
-        "lat": 26.4745341244339,
-        "lng": 73.11737822760072
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
         "name": "Proposed Hostel",
         "source": "kml",
         "category": "hostel",

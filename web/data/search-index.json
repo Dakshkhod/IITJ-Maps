@@ -770,17 +770,6 @@
     "is_proposed": true
   },
   {
-    "id": "Dining hall 2",
-    "name": "Dining hall 2",
-    "category": "dining",
-    "description": "Dining hall 2",
-    "keywords": [],
-    "lat": 26.4745341244339,
-    "lng": 73.11737822760072,
-    "source": "kml",
-    "is_proposed": false
-  },
-  {
     "id": "Proposed Dining Hall D-5",
     "name": "Proposed Dining Hall D-5",
     "category": "dining",
