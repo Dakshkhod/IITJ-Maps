@@ -18,14 +18,97 @@ const Landmarks3D = (() => {
   // Materials used across procedural builds (and as a fallback uniform
   // material for OBJ / GLB meshes that have no embedded materials).
   const MAT = {
-    bronze:    new THREE.MeshStandardMaterial({ color: 0xc59a6b, metalness: 0.85, roughness: 0.32, side: THREE.DoubleSide }),
+    // Polished gold — lower metalness so the diffuse colour reads on the
+    // map without a fancy environment map (pure metal needs reflections)
+    gold:      new THREE.MeshStandardMaterial({ color: 0xe2c073, metalness: 0.45, roughness: 0.45, side: THREE.DoubleSide }),
     sandstone: new THREE.MeshStandardMaterial({ color: 0xb89a78, metalness: 0.05, roughness: 0.85 }),
     sandDark:  new THREE.MeshStandardMaterial({ color: 0x8d6e4f, metalness: 0.05, roughness: 0.9 }),
     column:    new THREE.MeshStandardMaterial({ color: 0xece1cd, metalness: 0.04, roughness: 0.65 }),
     entrance:  new THREE.MeshStandardMaterial({ color: 0x2c2018, metalness: 0.20, roughness: 0.55 }),
     clockFace: new THREE.MeshStandardMaterial({ color: 0xf6f0e1, metalness: 0.10, roughness: 0.45 }),
     clockHand: new THREE.MeshStandardMaterial({ color: 0x1c1c1c, metalness: 0.30, roughness: 0.55 }),
+    // Indian tricolor concentric platform under the Brain Tree
+    grass:     new THREE.MeshStandardMaterial({ color: 0x4f8b3d, metalness: 0.02, roughness: 0.95 }),
+    pebble:    new THREE.MeshStandardMaterial({ color: 0xeae3d2, metalness: 0.03, roughness: 0.88 }),
+    saffron:   new THREE.MeshStandardMaterial({ color: 0xff9a3c, metalness: 0.05, roughness: 0.80 }),
+    sandTop:   new THREE.MeshStandardMaterial({ color: 0xc7a679, metalness: 0.05, roughness: 0.85 }),
+    brick:     new THREE.MeshStandardMaterial({ color: 0xa86a45, metalness: 0.05, roughness: 0.85 }),
   };
+
+  // ── Procedural builder: Brain Tree tiered platform + stairs ───────────
+  // Concentric ring tiers (green → white → saffron → tan) mirroring the
+  // Indian-tricolor garden the sculpture stands on, with one staircase
+  // wedge cutting from the outer ground up to the central pedestal.
+  // The sculpture itself sits on top via its own landmark + yOffsetMeters.
+  function buildBrainTreeBase() {
+    const g = new THREE.Group();
+    // Outer→inner: radius, thickness (height), material
+    const tiers = [
+      { r: 30, h: 0.25, m: MAT.grass   },   // grass apron at ground
+      { r: 24, h: 0.55, m: MAT.pebble  },   // white pebble ring
+      { r: 18, h: 1.00, m: MAT.saffron },   // saffron ring
+      { r: 12, h: 1.40, m: MAT.sandTop },   // tan inner platform
+    ];
+
+    let topY = 0;
+    tiers.forEach((t, i) => {
+      const cyl = new THREE.Mesh(
+        new THREE.CylinderGeometry(t.r, t.r, t.h, 64),
+        t.m,
+      );
+      cyl.position.y = topY + t.h / 2;
+      g.add(cyl);
+      // Brick edge ring around the rim of every tier (it shows in the photo)
+      const ring = new THREE.Mesh(
+        new THREE.TorusGeometry(t.r - 0.05, 0.18, 8, 64),
+        MAT.brick,
+      );
+      ring.position.y = topY + t.h;
+      ring.rotation.x = Math.PI / 2;
+      g.add(ring);
+      topY += t.h;
+    });
+
+    // Central pedestal that lifts the sculpture above the tan tier
+    const PED_R = 4.0;
+    const PED_H = 0.8;
+    const pedestal = new THREE.Mesh(
+      new THREE.CylinderGeometry(PED_R, PED_R + 0.5, PED_H, 32),
+      MAT.brick,
+    );
+    pedestal.position.y = topY + PED_H / 2;
+    g.add(pedestal);
+    topY += PED_H;
+
+    // ── Staircase wedge on the +Z side, climbing from grass to tan ────
+    const STAIR_COUNT  = 10;
+    const STAIR_WIDTH  = 6;                          // arc width
+    const STAIR_OUT_R  = tiers[0].r;                 // outer = grass edge
+    const STAIR_IN_R   = tiers[tiers.length - 1].r;  // inner = tan tier edge
+    const stepDepth    = (STAIR_OUT_R - STAIR_IN_R) / STAIR_COUNT;
+    const totalRise    = tiers.reduce((s, t) => s + t.h, 0);  // up to tan tier top
+    const stepRise     = totalRise / STAIR_COUNT;
+    for (let i = 0; i < STAIR_COUNT; i++) {
+      // Step i sits between outer-i and outer-(i+1), at rising height
+      const r = STAIR_OUT_R - (i + 0.5) * stepDepth;
+      const stepTopY = (i + 1) * stepRise;
+      const step = new THREE.Mesh(
+        new THREE.BoxGeometry(STAIR_WIDTH, stepTopY, stepDepth + 0.05),
+        MAT.sandTop,
+      );
+      step.position.set(0, stepTopY / 2, r);
+      g.add(step);
+    }
+    // Brick edge band along the front of the staircase (top step)
+    const stairBrick = new THREE.Mesh(
+      new THREE.BoxGeometry(STAIR_WIDTH + 0.3, 0.15, 0.4),
+      MAT.brick,
+    );
+    stairBrick.position.set(0, totalRise + 0.05, STAIR_IN_R);
+    g.add(stairBrick);
+
+    return g;
+  }
 
   // ── Procedural builder: SR Ranganathan Learning Hub + Clock Tower ──────
   // All units are metres. The group's local Y is up; the parent layer will
@@ -149,14 +232,28 @@ const Landmarks3D = (() => {
   }
 
   // ── Landmark registry ───────────────────────────────────────────────────
+  // Height of the tiered base that the Brain Tree sits on top of.
+  // Sum of all tier thicknesses + pedestal in buildBrainTreeBase().
+  const BRAIN_TREE_BASE_TOP_Y = 0.25 + 0.55 + 1.00 + 1.40 + 0.8;
+
   const LANDMARKS = [
+    {
+      id: 'brain-tree-base-3d',
+      format: 'procedural',
+      build: buildBrainTreeBase,
+      lng: 73.1141831, lat: 26.4692822,
+      heightMeters: null,
+      rotateMeshToUp: Y_UP_TO_Z_UP,
+      bearingOffset: 0,
+    },
     {
       id: 'brain-tree-3d',
       format: 'obj',
       file: 'assets/models/brain-tree.obj',
       lng: 73.1141831, lat: 26.4692822,
-      heightMeters: 18,
-      material: MAT.bronze,
+      heightMeters: 14,
+      yOffsetMeters: BRAIN_TREE_BASE_TOP_Y,   // lift so it rests on the pedestal
+      material: MAT.gold,
       rotateMeshToUp: Y_UP_TO_Z_UP,
       bearingOffset: 0,
     },
@@ -212,17 +309,19 @@ const Landmarks3D = (() => {
               }
             });
           }
-          // Centre horizontally, rest base on y=0
+          // Centre horizontally, then auto-fit to heightMeters if given
+          // (procedural builds keep their native metre scale by passing null).
           const bbox = new THREE.Box3().setFromObject(root);
           const size = new THREE.Vector3();   bbox.getSize(size);
           const center = new THREE.Vector3(); bbox.getCenter(center);
           root.position.set(-center.x, -bbox.min.y, -center.z);
-          // Auto-fit to heightMeters when one is given; otherwise trust the
-          // builder's native scale (procedural models are already in metres).
           if (cfg.heightMeters && size.y > 0) {
             const s = cfg.heightMeters / size.y;
             root.scale.set(s, s, s);
           }
+          // Lift above ground (used to stack a landmark on top of another,
+          // e.g. the Brain Tree sculpture on top of its tiered base)
+          if (cfg.yOffsetMeters) root.position.y += cfg.yOffsetMeters;
           this.group.add(root);
         };
 
