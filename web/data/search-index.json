@@ -950,22 +950,6 @@
     "is_proposed": false
   },
   {
-    "id": "curated_4",
-    "name": "Post Office",
-    "category": "utility",
-    "description": "Campus post office",
-    "keywords": [
-      "post",
-      "mail",
-      "courier",
-      "letter"
-    ],
-    "lat": 26.4716,
-    "lng": 73.1131,
-    "source": "curated",
-    "is_proposed": false
-  },
-  {
     "id": "curated_5",
     "name": "Bus Stop (Main Gate)",
     "category": "transport",

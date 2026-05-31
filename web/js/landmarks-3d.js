@@ -245,10 +245,10 @@ const Landmarks3D = (() => {
       // null → use the builder's native metre-scale (no auto-fit)
       heightMeters: null,
       rotateMeshToUp: Y_UP_TO_Z_UP,
-      // Rotate the mesh's long axis (X) onto the polygon's N-S long axis.
-      // Colonnade faces +Z in mesh space → after this rotation it faces
-      // East on the map; clock tower at −X ends up at the South.
-      bearingOffset: -Math.PI / 2,
+      // Long axis aligned N-S, but flipped 180° from the previous build so
+      // the colonnade now faces the Office of Administration side and the
+      // clock tower lands at the north end (matches campus layout).
+      bearingOffset: Math.PI / 2,
       replacesOsmBuildings: ['773563507'],
     },
   ];
