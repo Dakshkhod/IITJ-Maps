@@ -44,12 +44,14 @@ const Landmarks3D = (() => {
     const g = new THREE.Group();
     // Outer → inner. Each tier is one full circular step that can be
     // climbed from ANY direction — the structure itself is the staircase,
-    // radially symmetric like an amphitheatre.
+    // radially symmetric like an amphitheatre. Outer radius is kept under
+    // the inner road edge (~35 m from centre per OSM) so the platform
+    // doesn't spill onto the surrounding roundabout asphalt.
     const tiers = [
-      { r: 44, h: 0.20, m: MAT.grass   },   // grass apron fills the roundabout
-      { r: 36, h: 0.45, m: MAT.pebble  },   // white pebble ring
-      { r: 28, h: 0.55, m: MAT.saffron },   // saffron ring
-      { r: 20, h: 0.65, m: MAT.sandTop },   // tan inner platform
+      { r: 32, h: 0.20, m: MAT.grass   },   // grass apron, stops short of road
+      { r: 26, h: 0.45, m: MAT.pebble  },   // white pebble ring
+      { r: 20, h: 0.55, m: MAT.saffron },   // saffron ring
+      { r: 14, h: 0.65, m: MAT.sandTop },   // tan inner platform
     ];
 
     let topY = 0;
