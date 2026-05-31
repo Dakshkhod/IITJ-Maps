@@ -92,71 +92,77 @@ const Landmarks3D = (() => {
   function buildLibraryComplex() {
     const g = new THREE.Group();
 
-    // The OSM polygon's main rectangular hall is ~35.5 m (longest E-W
-    // edge) × ~26 m (N-S). Build the mesh to those dims; the colonnade
-    // adds ~2.6 m on the +Z face and the clock tower adds ~5.5 m on −X.
-    const BODY_W  = 33;          // < 35.5 m main edge with margin
-    const BODY_D  = 22;          // + 2.6 m colonnade ≈ 24.6 m, under 26 m short edge
-    const BODY_H  = 18;
+    // Polygon analysis (from OSM, in metres relative to polygon centroid;
+    // X = east, Y_polygon = north). Two main rectangular blocks plus a
+    // small clock tower on the west side at the junction:
+    //
+    //   NORTH HALL  : x[-22,13]  y[7,18]    → 35 × 11 m wide block
+    //   SOUTH WING  : x[-7,13]   y[-29,0]   → 20 × 29 m long block
+    //   CLOCK TOWER : x[-22,-9]  y[-1,6]    → small footprint, tall tower
+    //
+    // Mesh convention (after MapLibre transform with bearingOffset=0):
+    //   mesh +X = world east,  mesh −Z = world north,  mesh +Z = world south
+    // so we negate polygon-Y when assigning mesh Z.
+    const H = 18;                              // building height
 
-    // ── Main body ──────────────────────────────────────────────────
-    const body = new THREE.Mesh(new THREE.BoxGeometry(BODY_W, BODY_H, BODY_D), MAT.sandstone);
-    body.position.y = BODY_H / 2;
-    g.add(body);
+    // North hall — wide rectangle at the top of the polygon
+    const HALL_W = 34, HALL_D = 10;            // ≤ 35×11 polygon block
+    const HALL_CX = -4.5,  HALL_CN = 12.5;     // polygon X, polygon Y (north)
+    const hall = new THREE.Mesh(new THREE.BoxGeometry(HALL_W, H, HALL_D), MAT.sandstone);
+    hall.position.set(HALL_CX, H / 2, -HALL_CN);
+    g.add(hall);
+    // Hall cornice + parapet
+    const hallCornice = new THREE.Mesh(new THREE.BoxGeometry(HALL_W + 0.8, 1.0, HALL_D + 0.8), MAT.sandDark);
+    hallCornice.position.set(HALL_CX, H + 0.5, -HALL_CN);
+    g.add(hallCornice);
 
-    // Horizontal banding (faint lines just for visual richness)
-    for (const yFrac of [0.33, 0.66]) {
-      const band = new THREE.Mesh(new THREE.BoxGeometry(BODY_W + 0.05, 0.25, BODY_D + 0.05), MAT.sandDark);
-      band.position.y = BODY_H * yFrac;
-      g.add(band);
-    }
+    // South wing — narrower rectangle running south
+    const WING_W = 19, WING_D = 27;
+    const WING_CX = 3, WING_CN = -14.5;
+    const wing = new THREE.Mesh(new THREE.BoxGeometry(WING_W, H, WING_D), MAT.sandstone);
+    wing.position.set(WING_CX, H / 2, -WING_CN);
+    g.add(wing);
+    const wingCornice = new THREE.Mesh(new THREE.BoxGeometry(WING_W + 0.8, 1.0, WING_D + 0.8), MAT.sandDark);
+    wingCornice.position.set(WING_CX, H + 0.5, -WING_CN);
+    g.add(wingCornice);
 
-    // Roof slab + parapet
-    const cornice = new THREE.Mesh(new THREE.BoxGeometry(BODY_W + 1.2, 1.4, BODY_D + 1.2), MAT.sandDark);
-    cornice.position.y = BODY_H + 0.7;
-    g.add(cornice);
-    const parapet = new THREE.Mesh(new THREE.BoxGeometry(BODY_W + 0.6, 1.0, BODY_D + 0.6), MAT.sandstone);
-    parapet.position.y = BODY_H + 1.4 + 0.5;
-    g.add(parapet);
-
-    // ── Colonnade along +Z face (the photogenic front) ─────────────
-    const COL_COUNT   = 9;
-    const COL_R       = 0.55;
-    const COL_H       = BODY_H + 1.4;          // up to entablature
-    const COL_OFFSET  = BODY_D / 2 + 2.6;      // metres in front of body
-    const colSpan     = BODY_W - 4;            // span minus end margins
-    const colStep     = colSpan / (COL_COUNT - 1);
+    // ── Colonnade along the south face of the south wing ──────────
+    // South face of wing is at polygon Y = WING_CN - WING_D/2 = -28,
+    // which in mesh coords is +Z = 28.
+    const SOUTH_FACE_Z   = -(WING_CN - WING_D / 2);    // = 28
+    const COL_OFFSET     = SOUTH_FACE_Z + 2.5;
+    const COL_H          = H + 1.4;
+    const COL_R          = 0.55;
+    const COL_COUNT      = 8;
+    const colSpan        = WING_W - 2;
+    const colStep        = colSpan / (COL_COUNT - 1);
     for (let i = 0; i < COL_COUNT; i++) {
-      const x = -colSpan / 2 + i * colStep;
+      const x = WING_CX - colSpan / 2 + i * colStep;
       const col = new THREE.Mesh(new THREE.CylinderGeometry(COL_R, COL_R, COL_H, 14), MAT.column);
       col.position.set(x, COL_H / 2, COL_OFFSET);
       g.add(col);
     }
-    // Entablature beam across the colonnade
     const entablature = new THREE.Mesh(new THREE.BoxGeometry(colSpan + 2 * COL_R, 1.8, 1.6), MAT.column);
-    entablature.position.set(0, COL_H + 0.9, COL_OFFSET);
+    entablature.position.set(WING_CX, COL_H + 0.9, COL_OFFSET);
     g.add(entablature);
-    // Dark coping above the entablature
-    const coping = new THREE.Mesh(new THREE.BoxGeometry(colSpan + 2 * COL_R + 1, 0.6, 2), MAT.sandDark);
-    coping.position.set(0, COL_H + 2.1, COL_OFFSET);
-    g.add(coping);
 
-    // ── Recessed dark entrance on the front, centred ───────────────
+    // Recessed dark entrance on south face, centred under colonnade
     const entrance = new THREE.Mesh(new THREE.BoxGeometry(5, 6.5, 0.6), MAT.entrance);
-    entrance.position.set(0, 3.25, BODY_D / 2 + 0.3);
+    entrance.position.set(WING_CX, 3.25, SOUTH_FACE_Z + 0.3);
     g.add(entrance);
 
-    // ── Clock tower at the −X end (west) ───────────────────────────
-    // Stepped tiers, each slightly smaller, totalling ~38m
-    const TOWER_X = -BODY_W / 2 - 1.5;     // sit just outside the west wall
-    const TOWER_Z = 0;                     // centred in depth
+    // ── Clock tower on the WEST side at the polygon junction ──────
+    // Polygon position (-15, 5) — sits where the hall meets the wing on
+    // the western edge. Mesh coords: x = -15, z = -5.
+    const TOWER_X = -15;
+    const TOWER_Z = -5;
     const tiers = [
-      { w: 11, d: 11, h: 13 },             // base mass (rises from ground)
-      { w:  9.5, d: 9.5, h: 7 },           // mid
-      { w:  8,   d: 8,   h: 6 },           // clock level
-      { w:  6,   d: 6,   h: 4 },           // belfry
-      { w:  4.5, d: 4.5, h: 3 },           // crown
-      { w:  2.5, d: 2.5, h: 2 },           // finial cap
+      { w:  9, d: 8, h: 16 },                  // base sits on the ground
+      { w:  8, d: 7, h: 6  },
+      { w:  7, d: 6, h: 5  },                  // clock tier
+      { w:  5.5, d: 4.5, h: 4 },
+      { w:  4, d: 3.5, h: 3 },
+      { w:  2.5, d: 2.5, h: 2 },
     ];
     let towerY = 0;
     const clockTierIndex = 2;
@@ -242,15 +248,13 @@ const Landmarks3D = (() => {
       id: 'library-3d',
       format: 'procedural',
       build: buildLibraryComplex,
-      // Anchor on the OSM library polygon centroid
-      lng: 73.1134521, lat: 26.4715926,
-      // null → use the builder's native metre-scale (no auto-fit)
-      heightMeters: null,
+      // True OSM polygon centroid (mean of all 14 vertices)
+      lng: 73.1134681, lat: 26.4715806,
+      heightMeters: null,                       // builder is already in metres
       rotateMeshToUp: Y_UP_TO_Z_UP,
-      // Long axis E-W (matching the polygon's 35.5 m main edge). Flipped
-      // 180° so the clock tower sits at the WEST end (matching the small
-      // rectangle in the Google Maps layout) and the colonnade faces
-      // SOUTH toward Office of Students / Office of Administration.
+      // Mesh is built in polygon-local coords with +X = east and −Z = north
+      // (i.e. polygon-Y negated when placed into mesh Z). With bearingOffset
+      // = 0 the world axes line up directly, no extra rotation needed.
       bearingOffset: 0,
       replacesOsmBuildings: ['773563507'],
     },
