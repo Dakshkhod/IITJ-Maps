@@ -500,8 +500,8 @@
     "category": "hostel",
     "description": "",
     "keywords": [],
-    "lat": 26.474931442857137,
-    "lng": 73.11722862380955,
+    "lat": 26.47496375217391,
+    "lng": 73.1170122173913,
     "source": "osm",
     "is_proposed": false
   },
@@ -1232,8 +1232,8 @@
     "category": "dining",
     "description": "restaurant",
     "keywords": [],
-    "lat": 26.47488,
-    "lng": 73.11772,
+    "lat": 26.474911480000003,
+    "lng": 73.11761558,
     "source": "osm",
     "is_proposed": false
   },
