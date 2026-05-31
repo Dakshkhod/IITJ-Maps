@@ -92,12 +92,11 @@ const Landmarks3D = (() => {
   function buildLibraryComplex() {
     const g = new THREE.Group();
 
-    // Footprint matches OSM polygon (~35m × ~48m). Mesh built long-axis-X;
-    // landmark's `bearingOffset` rotates it onto the polygon's real N-S.
-    // Total long-axis extent = BODY_W + tower overhang (~5.5 m), so we
-    // size BODY_W conservatively to keep the model inside the 48 m polygon.
-    const BODY_W  = 38;
-    const BODY_D  = 26;          // colonnade adds ~5 m, total still under 35 m
+    // The OSM polygon's main rectangular hall is ~35.5 m (longest E-W
+    // edge) × ~26 m (N-S). Build the mesh to those dims; the colonnade
+    // adds ~2.6 m on the +Z face and the clock tower adds ~5.5 m on −X.
+    const BODY_W  = 33;          // < 35.5 m main edge with margin
+    const BODY_D  = 22;          // + 2.6 m colonnade ≈ 24.6 m, under 26 m short edge
     const BODY_H  = 18;
 
     // ── Main body ──────────────────────────────────────────────────
@@ -248,10 +247,10 @@ const Landmarks3D = (() => {
       // null → use the builder's native metre-scale (no auto-fit)
       heightMeters: null,
       rotateMeshToUp: Y_UP_TO_Z_UP,
-      // Long axis aligned N-S, but flipped 180° from the previous build so
-      // the colonnade now faces the Office of Administration side and the
-      // clock tower lands at the north end (matches campus layout).
-      bearingOffset: Math.PI / 2,
+      // OSM polygon's longest edge runs E-W (bearing 90.6°). Align the
+      // mesh's long axis (X) onto that edge and rotate so the colonnade
+      // (+Z face) ends up facing south — toward Office of Students.
+      bearingOffset: Math.PI,
       replacesOsmBuildings: ['773563507'],
     },
   ];
