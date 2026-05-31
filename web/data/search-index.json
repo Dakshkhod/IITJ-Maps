@@ -165,17 +165,6 @@
     "is_proposed": false
   },
   {
-    "id": "773563532",
-    "name": "Guest House (Visitor)",
-    "category": "building",
-    "description": "",
-    "keywords": [],
-    "lat": 26.472923046153845,
-    "lng": 73.11102467692308,
-    "source": "osm",
-    "is_proposed": false
-  },
-  {
     "id": "773587411",
     "name": "Department of Mechanical Engineering",
     "category": "academic",
@@ -792,17 +781,6 @@
     "is_proposed": false
   },
   {
-    "id": "Proposed Visitors Hostel",
-    "name": "Proposed Visitors Hostel",
-    "category": "hostel",
-    "description": "Proposed Visitors Hostel",
-    "keywords": [],
-    "lat": 26.47739653978015,
-    "lng": 73.11277814163205,
-    "source": "kml",
-    "is_proposed": true
-  },
-  {
     "id": "Proposed Dining Hall D-5",
     "name": "Proposed Dining Hall D-5",
     "category": "dining",
@@ -977,22 +955,6 @@
     ],
     "lat": 26.4671,
     "lng": 73.111,
-    "source": "curated",
-    "is_proposed": false
-  },
-  {
-    "id": "curated_9",
-    "name": "Visitor's Hostel",
-    "category": "hostel",
-    "description": "Guest accommodation for campus visitors",
-    "keywords": [
-      "visitor",
-      "guest house",
-      "accommodation",
-      "visitors hostel"
-    ],
-    "lat": 26.4682,
-    "lng": 73.1127,
     "source": "curated",
     "is_proposed": false
   },

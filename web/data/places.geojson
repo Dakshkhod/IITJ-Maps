@@ -1427,81 +1427,6 @@
     {
       "type": "Feature",
       "properties": {
-        "osm_id": "773563532",
-        "name": "Guest House (Visitor)",
-        "category": "building",
-        "source": "osm",
-        "building_type": "yes",
-        "amenity": null,
-        "levels": null
-      },
-      "geometry": {
-        "type": "Polygon",
-        "coordinates": [
-          [
-            [
-              73.1107981,
-              26.473023
-            ],
-            [
-              73.1112702,
-              26.4730134
-            ],
-            [
-              73.1112782,
-              26.4729365
-            ],
-            [
-              73.111171,
-              26.4729389
-            ],
-            [
-              73.111171,
-              26.4728957
-            ],
-            [
-              73.111289,
-              26.4728909
-            ],
-            [
-              73.1112997,
-              26.4728093
-            ],
-            [
-              73.1107981,
-              26.4728165
-            ],
-            [
-              73.1107955,
-              26.4728813
-            ],
-            [
-              73.1109242,
-              26.4728861
-            ],
-            [
-              73.1109296,
-              26.4729413
-            ],
-            [
-              73.1107981,
-              26.4729437
-            ],
-            [
-              73.1107981,
-              26.473023
-            ]
-          ]
-        ]
-      },
-      "centroid": {
-        "lat": 26.472923046153845,
-        "lng": 73.11102467692308
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
         "osm_id": "773587411",
         "name": "Department of Mechanical Engineering",
         "category": "academic",
@@ -5567,47 +5492,6 @@
     {
       "type": "Feature",
       "properties": {
-        "name": "Proposed Visitors Hostel",
-        "source": "kml",
-        "category": "hostel",
-        "is_proposed": true,
-        "description": "Proposed Visitors Hostel"
-      },
-      "geometry": {
-        "type": "Polygon",
-        "coordinates": [
-          [
-            [
-              73.11235224317143,
-              26.47740423355538
-            ],
-            [
-              73.11334983943074,
-              26.47721957783595
-            ],
-            [
-              73.11341000327965,
-              26.47737985672088
-            ],
-            [
-              73.11242637910702,
-              26.47757479723315
-            ],
-            [
-              73.11235224317143,
-              26.47740423355538
-            ]
-          ]
-        ]
-      },
-      "centroid": {
-        "lat": 26.47739653978015,
-        "lng": 73.11277814163205
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
         "name": "Proposed Dining Hall D-5",
         "source": "kml",
         "category": "dining",
@@ -6177,33 +6061,6 @@
       "centroid": {
         "lat": 26.4671,
         "lng": 73.111
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
-        "id": "curated_9",
-        "name": "Visitor's Hostel",
-        "category": "hostel",
-        "description": "Guest accommodation for campus visitors",
-        "keywords": [
-          "visitor",
-          "guest house",
-          "accommodation",
-          "visitors hostel"
-        ],
-        "source": "curated"
-      },
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          73.1127,
-          26.4682
-        ]
-      },
-      "centroid": {
-        "lat": 26.4682,
-        "lng": 73.1127
       }
     },
     {
