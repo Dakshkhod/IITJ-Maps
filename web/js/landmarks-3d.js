@@ -222,7 +222,7 @@ const Landmarks3D = (() => {
       // Geometric centre of the roundabout (mean of the surrounding road
       // waypoints from OSM), not the OSM 'Brain Tree' artwork node which
       // sits ~9 m off-centre.
-      lng: 73.1142337, lat: 26.4692165,
+      lng: 73.1141633, lat: 26.4692796,
       heightMeters: null,
       rotateMeshToUp: Y_UP_TO_Z_UP,
       bearingOffset: 0,
@@ -231,7 +231,7 @@ const Landmarks3D = (() => {
       id: 'brain-tree-3d',
       format: 'obj',
       file: 'assets/models/brain-tree.obj',
-      lng: 73.1142337, lat: 26.4692165,
+      lng: 73.1141633, lat: 26.4692796,
       heightMeters: 14,
       yOffsetMeters: BRAIN_TREE_BASE_TOP_Y,   // lift so it rests on the pedestal
       material: MAT.gold,
