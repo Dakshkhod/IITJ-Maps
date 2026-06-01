@@ -426,6 +426,35 @@ function getMapStyle() {
 
 let styleLoadGeneration = 0;
 
+// User-added overlay sources (and the layers that read from them). MapLibre's
+// setStyle diff can preserve these across a base-style swap, which causes the
+// add* helpers to short-circuit on their `getSource(...)` check and reuse stale
+// paint properties baked for the previous isSatellite/isDark state. We wipe
+// them before re-adding so the create-fresh path runs every time.
+const OVERLAY_LAYER_IDS = [
+  'campus-roads-casing', 'campus-roads-line', 'campus-roads-ped',
+  'campus-roads-hit', 'campus-roads-labels',
+  'areas-fill', 'areas-outline', 'areas-labels',
+  'buildings-fill', 'buildings-outline', 'buildings-3d', 'buildings-labels',
+  'places-circles', 'places-labels',
+];
+const OVERLAY_SOURCE_IDS = [
+  'campus-roads', 'named-areas', 'area-labels-src', 'buildings', 'places-points',
+];
+
+function clearOverlayLayers() {
+  for (const id of OVERLAY_LAYER_IDS) {
+    if (map.getLayer(id)) {
+      try { map.removeLayer(id); } catch (_) {}
+    }
+  }
+  for (const id of OVERLAY_SOURCE_IDS) {
+    if (map.getSource(id)) {
+      try { map.removeSource(id); } catch (_) {}
+    }
+  }
+}
+
 // Reload base map tiles and restore all overlay layers
 async function applyMapStyle() {
   const savedCenter  = map.getCenter();
@@ -449,6 +478,8 @@ async function applyMapStyle() {
         const areasRes     = IITJData.getAreas();
 
         labeledNames = buildLabeledNames(areasRes, buildingsRes);
+
+        clearOverlayLayers();
 
         addRoadsLayer(roadsRes);
         addAreasLayer(areasRes);
