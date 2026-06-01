@@ -1159,8 +1159,8 @@ var Landmarks3D = (() => {
       lng: 73.114550, lat: 26.466766,
       heightMeters: null,
       rotateMeshToUp: Y_UP_TO_Z_UP,
-      // Gun points toward Prithvi Missile (56° compass = 34° CCW from east)
-      bearingOffset: 34 * Math.PI / 180,
+      // Gun points NE toward Prithvi Missile (~45° compass = 45° CCW from east)
+      bearingOffset: 45 * Math.PI / 180,
     },
   ];
 
