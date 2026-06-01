@@ -1202,7 +1202,7 @@ var Landmarks3D = (() => {
   // base raster; labels must stay above the 3D mesh so they are not hidden.
   function _raise() {
     if (!_map) return;
-    try { _map.moveLayer(LAYER_ID); } catch (_) {}
+    if (_map.getLayer(LAYER_ID)) try { _map.moveLayer(LAYER_ID); } catch (_) {}
     try {
       if (_map.getLayer(LABEL_LAYER_ID)) _map.moveLayer(LABEL_LAYER_ID);
     } catch (_) {}

@@ -468,7 +468,6 @@ async function applyMapStyle() {
 
     const restoreOverlays = async () => {
       if (restored || generation !== styleLoadGeneration) return;
-      if (!map.isStyleLoaded()) return;
       restored = true;
 
       try {
@@ -509,14 +508,23 @@ async function applyMapStyle() {
     };
 
     const waitForStyle = () => {
-      if (generation !== styleLoadGeneration) {
-        resolve();
-        return;
-      }
+      if (generation !== styleLoadGeneration) { resolve(); return; }
       if (map.isStyleLoaded()) {
         restoreOverlays();
       } else {
-        map.once('idle', waitForStyle);
+        // 'idle' requires ALL tiles loaded — can take many seconds or never fire.
+        // 'sourcedata' fires quickly once setStyle has applied the new style spec,
+        // at which point addSource/addLayer calls succeed without "Style not loaded".
+        let _fired = false;
+        const doRestore = () => {
+          if (_fired) return;
+          _fired = true;
+          map.off('sourcedata', doRestore);
+          if (generation !== styleLoadGeneration) { resolve(); return; }
+          restoreOverlays();
+        };
+        map.once('sourcedata', doRestore);
+        setTimeout(doRestore, 2000); // Fallback if sourcedata never fires
       }
     };
 
