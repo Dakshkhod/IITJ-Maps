@@ -55,6 +55,12 @@ const Landmarks3D = (() => {
     missileWhite:  new THREE.MeshStandardMaterial({ color: 0xf3f1ec, metalness: 0.20, roughness: 0.45 }),
     missileOrange: new THREE.MeshStandardMaterial({ color: 0xff7a2e, metalness: 0.15, roughness: 0.50 }),
     missileBase:   new THREE.MeshStandardMaterial({ color: 0x5a4632, metalness: 0.10, roughness: 0.80 }),
+
+    // Boundary berms — blue painted outer wall + green vegetated inner slope
+    bermBlue:      new THREE.MeshStandardMaterial({ color: 0x3f7ec0, metalness: 0.10, roughness: 0.70 }),
+    bermEarth:     new THREE.MeshStandardMaterial({ color: 0x8a6e4d, metalness: 0.04, roughness: 0.90 }),
+    bermGreen:     new THREE.MeshStandardMaterial({ color: 0x4f8b3d, metalness: 0.04, roughness: 0.95 }),
+    bermAccent:    new THREE.MeshStandardMaterial({ color: 0xe85c3e, metalness: 0.10, roughness: 0.65 }),
   };
 
   // ─────────────────────────────────────────────────────────────────────
@@ -363,6 +369,64 @@ const Landmarks3D = (() => {
       }
       g.add(porticoG);
     }
+
+    return g;
+  }
+
+  // ─────────────────────────────────────────────────────────────────────
+  // BOUNDARY BERM — blue painted mural wall outside + green earth ridge inside
+  // ─────────────────────────────────────────────────────────────────────
+  // Long landscape feature along the campus perimeter. The road side has
+  // a vibrant blue wall punctuated by triangular buttresses (the wave
+  // pattern visible in the user's photo) with a white horizontal mural
+  // stripe and an orange/red accent band; the campus side is an earthen
+  // slope covered in dense green vegetation.
+  function buildBerm(opts = {}) {
+    const length = opts.length ?? 60;
+    const g = new THREE.Group();
+    const WALL_H   = 5.0;
+    const WALL_T   = 0.45;
+    const EARTH_D  = 9;                          // earth slope depth (inward)
+
+    // Outer blue wall (faces +Z = outward in mesh local space)
+    const wall = new THREE.Mesh(new THREE.BoxGeometry(length, WALL_H, WALL_T), MAT.bermBlue);
+    wall.position.set(0, WALL_H / 2, WALL_T / 2);
+    g.add(wall);
+    // White horizontal mural stripe
+    const stripe = new THREE.Mesh(new THREE.BoxGeometry(length + 0.04, 0.18, WALL_T + 0.04), MAT.portalWhite);
+    stripe.position.set(0, WALL_H * 0.62, WALL_T / 2);
+    g.add(stripe);
+    // Red/orange accent band (the colourful mural splash)
+    const accent = new THREE.Mesh(new THREE.BoxGeometry(length + 0.06, 0.22, WALL_T + 0.06), MAT.bermAccent);
+    accent.position.set(0, WALL_H * 0.78, WALL_T / 2);
+    g.add(accent);
+
+    // Triangular buttress wedges along the bottom of the outer face — use
+    // 4-sided cones rotated 45° so the apex points up and one flat face
+    // sits against the wall (the wave-pattern in the photos).
+    const buttressCount   = Math.max(4, Math.floor(length / 4));
+    const buttressSpacing = length / buttressCount;
+    const BUT_H = WALL_H * 0.65;
+    const BUT_R = 0.9;
+    for (let i = 0; i < buttressCount; i++) {
+      const x = -length / 2 + buttressSpacing * (i + 0.5);
+      const but = new THREE.Mesh(new THREE.ConeGeometry(BUT_R, BUT_H, 4, 1, false, Math.PI / 4), MAT.bermBlue);
+      but.position.set(x, BUT_H / 2, WALL_T + 0.4);
+      g.add(but);
+    }
+
+    // Earth ridge BEHIND the wall (inward) — capped with vegetation
+    const earth = new THREE.Mesh(new THREE.BoxGeometry(length, WALL_H * 0.55, EARTH_D), MAT.bermEarth);
+    earth.position.set(0, (WALL_H * 0.55) / 2, -EARTH_D / 2 - WALL_T / 2);
+    g.add(earth);
+    // Green vegetation cap on top of the earth — covers a bit beyond the wall too
+    const green = new THREE.Mesh(new THREE.BoxGeometry(length, 0.55, EARTH_D + WALL_T * 1.5), MAT.bermGreen);
+    green.position.set(0, WALL_H * 0.55 + 0.275, -EARTH_D / 2 + WALL_T * 0.2);
+    g.add(green);
+    // A second lower green tier for the flower-and-shrub layer
+    const lowerGreen = new THREE.Mesh(new THREE.BoxGeometry(length, 0.3, EARTH_D * 0.6), MAT.bermGreen);
+    lowerGreen.position.set(0, WALL_H * 0.20, -EARTH_D * 0.3 - WALL_T / 2);
+    g.add(lowerGreen);
 
     return g;
   }
@@ -865,6 +929,90 @@ const Landmarks3D = (() => {
       heightMeters: null,
       rotateMeshToUp: Y_UP_TO_Z_UP,
       bearingOffset: 0,                            // name faces south
+    },
+
+    // ── Boundary berms (mural wall + green ridge along campus perimeter)
+    // bearingOffset for each = pre-computed so the wall (+Z face) points
+    // away from the campus centre toward the perimeter road.
+    {
+      id: 'berm-1412399743',
+      format: 'procedural',
+      build: () => buildBerm({ length: 40 }),
+      lng: 73.1174662, lat: 26.4720418,
+      heightMeters: null,
+      rotateMeshToUp: Y_UP_TO_Z_UP,
+      bearingOffset: -123 * Math.PI / 180,
+      replacesOsmBuildings: ['1412399743'],
+    },
+    {
+      id: 'berm-1412399744',
+      format: 'procedural',
+      build: () => buildBerm({ length: 90 }),
+      lng: 73.1179420, lat: 26.4741088,
+      heightMeters: null,
+      rotateMeshToUp: Y_UP_TO_Z_UP,
+      bearingOffset: -94 * Math.PI / 180,
+      replacesOsmBuildings: ['1412399744'],
+    },
+    {
+      id: 'berm-1412399745',
+      format: 'procedural',
+      build: () => buildBerm({ length: 170 }),
+      lng: 73.1179703, lat: 26.4759836,
+      heightMeters: null,
+      rotateMeshToUp: Y_UP_TO_Z_UP,
+      bearingOffset: -88 * Math.PI / 180,
+      replacesOsmBuildings: ['1412399745'],
+    },
+    {
+      id: 'berm-1412399746',
+      format: 'procedural',
+      build: () => buildBerm({ length: 115 }),
+      lng: 73.1120723, lat: 26.4704351,
+      heightMeters: null,
+      rotateMeshToUp: Y_UP_TO_Z_UP,
+      bearingOffset: -204 * Math.PI / 180,
+      replacesOsmBuildings: ['1412399746'],
+    },
+    {
+      id: 'berm-1412399747',
+      format: 'procedural',
+      build: () => buildBerm({ length: 38 }),
+      lng: 73.1100258, lat: 26.4726479,
+      heightMeters: null,
+      rotateMeshToUp: Y_UP_TO_Z_UP,
+      bearingOffset: -243 * Math.PI / 180,
+      replacesOsmBuildings: ['1412399747'],
+    },
+    {
+      id: 'berm-1412399748',
+      format: 'procedural',
+      build: () => buildBerm({ length: 105 }),
+      lng: 73.1099416, lat: 26.4746017,
+      heightMeters: null,
+      rotateMeshToUp: Y_UP_TO_Z_UP,
+      bearingOffset: -277 * Math.PI / 180,
+      replacesOsmBuildings: ['1412399748'],
+    },
+    {
+      id: 'berm-1412399749',
+      format: 'procedural',
+      build: () => buildBerm({ length: 95 }),
+      lng: 73.1107539, lat: 26.4763111,
+      heightMeters: null,
+      rotateMeshToUp: Y_UP_TO_Z_UP,
+      bearingOffset: 48 * Math.PI / 180,
+      replacesOsmBuildings: ['1412399749'],
+    },
+    {
+      id: 'berm-1412399750',
+      format: 'procedural',
+      build: () => buildBerm({ length: 55 }),
+      lng: 73.1119991, lat: 26.4775885,
+      heightMeters: null,
+      rotateMeshToUp: Y_UP_TO_Z_UP,
+      bearingOffset: -320 * Math.PI / 180,
+      replacesOsmBuildings: ['1412399750'],
     },
 
     // Point-feature landmarks — Fountain and Prithvi Missile
