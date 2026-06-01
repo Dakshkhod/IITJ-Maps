@@ -1002,7 +1002,7 @@ function toggle3D() {
     if (!isSatellite) showLandmarks3D();
     else if (typeof Landmarks3D !== 'undefined') Landmarks3D.hide();
     syncLandmarkLabels();
-    map.easeTo({ pitch: 52, bearing: -18, duration: 900 });
+    map.easeTo({ pitch: 52, bearing: 0, duration: 900 });
     showToast('3D view — drag to rotate', 'info');
   } else {
     if (map.getLayer('buildings-3d')) map.setLayoutProperty('buildings-3d', 'visibility', 'none');

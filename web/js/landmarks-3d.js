@@ -517,17 +517,21 @@ var Landmarks3D = (() => {
   function buildTank() {
     const g = new THREE.Group();
 
-    const PEDESTAL_H = 0.55;
-    const PEDESTAL_L = 10.0;
-    const PEDESTAL_W = 5.2;
+    const PEDESTAL_H = 0.65;
+    const PEDESTAL_L = 13.0;
+    const PEDESTAL_W = 7.0;
 
-    // Concrete pedestal
+    // Concrete pedestal — lower wide base step
+    const pedBase = new THREE.Mesh(new THREE.BoxGeometry(PEDESTAL_L + 1.2, 0.28, PEDESTAL_W + 1.2), MAT.tankPed);
+    pedBase.position.y = 0.14;
+    g.add(pedBase);
+    // Main pedestal slab
     const ped = new THREE.Mesh(new THREE.BoxGeometry(PEDESTAL_L, PEDESTAL_H, PEDESTAL_W), MAT.tankPed);
-    ped.position.y = PEDESTAL_H / 2;
+    ped.position.y = 0.28 + PEDESTAL_H / 2;
     g.add(ped);
-    // Pedestal top edge chamfer strip
-    const chamfer = new THREE.Mesh(new THREE.BoxGeometry(PEDESTAL_L + 0.1, 0.12, PEDESTAL_W + 0.1), MAT.sandDark);
-    chamfer.position.y = PEDESTAL_H;
+    // Pedestal top chamfer strip (darker border)
+    const chamfer = new THREE.Mesh(new THREE.BoxGeometry(PEDESTAL_L + 0.15, 0.10, PEDESTAL_W + 0.15), MAT.sandDark);
+    chamfer.position.y = 0.28 + PEDESTAL_H;
     g.add(chamfer);
 
     const BY = PEDESTAL_H; // base Y of tank bottom
