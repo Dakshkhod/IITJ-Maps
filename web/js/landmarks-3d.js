@@ -915,7 +915,12 @@ const Landmarks3D = (() => {
   let _root = null;
   let _camera = null;
   let _renderer = null;
-  let _meshesBuilt = false;
+  // setStyle() (satellite/dark toggle) destroys the WebGLRenderer that
+  // uploaded our geometry to GPU. The cached scene's BufferGeometry/
+  // Material objects still exist in JS but their GPU-side handles are
+  // orphaned. The next renderer can't reuse them, so we mark the scene
+  // stale on every styledata event and rebuild on the next show().
+  let _sceneStale = false;
   let _originMcX = 0, _originMcY = 0, _originMcZ = 0;
   let _mercPerMeter = 1;
 
@@ -926,7 +931,15 @@ const Landmarks3D = (() => {
   const _scaleVec = new THREE.Vector3();
 
   function _ensureScene() {
-    if (_scene) return;
+    if (_scene && !_sceneStale) return;
+
+    // Drop the previous scene if it was invalidated by a setStyle. The
+    // BufferGeometry / Material objects will be GC'd along with the old
+    // renderer's WebGL resource cache. This rebuild is one-shot per style
+    // swap, not per frame, so it does not cause sustained lag.
+    _scene = null;
+    _root = null;
+    _camera = null;
 
     _scene = new THREE.Scene();
     const sun = new THREE.DirectionalLight(0xffffff, 1.05);
@@ -949,7 +962,7 @@ const Landmarks3D = (() => {
     _mercPerMeter = originMc.meterInMercatorCoordinateUnits();
 
     for (const cfg of LANDMARKS) _addLandmark(cfg, originMc);
-    _meshesBuilt = true;
+    _sceneStale = false;
   }
 
   function _addLandmark(cfg, originMc) {
@@ -1036,11 +1049,15 @@ const Landmarks3D = (() => {
     _ready = true;
 
     // After setStyle() (theme / satellite toggle) custom layers are torn
-    // down. Re-add the layer once the new style is fully loaded.
+    // down and our renderer's GPU cache is gone. Mark the scene stale on
+    // every styledata event so the next show()/onAdd rebuilds it. If the
+    // landmarks are currently visible, also re-add the layer once the new
+    // style finishes loading.
     if (!map.__landmarks3dHooked) {
       map.__landmarks3dHooked = true;
       let pending = false;
       map.on('styledata', () => {
+        _sceneStale = true;
         if (!_visible || pending) return;
         if (_map.getLayer(LAYER_ID)) return;
         pending = true;
