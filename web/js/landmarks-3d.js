@@ -375,8 +375,9 @@ const Landmarks3D = (() => {
   // Sits in the courtyard space between OoA and OoS.
   function buildIITJNameCanopy() {
     const g = new THREE.Group();
-    const SPAN  = 14;
-    const COL_W = 2.4, COL_D = 3, COL_H = 5.5;
+    // Substantial archway spanning most of the OoA<->OoS plaza gap.
+    const SPAN  = 28;                              // column-to-column distance
+    const COL_W = 3.0, COL_D = 5.5, COL_H = 6.5;   // thick stone piers
 
     // Two thick sandstone columns
     [-SPAN / 2, SPAN / 2].forEach((x) => {
@@ -386,36 +387,38 @@ const Landmarks3D = (() => {
     });
 
     // Main canopy beam between the columns
-    const CW = SPAN + COL_W + 1.4;
-    const CD = COL_D + 1.0;
-    const CH = 2.0;
+    const CW = SPAN + COL_W + 2.0;                 // ≈ 33 m wide
+    const CD = COL_D + 1.6;                        // ≈ 7 m deep
+    const CH = 2.6;
     const cY = COL_H + CH / 2;
     const canopy = new THREE.Mesh(new THREE.BoxGeometry(CW, CH, CD), MAT.sandstone);
     canopy.position.set(0, cY, 0);
     g.add(canopy);
 
     // Pink horizontal accent strips above and below the sign band
-    const stripeTop = new THREE.Mesh(new THREE.BoxGeometry(CW + 0.06, 0.15, CD + 0.06), MAT.hostelBand);
-    stripeTop.position.set(0, cY + 0.55, 0);
+    const stripeTop = new THREE.Mesh(new THREE.BoxGeometry(CW + 0.06, 0.18, CD + 0.06), MAT.hostelBand);
+    stripeTop.position.set(0, cY + 0.75, 0);
     g.add(stripeTop);
-    const stripeBot = new THREE.Mesh(new THREE.BoxGeometry(CW + 0.06, 0.15, CD + 0.06), MAT.hostelBand);
-    stripeBot.position.set(0, cY - 0.55, 0);
+    const stripeBot = new THREE.Mesh(new THREE.BoxGeometry(CW + 0.06, 0.18, CD + 0.06), MAT.hostelBand);
+    stripeBot.position.set(0, cY - 0.75, 0);
     g.add(stripeBot);
     // Dark inset band where the IITJ name sits
-    const nameBand = new THREE.Mesh(new THREE.BoxGeometry(CW + 0.04, 0.6, CD + 0.04), MAT.sandDark);
+    const nameBand = new THREE.Mesh(new THREE.BoxGeometry(CW + 0.04, 0.85, CD + 0.04), MAT.sandDark);
     nameBand.position.set(0, cY, 0);
     g.add(nameBand);
 
-    // Curved/arched top edge — three stepped slabs to suggest the curve
+    // Curved/arched top edge — four stepped slabs of decreasing width to
+    // suggest the broad curve visible in the photo
     const archTopY = cY + CH / 2;
     const archSteps = [
-      { w: CW - 1.0, h: 0.45 },
-      { w: CW - 3.5, h: 0.4 },
-      { w: CW - 6.5, h: 0.35 },
+      { w: CW - 1.0, h: 0.50 },
+      { w: CW - 4.0, h: 0.45 },
+      { w: CW - 8.0, h: 0.40 },
+      { w: CW - 13.0, h: 0.35 },
     ];
     let ay = archTopY;
     for (const a of archSteps) {
-      const slab = new THREE.Mesh(new THREE.BoxGeometry(a.w, a.h, CD + 0.3), MAT.portalWhite);
+      const slab = new THREE.Mesh(new THREE.BoxGeometry(Math.max(2, a.w), a.h, CD + 0.3), MAT.portalWhite);
       slab.position.set(0, ay + a.h / 2, 0);
       g.add(slab);
       ay += a.h;
