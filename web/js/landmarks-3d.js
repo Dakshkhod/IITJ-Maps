@@ -272,6 +272,11 @@ const Landmarks3D = (() => {
     const depth  = opts.depth  ?? 16;
     const height = opts.height ?? 12;
     const portal = opts.portal ?? true;
+    // Which face the portico projects from: 'south' (+Z, default), 'east'
+    // (+X), 'west' (-X), or 'north' (-Z). For wings that face an internal
+    // courtyard (e.g. Office of Administration → faces Office of Students)
+    // pass 'east' or 'west'.
+    const portalSide = opts.portalSide ?? 'south';
     const g = new THREE.Group();
 
     // ── Main sandstone block
@@ -301,47 +306,119 @@ const Landmarks3D = (() => {
     }
 
     // ── White entrance portico — two tall front columns + a row of
-    // horizontal beams running the full portico width. Centred on the
-    // long axis, projecting from the +Z (south) face.
+    // horizontal beams running the full portico width. Built in a sub-
+    // group facing +Z, then translated to the requested face and rotated.
     if (portal) {
-      const PORT_H   = height + 0.5;
-      const PORT_W   = Math.min(length * 0.55, 22);
-      const POST_W   = 1.4;
-      const POST_D   = 1.4;
-      const PROJ     = 4.5;                      // metres projecting south
-      const postZ    = depth / 2 + PROJ - POST_D / 2;
+      const porticoG = new THREE.Group();
+      const isShortFace = portalSide === 'east' || portalSide === 'west';
+      const faceLen     = isShortFace ? depth : length;
+      const PORT_H      = height + 0.5;
+      // East/west face is shorter — fill more of it; long faces use a
+      // proportional width capped at 22 m.
+      const PORT_W      = isShortFace ? faceLen * 0.78 : Math.min(faceLen * 0.55, 22);
+      const POST_W      = 1.4;
+      const POST_D      = 1.4;
+      const PROJ        = 4.5;                                   // metres projected outward
+      const postZ       = PROJ - POST_D / 2;
 
       // Two structural posts
       [-PORT_W / 2, PORT_W / 2].forEach((px) => {
         const post = new THREE.Mesh(new THREE.BoxGeometry(POST_W, PORT_H, POST_D), MAT.portalWhite);
         post.position.set(px, PORT_H / 2, postZ);
-        g.add(post);
+        porticoG.add(post);
       });
-
-      // Top capping beam across both posts
+      // Top capping beam
       const topBeam = new THREE.Mesh(new THREE.BoxGeometry(PORT_W + POST_W, 1.0, POST_D + 0.4), MAT.portalWhite);
       topBeam.position.set(0, PORT_H - 0.5, postZ);
-      g.add(topBeam);
-
-      // Four horizontal cross-beams between posts (the photographed look)
+      porticoG.add(topBeam);
+      // Horizontal cross-beams
       for (let i = 0; i < 4; i++) {
         const beamY = PORT_H - 1.6 - i * 1.5;
         if (beamY < 2) break;
         const beam = new THREE.Mesh(new THREE.BoxGeometry(PORT_W + 0.4, 0.3, 0.7), MAT.portalWhite);
         beam.position.set(0, beamY, postZ + 0.05);
-        g.add(beam);
+        porticoG.add(beam);
       }
-
-      // Recessed dark entrance opening on the building's south face,
-      // centred under the portico
-      const door = new THREE.Mesh(new THREE.BoxGeometry(PORT_W * 0.55, 5, 0.4), MAT.entrance);
-      door.position.set(0, 2.5, depth / 2 + 0.2);
-      g.add(door);
-
-      // Soffit slab above the entrance (joining portico back to facade)
+      // Soffit slab from facade out to the posts
       const soffit = new THREE.Mesh(new THREE.BoxGeometry(PORT_W + 0.4, 0.4, PROJ + 0.2), MAT.portalWhite);
-      soffit.position.set(0, PORT_H - 0.1, depth / 2 + PROJ / 2 - 0.1);
-      g.add(soffit);
+      soffit.position.set(0, PORT_H - 0.1, PROJ / 2 - 0.1);
+      porticoG.add(soffit);
+      // Recessed dark door at the face origin
+      const door = new THREE.Mesh(new THREE.BoxGeometry(PORT_W * 0.55, 5, 0.4), MAT.entrance);
+      door.position.set(0, 2.5, 0.2);
+      porticoG.add(door);
+
+      // Position + rotate the portico group to the requested face
+      if (portalSide === 'south') {
+        porticoG.position.set(0, 0, depth / 2);
+      } else if (portalSide === 'north') {
+        porticoG.position.set(0, 0, -depth / 2);
+        porticoG.rotation.y = Math.PI;
+      } else if (portalSide === 'east') {
+        porticoG.position.set(length / 2, 0, 0);
+        porticoG.rotation.y = -Math.PI / 2;
+      } else if (portalSide === 'west') {
+        porticoG.position.set(-length / 2, 0, 0);
+        porticoG.rotation.y = Math.PI / 2;
+      }
+      g.add(porticoG);
+    }
+
+    return g;
+  }
+
+  // ─────────────────────────────────────────────────────────────────────
+  // IIT-J NAME CANOPY — curved sandstone arch in front of Chanakya
+  // ─────────────────────────────────────────────────────────────────────
+  // Standalone landmark: two thick sandstone columns supporting a curved
+  // canopy carrying the "INDIAN INSTITUTE OF TECHNOLOGY JODHPUR" sign.
+  // Sits in the courtyard space between OoA and OoS.
+  function buildIITJNameCanopy() {
+    const g = new THREE.Group();
+    const SPAN  = 14;
+    const COL_W = 2.4, COL_D = 3, COL_H = 5.5;
+
+    // Two thick sandstone columns
+    [-SPAN / 2, SPAN / 2].forEach((x) => {
+      const col = new THREE.Mesh(new THREE.BoxGeometry(COL_W, COL_H, COL_D), MAT.sandstone);
+      col.position.set(x, COL_H / 2, 0);
+      g.add(col);
+    });
+
+    // Main canopy beam between the columns
+    const CW = SPAN + COL_W + 1.4;
+    const CD = COL_D + 1.0;
+    const CH = 2.0;
+    const cY = COL_H + CH / 2;
+    const canopy = new THREE.Mesh(new THREE.BoxGeometry(CW, CH, CD), MAT.sandstone);
+    canopy.position.set(0, cY, 0);
+    g.add(canopy);
+
+    // Pink horizontal accent strips above and below the sign band
+    const stripeTop = new THREE.Mesh(new THREE.BoxGeometry(CW + 0.06, 0.15, CD + 0.06), MAT.hostelBand);
+    stripeTop.position.set(0, cY + 0.55, 0);
+    g.add(stripeTop);
+    const stripeBot = new THREE.Mesh(new THREE.BoxGeometry(CW + 0.06, 0.15, CD + 0.06), MAT.hostelBand);
+    stripeBot.position.set(0, cY - 0.55, 0);
+    g.add(stripeBot);
+    // Dark inset band where the IITJ name sits
+    const nameBand = new THREE.Mesh(new THREE.BoxGeometry(CW + 0.04, 0.6, CD + 0.04), MAT.sandDark);
+    nameBand.position.set(0, cY, 0);
+    g.add(nameBand);
+
+    // Curved/arched top edge — three stepped slabs to suggest the curve
+    const archTopY = cY + CH / 2;
+    const archSteps = [
+      { w: CW - 1.0, h: 0.45 },
+      { w: CW - 3.5, h: 0.4 },
+      { w: CW - 6.5, h: 0.35 },
+    ];
+    let ay = archTopY;
+    for (const a of archSteps) {
+      const slab = new THREE.Mesh(new THREE.BoxGeometry(a.w, a.h, CD + 0.3), MAT.portalWhite);
+      slab.position.set(0, ay + a.h / 2, 0);
+      g.add(slab);
+      ay += a.h;
     }
 
     return g;
@@ -731,26 +808,39 @@ const Landmarks3D = (() => {
       replacesOsmBuildings: ['773690911'],
     },
 
-    // Chanakya Complex — two wings (Office of Administration + Office of Students)
+    // Chanakya Complex — Office of Administration (west wing, portico faces
+    // EAST toward Office of Students) + Office of Students (east wing,
+    // portico faces WEST toward OoA across the central canopy plaza).
     {
       id: 'chanakya-admin-3d',
       format: 'procedural',
-      build: () => buildChanakyaWing({ length: 40, depth: 16, height: 13, portal: true }),
+      build: () => buildChanakyaWing({ length: 40, depth: 16, height: 13, portal: true, portalSide: 'east' }),
       lng: 73.1131579, lat: 26.4711373,
       heightMeters: null,
       rotateMeshToUp: Y_UP_TO_Z_UP,
-      bearingOffset: 0,                          // longest edge bearing 90° (E-W)
+      bearingOffset: 0,
       replacesOsmBuildings: ['773563509'],
     },
     {
       id: 'chanakya-students-3d',
       format: 'procedural',
-      build: () => buildChanakyaWing({ length: 34, depth: 15, height: 13, portal: false }),
+      build: () => buildChanakyaWing({ length: 34, depth: 15, height: 13, portal: true, portalSide: 'west' }),
       lng: 73.1140003, lat: 26.4711330,
       heightMeters: null,
       rotateMeshToUp: Y_UP_TO_Z_UP,
       bearingOffset: 0,
       replacesOsmBuildings: ['773563508'],
+    },
+    // IIT-J name canopy — curved sandstone arch with the institute name,
+    // sits in the courtyard space midway between OoA and OoS.
+    {
+      id: 'iitj-name-canopy-3d',
+      format: 'procedural',
+      build: buildIITJNameCanopy,
+      lng: 73.1135791, lat: 26.4710902,           // midpoint shifted ~5 m south
+      heightMeters: null,
+      rotateMeshToUp: Y_UP_TO_Z_UP,
+      bearingOffset: 0,                            // name faces south
     },
 
     // Point-feature landmarks — Fountain and Prithvi Missile
