@@ -921,7 +921,10 @@ function toggle3D() {
       if (map.getLayer('buildings-outline')) map.setLayoutProperty('buildings-outline', 'visibility', 'none');
       if (map.getLayer('buildings-3d'))      map.setLayoutProperty('buildings-3d',      'visibility', 'visible');
     }
-    showLandmarks3D();
+    // Custom 3D landmark models are only shown on the vector base map, not
+    // over satellite imagery (matches buildings-3d behaviour).
+    if (!isSatellite) showLandmarks3D();
+    else if (typeof Landmarks3D !== 'undefined') Landmarks3D.hide();
     map.easeTo({ pitch: 52, bearing: -18, duration: 900 });
     showToast('3D view — drag to rotate', 'info');
   } else {
@@ -1862,6 +1865,9 @@ async function toggleSatellite() {
     document.documentElement.removeAttribute('data-theme');
     map.setMaxZoom(SATELLITE_MAX_ZOOM);
     if (map.getZoom() > SATELLITE_MAX_ZOOM) map.zoomTo(SATELLITE_MAX_ZOOM);
+    // Hide custom 3D models before the style swap so the styledata
+    // re-add hook doesn't bring them back over the imagery.
+    if (typeof Landmarks3D !== 'undefined') Landmarks3D.hide();
   } else {
     map.setMaxZoom(19);
   }

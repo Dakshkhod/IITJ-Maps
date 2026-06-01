@@ -915,12 +915,15 @@ const Landmarks3D = (() => {
   let _root = null;
   let _camera = null;
   let _renderer = null;
-  // setStyle() (satellite/dark toggle) destroys the WebGLRenderer that
-  // uploaded our geometry to GPU. The cached scene's BufferGeometry/
-  // Material objects still exist in JS but their GPU-side handles are
-  // orphaned. The next renderer can't reuse them, so we mark the scene
-  // stale on every styledata event and rebuild on the next show().
-  let _sceneStale = false;
+  // MapLibre reuses the SAME WebGL context/canvas across setStyle()
+  // (satellite/dark toggles). Creating more than one THREE.WebGLRenderer
+  // on a single GL context corrupts three's internal program/VAO cache
+  // and the custom layer renders nothing after the first style swap.
+  // So we build ONE renderer, keyed to its gl context, and reuse it for
+  // the life of the context. Because the context (and therefore every
+  // uploaded BufferGeometry) survives a setStyle, the scene is also built
+  // exactly once and reused — no per-toggle rebuild, no lag.
+  let _rendererGl = null;
   let _originMcX = 0, _originMcY = 0, _originMcZ = 0;
   let _mercPerMeter = 1;
 
@@ -931,15 +934,7 @@ const Landmarks3D = (() => {
   const _scaleVec = new THREE.Vector3();
 
   function _ensureScene() {
-    if (_scene && !_sceneStale) return;
-
-    // Drop the previous scene if it was invalidated by a setStyle. The
-    // BufferGeometry / Material objects will be GC'd along with the old
-    // renderer's WebGL resource cache. This rebuild is one-shot per style
-    // swap, not per frame, so it does not cause sustained lag.
-    _scene = null;
-    _root = null;
-    _camera = null;
+    if (_scene) return;
 
     _scene = new THREE.Scene();
     const sun = new THREE.DirectionalLight(0xffffff, 1.05);
@@ -962,7 +957,6 @@ const Landmarks3D = (() => {
     _mercPerMeter = originMc.meterInMercatorCoordinateUnits();
 
     for (const cfg of LANDMARKS) _addLandmark(cfg, originMc);
-    _sceneStale = false;
   }
 
   function _addLandmark(cfg, originMc) {
@@ -1018,17 +1012,17 @@ const Landmarks3D = (() => {
       type: 'custom',
       renderingMode: '3d',
       onAdd(map, gl) {
-        // Force a fresh scene every time MapLibre attaches the layer.
-        // onAdd only runs on actual addLayer() calls — toggling 3D off
-        // and back on goes through setLayoutProperty() instead, so the
-        // cached scene is still reused for fast toggles. This path
-        // executes after a setStyle() (satellite/dark theme swap), which
-        // invalidates the previous renderer's GPU resource cache; a
-        // rebuild here guarantees the new renderer can render correctly.
-        _sceneStale = true;
         _ensureScene();
-        _renderer = new THREE.WebGLRenderer({ canvas: map.getCanvas(), context: gl, antialias: true });
-        _renderer.autoClear = false;
+        // Reuse the existing renderer if MapLibre handed us the same GL
+        // context (the normal case across setStyle). Only build a new one
+        // if there is none yet, or the context was genuinely replaced
+        // (e.g. after a WebGL context-loss/restore). Creating a second
+        // renderer on a live context is what previously blanked the layer.
+        if (!_renderer || _rendererGl !== gl) {
+          _renderer = new THREE.WebGLRenderer({ canvas: map.getCanvas(), context: gl, antialias: true });
+          _renderer.autoClear = false;
+          _rendererGl = gl;
+        }
       },
       render(_gl, matrix) {
         if (!_scene || !_renderer) return;
@@ -1054,30 +1048,43 @@ const Landmarks3D = (() => {
     _map = map;
     _ready = true;
 
-    // After setStyle() (theme / satellite toggle) custom layers are torn
-    // down and our renderer's GPU cache is gone. Mark the scene stale on
-    // every styledata event so the next show()/onAdd rebuilds it. If the
-    // landmarks are currently visible, also re-add the layer once the new
-    // style finishes loading.
+    // After setStyle() (theme / satellite toggle) MapLibre removes all
+    // custom layers but keeps the GL context (and our uploaded geometry)
+    // alive. If the landmarks are currently visible, re-add the layer
+    // once the new style finishes loading; onAdd will reuse the existing
+    // renderer and scene.
     if (!map.__landmarks3dHooked) {
       map.__landmarks3dHooked = true;
       let pending = false;
       map.on('styledata', () => {
-        _sceneStale = true;
         if (!_visible || pending) return;
-        if (_map.getLayer(LAYER_ID)) return;
         pending = true;
         const flush = () => {
           if (!_map || !_map.isStyleLoaded()) { setTimeout(flush, 80); return; }
           pending = false;
-          if (!_visible || _map.getLayer(LAYER_ID)) return;
-          try { _map.addLayer(_buildLayer()); }
-          catch (e) { console.warn('[Landmarks3D] addLayer failed:', e); }
+          if (!_visible) return;
+          // The layer may still exist after the diff but be buried at the
+          // bottom — raise it. Otherwise (re)add it fresh on top.
+          if (_map.getLayer(LAYER_ID)) {
+            _raise();
+          } else {
+            try { _map.addLayer(_buildLayer()); }
+            catch (e) { console.warn('[Landmarks3D] addLayer failed:', e); }
+          }
           _map.triggerRepaint();
         };
         flush();
       });
     }
+  }
+
+  // Move the layer to the very top of the stack. setStyle() (satellite/
+  // dark toggle) uses MapLibre's style-diff, which keeps our custom layer
+  // alive but relocates it to the BOTTOM of the order — underneath the
+  // base-map raster, so it renders but is immediately painted over. Any
+  // time we (re)show the layer we must raise it back above everything.
+  function _raise() {
+    try { _map.moveLayer(LAYER_ID); } catch (_) {}
   }
 
   function show() {
@@ -1089,6 +1096,7 @@ const Landmarks3D = (() => {
     const tryAdd = () => {
       if (!_visible) return;
       if (_map.getLayer(LAYER_ID)) {
+        _raise();
         try { _map.setLayoutProperty(LAYER_ID, 'visibility', 'visible'); } catch (_) {}
         _map.triggerRepaint();
         return;
