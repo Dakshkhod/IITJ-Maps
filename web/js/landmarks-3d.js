@@ -33,7 +33,336 @@ const Landmarks3D = (() => {
     saffron:   new THREE.MeshStandardMaterial({ color: 0xff9a3c, metalness: 0.05, roughness: 0.80 }),
     sandTop:   new THREE.MeshStandardMaterial({ color: 0xc7a679, metalness: 0.05, roughness: 0.85 }),
     brick:     new THREE.MeshStandardMaterial({ color: 0xa86a45, metalness: 0.05, roughness: 0.85 }),
+
+    // Hostel materials — cream walls, pink banding, white pilasters, dark screens
+    hostelWall:    new THREE.MeshStandardMaterial({ color: 0xebcfa8, metalness: 0.04, roughness: 0.85 }),
+    hostelBand:    new THREE.MeshStandardMaterial({ color: 0xd99c70, metalness: 0.04, roughness: 0.85 }),
+    hostelTrim:    new THREE.MeshStandardMaterial({ color: 0xf2ebdc, metalness: 0.04, roughness: 0.70 }),
+    hostelScreen:  new THREE.MeshStandardMaterial({ color: 0x6b4a36, metalness: 0.05, roughness: 0.80 }),
+    hostelRoof:    new THREE.MeshStandardMaterial({ color: 0x847362, metalness: 0.05, roughness: 0.85 }),
+
+    // Red sandstone / brick block for Computer Centre & Chanakya
+    redStone:      new THREE.MeshStandardMaterial({ color: 0x9d5a3c, metalness: 0.05, roughness: 0.90 }),
+    redStoneDark:  new THREE.MeshStandardMaterial({ color: 0x754328, metalness: 0.05, roughness: 0.92 }),
+    portalWhite:   new THREE.MeshStandardMaterial({ color: 0xefe9dc, metalness: 0.05, roughness: 0.65 }),
+
+    // Fountain — bronze sculpture + sandstone basin
+    bronzeSculp:   new THREE.MeshStandardMaterial({ color: 0x7a4f2a, metalness: 0.6, roughness: 0.4 }),
+    water:         new THREE.MeshStandardMaterial({ color: 0x3e6b8a, metalness: 0.3, roughness: 0.25 }),
+
+    // Missile — white body, orange stripes, dark base
+    missileWhite:  new THREE.MeshStandardMaterial({ color: 0xf3f1ec, metalness: 0.20, roughness: 0.45 }),
+    missileOrange: new THREE.MeshStandardMaterial({ color: 0xff7a2e, metalness: 0.15, roughness: 0.50 }),
+    missileBase:   new THREE.MeshStandardMaterial({ color: 0x5a4632, metalness: 0.10, roughness: 0.80 }),
   };
+
+  // ─────────────────────────────────────────────────────────────────────
+  // O-LANE / Y-LANE HOSTEL (long-bar boys' / girls' hostel pattern)
+  // ─────────────────────────────────────────────────────────────────────
+  // 4 floors + parapet, ~16 m tall. Long main bar with regular bay rhythm,
+  // pink horizontal banding between floors, white vertical pilasters, end
+  // stair towers with brick-screen lattice, central entrance canopy and a
+  // small rooftop machine room. Rear "comb teeth" wings echo the polygon
+  // footprint shape.
+  //
+  // Builder accepts {length, depth, height, wingCount, wingDepth} so the
+  // SAME architectural style scales to each hostel's own footprint bbox.
+  function buildOLaneHostel(opts = {}) {
+    const length     = opts.length     ?? 66;   // X — long facade
+    const depth      = opts.depth      ?? 10;   // Z — bar depth (short)
+    const height     = opts.height     ?? 14;   // four floors × 3.5 m
+    const wingCount  = opts.wingCount  ?? 4;
+    const wingDepth  = opts.wingDepth  ?? 18;   // rear courtyard fingers
+    const g = new THREE.Group();
+
+    // Main bar
+    const bar = new THREE.Mesh(new THREE.BoxGeometry(length, height, depth), MAT.hostelWall);
+    bar.position.set(0, height / 2, 0);
+    g.add(bar);
+
+    // Pink horizontal floor bands (3 between 4 floors)
+    for (let i = 1; i <= 3; i++) {
+      const y = (height) * i / 4;
+      const stripe = new THREE.Mesh(new THREE.BoxGeometry(length + 0.10, 0.22, depth + 0.10), MAT.hostelBand);
+      stripe.position.set(0, y, 0);
+      g.add(stripe);
+    }
+
+    // White vertical pilasters on the front (+Z) face — split into bays
+    const BAYS = 9;
+    for (let i = 0; i <= BAYS; i++) {
+      const x = -length / 2 + length * i / BAYS;
+      const pil = new THREE.Mesh(new THREE.BoxGeometry(0.45, height, 0.25), MAT.hostelTrim);
+      pil.position.set(x, height / 2, depth / 2 + 0.05);
+      g.add(pil);
+    }
+
+    // End stair towers — slightly wider + half-floor taller, with screen lattice
+    const TOWER_W = 5;
+    const TOWER_HT = height + 1.2;
+    [-(length - TOWER_W) / 2, (length - TOWER_W) / 2].forEach((x) => {
+      const tower = new THREE.Mesh(new THREE.BoxGeometry(TOWER_W, TOWER_HT, depth + 0.6), MAT.hostelWall);
+      tower.position.set(x, TOWER_HT / 2, 0);
+      g.add(tower);
+      // Brick-screen lattice on the +Z front face (full-height jali)
+      const lat = new THREE.Mesh(new THREE.BoxGeometry(TOWER_W - 0.8, height - 1.5, 0.08), MAT.hostelScreen);
+      lat.position.set(x, (height + 0.5) / 2, depth / 2 + 0.34);
+      g.add(lat);
+    });
+
+    // Roof parapet
+    const parapet = new THREE.Mesh(new THREE.BoxGeometry(length + 0.2, 0.5, depth + 0.2), MAT.hostelRoof);
+    parapet.position.set(0, height + 0.25, 0);
+    g.add(parapet);
+
+    // Rooftop machine room — slightly off-centre, evokes water-tank housing
+    const mech = new THREE.Mesh(new THREE.BoxGeometry(5.5, 2.5, 3.5), MAT.hostelWall);
+    mech.position.set(length * 0.10, height + 1.25, 0);
+    g.add(mech);
+
+    // Central entrance canopy projecting from +Z face
+    const canopy = new THREE.Mesh(new THREE.BoxGeometry(6.5, 0.4, 2.5), MAT.hostelTrim);
+    canopy.position.set(0, 3.6, depth / 2 + 1.5);
+    g.add(canopy);
+    const canopyPosts = new THREE.Mesh(new THREE.BoxGeometry(6.5, 3.4, 0.25), MAT.hostelTrim);
+    canopyPosts.position.set(0, 1.7, depth / 2 + 2.6);
+    g.add(canopyPosts);
+
+    // Rear "comb teeth" wings extending −Z, evenly spaced along the bar
+    const WING_W = 5.5;
+    for (let i = 0; i < wingCount; i++) {
+      const t = (i + 0.5) / wingCount;
+      const x = -length * 0.42 + length * 0.84 * t;
+      const wing = new THREE.Mesh(new THREE.BoxGeometry(WING_W, height, wingDepth), MAT.hostelWall);
+      wing.position.set(x, height / 2, -wingDepth / 2 - depth / 2 + 0.1);
+      g.add(wing);
+      // Pink band continuation onto wing roof joint
+      for (let j = 1; j <= 3; j++) {
+        const y = height * j / 4;
+        const wb = new THREE.Mesh(new THREE.BoxGeometry(WING_W + 0.08, 0.18, wingDepth + 0.08), MAT.hostelBand);
+        wb.position.set(x, y, -wingDepth / 2 - depth / 2 + 0.1);
+        g.add(wb);
+      }
+    }
+
+    return g;
+  }
+
+  // ─────────────────────────────────────────────────────────────────────
+  // COMPUTER CENTRE — sandstone block with white portal frame entrance
+  // ─────────────────────────────────────────────────────────────────────
+  // Footprint ~39 × 42 m. 3 floors (~13 m). Symmetric stepped massing
+  // with a central tall entrance volume flanked by two lower side wings,
+  // joined by a tall WHITE structural portal frame at the entrance.
+  function buildComputerCentre() {
+    const g = new THREE.Group();
+    const W = 36;             // E-W
+    const D = 38;             // N-S
+    const H_SIDE = 12;        // side wings
+    const H_CENTRE = 15;      // central entrance volume
+
+    // Two side wings (slightly recessed compared to the centre)
+    const WING_W = 12;
+    const WING_D = D;
+    [-W / 2 + WING_W / 2, W / 2 - WING_W / 2].forEach((x) => {
+      const wing = new THREE.Mesh(new THREE.BoxGeometry(WING_W, H_SIDE, WING_D), MAT.redStone);
+      wing.position.set(x, H_SIDE / 2, 0);
+      g.add(wing);
+      // dark capping band
+      const cap = new THREE.Mesh(new THREE.BoxGeometry(WING_W + 0.2, 0.6, WING_D + 0.2), MAT.redStoneDark);
+      cap.position.set(x, H_SIDE + 0.3, 0);
+      g.add(cap);
+    });
+
+    // Central recessed entrance volume
+    const CENTRE_W = W - 2 * WING_W;
+    const centre = new THREE.Mesh(new THREE.BoxGeometry(CENTRE_W + 4, H_CENTRE, D - 6), MAT.redStone);
+    centre.position.set(0, H_CENTRE / 2, -2);
+    g.add(centre);
+    const centreCap = new THREE.Mesh(new THREE.BoxGeometry(CENTRE_W + 4.4, 0.6, D - 5.6), MAT.redStoneDark);
+    centreCap.position.set(0, H_CENTRE + 0.3, -2);
+    g.add(centreCap);
+
+    // White portal frame — two tall vertical columns + a horizontal beam
+    const PORT_H = H_CENTRE - 1;
+    const COL_W = 1.5;
+    const portalSpan = CENTRE_W + 2;
+    [-portalSpan / 2, portalSpan / 2].forEach((x) => {
+      const col = new THREE.Mesh(new THREE.BoxGeometry(COL_W, PORT_H, 1.4), MAT.portalWhite);
+      col.position.set(x, PORT_H / 2, D / 2 - 4);
+      g.add(col);
+    });
+    const beam = new THREE.Mesh(new THREE.BoxGeometry(portalSpan + COL_W, 1.2, 1.4), MAT.portalWhite);
+    beam.position.set(0, PORT_H - 0.6, D / 2 - 4);
+    g.add(beam);
+    // Small horizontal cross-beams (the three-bar look from the photo)
+    for (let i = 0; i < 3; i++) {
+      const cb = new THREE.Mesh(new THREE.BoxGeometry(portalSpan, 0.35, 1.0), MAT.portalWhite);
+      cb.position.set(0, PORT_H - 1.4 - i * 0.7, D / 2 - 3.4);
+      g.add(cb);
+    }
+
+    // Dark recessed entrance door
+    const door = new THREE.Mesh(new THREE.BoxGeometry(4, 4, 0.4), MAT.entrance);
+    door.position.set(0, 2, D / 2 - 3.2);
+    g.add(door);
+
+    return g;
+  }
+
+  // ─────────────────────────────────────────────────────────────────────
+  // CHANAKYA COMPLEX — Office of Administration + Office of Students
+  // ─────────────────────────────────────────────────────────────────────
+  // Two long parallel sandstone/brick blocks with brick-screen jali walls,
+  // joined by a courtyard. Distinctive WHITE concrete portal frame at the
+  // main entrance, with a stepped/curved top edge on the brick mass.
+  // Builder is parametric so it can render the OoA and OoS halves at
+  // their separate footprints.
+  function buildChanakyaWing(opts = {}) {
+    const length = opts.length ?? 38;     // X — long axis (E-W)
+    const depth  = opts.depth  ?? 16;
+    const height = opts.height ?? 14;
+    const portal = opts.portal ?? true;
+    const g = new THREE.Group();
+
+    // Main brick-jali block
+    const block = new THREE.Mesh(new THREE.BoxGeometry(length, height, depth), MAT.redStone);
+    block.position.set(0, height / 2, 0);
+    g.add(block);
+
+    // Sloping top edge (a thin wedge sitting on the +X end) — abstracted as
+    // a slightly taller block on one end suggesting the curved cap
+    const cap = new THREE.Mesh(new THREE.BoxGeometry(length * 0.25, 2.0, depth + 0.1), MAT.redStone);
+    cap.position.set(length * 0.375, height + 1.0, 0);
+    g.add(cap);
+
+    // Horizontal cream sandstone bands (3 across the height)
+    for (let i = 1; i <= 3; i++) {
+      const y = height * i / 4;
+      const band = new THREE.Mesh(new THREE.BoxGeometry(length + 0.08, 0.25, depth + 0.08), MAT.portalWhite);
+      band.position.set(0, y, 0);
+      g.add(band);
+    }
+
+    // Cornice
+    const cornice = new THREE.Mesh(new THREE.BoxGeometry(length + 0.3, 0.4, depth + 0.3), MAT.redStoneDark);
+    cornice.position.set(0, height + 0.2, 0);
+    g.add(cornice);
+
+    // White portal frame at one end (acts as the building's main entrance)
+    if (portal) {
+      const PORT_H = height + 2;
+      const portW  = 6;
+      [-portW / 2, portW / 2].forEach((px) => {
+        const col = new THREE.Mesh(new THREE.BoxGeometry(1.4, PORT_H, 1.4), MAT.portalWhite);
+        col.position.set(-length / 2 + 3 + px + portW / 2, PORT_H / 2, depth / 2 + 0.5);
+        g.add(col);
+      });
+      const top = new THREE.Mesh(new THREE.BoxGeometry(portW + 1.4, 1.4, 1.4), MAT.portalWhite);
+      top.position.set(-length / 2 + 3 + portW / 2, PORT_H - 0.7, depth / 2 + 0.5);
+      g.add(top);
+      const beam = new THREE.Mesh(new THREE.BoxGeometry(portW + 1.4, 1.0, 0.8), MAT.portalWhite);
+      beam.position.set(-length / 2 + 3 + portW / 2, height * 0.55, depth / 2 + 1.2);
+      g.add(beam);
+    }
+
+    return g;
+  }
+
+  // ─────────────────────────────────────────────────────────────────────
+  // IITJ FOUNTAIN — circular sandstone basin + bronze sculpture
+  // ─────────────────────────────────────────────────────────────────────
+  function buildFountain() {
+    const g = new THREE.Group();
+    // Outer stone apron (tiled paving look)
+    const apron = new THREE.Mesh(new THREE.CylinderGeometry(8, 8, 0.15, 48), MAT.sandTop);
+    apron.position.y = 0.075;
+    g.add(apron);
+    // Apron edge ring (darker)
+    const apronEdge = new THREE.Mesh(new THREE.TorusGeometry(8 - 0.05, 0.12, 8, 48), MAT.brick);
+    apronEdge.position.y = 0.15;
+    apronEdge.rotation.x = Math.PI / 2;
+    g.add(apronEdge);
+
+    // Stone basin rim
+    const basin = new THREE.Mesh(new THREE.CylinderGeometry(5, 5.3, 0.9, 48), MAT.sandstone);
+    basin.position.y = 0.45 + 0.15;
+    g.add(basin);
+    // Basin top torus (carved coping)
+    const basinTop = new THREE.Mesh(new THREE.TorusGeometry(5, 0.25, 10, 48), MAT.sandDark);
+    basinTop.position.y = 0.95;
+    basinTop.rotation.x = Math.PI / 2;
+    g.add(basinTop);
+
+    // Water surface
+    const water = new THREE.Mesh(new THREE.CylinderGeometry(4.6, 4.6, 0.05, 48), MAT.water);
+    water.position.y = 0.85;
+    g.add(water);
+
+    // Central sculpture — three angular blades meeting at a hub
+    const hub = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.4, 1.6, 12), MAT.bronzeSculp);
+    hub.position.y = 1.6;
+    g.add(hub);
+    for (let i = 0; i < 3; i++) {
+      const a = (i / 3) * Math.PI * 2;
+      const blade = new THREE.Mesh(new THREE.BoxGeometry(3.2, 1.2, 0.15), MAT.bronzeSculp);
+      blade.position.set(Math.cos(a) * 1.4, 2.0 + i * 0.3, Math.sin(a) * 1.4);
+      blade.rotation.y = a + Math.PI / 2;
+      blade.rotation.z = -0.45;
+      g.add(blade);
+    }
+    // Tall central spire
+    const spire = new THREE.Mesh(new THREE.ConeGeometry(0.25, 2.5, 8), MAT.bronzeSculp);
+    spire.position.y = 3.6;
+    g.add(spire);
+
+    return g;
+  }
+
+  // ─────────────────────────────────────────────────────────────────────
+  // PRITHVI MISSILE — upright missile on a low pedestal with garden walls
+  // ─────────────────────────────────────────────────────────────────────
+  function buildPrithviMissile() {
+    const g = new THREE.Group();
+
+    // Low circular boundary wall (the stone wall visible in photo)
+    const wall = new THREE.Mesh(new THREE.CylinderGeometry(10, 10, 0.7, 32, 1, true), MAT.missileBase);
+    wall.position.y = 0.35;
+    g.add(wall);
+
+    // Pedestal — small raised circular plinth
+    const plinth = new THREE.Mesh(new THREE.CylinderGeometry(1.4, 1.6, 0.8, 16), MAT.missileBase);
+    plinth.position.y = 0.4;
+    g.add(plinth);
+
+    // Missile body — cylinder
+    const BODY_H = 6.5;
+    const body = new THREE.Mesh(new THREE.CylinderGeometry(0.55, 0.55, BODY_H, 16), MAT.missileWhite);
+    body.position.y = 0.8 + BODY_H / 2;
+    g.add(body);
+    // Orange stripe near the top
+    const stripeTop = new THREE.Mesh(new THREE.CylinderGeometry(0.56, 0.56, 0.45, 16), MAT.missileOrange);
+    stripeTop.position.y = 0.8 + BODY_H - 1.2;
+    g.add(stripeTop);
+    // Orange stripe near the base
+    const stripeBot = new THREE.Mesh(new THREE.CylinderGeometry(0.56, 0.56, 0.45, 16), MAT.missileOrange);
+    stripeBot.position.y = 0.8 + 0.8;
+    g.add(stripeBot);
+    // Nose cone
+    const nose = new THREE.Mesh(new THREE.ConeGeometry(0.55, 1.6, 16), MAT.missileWhite);
+    nose.position.y = 0.8 + BODY_H + 0.8;
+    g.add(nose);
+    // Four fins at the base
+    for (let i = 0; i < 4; i++) {
+      const a = (i / 4) * Math.PI * 2;
+      const fin = new THREE.Mesh(new THREE.BoxGeometry(0.08, 1.2, 0.9), MAT.missileWhite);
+      fin.position.set(Math.cos(a) * 0.7, 0.8 + 0.6, Math.sin(a) * 0.7);
+      fin.rotation.y = a;
+      g.add(fin);
+    }
+
+    return g;
+  }
 
   // ── Procedural builder: Brain Tree tiered platform + stairs ───────────
   // Concentric ring tiers (green → white → saffron → tan) mirroring the
@@ -264,6 +593,105 @@ const Landmarks3D = (() => {
       // = 0 the world axes line up directly, no extra rotation needed.
       bearingOffset: 0,
       replacesOsmBuildings: ['773563507'],
+    },
+
+    // ── O-lane / Y-lane hostels (same architectural design × 4 footprints)
+    // Bearings come from each polygon's longest edge; bearingOffset is the
+    // angular delta from compass-east in radians (negative = rotate CW).
+    {
+      id: 'hostel-O3-3d',
+      format: 'procedural',
+      build: () => buildOLaneHostel({ length: 66, depth: 11, height: 14, wingCount: 4, wingDepth: 18 }),
+      lng: 73.1172853, lat: 26.4754698,
+      heightMeters: null,
+      rotateMeshToUp: Y_UP_TO_Z_UP,
+      bearingOffset: -6 * Math.PI / 180,        // longest edge bearing 276°/96°
+      replacesOsmBuildings: ['1412504063'],
+    },
+    {
+      id: 'hostel-O4-3d',
+      format: 'procedural',
+      build: () => buildOLaneHostel({ length: 66, depth: 11, height: 14, wingCount: 4, wingDepth: 18 }),
+      lng: 73.1170278, lat: 26.4749548,
+      heightMeters: null,
+      rotateMeshToUp: Y_UP_TO_Z_UP,
+      bearingOffset: -9 * Math.PI / 180,        // longest edge bearing 279°/99°
+      replacesOsmBuildings: ['1412504062'],
+    },
+    {
+      id: 'hostel-Y3-3d',
+      format: 'procedural',
+      build: () => buildOLaneHostel({ length: 66, depth: 11, height: 14, wingCount: 4, wingDepth: 18 }),
+      lng: 73.1171422, lat: 26.4744791,
+      heightMeters: null,
+      rotateMeshToUp: Y_UP_TO_Z_UP,
+      bearingOffset: -6 * Math.PI / 180,
+      replacesOsmBuildings: ['1412504061'],
+    },
+    {
+      id: 'hostel-Y4-3d',
+      format: 'procedural',
+      build: () => buildOLaneHostel({ length: 66, depth: 11, height: 14, wingCount: 4, wingDepth: 18 }),
+      lng: 73.1168888, lat: 26.4740272,
+      heightMeters: null,
+      rotateMeshToUp: Y_UP_TO_Z_UP,
+      bearingOffset: -6 * Math.PI / 180,
+      replacesOsmBuildings: ['1412504060'],
+    },
+
+    // Computer Centre — square footprint, longest edge bearing 4° (N-S)
+    {
+      id: 'computer-centre-3d',
+      format: 'procedural',
+      build: buildComputerCentre,
+      lng: 73.1140009, lat: 26.4715934,
+      heightMeters: null,
+      rotateMeshToUp: Y_UP_TO_Z_UP,
+      // Footprint long axis runs N-S, mesh long axis (X) is E-W → rotate 86°
+      bearingOffset: 86 * Math.PI / 180,
+      replacesOsmBuildings: ['773690911'],
+    },
+
+    // Chanakya Complex — two wings (Office of Administration + Office of Students)
+    {
+      id: 'chanakya-admin-3d',
+      format: 'procedural',
+      build: () => buildChanakyaWing({ length: 40, depth: 16, height: 13, portal: true }),
+      lng: 73.1131579, lat: 26.4711373,
+      heightMeters: null,
+      rotateMeshToUp: Y_UP_TO_Z_UP,
+      bearingOffset: 0,                          // longest edge bearing 90° (E-W)
+      replacesOsmBuildings: ['773563509'],
+    },
+    {
+      id: 'chanakya-students-3d',
+      format: 'procedural',
+      build: () => buildChanakyaWing({ length: 34, depth: 15, height: 13, portal: false }),
+      lng: 73.1140003, lat: 26.4711330,
+      heightMeters: null,
+      rotateMeshToUp: Y_UP_TO_Z_UP,
+      bearingOffset: 0,
+      replacesOsmBuildings: ['773563508'],
+    },
+
+    // Point-feature landmarks — Fountain and Prithvi Missile
+    {
+      id: 'fountain-3d',
+      format: 'procedural',
+      build: buildFountain,
+      lng: 73.1136467, lat: 26.4704637,
+      heightMeters: null,
+      rotateMeshToUp: Y_UP_TO_Z_UP,
+      bearingOffset: 0,
+    },
+    {
+      id: 'prithvi-missile-3d',
+      format: 'procedural',
+      build: buildPrithviMissile,
+      lng: 73.1147901, lat: 26.4669087,
+      heightMeters: null,
+      rotateMeshToUp: Y_UP_TO_Z_UP,
+      bearingOffset: 0,
     },
   ];
 
