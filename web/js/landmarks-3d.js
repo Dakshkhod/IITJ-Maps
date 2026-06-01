@@ -41,9 +41,10 @@ const Landmarks3D = (() => {
     hostelScreen:  new THREE.MeshStandardMaterial({ color: 0x6b4a36, metalness: 0.05, roughness: 0.80 }),
     hostelRoof:    new THREE.MeshStandardMaterial({ color: 0x847362, metalness: 0.05, roughness: 0.85 }),
 
-    // Red sandstone / brick block for Computer Centre & Chanakya
-    redStone:      new THREE.MeshStandardMaterial({ color: 0x9d5a3c, metalness: 0.05, roughness: 0.90 }),
-    redStoneDark:  new THREE.MeshStandardMaterial({ color: 0x754328, metalness: 0.05, roughness: 0.92 }),
+    // All campus stone buildings use the library sandstone palette so the
+    // whole campus reads as one architectural family (per user request)
+    redStone:      new THREE.MeshStandardMaterial({ color: 0xb89a78, metalness: 0.05, roughness: 0.85 }),
+    redStoneDark:  new THREE.MeshStandardMaterial({ color: 0x8d6e4f, metalness: 0.05, roughness: 0.9 }),
     portalWhite:   new THREE.MeshStandardMaterial({ color: 0xefe9dc, metalness: 0.05, roughness: 0.65 }),
 
     // Fountain — bronze sculpture + sandstone basin
@@ -260,59 +261,87 @@ const Landmarks3D = (() => {
   }
 
   // ─────────────────────────────────────────────────────────────────────
-  // CHANAKYA COMPLEX — Office of Administration + Office of Students
+  // CHANAKYA COMPLEX — IIT-J Administrative Block
   // ─────────────────────────────────────────────────────────────────────
-  // Two long parallel sandstone/brick blocks with brick-screen jali walls,
-  // joined by a courtyard. Distinctive WHITE concrete portal frame at the
-  // main entrance, with a stepped/curved top edge on the brick mass.
-  // Builder is parametric so it can render the OoA and OoS halves at
-  // their separate footprints.
+  // Long low sandstone facade with a CURVED sloping roof cornice, a long
+  // recessed entrance protected by a WHITE concrete portico made of two
+  // tall columns supporting a series of horizontal beams. A small clock
+  // tower rises above the main block, behind the portico (see photos).
   function buildChanakyaWing(opts = {}) {
-    const length = opts.length ?? 38;     // X — long axis (E-W)
+    const length = opts.length ?? 38;
     const depth  = opts.depth  ?? 16;
-    const height = opts.height ?? 14;
+    const height = opts.height ?? 12;
     const portal = opts.portal ?? true;
     const g = new THREE.Group();
 
-    // Main brick-jali block
-    const block = new THREE.Mesh(new THREE.BoxGeometry(length, height, depth), MAT.redStone);
+    // ── Main sandstone block
+    const block = new THREE.Mesh(new THREE.BoxGeometry(length, height, depth), MAT.sandstone);
     block.position.set(0, height / 2, 0);
     g.add(block);
 
-    // Sloping top edge (a thin wedge sitting on the +X end) — abstracted as
-    // a slightly taller block on one end suggesting the curved cap
-    const cap = new THREE.Mesh(new THREE.BoxGeometry(length * 0.25, 2.0, depth + 0.1), MAT.redStone);
-    cap.position.set(length * 0.375, height + 1.0, 0);
-    g.add(cap);
-
-    // Horizontal cream sandstone bands (3 across the height)
+    // Three thin cream sandstone bands across the height for richness
     for (let i = 1; i <= 3; i++) {
       const y = height * i / 4;
-      const band = new THREE.Mesh(new THREE.BoxGeometry(length + 0.08, 0.25, depth + 0.08), MAT.portalWhite);
+      const band = new THREE.Mesh(new THREE.BoxGeometry(length + 0.06, 0.18, depth + 0.06), MAT.sandDark);
       band.position.set(0, y, 0);
       g.add(band);
     }
 
-    // Cornice
-    const cornice = new THREE.Mesh(new THREE.BoxGeometry(length + 0.3, 0.4, depth + 0.3), MAT.redStoneDark);
-    cornice.position.set(0, height + 0.2, 0);
-    g.add(cornice);
+    // ── Curved sloping cornice — approximated by three stepped slabs of
+    // decreasing width to evoke the curved roofline visible in the photo
+    const corniceSteps = [
+      { w: length + 0.6, h: 0.6,  yo: 0.0 },
+      { w: length + 0.2, h: 0.45, yo: 0.55 },
+      { w: length - 1.0, h: 0.45, yo: 1.0 },
+    ];
+    for (const cs of corniceSteps) {
+      const slab = new THREE.Mesh(new THREE.BoxGeometry(cs.w, cs.h, depth + 0.6 - cs.yo * 0.4), MAT.portalWhite);
+      slab.position.set(0, height + cs.yo + cs.h / 2, 0);
+      g.add(slab);
+    }
 
-    // White portal frame at one end (acts as the building's main entrance)
+    // ── White entrance portico — two tall front columns + a row of
+    // horizontal beams running the full portico width. Centred on the
+    // long axis, projecting from the +Z (south) face.
     if (portal) {
-      const PORT_H = height + 2;
-      const portW  = 6;
-      [-portW / 2, portW / 2].forEach((px) => {
-        const col = new THREE.Mesh(new THREE.BoxGeometry(1.4, PORT_H, 1.4), MAT.portalWhite);
-        col.position.set(-length / 2 + 3 + px + portW / 2, PORT_H / 2, depth / 2 + 0.5);
-        g.add(col);
+      const PORT_H   = height + 0.5;
+      const PORT_W   = Math.min(length * 0.55, 22);
+      const POST_W   = 1.4;
+      const POST_D   = 1.4;
+      const PROJ     = 4.5;                      // metres projecting south
+      const postZ    = depth / 2 + PROJ - POST_D / 2;
+
+      // Two structural posts
+      [-PORT_W / 2, PORT_W / 2].forEach((px) => {
+        const post = new THREE.Mesh(new THREE.BoxGeometry(POST_W, PORT_H, POST_D), MAT.portalWhite);
+        post.position.set(px, PORT_H / 2, postZ);
+        g.add(post);
       });
-      const top = new THREE.Mesh(new THREE.BoxGeometry(portW + 1.4, 1.4, 1.4), MAT.portalWhite);
-      top.position.set(-length / 2 + 3 + portW / 2, PORT_H - 0.7, depth / 2 + 0.5);
-      g.add(top);
-      const beam = new THREE.Mesh(new THREE.BoxGeometry(portW + 1.4, 1.0, 0.8), MAT.portalWhite);
-      beam.position.set(-length / 2 + 3 + portW / 2, height * 0.55, depth / 2 + 1.2);
-      g.add(beam);
+
+      // Top capping beam across both posts
+      const topBeam = new THREE.Mesh(new THREE.BoxGeometry(PORT_W + POST_W, 1.0, POST_D + 0.4), MAT.portalWhite);
+      topBeam.position.set(0, PORT_H - 0.5, postZ);
+      g.add(topBeam);
+
+      // Four horizontal cross-beams between posts (the photographed look)
+      for (let i = 0; i < 4; i++) {
+        const beamY = PORT_H - 1.6 - i * 1.5;
+        if (beamY < 2) break;
+        const beam = new THREE.Mesh(new THREE.BoxGeometry(PORT_W + 0.4, 0.3, 0.7), MAT.portalWhite);
+        beam.position.set(0, beamY, postZ + 0.05);
+        g.add(beam);
+      }
+
+      // Recessed dark entrance opening on the building's south face,
+      // centred under the portico
+      const door = new THREE.Mesh(new THREE.BoxGeometry(PORT_W * 0.55, 5, 0.4), MAT.entrance);
+      door.position.set(0, 2.5, depth / 2 + 0.2);
+      g.add(door);
+
+      // Soffit slab above the entrance (joining portico back to facade)
+      const soffit = new THREE.Mesh(new THREE.BoxGeometry(PORT_W + 0.4, 0.4, PROJ + 0.2), MAT.portalWhite);
+      soffit.position.set(0, PORT_H - 0.1, depth / 2 + PROJ / 2 - 0.1);
+      g.add(soffit);
     }
 
     return g;
