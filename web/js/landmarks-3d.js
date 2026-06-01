@@ -47,8 +47,8 @@ const Landmarks3D = (() => {
     redStoneDark:  new THREE.MeshStandardMaterial({ color: 0x8d6e4f, metalness: 0.05, roughness: 0.9 }),
     portalWhite:   new THREE.MeshStandardMaterial({ color: 0xefe9dc, metalness: 0.05, roughness: 0.65 }),
 
-    // Fountain — bronze sculpture + sandstone basin
-    bronzeSculp:   new THREE.MeshStandardMaterial({ color: 0x7a4f2a, metalness: 0.6, roughness: 0.4 }),
+    // Fountain — polished chrome sculpture + sandstone basin
+    chromeSculp:   new THREE.MeshStandardMaterial({ color: 0xd6d6dc, metalness: 0.75, roughness: 0.18 }),
     water:         new THREE.MeshStandardMaterial({ color: 0x3e6b8a, metalness: 0.3, roughness: 0.25 }),
 
     // Missile — white body, orange stripes, dark base
@@ -428,51 +428,68 @@ const Landmarks3D = (() => {
   }
 
   // ─────────────────────────────────────────────────────────────────────
-  // IITJ FOUNTAIN — circular sandstone basin + bronze sculpture
+  // IITJ FOUNTAIN — circular sandstone basin + interlocking chrome rings
   // ─────────────────────────────────────────────────────────────────────
   function buildFountain() {
     const g = new THREE.Group();
-    // Outer stone apron (tiled paving look)
-    const apron = new THREE.Mesh(new THREE.CylinderGeometry(8, 8, 0.15, 48), MAT.sandTop);
+
+    // Outer stone apron (tiled paving look) — ~15 m diameter per satellite
+    const apron = new THREE.Mesh(new THREE.CylinderGeometry(7.5, 7.5, 0.15, 56), MAT.sandTop);
     apron.position.y = 0.075;
     g.add(apron);
-    // Apron edge ring (darker)
-    const apronEdge = new THREE.Mesh(new THREE.TorusGeometry(8 - 0.05, 0.12, 8, 48), MAT.brick);
+    const apronEdge = new THREE.Mesh(new THREE.TorusGeometry(7.5 - 0.05, 0.12, 8, 56), MAT.brick);
     apronEdge.position.y = 0.15;
     apronEdge.rotation.x = Math.PI / 2;
     g.add(apronEdge);
 
-    // Stone basin rim
-    const basin = new THREE.Mesh(new THREE.CylinderGeometry(5, 5.3, 0.9, 48), MAT.sandstone);
-    basin.position.y = 0.45 + 0.15;
+    // Sandstone basin — ~8 m outer diameter per satellite
+    const basin = new THREE.Mesh(new THREE.CylinderGeometry(3.8, 4.1, 0.95, 56), MAT.sandstone);
+    basin.position.y = 0.475 + 0.15;
     g.add(basin);
-    // Basin top torus (carved coping)
-    const basinTop = new THREE.Mesh(new THREE.TorusGeometry(5, 0.25, 10, 48), MAT.sandDark);
-    basinTop.position.y = 0.95;
+    // Basin top coping ring
+    const basinTop = new THREE.Mesh(new THREE.TorusGeometry(3.8, 0.22, 10, 56), MAT.sandDark);
+    basinTop.position.y = 1.0;
     basinTop.rotation.x = Math.PI / 2;
     g.add(basinTop);
 
-    // Water surface
-    const water = new THREE.Mesh(new THREE.CylinderGeometry(4.6, 4.6, 0.05, 48), MAT.water);
-    water.position.y = 0.85;
+    // Water surface inside the basin
+    const water = new THREE.Mesh(new THREE.CylinderGeometry(3.55, 3.55, 0.05, 48), MAT.water);
+    water.position.y = 0.9;
     g.add(water);
 
-    // Central sculpture — three angular blades meeting at a hub
-    const hub = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.4, 1.6, 12), MAT.bronzeSculp);
-    hub.position.y = 1.6;
-    g.add(hub);
-    for (let i = 0; i < 3; i++) {
-      const a = (i / 3) * Math.PI * 2;
-      const blade = new THREE.Mesh(new THREE.BoxGeometry(3.2, 1.2, 0.15), MAT.bronzeSculp);
-      blade.position.set(Math.cos(a) * 1.4, 2.0 + i * 0.3, Math.sin(a) * 1.4);
-      blade.rotation.y = a + Math.PI / 2;
-      blade.rotation.z = -0.45;
-      g.add(blade);
-    }
-    // Tall central spire
-    const spire = new THREE.Mesh(new THREE.ConeGeometry(0.25, 2.5, 8), MAT.bronzeSculp);
-    spire.position.y = 3.6;
-    g.add(spire);
+    // ── Sculpture: interlocking polished chrome rings (per reference photo)
+    // Two large vertical tori at perpendicular axes form the dramatic
+    // intertwined silhouette; a third smaller diagonal ring adds richness.
+    const baseY  = 1.0;       // top of basin
+    const RING_R = 1.7;       // major radius of each ring
+    const TUBE_R = 0.22;      // tube thickness
+    const ringCenterY = baseY + RING_R + 0.2;
+
+    // Ring 1 — main vertical ring, slight forward tilt
+    const r1 = new THREE.Mesh(new THREE.TorusGeometry(RING_R, TUBE_R, 10, 36), MAT.chromeSculp);
+    r1.position.y = ringCenterY;
+    r1.rotation.x = Math.PI / 2;            // stand it vertically
+    r1.rotation.y = Math.PI / 14;           // tilt around vertical
+    g.add(r1);
+
+    // Ring 2 — perpendicular vertical ring (interlocking with ring 1)
+    const r2 = new THREE.Mesh(new THREE.TorusGeometry(RING_R, TUBE_R, 10, 36), MAT.chromeSculp);
+    r2.position.y = ringCenterY;
+    r2.rotation.x = Math.PI / 2;
+    r2.rotation.y = Math.PI / 2 - Math.PI / 14;
+    g.add(r2);
+
+    // Ring 3 — smaller diagonal ring tying the composition together
+    const r3 = new THREE.Mesh(new THREE.TorusGeometry(RING_R * 0.78, TUBE_R, 10, 32), MAT.chromeSculp);
+    r3.position.y = ringCenterY - 0.4;
+    r3.rotation.x = Math.PI / 3;            // tilted off-vertical
+    r3.rotation.z = Math.PI / 4;
+    g.add(r3);
+
+    // Small chrome base at the pool floor anchoring the rings
+    const anchor = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.6, 0.4, 16), MAT.chromeSculp);
+    anchor.position.y = baseY + 0.1;
+    g.add(anchor);
 
     return g;
   }
