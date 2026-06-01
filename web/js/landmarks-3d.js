@@ -1018,9 +1018,15 @@ const Landmarks3D = (() => {
       type: 'custom',
       renderingMode: '3d',
       onAdd(map, gl) {
+        // Force a fresh scene every time MapLibre attaches the layer.
+        // onAdd only runs on actual addLayer() calls — toggling 3D off
+        // and back on goes through setLayoutProperty() instead, so the
+        // cached scene is still reused for fast toggles. This path
+        // executes after a setStyle() (satellite/dark theme swap), which
+        // invalidates the previous renderer's GPU resource cache; a
+        // rebuild here guarantees the new renderer can render correctly.
+        _sceneStale = true;
         _ensureScene();
-        // Renderer is bound to the GL context and must be recreated when
-        // MapLibre reuses or recreates its canvas after setStyle().
         _renderer = new THREE.WebGLRenderer({ canvas: map.getCanvas(), context: gl, antialias: true });
         _renderer.autoClear = false;
       },
@@ -1077,13 +1083,22 @@ const Landmarks3D = (() => {
   function show() {
     _visible = true;
     if (!_ready) return;
-    if (_map.getLayer(LAYER_ID)) {
-      try { _map.setLayoutProperty(LAYER_ID, 'visibility', 'visible'); } catch (_) {}
-    } else {
+    // If the user clicked 3D while a setStyle() is still loading (e.g.
+    // immediately after toggling satellite off), addLayer would throw
+    // "Style is not done loading". Defer until the style is ready.
+    const tryAdd = () => {
+      if (!_visible) return;
+      if (_map.getLayer(LAYER_ID)) {
+        try { _map.setLayoutProperty(LAYER_ID, 'visibility', 'visible'); } catch (_) {}
+        _map.triggerRepaint();
+        return;
+      }
+      if (!_map.isStyleLoaded()) { setTimeout(tryAdd, 80); return; }
       try { _map.addLayer(_buildLayer()); }
       catch (e) { console.warn('[Landmarks3D] addLayer failed:', e); }
-    }
-    _map.triggerRepaint();
+      _map.triggerRepaint();
+    };
+    tryAdd();
   }
 
   function hide() {
