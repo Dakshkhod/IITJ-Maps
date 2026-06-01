@@ -988,48 +988,55 @@ const Landmarks3D = (() => {
     if (!_threeReady()) { console.warn('[Landmarks3D] three.js not loaded yet'); return; }
     _map = map;
     _ready = true;
-    // MapLibre's setStyle() (used by satellite / dark-mode toggles) tears
-    // down every custom layer without firing onRemove on ours. Hook
-    // 'style.load' ONCE so we can automatically re-add our landmarks
-    // whenever the user switches base styles — without relying on the
-    // app's manual restore path racing the style-swap timing.
+
+    // MapLibre's setStyle() (called by satellite / dark / light toggles)
+    // tears every custom 3D layer down without firing onRemove. We must
+    // re-add them when the new style finishes loading. The 'styledata'
+    // event combined with isStyleLoaded() is more reliable across
+    // MapLibre versions than 'style.load' alone.
     if (!map.__landmarks3dHooked) {
       map.__landmarks3dHooked = true;
-      map.on('style.load', () => {
-        if (!_visible) return;
-        // Wait a tick so any synchronous layer adds in the app's
-        // restoreOverlays() complete before we add our custom layers on top.
-        setTimeout(() => { if (_visible) _setAllVisibility('visible'); }, 0);
+      let pending = false;
+      map.on('styledata', () => {
+        if (!_visible || pending) return;
+        pending = true;
+        const flush = () => {
+          if (!_map || !_map.isStyleLoaded()) { setTimeout(flush, 50); return; }
+          pending = false;
+          if (_visible) _rebuildAll();
+        };
+        flush();
       });
     }
   }
 
-  function _ensureLayer(cfg) {
-    // After map.setStyle(), the previous custom-layer instance is gone but
-    // we may still hold a stale `_layer` reference. Always check the
-    // current map state and add a fresh instance if missing.
-    if (!_map.getLayer(cfg.id)) {
-      try {
-        _map.addLayer(_buildLayer(cfg));
-      } catch (e) {
-        console.warn(`[Landmarks3D] addLayer ${cfg.id} failed:`, e);
-      }
-    }
-  }
-
-  function _setAllVisibility(vis) {
+  // Force-rebuild every landmark layer from scratch. Idempotent and safe
+  // to call whether or not the layers currently exist on the map.
+  function _rebuildAll() {
     if (!_ready) return;
     for (const cfg of LANDMARKS) {
-      if (vis === 'visible') _ensureLayer(cfg);
-      if (_map.getLayer(cfg.id)) {
-        try { _map.setLayoutProperty(cfg.id, 'visibility', vis); } catch (_) {}
-      }
+      try { if (_map.getLayer(cfg.id)) _map.removeLayer(cfg.id); } catch (_) {}
+      try { _map.addLayer(_buildLayer(cfg)); }
+      catch (e) { console.warn(`[Landmarks3D] addLayer ${cfg.id} failed:`, e); }
     }
-    if (vis === 'visible') _map.triggerRepaint();
+    _map.triggerRepaint();
   }
 
-  function show() { _visible = true;  _setAllVisibility('visible'); }
-  function hide() { _visible = false; _setAllVisibility('none');    }
+  function show() {
+    _visible = true;
+    if (!_ready) return;
+    _rebuildAll();
+  }
+
+  function hide() {
+    _visible = false;
+    if (!_ready) return;
+    for (const cfg of LANDMARKS) {
+      if (_map.getLayer(cfg.id)) {
+        try { _map.setLayoutProperty(cfg.id, 'visibility', 'none'); } catch (_) {}
+      }
+    }
+  }
   function isVisible() { return _visible; }
   function listIds() { return LANDMARKS.map(l => l.id); }
 
