@@ -888,94 +888,140 @@ const Landmarks3D = (() => {
     },
   ];
 
+  // ─────────────────────────────────────────────────────────────────────
+  // Singleton state — ONE scene/camera/renderer for ALL landmarks.
+  //
+  // The previous design created one custom MapLibre layer (with its own
+  // scene, camera, renderer, and a per-frame triggerRepaint) PER landmark.
+  // With ~14 landmarks that meant a continuous render loop with 14 forced
+  // repaints per frame and dozens of matrix allocations — the map never
+  // went idle, killing performance on mid-range hardware.
+  //
+  // This rewrite consolidates everything into a single layer:
+  //   • one Scene with all landmark groups, each pre-positioned in metres
+  //     relative to a fixed campus-centre origin
+  //   • one renderer + camera, reused across style swaps
+  //   • render() does not call triggerRepaint() — the scene is static
+  //   • geometry is built once during init() and cached forever
+  //   • show()/hide() just toggle layer visibility
+  // ─────────────────────────────────────────────────────────────────────
+  const LAYER_ID = 'iitj-landmarks-3d';
+  const ORIGIN_LNG = 73.1147, ORIGIN_LAT = 26.4727;   // campus centre
+
   let _map = null;
   let _ready = false;
   let _visible = false;
+  let _scene = null;
+  let _root = null;
+  let _camera = null;
+  let _renderer = null;
+  let _meshesBuilt = false;
+  let _originMcX = 0, _originMcY = 0, _originMcZ = 0;
+  let _mercPerMeter = 1;
 
-  function _buildLayer(cfg) {
+  // Reusable buffers — allocated once, mutated each frame
+  const _rotX = new THREE.Matrix4().makeRotationAxis(new THREE.Vector3(1, 0, 0), Y_UP_TO_Z_UP);
+  const _projM = new THREE.Matrix4();
+  const _localM = new THREE.Matrix4();
+  const _scaleVec = new THREE.Vector3();
+
+  function _ensureScene() {
+    if (_scene) return;
+
+    _scene = new THREE.Scene();
+    const sun = new THREE.DirectionalLight(0xffffff, 1.05);
+    sun.position.set(0.5, -1, 0.8).normalize();
+    _scene.add(sun);
+    const fill = new THREE.DirectionalLight(0xfff2d5, 0.45);
+    fill.position.set(-0.7, 0.6, 0.4).normalize();
+    _scene.add(fill);
+    _scene.add(new THREE.AmbientLight(0xffffff, 0.35));
+
+    _root = new THREE.Group();
+    _scene.add(_root);
+
+    _camera = new THREE.PerspectiveCamera();
+
+    const originMc = maplibregl.MercatorCoordinate.fromLngLat([ORIGIN_LNG, ORIGIN_LAT], 0);
+    _originMcX = originMc.x;
+    _originMcY = originMc.y;
+    _originMcZ = originMc.z;
+    _mercPerMeter = originMc.meterInMercatorCoordinateUnits();
+
+    for (const cfg of LANDMARKS) _addLandmark(cfg, originMc);
+    _meshesBuilt = true;
+  }
+
+  function _addLandmark(cfg, originMc) {
+    const group = new THREE.Group();
+    // Bearing rotates around mesh-Y (= world vertical after Rx flip)
+    group.rotation.y = cfg.bearingOffset || 0;
+
+    // Position offset from origin in mesh-local coords (Y-up).
+    // Vertex flow: group.matrix → layer Rx(π/2) → S(merc,-merc,merc) → T(originMc).
+    // For a vertex at (0,0,0), final mercator = originMc + (group.x*s, group.z*s, 0).
+    // We want this to equal cfg's mercator, so: group.x = (cfg.mc.x-origin.x)/s,
+    // group.z = (cfg.mc.y-origin.y)/s.
+    const mc = maplibregl.MercatorCoordinate.fromLngLat([cfg.lng, cfg.lat], 0);
+    const dx = (mc.x - originMc.x) / _mercPerMeter;
+    const dz = (mc.y - originMc.y) / _mercPerMeter;
+    group.position.set(dx, 0, dz);
+
+    const place = (root) => {
+      if (cfg.format !== 'procedural' && cfg.material) {
+        root.traverse((c) => {
+          if (c.isMesh) {
+            c.material = cfg.material;
+            c.geometry.computeVertexNormals();
+          }
+        });
+      }
+      const bbox = new THREE.Box3().setFromObject(root);
+      const size = new THREE.Vector3();   bbox.getSize(size);
+      const center = new THREE.Vector3(); bbox.getCenter(center);
+      const s = (cfg.heightMeters && size.y > 0) ? cfg.heightMeters / size.y : 1;
+      if (s !== 1) root.scale.set(s, s, s);
+      root.position.set(-center.x * s, -bbox.min.y * s, -center.z * s);
+      if (cfg.yOffsetMeters) root.position.y += cfg.yOffsetMeters;
+      group.add(root);
+    };
+
+    if (cfg.format === 'procedural') {
+      place(cfg.build());
+    } else if (cfg.format === 'obj') {
+      new THREE.OBJLoader().load(cfg.file, place, undefined,
+        (err) => console.warn(`[Landmarks3D:${cfg.id}] OBJ load failed:`, err));
+    } else {
+      new THREE.GLTFLoader().load(cfg.file, (g) => place(g.scene), undefined,
+        (err) => console.warn(`[Landmarks3D:${cfg.id}] GLB load failed:`, err));
+    }
+
+    _root.add(group);
+  }
+
+  function _buildLayer() {
     return {
-      id: cfg.id,
+      id: LAYER_ID,
       type: 'custom',
       renderingMode: '3d',
-
       onAdd(map, gl) {
-        this.map = map;
-        this.camera = new THREE.PerspectiveCamera(28, window.innerWidth / window.innerHeight, 0.1, 1e6);
-        this.scene = new THREE.Scene();
-
-        // Three-point lighting flatters both metal and stone
-        const sun = new THREE.DirectionalLight(0xffffff, 1.05);
-        sun.position.set(0.5, -1, 0.8).normalize();
-        this.scene.add(sun);
-        const fill = new THREE.DirectionalLight(0xfff2d5, 0.45);
-        fill.position.set(-0.7, 0.6, 0.4).normalize();
-        this.scene.add(fill);
-        this.scene.add(new THREE.AmbientLight(0xffffff, 0.35));
-
-        this.group = new THREE.Group();
-        this.scene.add(this.group);
-
-        const place = (root) => {
-          // For mesh imports (no embedded material), paint a uniform one.
-          // Procedural builds keep their own per-mesh materials.
-          if (cfg.format !== 'procedural' && cfg.material) {
-            root.traverse((c) => {
-              if (c.isMesh) {
-                c.material = cfg.material;
-                c.geometry.computeVertexNormals();
-              }
-            });
-          }
-          // Auto-fit to heightMeters first (procedural builds pass null to
-          // keep their native metre scale).
-          const bbox = new THREE.Box3().setFromObject(root);
-          const size = new THREE.Vector3();   bbox.getSize(size);
-          const center = new THREE.Vector3(); bbox.getCenter(center);
-          const s = (cfg.heightMeters && size.y > 0) ? cfg.heightMeters / size.y : 1;
-          if (s !== 1) root.scale.set(s, s, s);
-          // Position is in WORLD units, so scale the (model-space) bbox
-          // offsets by `s` before applying them — otherwise scaling the
-          // mesh up sinks its base below y=0.
-          root.position.set(-center.x * s, -bbox.min.y * s, -center.z * s);
-          // Optional lift for stacking landmarks (e.g. Brain Tree on its
-          // tiered base).
-          if (cfg.yOffsetMeters) root.position.y += cfg.yOffsetMeters;
-          this.group.add(root);
-        };
-
-        if (cfg.format === 'procedural') {
-          place(cfg.build());
-        } else if (cfg.format === 'obj') {
-          new THREE.OBJLoader().load(cfg.file, place, undefined,
-            (err) => console.warn(`[Landmarks3D:${cfg.id}] OBJ load failed:`, err));
-        } else {
-          new THREE.GLTFLoader().load(cfg.file, (g) => place(g.scene), undefined,
-            (err) => console.warn(`[Landmarks3D:${cfg.id}] GLB load failed:`, err));
-        }
-
-        this.renderer = new THREE.WebGLRenderer({ canvas: map.getCanvas(), context: gl, antialias: true });
-        this.renderer.autoClear = false;
+        _ensureScene();
+        // Renderer is bound to the GL context and must be recreated when
+        // MapLibre reuses or recreates its canvas after setStyle().
+        _renderer = new THREE.WebGLRenderer({ canvas: map.getCanvas(), context: gl, antialias: true });
+        _renderer.autoClear = false;
       },
-
-      render(gl, matrix) {
-        const mc = maplibregl.MercatorCoordinate.fromLngLat([cfg.lng, cfg.lat], 0);
-        const metersToMerc = mc.meterInMercatorCoordinateUnits();
-        // Y-up → Z-up correction (must come BEFORE bearing rotation in the
-        // multiply chain, so it's applied FIRST to vertices and bearing
-        // then rotates around the world's vertical axis instead of around
-        // a horizontal axis in mesh-local space).
-        const rotX = new THREE.Matrix4().makeRotationAxis(new THREE.Vector3(1, 0, 0), cfg.rotateMeshToUp);
-        const rotZ = new THREE.Matrix4().makeRotationAxis(new THREE.Vector3(0, 0, 1), cfg.bearingOffset);
-        const m = new THREE.Matrix4().fromArray(matrix);
-        const l = new THREE.Matrix4()
-          .makeTranslation(mc.x, mc.y, mc.z)
-          .scale(new THREE.Vector3(metersToMerc, -metersToMerc, metersToMerc))
-          .multiply(rotZ)   // applied SECOND to vertex (rotate around world Z = vertical)
-          .multiply(rotX);  // applied FIRST  to vertex (Y-up → Z-up)
-        this.camera.projectionMatrix = m.multiply(l);
-        this.renderer.resetState();
-        this.renderer.render(this.scene, this.camera);
-        this.map.triggerRepaint();
+      render(_gl, matrix) {
+        if (!_scene || !_renderer) return;
+        _scaleVec.set(_mercPerMeter, -_mercPerMeter, _mercPerMeter);
+        _localM.makeTranslation(_originMcX, _originMcY, _originMcZ)
+               .scale(_scaleVec)
+               .multiply(_rotX);
+        _projM.fromArray(matrix);
+        _camera.projectionMatrix = _projM.multiply(_localM);
+        _renderer.resetState();
+        _renderer.render(_scene, _camera);
+        // No triggerRepaint(): the scene is static, MapLibre can go idle.
       },
     };
   }
@@ -989,56 +1035,50 @@ const Landmarks3D = (() => {
     _map = map;
     _ready = true;
 
-    // MapLibre's setStyle() (called by satellite / dark / light toggles)
-    // tears every custom 3D layer down without firing onRemove. We must
-    // re-add them when the new style finishes loading. The 'styledata'
-    // event combined with isStyleLoaded() is more reliable across
-    // MapLibre versions than 'style.load' alone.
+    // After setStyle() (theme / satellite toggle) custom layers are torn
+    // down. Re-add the layer once the new style is fully loaded.
     if (!map.__landmarks3dHooked) {
       map.__landmarks3dHooked = true;
       let pending = false;
       map.on('styledata', () => {
         if (!_visible || pending) return;
+        if (_map.getLayer(LAYER_ID)) return;
         pending = true;
         const flush = () => {
-          if (!_map || !_map.isStyleLoaded()) { setTimeout(flush, 50); return; }
+          if (!_map || !_map.isStyleLoaded()) { setTimeout(flush, 80); return; }
           pending = false;
-          if (_visible) _rebuildAll();
+          if (!_visible || _map.getLayer(LAYER_ID)) return;
+          try { _map.addLayer(_buildLayer()); }
+          catch (e) { console.warn('[Landmarks3D] addLayer failed:', e); }
+          _map.triggerRepaint();
         };
         flush();
       });
     }
   }
 
-  // Force-rebuild every landmark layer from scratch. Idempotent and safe
-  // to call whether or not the layers currently exist on the map.
-  function _rebuildAll() {
-    if (!_ready) return;
-    for (const cfg of LANDMARKS) {
-      try { if (_map.getLayer(cfg.id)) _map.removeLayer(cfg.id); } catch (_) {}
-      try { _map.addLayer(_buildLayer(cfg)); }
-      catch (e) { console.warn(`[Landmarks3D] addLayer ${cfg.id} failed:`, e); }
-    }
-    _map.triggerRepaint();
-  }
-
   function show() {
     _visible = true;
     if (!_ready) return;
-    _rebuildAll();
+    if (_map.getLayer(LAYER_ID)) {
+      try { _map.setLayoutProperty(LAYER_ID, 'visibility', 'visible'); } catch (_) {}
+    } else {
+      try { _map.addLayer(_buildLayer()); }
+      catch (e) { console.warn('[Landmarks3D] addLayer failed:', e); }
+    }
+    _map.triggerRepaint();
   }
 
   function hide() {
     _visible = false;
     if (!_ready) return;
-    for (const cfg of LANDMARKS) {
-      if (_map.getLayer(cfg.id)) {
-        try { _map.setLayoutProperty(cfg.id, 'visibility', 'none'); } catch (_) {}
-      }
+    if (_map.getLayer(LAYER_ID)) {
+      try { _map.setLayoutProperty(LAYER_ID, 'visibility', 'none'); } catch (_) {}
     }
   }
+
   function isVisible() { return _visible; }
-  function listIds() { return LANDMARKS.map(l => l.id); }
+  function listIds() { return [LAYER_ID]; }
 
   // OSM building IDs that a detailed landmark replaces — used by app.js to
   // suppress the plain extrusion under the model.
