@@ -55,6 +55,16 @@ var Landmarks3D = (() => {
     missileWhite:  new THREE.MeshStandardMaterial({ color: 0xf3f1ec, metalness: 0.20, roughness: 0.45 }),
     missileOrange: new THREE.MeshStandardMaterial({ color: 0xff7a2e, metalness: 0.15, roughness: 0.50 }),
     missileBase:   new THREE.MeshStandardMaterial({ color: 0x5a4632, metalness: 0.10, roughness: 0.80 }),
+
+    // T-72 Tank — olive hull, sand turret, dark red turret top, gold wheels
+    tankOlive:  new THREE.MeshStandardMaterial({ color: 0x3d5c1e, metalness: 0.10, roughness: 0.80 }),
+    tankSand:   new THREE.MeshStandardMaterial({ color: 0xc0a06a, metalness: 0.08, roughness: 0.82 }),
+    tankRed:    new THREE.MeshStandardMaterial({ color: 0x7a1a1a, metalness: 0.10, roughness: 0.75 }),
+    tankBarrel: new THREE.MeshStandardMaterial({ color: 0x1c1c1c, metalness: 0.35, roughness: 0.55 }),
+    tankWheel:  new THREE.MeshStandardMaterial({ color: 0xd4a800, metalness: 0.25, roughness: 0.55 }),
+    tankHub:    new THREE.MeshStandardMaterial({ color: 0xcc2020, metalness: 0.20, roughness: 0.65 }),
+    tankTrack:  new THREE.MeshStandardMaterial({ color: 0x282828, metalness: 0.15, roughness: 0.90 }),
+    tankPed:    new THREE.MeshStandardMaterial({ color: 0xa89880, metalness: 0.04, roughness: 0.92 }),
   };
 
   // ─────────────────────────────────────────────────────────────────────
@@ -497,6 +507,216 @@ var Landmarks3D = (() => {
   // ─────────────────────────────────────────────────────────────────────
   // PRITHVI MISSILE — upright missile on a low pedestal with garden walls
   // ─────────────────────────────────────────────────────────────────────
+  // ── Procedural builder: T-72 Ajeya Display Tank ──────────────────────
+  // OSM way 1412392546 — concrete pedestal near the south main entrance.
+  // Tank model oriented with gun barrel pointing along +X (east). The
+  // bearingOffset in the LANDMARKS entry rotates it to face the road.
+  // All units metres. Hull dimensions based on T-72 spec:
+  //   hull 6.9m × 3.46m × 2.1m (inc. track skirts), gun ~6.8m above deck.
+  function buildTank() {
+    const g = new THREE.Group();
+
+    const PEDESTAL_H = 0.55;
+    const PEDESTAL_L = 10.0;
+    const PEDESTAL_W = 5.2;
+
+    // Concrete pedestal
+    const ped = new THREE.Mesh(new THREE.BoxGeometry(PEDESTAL_L, PEDESTAL_H, PEDESTAL_W), MAT.tankPed);
+    ped.position.y = PEDESTAL_H / 2;
+    g.add(ped);
+    // Pedestal top edge chamfer strip
+    const chamfer = new THREE.Mesh(new THREE.BoxGeometry(PEDESTAL_L + 0.1, 0.12, PEDESTAL_W + 0.1), MAT.sandDark);
+    chamfer.position.y = PEDESTAL_H;
+    g.add(chamfer);
+
+    const BY = PEDESTAL_H; // base Y of tank bottom
+
+    // ── Hull ──────────────────────────────────────────────────────
+    const HULL_L  = 6.9;
+    const HULL_W  = 3.46;
+    const HULL_H  = 1.8;
+
+    // Lower hull box (olive green)
+    const hull = new THREE.Mesh(new THREE.BoxGeometry(HULL_L, HULL_H, HULL_W), MAT.tankOlive);
+    hull.position.set(0, BY + HULL_H / 2, 0);
+    g.add(hull);
+
+    // Front glacis plate — sloped sand/tan panel
+    const GLACIS_L = 1.8, GLACIS_H = 1.5;
+    const glacis = new THREE.Mesh(new THREE.BoxGeometry(GLACIS_L, GLACIS_H, HULL_W - 0.1), MAT.tankSand);
+    glacis.rotation.z = Math.PI * 0.24;       // ~43° slope
+    glacis.position.set(HULL_L / 2 + 0.1, BY + 0.85, 0);
+    g.add(glacis);
+
+    // Rear hull overhang
+    const rear = new THREE.Mesh(new THREE.BoxGeometry(0.5, HULL_H, HULL_W), MAT.tankOlive);
+    rear.position.set(-HULL_L / 2 - 0.15, BY + HULL_H / 2, 0);
+    g.add(rear);
+
+    // Hull roof plate (slightly lighter sand tone)
+    const roof = new THREE.Mesh(new THREE.BoxGeometry(HULL_L + 0.3, 0.15, HULL_W + 0.1), MAT.tankSand);
+    roof.position.set(0, BY + HULL_H + 0.07, 0);
+    g.add(roof);
+
+    // Side skirts (armour panels above tracks)
+    const SKIRT_L = HULL_L - 0.2;
+    for (const side of [-1, 1]) {
+      const skirt = new THREE.Mesh(new THREE.BoxGeometry(SKIRT_L, 0.5, 0.15), MAT.tankOlive);
+      skirt.position.set(-0.1, BY + HULL_H - 0.25, side * (HULL_W / 2 + 0.12));
+      g.add(skirt);
+    }
+
+    // ── Tracks ────────────────────────────────────────────────────
+    const TRACK_W = 0.55;
+    for (const side of [-1, 1]) {
+      // Lower track run (flat box under hull)
+      const trackBottom = new THREE.Mesh(
+        new THREE.BoxGeometry(HULL_L + 1.2, 0.18, TRACK_W), MAT.tankTrack);
+      trackBottom.position.set(-0.1, BY + 0.09, side * (HULL_W / 2 + TRACK_W / 2 - 0.05));
+      g.add(trackBottom);
+      // Upper track run (thin strip visible above road wheels)
+      const trackTop = new THREE.Mesh(
+        new THREE.BoxGeometry(HULL_L + 0.6, 0.12, TRACK_W), MAT.tankTrack);
+      trackTop.position.set(-0.1, BY + HULL_H - 0.06, side * (HULL_W / 2 + TRACK_W / 2 - 0.05));
+      g.add(trackTop);
+    }
+
+    // ── Road wheels (6 per side, T-72) ───────────────────────────
+    const WHEEL_R  = 0.26;
+    const WHEEL_TH = 0.28;   // axle-direction thickness
+    // X positions along hull (evenly-ish spaced, front → rear)
+    const wheelXs  = [2.6, 1.56, 0.52, -0.52, -1.56, -2.6];
+    for (const wx of wheelXs) {
+      for (const side of [-1, 1]) {
+        const wz = side * (HULL_W / 2 + WHEEL_TH / 2 - 0.02);
+        const wy = BY + WHEEL_R;
+        // Outer rim — gold/yellow torus-like cylinder
+        const rim = new THREE.Mesh(
+          new THREE.CylinderGeometry(WHEEL_R, WHEEL_R, WHEEL_TH, 20),
+          MAT.tankWheel);
+        rim.rotation.x = Math.PI / 2;     // cylinder axis → Z (hull-width direction)
+        rim.position.set(wx, wy, wz);
+        g.add(rim);
+        // Inner hole (slightly smaller dark cylinder to fake hollow spoke area)
+        const inner = new THREE.Mesh(
+          new THREE.CylinderGeometry(WHEEL_R * 0.6, WHEEL_R * 0.6, WHEEL_TH + 0.02, 16),
+          MAT.tankTrack);
+        inner.rotation.x = Math.PI / 2;
+        inner.position.set(wx, wy, wz);
+        g.add(inner);
+        // Red hub cap (centre disc)
+        const hub = new THREE.Mesh(
+          new THREE.CylinderGeometry(0.09, 0.09, WHEEL_TH + 0.04, 12),
+          MAT.tankHub);
+        hub.rotation.x = Math.PI / 2;
+        hub.position.set(wx, wy, wz);
+        g.add(hub);
+      }
+    }
+
+    // Drive sprocket (rear, larger toothed wheel)
+    for (const side of [-1, 1]) {
+      const sprocket = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.32, 0.32, WHEEL_TH, 16), MAT.tankOlive);
+      sprocket.rotation.x = Math.PI / 2;
+      sprocket.position.set(-HULL_L / 2 - 0.4, BY + 0.32, side * (HULL_W / 2 + WHEEL_TH / 2));
+      g.add(sprocket);
+    }
+    // Idler wheel (front)
+    for (const side of [-1, 1]) {
+      const idler = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.30, 0.30, WHEEL_TH, 16), MAT.tankSand);
+      idler.rotation.x = Math.PI / 2;
+      idler.position.set(HULL_L / 2 + 0.4, BY + 0.30, side * (HULL_W / 2 + WHEEL_TH / 2));
+      g.add(idler);
+    }
+
+    // ── Turret ────────────────────────────────────────────────────
+    // T-72 turret: rounded ovoid, sand on sides, dark red on top dome.
+    // Position: slightly forward of hull centre.
+    const TURRET_Y = BY + HULL_H + 0.14;
+    const TURRET_CX = 0.5;   // forward offset
+
+    // Lower turret ring / collar
+    const collar = new THREE.Mesh(new THREE.CylinderGeometry(1.35, 1.4, 0.28, 24), MAT.tankSand);
+    collar.position.set(TURRET_CX, TURRET_Y + 0.14, 0);
+    g.add(collar);
+
+    // Main turret body — box base with rounded ends
+    const tBody = new THREE.Mesh(new THREE.BoxGeometry(2.8, 0.65, 2.3), MAT.tankSand);
+    tBody.position.set(TURRET_CX, TURRET_Y + 0.28 + 0.32, 0);
+    g.add(tBody);
+
+    // Turret front slope (sloped sand armour)
+    const tFront = new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.6, 2.2), MAT.tankSand);
+    tFront.rotation.z = Math.PI * 0.18;
+    tFront.position.set(TURRET_CX + 1.2, TURRET_Y + 0.55, 0);
+    g.add(tFront);
+
+    // Turret dome top (dark red hemisphere approximation using squashed sphere)
+    const tDome = new THREE.Mesh(
+      new THREE.SphereGeometry(1.18, 20, 10, 0, Math.PI * 2, 0, Math.PI / 2),
+      MAT.tankRed);
+    tDome.scale.set(1.2, 0.55, 1.05);
+    tDome.position.set(TURRET_CX, TURRET_Y + 0.28 + 0.65, 0);
+    g.add(tDome);
+
+    // Gunner's cupola (small cylinder on turret top-right)
+    const cupola = new THREE.Mesh(new THREE.CylinderGeometry(0.28, 0.28, 0.30, 16), MAT.tankOlive);
+    cupola.position.set(TURRET_CX - 0.3, TURRET_Y + 1.25, 0.6);
+    g.add(cupola);
+    const cupolid = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.3, 0.08, 16), MAT.tankOlive);
+    cupolid.position.set(TURRET_CX - 0.3, TURRET_Y + 1.42, 0.6);
+    g.add(cupolid);
+
+    // ── Main gun barrel (125mm) ───────────────────────────────────
+    // Barrel points along +X (east when bearingOffset=0).
+    // Slightly elevated (~3°) as in a static display.
+    const GUN_L   = 6.8;
+    const GUN_ELV = Math.PI / 60;    // ~3° upward elevation
+    const GUN_Y   = TURRET_Y + 0.75;
+    const GUN_OX  = TURRET_CX + 1.3; // starts at turret front
+
+    const barrelGroup = new THREE.Group();
+    barrelGroup.position.set(GUN_OX + GUN_L / 2, GUN_Y, 0);
+    barrelGroup.rotation.z = -GUN_ELV;
+
+    const barrelMesh = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.105, 0.115, GUN_L, 14), MAT.tankBarrel);
+    barrelMesh.rotation.z = Math.PI / 2;
+    barrelGroup.add(barrelMesh);
+
+    // Thermal sleeve (slightly wider mid-section, sand coloured)
+    const sleeve = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.135, 0.135, GUN_L * 0.55, 14), MAT.tankSand);
+    sleeve.rotation.z = Math.PI / 2;
+    sleeve.position.x = -GUN_L * 0.1;
+    barrelGroup.add(sleeve);
+
+    // Muzzle reference device (wider tip, sand colour)
+    const muzzle = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.14, 0.11, 0.55, 14), MAT.tankSand);
+    muzzle.rotation.z = Math.PI / 2;
+    muzzle.position.x = GUN_L / 2 + 0.27;
+    barrelGroup.add(muzzle);
+
+    g.add(barrelGroup);
+
+    // ── Indian flag on a small pole atop the turret ───────────────
+    const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.025, 0.025, 2.0, 8), MAT.tankBarrel);
+    pole.position.set(TURRET_CX + 0.1, TURRET_Y + 1.2 + 1.0, -0.2);
+    g.add(pole);
+    // Saffron, white, green stripes
+    const flagColors = [MAT.saffron, MAT.portalWhite, MAT.grass];
+    for (let i = 0; i < 3; i++) {
+      const stripe = new THREE.Mesh(new THREE.BoxGeometry(0.65, 0.20, 0.02), flagColors[i]);
+      stripe.position.set(TURRET_CX + 0.1 + 0.32, TURRET_Y + 1.2 + 2.0 - i * 0.21, -0.2);
+      g.add(stripe);
+    }
+
+    return g;
+  }
+
   function buildPrithviMissile() {
     const g = new THREE.Group();
 
@@ -919,6 +1139,21 @@ var Landmarks3D = (() => {
       lng: 73.1147901, lat: 26.4669087,
       heightMeters: null,
       rotateMeshToUp: Y_UP_TO_Z_UP,
+      bearingOffset: 0,
+    },
+    {
+      id: 'tank-3d',
+      label: 'T-72 Tank',
+      labelOffsetY: -0.4,
+      labelOffsetY3d: -1.8,
+      format: 'procedural',
+      build: buildTank,
+      // OSM way 1412392546 — display tank near south main entrance
+      lng: 73.11444, lat: 26.46691,
+      heightMeters: null,
+      rotateMeshToUp: Y_UP_TO_Z_UP,
+      // Gun faces east toward campus interior (gun built pointing +X, bearingOffset=0 = east)
+      // Adjust if satellite view shows a different orientation.
       bearingOffset: 0,
     },
   ];
