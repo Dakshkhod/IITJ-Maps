@@ -1076,8 +1076,8 @@ var Landmarks3D = (() => {
       lng: 73.1140009, lat: 26.4715934,
       heightMeters: null,
       rotateMeshToUp: Y_UP_TO_Z_UP,
-      // Footprint long axis runs N-S, mesh long axis (X) is E-W → rotate 86°
-      bearingOffset: 86 * Math.PI / 180,
+      // Footprint long axis runs N-S, mesh long axis (X) is E-W → 86° + 180° flip
+      bearingOffset: (86 + 180) * Math.PI / 180,
       replacesOsmBuildings: ['773690911'],
     },
 
