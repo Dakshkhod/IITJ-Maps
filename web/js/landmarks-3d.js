@@ -941,6 +941,7 @@ var Landmarks3D = (() => {
   //   • show()/hide() just toggle layer visibility
   // ─────────────────────────────────────────────────────────────────────
   const LAYER_ID = 'iitj-landmarks-3d';
+  const LABEL_SRC_ID = 'landmark-labels-src';
   const LABEL_LAYER_ID = 'landmark-labels';
   const ORIGIN_LNG = 73.1147, ORIGIN_LAT = 26.4727;   // campus centre
 
@@ -1079,34 +1080,116 @@ var Landmarks3D = (() => {
     return typeof THREE !== 'undefined' && THREE.OBJLoader && THREE.GLTFLoader;
   }
 
+  let _labelOpts = { satellite: false, dark: false, is3D: false, visible: true };
+
+  function _labelPaint() {
+    const onSatellite = _labelOpts.satellite;
+    const isDark = _labelOpts.dark;
+    return {
+      'text-color': onSatellite ? '#ffffff' : (isDark ? '#e2e8f0' : '#1f2937'),
+      'text-halo-color': onSatellite ? 'rgba(0,0,0,0.88)' : (isDark ? 'rgba(15,23,42,0.9)' : 'rgba(255,255,255,0.95)'),
+      'text-halo-width': onSatellite ? 2 : 1.5,
+    };
+  }
+
+  function _labelOffset() {
+    return _labelOpts.is3D ? [0, -1.1] : [0, -0.25];
+  }
+
+  function _ensureLabels() {
+    if (!_map) return;
+    const tryAdd = (attempts = 0) => {
+      if (!_map) return;
+      if (!_map.isStyleLoaded()) {
+        if (attempts < 120) setTimeout(() => tryAdd(attempts + 1), 50);
+        return;
+      }
+      const data = getLabelGeoJSON();
+      try {
+        // Older builds used the same id for the GeoJSON source and symbol
+        // layer ("landmark-labels"), which prevents glyphs from rendering.
+        if (_map.getSource('landmark-labels') && !_map.getSource(LABEL_SRC_ID)) {
+          try {
+            if (_map.getLayer(LABEL_LAYER_ID)) _map.removeLayer(LABEL_LAYER_ID);
+            _map.removeSource('landmark-labels');
+          } catch (_) {}
+        }
+
+        if (_map.getSource(LABEL_SRC_ID)) _map.getSource(LABEL_SRC_ID).setData(data);
+        else _map.addSource(LABEL_SRC_ID, { type: 'geojson', data });
+
+        const existing = _map.getStyle().layers.find(l => l.id === LABEL_LAYER_ID);
+        if (existing && existing.source !== LABEL_SRC_ID) {
+          try { _map.removeLayer(LABEL_LAYER_ID); } catch (_) {}
+        }
+
+        if (!_map.getLayer(LABEL_LAYER_ID)) {
+          _map.addLayer({
+            id: LABEL_LAYER_ID,
+            type: 'symbol',
+            source: LABEL_SRC_ID,
+            minzoom: 14,
+            layout: {
+              'text-field': ['get', 'name'],
+              'text-size': ['interpolate', ['linear'], ['zoom'], 14, 11, 18, 14],
+              'text-font': ['Open Sans Regular'],
+              'text-anchor': 'bottom',
+              'text-offset': _labelOffset(),
+              'text-max-width': 10,
+              'text-allow-overlap': true,
+              'text-ignore-placement': true,
+              visibility: _labelOpts.visible ? 'visible' : 'none',
+            },
+            paint: _labelPaint(),
+          });
+        } else {
+          _map.setPaintProperty(LABEL_LAYER_ID, 'text-color', _labelPaint()['text-color']);
+          _map.setPaintProperty(LABEL_LAYER_ID, 'text-halo-color', _labelPaint()['text-halo-color']);
+          _map.setPaintProperty(LABEL_LAYER_ID, 'text-halo-width', _labelPaint()['text-halo-width']);
+          _map.setLayoutProperty(LABEL_LAYER_ID, 'text-anchor', 'bottom');
+          _map.setLayoutProperty(LABEL_LAYER_ID, 'text-offset', _labelOffset());
+          _map.setLayoutProperty(LABEL_LAYER_ID, 'visibility', _labelOpts.visible ? 'visible' : 'none');
+        }
+        _raise();
+      } catch (e) {
+        console.error('[Landmarks3D] landmark labels failed:', e);
+      }
+    };
+    tryAdd();
+  }
+
+  /** Update label theme/visibility (call from app.js on mode toggles). */
+  function syncLabels(opts) {
+    if (opts) _labelOpts = { ..._labelOpts, ...opts };
+    if (!_map) return;
+    _ensureLabels();
+  }
+
   function init(map) {
-    if (!_threeReady()) { console.warn('[Landmarks3D] three.js not loaded yet'); return; }
     _map = map;
     _ready = true;
+    _ensureLabels();
 
-    // After setStyle() (theme / satellite toggle) MapLibre removes all
-    // custom layers but keeps the GL context (and our uploaded geometry)
-    // alive. If the landmarks are currently visible, re-add the layer
-    // once the new style finishes loading; onAdd will reuse the existing
-    // renderer and scene.
+    // After setStyle() (theme / satellite toggle) MapLibre removes symbol
+    // and custom layers; re-create labels and optionally the 3D mesh layer.
     if (!map.__landmarks3dHooked) {
       map.__landmarks3dHooked = true;
       let pending = false;
       map.on('styledata', () => {
+        _ensureLabels();
         if (!_visible || pending) return;
         pending = true;
         const flush = () => {
           if (!_map || !_map.isStyleLoaded()) { setTimeout(flush, 80); return; }
           pending = false;
           if (!_visible) return;
-          // The layer may still exist after the diff but be buried at the
-          // bottom — raise it. Otherwise (re)add it fresh on top.
           if (_map.getLayer(LAYER_ID)) {
             _raise();
           } else {
             try { _map.addLayer(_buildLayer()); }
             catch (e) { console.warn('[Landmarks3D] addLayer failed:', e); }
           }
+          _raise();
           _map.triggerRepaint();
         };
         flush();
@@ -1149,7 +1232,7 @@ var Landmarks3D = (() => {
 
   function show() {
     _visible = true;
-    if (!_ready) return;
+    if (!_ready || !_threeReady()) return;
     // If the user clicked 3D while a setStyle() is still loading (e.g.
     // immediately after toggling satellite off), addLayer would throw
     // "Style is not done loading". Defer until the style is ready.
@@ -1164,6 +1247,7 @@ var Landmarks3D = (() => {
       if (!_map.isStyleLoaded()) { setTimeout(tryAdd, 80); return; }
       try { _map.addLayer(_buildLayer()); }
       catch (e) { console.warn('[Landmarks3D] addLayer failed:', e); }
+      _raise();
       _map.triggerRepaint();
     };
     tryAdd();
@@ -1178,7 +1262,7 @@ var Landmarks3D = (() => {
   }
 
   function isVisible() { return _visible; }
-  function listIds() { return [LAYER_ID]; }
+  function listIds() { return [LAYER_ID, LABEL_LAYER_ID]; }
 
   // OSM building IDs that a detailed landmark replaces — used by app.js to
   // suppress the plain extrusion under the model.
@@ -1192,6 +1276,7 @@ var Landmarks3D = (() => {
 
   return {
     init, show, hide, isVisible, listIds, replacedBuildingIds,
-    getLabelGeoJSON, landmarkLabelNames, labelLayerId: () => LABEL_LAYER_ID, raise: _raise,
+    getLabelGeoJSON, landmarkLabelNames, labelLayerId: () => LABEL_LAYER_ID,
+    syncLabels, raise: _raise,
   };
 })();
