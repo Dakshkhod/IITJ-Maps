@@ -776,7 +776,11 @@ const Landmarks3D = (() => {
     {
       id: 'hostel-O3-3d',
       format: 'procedural',
-      build: () => buildOLaneHostel({ length: 68, bboxDepth: 42, wingCount: 5 }),
+      // Footprint sized for the polygon's central rectangular body so the
+      // ring (especially the end stair towers, which span the full bbox
+      // depth) doesn't overshoot the polygon's comb-shaped extremities
+      // and clip the surrounding roads.
+      build: () => buildOLaneHostel({ length: 58, bboxDepth: 32, wingCount: 5 }),
       lng: 73.1172853, lat: 26.4754698,
       heightMeters: null,
       rotateMeshToUp: Y_UP_TO_Z_UP,
@@ -786,7 +790,7 @@ const Landmarks3D = (() => {
     {
       id: 'hostel-O4-3d',
       format: 'procedural',
-      build: () => buildOLaneHostel({ length: 68, bboxDepth: 48, wingCount: 5 }),
+      build: () => buildOLaneHostel({ length: 58, bboxDepth: 36, wingCount: 5 }),
       lng: 73.1170278, lat: 26.4749548,
       heightMeters: null,
       rotateMeshToUp: Y_UP_TO_Z_UP,
@@ -796,7 +800,7 @@ const Landmarks3D = (() => {
     {
       id: 'hostel-Y3-3d',
       format: 'procedural',
-      build: () => buildOLaneHostel({ length: 68, bboxDepth: 42, wingCount: 5 }),
+      build: () => buildOLaneHostel({ length: 58, bboxDepth: 32, wingCount: 5 }),
       lng: 73.1171422, lat: 26.4744791,
       heightMeters: null,
       rotateMeshToUp: Y_UP_TO_Z_UP,
@@ -806,7 +810,7 @@ const Landmarks3D = (() => {
     {
       id: 'hostel-Y4-3d',
       format: 'procedural',
-      build: () => buildOLaneHostel({ length: 68, bboxDepth: 42, wingCount: 5 }),
+      build: () => buildOLaneHostel({ length: 58, bboxDepth: 32, wingCount: 5 }),
       lng: 73.1168888, lat: 26.4740272,
       heightMeters: null,
       rotateMeshToUp: Y_UP_TO_Z_UP,
