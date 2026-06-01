@@ -669,14 +669,16 @@ function addAreasLayer(data) {
     id: 'areas-labels',
     type: 'symbol',
     source: 'area-labels-src',
-    minzoom: 14,
+    minzoom: 15,
     layout: {
       'text-field': ['get', 'name'],
-      'text-size': ['interpolate', ['linear'], ['zoom'], 14, 10, 18, 13],
+      'text-size': ['interpolate', ['linear'], ['zoom'], 15, 10, 18, 13],
       'text-font': ['Open Sans Regular'],
       'text-anchor': 'center',
       'text-max-width': 10,
       'text-allow-overlap': false,
+      'text-optional': true,
+      'text-padding': 6,
       visibility: 'visible'
     },
     paint: labelPaint()
@@ -790,7 +792,7 @@ function addRoadsLayer(data) {
     id: 'campus-roads-labels',
     type: 'symbol',
     source: 'campus-roads',
-    minzoom: 15,
+    minzoom: 16,
     filter: ['all',
       ['has', 'name'],
       ['!=', ['get', 'name'], ''],
@@ -799,10 +801,12 @@ function addRoadsLayer(data) {
     layout: {
       'symbol-placement': 'line',
       'text-field': ['get', 'name'],
-      'text-size': ['interpolate', ['linear'], ['zoom'], 15, 10, 18, 12],
+      'text-size': ['interpolate', ['linear'], ['zoom'], 16, 10, 18, 12],
       'text-font': ['Open Sans Regular'],
       'text-max-angle': 30,
       'text-allow-overlap': false,
+      'text-optional': true,
+      'text-padding': 4,
       visibility: roadVis
     },
     paint: labelPaint()
@@ -883,13 +887,15 @@ function addBuildingsLayer(data) {
     type: 'symbol',
     source: 'buildings',
     filter: labelsFilter,
-    minzoom: 16,
+    minzoom: 17,
     layout: {
       'text-field': ['get', 'name'],
-      'text-size': ['interpolate', ['linear'], ['zoom'], 16, 10, 18, 13],
+      'text-size': ['interpolate', ['linear'], ['zoom'], 17, 10, 19, 13],
       'text-font': ['Open Sans Regular'],
       'text-anchor': 'center',
       'text-max-width': 8,
+      'text-optional': true,
+      'text-padding': 6,
       visibility: LAYERS.buildings ? 'visible' : 'none'
     },
     paint: labelPaint()
@@ -956,20 +962,22 @@ function addPlacesLayer(features) {
     }
   });
 
-  // Text labels (shown at zoom 15+, with collision avoidance)
+  // Text labels (shown at zoom 16+, with collision avoidance)
   map.addLayer({
     id: 'places-labels',
     type: 'symbol',
     source: 'places-points',
-    minzoom: 15,
+    minzoom: 16,
     layout: {
       'text-field': ['get', 'name'],
-      'text-size': ['interpolate', ['linear'], ['zoom'], 15, 10, 18, 13],
+      'text-size': ['interpolate', ['linear'], ['zoom'], 16, 10, 18, 13],
       'text-offset': [0, 1.2],
       'text-anchor': 'top',
       'text-max-width': 9,
       'text-font': ['Open Sans Regular'],
       'text-allow-overlap': false,
+      'text-optional': true,
+      'text-padding': 4,
       visibility: LAYERS.markers ? 'visible' : 'none'
     },
     paint: labelPaint()
