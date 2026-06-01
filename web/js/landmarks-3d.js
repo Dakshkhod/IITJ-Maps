@@ -56,15 +56,16 @@ var Landmarks3D = (() => {
     missileOrange: new THREE.MeshStandardMaterial({ color: 0xff7a2e, metalness: 0.15, roughness: 0.50 }),
     missileBase:   new THREE.MeshStandardMaterial({ color: 0x5a4632, metalness: 0.10, roughness: 0.80 }),
 
-    // T-72 Tank — olive hull, sand turret, dark red turret top, gold wheels
-    tankOlive:  new THREE.MeshStandardMaterial({ color: 0x3d5c1e, metalness: 0.10, roughness: 0.80 }),
-    tankSand:   new THREE.MeshStandardMaterial({ color: 0xc0a06a, metalness: 0.08, roughness: 0.82 }),
-    tankRed:    new THREE.MeshStandardMaterial({ color: 0x7a1a1a, metalness: 0.10, roughness: 0.75 }),
-    tankBarrel: new THREE.MeshStandardMaterial({ color: 0x1c1c1c, metalness: 0.35, roughness: 0.55 }),
-    tankWheel:  new THREE.MeshStandardMaterial({ color: 0xd4a800, metalness: 0.25, roughness: 0.55 }),
+    // T-72 Tank — near-black hull, sand/tan turret, dark brown dome, teal barrel, red muzzle cap
+    tankOlive:  new THREE.MeshStandardMaterial({ color: 0x1a2a10, metalness: 0.10, roughness: 0.85 }),
+    tankSand:   new THREE.MeshStandardMaterial({ color: 0xb59660, metalness: 0.08, roughness: 0.82 }),
+    tankRed:    new THREE.MeshStandardMaterial({ color: 0x6b3020, metalness: 0.10, roughness: 0.78 }),
+    tankBarrel: new THREE.MeshStandardMaterial({ color: 0x2a5030, metalness: 0.20, roughness: 0.65 }),
+    tankMuzzle: new THREE.MeshStandardMaterial({ color: 0xcc1010, metalness: 0.20, roughness: 0.60 }),
+    tankWheel:  new THREE.MeshStandardMaterial({ color: 0xf0c000, metalness: 0.22, roughness: 0.52 }),
     tankHub:    new THREE.MeshStandardMaterial({ color: 0xcc2020, metalness: 0.20, roughness: 0.65 }),
-    tankTrack:  new THREE.MeshStandardMaterial({ color: 0x282828, metalness: 0.15, roughness: 0.90 }),
-    tankPed:    new THREE.MeshStandardMaterial({ color: 0xa89880, metalness: 0.04, roughness: 0.92 }),
+    tankTrack:  new THREE.MeshStandardMaterial({ color: 0x1a1a1a, metalness: 0.15, roughness: 0.92 }),
+    tankPed:    new THREE.MeshStandardMaterial({ color: 0xc8c0b0, metalness: 0.04, roughness: 0.90 }),
   };
 
   // ─────────────────────────────────────────────────────────────────────
@@ -581,11 +582,11 @@ var Landmarks3D = (() => {
       g.add(trackTop);
     }
 
-    // ── Road wheels (6 per side, T-72) ───────────────────────────
-    const WHEEL_R  = 0.26;
+    // ── Road wheels (5 per side, matching photo) ─────────────────
+    const WHEEL_R  = 0.27;
     const WHEEL_TH = 0.28;   // axle-direction thickness
     // X positions along hull (evenly-ish spaced, front → rear)
-    const wheelXs  = [2.6, 1.56, 0.52, -0.52, -1.56, -2.6];
+    const wheelXs  = [2.4, 1.2, 0.0, -1.2, -2.4];
     for (const wx of wheelXs) {
       for (const side of [-1, 1]) {
         const wz = side * (HULL_W / 2 + WHEEL_TH / 2 - 0.02);
@@ -669,36 +670,38 @@ var Landmarks3D = (() => {
     cupolid.position.set(TURRET_CX - 0.3, TURRET_Y + 1.42, 0.6);
     g.add(cupolid);
 
-    // ── Main gun barrel (125mm) ───────────────────────────────────
-    // Barrel points along +X (east when bearingOffset=0).
-    // Slightly elevated (~3°) as in a static display.
-    const GUN_L   = 6.8;
-    const GUN_ELV = Math.PI / 60;    // ~3° upward elevation
-    const GUN_Y   = TURRET_Y + 0.75;
-    const GUN_OX  = TURRET_CX + 1.3; // starts at turret front
+    // ── Main gun barrel ───────────────────────────────────────────
+    // From photo: dark teal body, sand/tan thermal sleeve over the middle,
+    // and a distinctive RED muzzle cap at the tip. Gun points along +X.
+    const GUN_L   = 7.0;
+    const GUN_ELV = Math.PI / 70;    // slight upward elevation (~2.5°)
+    const GUN_Y   = TURRET_Y + 0.72;
+    const GUN_OX  = TURRET_CX + 1.4; // starts at turret front face
 
     const barrelGroup = new THREE.Group();
     barrelGroup.position.set(GUN_OX + GUN_L / 2, GUN_Y, 0);
     barrelGroup.rotation.z = -GUN_ELV;
 
+    // Full barrel (dark teal/green)
     const barrelMesh = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.105, 0.115, GUN_L, 14), MAT.tankBarrel);
+      new THREE.CylinderGeometry(0.100, 0.112, GUN_L, 14), MAT.tankBarrel);
     barrelMesh.rotation.z = Math.PI / 2;
     barrelGroup.add(barrelMesh);
 
-    // Thermal sleeve (slightly wider mid-section, sand coloured)
+    // Thermal sleeve — slightly wider, sand/tan, covers the rear ~55%
+    const SLEEVE_L = GUN_L * 0.52;
     const sleeve = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.135, 0.135, GUN_L * 0.55, 14), MAT.tankSand);
+      new THREE.CylinderGeometry(0.130, 0.130, SLEEVE_L, 14), MAT.tankSand);
     sleeve.rotation.z = Math.PI / 2;
-    sleeve.position.x = -GUN_L * 0.1;
+    sleeve.position.x = -GUN_L / 2 + SLEEVE_L / 2;  // rear half
     barrelGroup.add(sleeve);
 
-    // Muzzle reference device (wider tip, sand colour)
-    const muzzle = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.14, 0.11, 0.55, 14), MAT.tankSand);
-    muzzle.rotation.z = Math.PI / 2;
-    muzzle.position.x = GUN_L / 2 + 0.27;
-    barrelGroup.add(muzzle);
+    // RED muzzle cap — the very distinctive red tip visible in photos
+    const muzzleCap = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.130, 0.110, 0.45, 14), MAT.tankMuzzle);
+    muzzleCap.rotation.z = Math.PI / 2;
+    muzzleCap.position.x = GUN_L / 2 + 0.22;
+    barrelGroup.add(muzzleCap);
 
     g.add(barrelGroup);
 
@@ -1148,12 +1151,11 @@ var Landmarks3D = (() => {
       labelOffsetY3d: -1.8,
       format: 'procedural',
       build: buildTank,
-      // OSM way 1412392546 — display tank near south main entrance
-      lng: 73.11444, lat: 26.46691,
+      // OSM way 1412392546 — verified lat/lng from OSM #map=19/26.466766/73.114550
+      lng: 73.114550, lat: 26.466766,
       heightMeters: null,
       rotateMeshToUp: Y_UP_TO_Z_UP,
-      // Gun faces east toward campus interior (gun built pointing +X, bearingOffset=0 = east)
-      // Adjust if satellite view shows a different orientation.
+      // Gun faces east (+X = east, bearingOffset 0)
       bearingOffset: 0,
     },
   ];
