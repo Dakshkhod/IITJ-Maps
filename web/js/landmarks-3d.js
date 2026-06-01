@@ -57,93 +57,98 @@ const Landmarks3D = (() => {
   };
 
   // ─────────────────────────────────────────────────────────────────────
-  // O-LANE / Y-LANE HOSTEL (long-bar boys' / girls' hostel pattern)
+  // O-LANE / Y-LANE HOSTEL — comb / E-shape: thin north spine + south wings
   // ─────────────────────────────────────────────────────────────────────
-  // 4 floors + parapet, ~16 m tall. Long main bar with regular bay rhythm,
-  // pink horizontal banding between floors, white vertical pilasters, end
-  // stair towers with brick-screen lattice, central entrance canopy and a
-  // small rooftop machine room. Rear "comb teeth" wings echo the polygon
-  // footprint shape.
+  // Per the satellite imagery and the OSM polygons (~70 × 43 m, 20+
+  // vertices), each hostel is a long circulation spine on the NORTH side
+  // with FIVE perpendicular dorm wings projecting south, forming open
+  // courtyards between adjacent wings. 4 floors × 3.5 m = 14 m tall.
   //
-  // Builder accepts {length, depth, height, wingCount, wingDepth} so the
-  // SAME architectural style scales to each hostel's own footprint bbox.
+  // The builder is parameterized so the same architectural style fits each
+  // hostel's own footprint (length, bbox depth, wing count).
   function buildOLaneHostel(opts = {}) {
-    const length     = opts.length     ?? 66;   // X — long facade
-    const depth      = opts.depth      ?? 10;   // Z — bar depth (short)
-    const height     = opts.height     ?? 14;   // four floors × 3.5 m
-    const wingCount  = opts.wingCount  ?? 4;
-    const wingDepth  = opts.wingDepth  ?? 18;   // rear courtyard fingers
+    const length      = opts.length      ?? 66;
+    const bboxDepth   = opts.bboxDepth   ?? 42;   // total N-S extent
+    const height      = opts.height      ?? 14;
+    const wingCount   = opts.wingCount   ?? 5;
+    const spineDepth  = opts.spineDepth  ?? 8;
+    const wingWidth   = opts.wingWidth   ?? 7.5;
     const g = new THREE.Group();
 
-    // Main bar
-    const bar = new THREE.Mesh(new THREE.BoxGeometry(length, height, depth), MAT.hostelWall);
-    bar.position.set(0, height / 2, 0);
-    g.add(bar);
+    // Spine sits along the NORTH (-Z) edge of the footprint
+    const spineZ   = -(bboxDepth / 2) + spineDepth / 2;
+    const wingDepth = bboxDepth - spineDepth - 1;   // leaves 1 m south margin
+    const wingZ    = spineZ + spineDepth / 2 + wingDepth / 2;
 
-    // Pink horizontal floor bands (3 between 4 floors)
+    // ── Main spine (circulation corridor)
+    const spine = new THREE.Mesh(new THREE.BoxGeometry(length, height, spineDepth), MAT.hostelWall);
+    spine.position.set(0, height / 2, spineZ);
+    g.add(spine);
+    // Pink banding on spine
     for (let i = 1; i <= 3; i++) {
-      const y = (height) * i / 4;
-      const stripe = new THREE.Mesh(new THREE.BoxGeometry(length + 0.10, 0.22, depth + 0.10), MAT.hostelBand);
-      stripe.position.set(0, y, 0);
-      g.add(stripe);
+      const y = height * i / 4;
+      const band = new THREE.Mesh(new THREE.BoxGeometry(length + 0.10, 0.18, spineDepth + 0.10), MAT.hostelBand);
+      band.position.set(0, y, spineZ);
+      g.add(band);
     }
+    // Spine parapet
+    const spineParapet = new THREE.Mesh(new THREE.BoxGeometry(length + 0.2, 0.5, spineDepth + 0.2), MAT.hostelRoof);
+    spineParapet.position.set(0, height + 0.25, spineZ);
+    g.add(spineParapet);
 
-    // White vertical pilasters on the front (+Z) face — split into bays
-    const BAYS = 9;
-    for (let i = 0; i <= BAYS; i++) {
-      const x = -length / 2 + length * i / BAYS;
-      const pil = new THREE.Mesh(new THREE.BoxGeometry(0.45, height, 0.25), MAT.hostelTrim);
-      pil.position.set(x, height / 2, depth / 2 + 0.05);
-      g.add(pil);
-    }
-
-    // End stair towers — slightly wider + half-floor taller, with screen lattice
-    const TOWER_W = 5;
-    const TOWER_HT = height + 1.2;
-    [-(length - TOWER_W) / 2, (length - TOWER_W) / 2].forEach((x) => {
-      const tower = new THREE.Mesh(new THREE.BoxGeometry(TOWER_W, TOWER_HT, depth + 0.6), MAT.hostelWall);
-      tower.position.set(x, TOWER_HT / 2, 0);
+    // ── End stair towers — bookend the spine with brick-screen jali
+    const TOWER_W = 4.5;
+    const TOWER_HT = height + 1.4;
+    [-(length / 2) + TOWER_W / 2, (length / 2) - TOWER_W / 2].forEach((tx) => {
+      const tower = new THREE.Mesh(new THREE.BoxGeometry(TOWER_W, TOWER_HT, spineDepth + 0.5), MAT.hostelWall);
+      tower.position.set(tx, TOWER_HT / 2, spineZ);
       g.add(tower);
-      // Brick-screen lattice on the +Z front face (full-height jali)
-      const lat = new THREE.Mesh(new THREE.BoxGeometry(TOWER_W - 0.8, height - 1.5, 0.08), MAT.hostelScreen);
-      lat.position.set(x, (height + 0.5) / 2, depth / 2 + 0.34);
+      // Screen lattice on the NORTH face
+      const lat = new THREE.Mesh(new THREE.BoxGeometry(TOWER_W - 0.7, height - 1.5, 0.08), MAT.hostelScreen);
+      lat.position.set(tx, height / 2, spineZ - spineDepth / 2 - 0.3);
       g.add(lat);
     });
 
-    // Roof parapet
-    const parapet = new THREE.Mesh(new THREE.BoxGeometry(length + 0.2, 0.5, depth + 0.2), MAT.hostelRoof);
-    parapet.position.set(0, height + 0.25, 0);
-    g.add(parapet);
-
-    // Rooftop machine room — slightly off-centre, evokes water-tank housing
-    const mech = new THREE.Mesh(new THREE.BoxGeometry(5.5, 2.5, 3.5), MAT.hostelWall);
-    mech.position.set(length * 0.10, height + 1.25, 0);
-    g.add(mech);
-
-    // Central entrance canopy projecting from +Z face
-    const canopy = new THREE.Mesh(new THREE.BoxGeometry(6.5, 0.4, 2.5), MAT.hostelTrim);
-    canopy.position.set(0, 3.6, depth / 2 + 1.5);
-    g.add(canopy);
-    const canopyPosts = new THREE.Mesh(new THREE.BoxGeometry(6.5, 3.4, 0.25), MAT.hostelTrim);
-    canopyPosts.position.set(0, 1.7, depth / 2 + 2.6);
-    g.add(canopyPosts);
-
-    // Rear "comb teeth" wings extending −Z, evenly spaced along the bar
-    const WING_W = 5.5;
+    // ── Five wings projecting SOUTH from the spine
+    const wingSpacing = length / wingCount;
     for (let i = 0; i < wingCount; i++) {
-      const t = (i + 0.5) / wingCount;
-      const x = -length * 0.42 + length * 0.84 * t;
-      const wing = new THREE.Mesh(new THREE.BoxGeometry(WING_W, height, wingDepth), MAT.hostelWall);
-      wing.position.set(x, height / 2, -wingDepth / 2 - depth / 2 + 0.1);
+      const wx = -length / 2 + wingSpacing * (i + 0.5);
+
+      const wing = new THREE.Mesh(new THREE.BoxGeometry(wingWidth, height, wingDepth), MAT.hostelWall);
+      wing.position.set(wx, height / 2, wingZ);
       g.add(wing);
-      // Pink band continuation onto wing roof joint
+
+      // Pink banding on each wing
       for (let j = 1; j <= 3; j++) {
         const y = height * j / 4;
-        const wb = new THREE.Mesh(new THREE.BoxGeometry(WING_W + 0.08, 0.18, wingDepth + 0.08), MAT.hostelBand);
-        wb.position.set(x, y, -wingDepth / 2 - depth / 2 + 0.1);
-        g.add(wb);
+        const band = new THREE.Mesh(new THREE.BoxGeometry(wingWidth + 0.08, 0.18, wingDepth + 0.08), MAT.hostelBand);
+        band.position.set(wx, y, wingZ);
+        g.add(band);
       }
+      // Wing parapet
+      const wingParapet = new THREE.Mesh(new THREE.BoxGeometry(wingWidth + 0.2, 0.45, wingDepth + 0.2), MAT.hostelRoof);
+      wingParapet.position.set(wx, height + 0.225, wingZ);
+      g.add(wingParapet);
+
+      // White trim pilasters at the south end of each wing (the visible
+      // long-facade short edge that faces the courtyard between wings)
+      const wingSouthZ = wingZ + wingDepth / 2 + 0.05;
+      const pil = new THREE.Mesh(new THREE.BoxGeometry(wingWidth + 0.3, height + 0.5, 0.2), MAT.hostelTrim);
+      pil.position.set(wx, (height + 0.5) / 2, wingSouthZ);
+      g.add(pil);
     }
+
+    // ── Central entrance canopy on the middle wing's south face
+    const midWingX = 0;
+    const canopyZ  = wingZ + wingDepth / 2 + 1.5;
+    const canopy = new THREE.Mesh(new THREE.BoxGeometry(5.5, 0.4, 2.4), MAT.hostelTrim);
+    canopy.position.set(midWingX, 3.5, canopyZ);
+    g.add(canopy);
+
+    // ── Rooftop machine room on the spine
+    const mech = new THREE.Mesh(new THREE.BoxGeometry(5, 2.5, 3.2), MAT.hostelWall);
+    mech.position.set(length * 0.12, height + 1.25, spineZ);
+    g.add(mech);
 
     return g;
   }
@@ -601,7 +606,7 @@ const Landmarks3D = (() => {
     {
       id: 'hostel-O3-3d',
       format: 'procedural',
-      build: () => buildOLaneHostel({ length: 66, depth: 11, height: 14, wingCount: 4, wingDepth: 18 }),
+      build: () => buildOLaneHostel({ length: 68, bboxDepth: 42, wingCount: 5 }),
       lng: 73.1172853, lat: 26.4754698,
       heightMeters: null,
       rotateMeshToUp: Y_UP_TO_Z_UP,
@@ -611,7 +616,7 @@ const Landmarks3D = (() => {
     {
       id: 'hostel-O4-3d',
       format: 'procedural',
-      build: () => buildOLaneHostel({ length: 66, depth: 11, height: 14, wingCount: 4, wingDepth: 18 }),
+      build: () => buildOLaneHostel({ length: 68, bboxDepth: 48, wingCount: 5 }),
       lng: 73.1170278, lat: 26.4749548,
       heightMeters: null,
       rotateMeshToUp: Y_UP_TO_Z_UP,
@@ -621,7 +626,7 @@ const Landmarks3D = (() => {
     {
       id: 'hostel-Y3-3d',
       format: 'procedural',
-      build: () => buildOLaneHostel({ length: 66, depth: 11, height: 14, wingCount: 4, wingDepth: 18 }),
+      build: () => buildOLaneHostel({ length: 68, bboxDepth: 42, wingCount: 5 }),
       lng: 73.1171422, lat: 26.4744791,
       heightMeters: null,
       rotateMeshToUp: Y_UP_TO_Z_UP,
@@ -631,7 +636,7 @@ const Landmarks3D = (() => {
     {
       id: 'hostel-Y4-3d',
       format: 'procedural',
-      build: () => buildOLaneHostel({ length: 66, depth: 11, height: 14, wingCount: 4, wingDepth: 18 }),
+      build: () => buildOLaneHostel({ length: 68, bboxDepth: 42, wingCount: 5 }),
       lng: 73.1168888, lat: 26.4740272,
       heightMeters: null,
       rotateMeshToUp: Y_UP_TO_Z_UP,
