@@ -988,12 +988,32 @@ const Landmarks3D = (() => {
     if (!_threeReady()) { console.warn('[Landmarks3D] three.js not loaded yet'); return; }
     _map = map;
     _ready = true;
+    // MapLibre's setStyle() (used by satellite / dark-mode toggles) tears
+    // down every custom layer without firing onRemove on ours. Hook
+    // 'style.load' ONCE so we can automatically re-add our landmarks
+    // whenever the user switches base styles — without relying on the
+    // app's manual restore path racing the style-swap timing.
+    if (!map.__landmarks3dHooked) {
+      map.__landmarks3dHooked = true;
+      map.on('style.load', () => {
+        if (!_visible) return;
+        // Wait a tick so any synchronous layer adds in the app's
+        // restoreOverlays() complete before we add our custom layers on top.
+        setTimeout(() => { if (_visible) _setAllVisibility('visible'); }, 0);
+      });
+    }
   }
 
   function _ensureLayer(cfg) {
+    // After map.setStyle(), the previous custom-layer instance is gone but
+    // we may still hold a stale `_layer` reference. Always check the
+    // current map state and add a fresh instance if missing.
     if (!_map.getLayer(cfg.id)) {
-      try { _map.addLayer(_buildLayer(cfg)); }
-      catch (e) { console.warn(`[Landmarks3D] addLayer ${cfg.id} failed:`, e); }
+      try {
+        _map.addLayer(_buildLayer(cfg));
+      } catch (e) {
+        console.warn(`[Landmarks3D] addLayer ${cfg.id} failed:`, e);
+      }
     }
   }
 
@@ -1005,6 +1025,7 @@ const Landmarks3D = (() => {
         try { _map.setLayoutProperty(cfg.id, 'visibility', vis); } catch (_) {}
       }
     }
+    if (vis === 'visible') _map.triggerRepaint();
   }
 
   function show() { _visible = true;  _setAllVisibility('visible'); }
