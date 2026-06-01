@@ -176,6 +176,38 @@ const Landmarks3D = (() => {
   }
 
   // ─────────────────────────────────────────────────────────────────────
+  // HOSTEL LINK — small connector bridge between two adjacent hostels
+  // ─────────────────────────────────────────────────────────────────────
+  // The satellite shows O/Y hostels are chained — narrow walkway / link
+  // block spans the ~15 m gap between adjacent hostels on the east side.
+  // Built with mesh long-axis on local X; rotated perpendicular to the
+  // hostels via bearingOffset so it bridges them N-S.
+  function buildHostelLink(opts = {}) {
+    const length = opts.length ?? 16;
+    const width  = opts.width  ?? 5;
+    const height = opts.height ?? 12;
+    const g = new THREE.Group();
+
+    const body = new THREE.Mesh(new THREE.BoxGeometry(length, height, width), MAT.hostelWall);
+    body.position.set(0, height / 2, 0);
+    g.add(body);
+
+    // Pink bands matching the hostels
+    for (let i = 1; i <= 3; i++) {
+      const y = height * i / 4;
+      const band = new THREE.Mesh(new THREE.BoxGeometry(length + 0.08, 0.18, width + 0.08), MAT.hostelBand);
+      band.position.set(0, y, 0);
+      g.add(band);
+    }
+    // Parapet
+    const para = new THREE.Mesh(new THREE.BoxGeometry(length + 0.2, 0.45, width + 0.2), MAT.hostelRoof);
+    para.position.set(0, height + 0.225, 0);
+    g.add(para);
+
+    return g;
+  }
+
+  // ─────────────────────────────────────────────────────────────────────
   // COMPUTER CENTRE — sandstone block with white portal frame entrance
   // ─────────────────────────────────────────────────────────────────────
   // Footprint ~39 × 42 m. 3 floors (~13 m). Symmetric stepped massing
@@ -664,6 +696,39 @@ const Landmarks3D = (() => {
       rotateMeshToUp: Y_UP_TO_Z_UP,
       bearingOffset: -6 * Math.PI / 180,
       replacesOsmBuildings: ['1412504060'],
+    },
+
+    // ── Connector bridges between adjacent hostels (east-side chain) ─
+    // Position = midpoint of the two hostels' east ends (offset ~33 m
+    // east, 3.5 m south of each centroid for the -6° hostel orientation).
+    // bearingOffset = 84° rotates the mesh's +X long axis to compass 6°
+    // (perpendicular to the hostels), so the link spans N-S.
+    {
+      id: 'hostel-link-O3-O4',
+      format: 'procedural',
+      build: () => buildHostelLink({ length: 16, width: 5, height: 12 }),
+      lng: 73.1174867, lat: 26.4751808,
+      heightMeters: null,
+      rotateMeshToUp: Y_UP_TO_Z_UP,
+      bearingOffset: 84 * Math.PI / 180,
+    },
+    {
+      id: 'hostel-link-O4-Y3',
+      format: 'procedural',
+      build: () => buildHostelLink({ length: 16, width: 5, height: 12 }),
+      lng: 73.1174151, lat: 26.4746854,
+      heightMeters: null,
+      rotateMeshToUp: Y_UP_TO_Z_UP,
+      bearingOffset: 84 * Math.PI / 180,
+    },
+    {
+      id: 'hostel-link-Y3-Y4',
+      format: 'procedural',
+      build: () => buildHostelLink({ length: 16, width: 5, height: 12 }),
+      lng: 73.1173456, lat: 26.4742216,
+      heightMeters: null,
+      rotateMeshToUp: Y_UP_TO_Z_UP,
+      bearingOffset: 84 * Math.PI / 180,
     },
 
     // Computer Centre — square footprint, longest edge bearing 4° (N-S)
