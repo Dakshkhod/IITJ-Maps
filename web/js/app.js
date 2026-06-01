@@ -86,6 +86,79 @@ function labelPaint() {
   };
 }
 
+function buildLabeledNames(areasRes, buildingsRes) {
+  const names = new Set([
+    ...areasRes.features.map(f => (f.properties.name || '').toLowerCase().trim()),
+    ...buildingsRes.features
+      .filter(f => f.geometry.type === 'Polygon' && f.properties.name)
+      .map(f => f.properties.name.toLowerCase().trim()),
+  ].filter(Boolean));
+  if (typeof Landmarks3D !== 'undefined' && Landmarks3D.landmarkLabelNames) {
+    for (const n of Landmarks3D.landmarkLabelNames()) names.add(n);
+  }
+  return names;
+}
+
+/** Vertical text offset so labels sit above 3D meshes when pitched. */
+function syncLandmarkLabelLayout() {
+  const lid = typeof Landmarks3D !== 'undefined' ? Landmarks3D.labelLayerId() : 'landmark-labels';
+  if (!map.getLayer(lid)) return;
+  const oy = is3D ? ['get', 'offset_y_3d'] : ['get', 'offset_y'];
+  map.setLayoutProperty(lid, 'text-offset', [0, oy]);
+}
+
+function refreshLandmarkLabelPaint() {
+  const lid = typeof Landmarks3D !== 'undefined' ? Landmarks3D.labelLayerId() : 'landmark-labels';
+  if (!map.getLayer(lid)) return;
+  const p = labelPaint();
+  map.setPaintProperty(lid, 'text-color', p['text-color']);
+  map.setPaintProperty(lid, 'text-halo-color', p['text-halo-color']);
+  map.setPaintProperty(lid, 'text-halo-width', p['text-halo-width']);
+}
+
+/** Add landmark name labels once Landmarks3D is available (retries if scripts race). */
+function ensureLandmarkLabelsLayer() {
+  if (typeof Landmarks3D === 'undefined') {
+    setTimeout(ensureLandmarkLabelsLayer, 50);
+    return;
+  }
+  addLandmarkLabelsLayer();
+}
+
+function addLandmarkLabelsLayer() {
+  if (typeof Landmarks3D === 'undefined') return;
+  const srcId = 'landmark-labels';
+  const layerId = Landmarks3D.labelLayerId();
+  const data = Landmarks3D.getLabelGeoJSON();
+
+  if (map.getSource(srcId)) map.getSource(srcId).setData(data);
+  else map.addSource(srcId, { type: 'geojson', data });
+
+  if (!map.getLayer(layerId)) {
+    map.addLayer({
+      id: layerId,
+      type: 'symbol',
+      source: srcId,
+      minzoom: 15,
+      layout: {
+        'text-field': ['get', 'name'],
+        'text-size': ['interpolate', ['linear'], ['zoom'], 15, 10, 18, 13],
+        'text-font': ['Open Sans Regular'],
+        'text-anchor': 'center',
+        'text-offset': is3D ? [0, ['get', 'offset_y_3d']] : [0, ['get', 'offset_y']],
+        'text-allow-overlap': false,
+        visibility: LAYERS.buildings ? 'visible' : 'none',
+      },
+      paint: labelPaint(),
+    });
+  } else {
+    refreshLandmarkLabelPaint();
+    syncLandmarkLabelLayout();
+    map.setLayoutProperty(layerId, 'visibility', LAYERS.buildings ? 'visible' : 'none');
+  }
+  if (typeof Landmarks3D.raise === 'function') Landmarks3D.raise();
+}
+
 function buildingFillOpacity() {
   if (isSatellite) return 0;
   return ['interpolate', ['linear'], ['zoom'], 14, 0.5, 17, 0.65];
@@ -413,17 +486,13 @@ async function applyMapStyle() {
         const roadsRes     = IITJData.getRoads();
         const areasRes     = IITJData.getAreas();
 
-        labeledNames = new Set([
-          ...areasRes.features.map(f => (f.properties.name || '').toLowerCase().trim()),
-          ...buildingsRes.features
-            .filter(f => f.geometry.type === 'Polygon' && f.properties.name)
-            .map(f => f.properties.name.toLowerCase().trim()),
-        ].filter(Boolean));
+        labeledNames = buildLabeledNames(areasRes, buildingsRes);
 
         addRoadsLayer(roadsRes);
         addAreasLayer(areasRes);
         addBuildingsLayer(buildingsRes);
         addPlacesLayer(placesRes.features || []);
+        ensureLandmarkLabelsLayer();
         if (currentRoute) drawRoute(currentRoute.geometry);
 
         map.jumpTo({ center: savedCenter, zoom: savedZoom, pitch: savedPitch, bearing: savedBearing });
@@ -484,18 +553,14 @@ async function loadMapData() {
     const areasRes     = IITJData.getAreas();
     const categoriesRes = IITJData.getCategories();
 
-    // Names already labeled on buildings/areas layers — exclude from point markers
-    labeledNames = new Set([
-      ...areasRes.features.map(f => (f.properties.name || '').toLowerCase().trim()),
-      ...buildingsRes.features
-        .filter(f => f.geometry.type === 'Polygon' && f.properties.name)
-        .map(f => f.properties.name.toLowerCase().trim()),
-    ].filter(Boolean));
+    // Names already labeled on buildings/areas/landmark layers — exclude from point markers
+    labeledNames = buildLabeledNames(areasRes, buildingsRes);
 
     addRoadsLayer(roadsRes);
     addAreasLayer(areasRes);
     addBuildingsLayer(buildingsRes);
     addPlacesLayer(placesRes.features || []);
+    ensureLandmarkLabelsLayer();
     renderCategoryChips(categoriesRes);
     finishMapLayers();
   } catch (err) {
@@ -511,11 +576,12 @@ function removeCustomLayers() {
     'areas-fill', 'areas-outline', 'areas-labels',
     'campus-roads-casing', 'campus-roads-line', 'campus-roads-ped', 'campus-roads-hit', 'campus-roads-labels',
     'buildings-fill', 'buildings-outline', 'buildings-3d', 'buildings-labels',
+    'landmark-labels',
     'places-circles', 'places-labels',
     'route-glow', 'route-casing', 'route-line',
     ...((typeof Landmarks3D !== 'undefined' && Landmarks3D.listIds) ? Landmarks3D.listIds() : ['brain-tree-3d']),
   ];
-  const sources = ['named-areas', 'area-labels-src', 'campus-roads', 'buildings', 'places-points', 'route'];
+  const sources = ['named-areas', 'area-labels-src', 'campus-roads', 'buildings', 'landmark-labels', 'places-points', 'route'];
   layers.forEach(id => { try { if (map.getLayer(id)) map.removeLayer(id); } catch (_) {} });
   sources.forEach(id => { try { if (map.getSource(id)) map.removeSource(id); } catch (_) {} });
 }
@@ -925,6 +991,7 @@ function toggle3D() {
     // over satellite imagery (matches buildings-3d behaviour).
     if (!isSatellite) showLandmarks3D();
     else if (typeof Landmarks3D !== 'undefined') Landmarks3D.hide();
+    syncLandmarkLabelLayout();
     map.easeTo({ pitch: 52, bearing: -18, duration: 900 });
     showToast('3D view — drag to rotate', 'info');
   } else {
@@ -934,6 +1001,7 @@ function toggle3D() {
       if (map.getLayer('buildings-fill'))    map.setLayoutProperty('buildings-fill',    'visibility', 'visible');
       if (map.getLayer('buildings-outline')) map.setLayoutProperty('buildings-outline', 'visibility', 'visible');
     }
+    syncLandmarkLabelLayout();
     map.easeTo({ pitch: 0, bearing: 0, duration: 900 });
   }
 }
@@ -946,7 +1014,10 @@ function showLandmarks3D(attempts = 0) {
     return;
   }
   Landmarks3D.init(map);
+  ensureLandmarkLabelsLayer();
   Landmarks3D.show();
+  syncLandmarkLabelLayout();
+  if (typeof Landmarks3D.raise === 'function') Landmarks3D.raise();
 }
 
 // ============================================================
@@ -958,8 +1029,8 @@ function toggleLayer(layerName) {
 
   const layerMap = {
     buildings: is3D
-      ? ['buildings-3d', 'buildings-labels']
-      : ['buildings-fill', 'buildings-outline', 'buildings-labels'],
+      ? ['buildings-3d', 'buildings-labels', 'landmark-labels']
+      : ['buildings-fill', 'buildings-outline', 'buildings-labels', 'landmark-labels'],
     roads: ['campus-roads-casing', 'campus-roads-line', 'campus-roads-ped', 'campus-roads-hit', 'campus-roads-labels'],
     markers: ['places-circles', 'places-labels'],
   };

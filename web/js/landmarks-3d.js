@@ -11,7 +11,7 @@
  *
  * To add a landmark: push an entry into LANDMARKS. No other code changes.
  */
-const Landmarks3D = (() => {
+var Landmarks3D = (() => {
   // Three.js Y-up → MapLibre Z-up (mesh-derived models all use Y-up)
   const Y_UP_TO_Z_UP = Math.PI / 2;
 
@@ -733,6 +733,7 @@ const Landmarks3D = (() => {
   const LANDMARKS = [
     {
       id: 'brain-tree-base-3d',
+      label: null,
       format: 'procedural',
       build: buildBrainTreeBase,
       // Geometric centre of the roundabout (mean of the surrounding road
@@ -745,6 +746,9 @@ const Landmarks3D = (() => {
     },
     {
       id: 'brain-tree-3d',
+      label: 'Brain Tree',
+      labelOffsetY: -1.0,
+      labelOffsetY3d: -2.8,
       format: 'obj',
       file: 'assets/models/brain-tree.obj',
       lng: 73.1141633, lat: 26.4692796,
@@ -756,6 +760,9 @@ const Landmarks3D = (() => {
     },
     {
       id: 'library-3d',
+      label: 'Library',
+      labelOffsetY: -0.6,
+      labelOffsetY3d: -2.2,
       format: 'procedural',
       build: buildLibraryComplex,
       // True OSM polygon centroid (26.4715806, 73.1134681) shifted ~3 m
@@ -775,6 +782,9 @@ const Landmarks3D = (() => {
     // angular delta from compass-east in radians (negative = rotate CW).
     {
       id: 'hostel-O3-3d',
+      label: 'Hostel O3',
+      labelOffsetY: -0.5,
+      labelOffsetY3d: -2.0,
       format: 'procedural',
       // Footprint sized for the polygon's central rectangular body so the
       // ring (especially the end stair towers, which span the full bbox
@@ -789,6 +799,9 @@ const Landmarks3D = (() => {
     },
     {
       id: 'hostel-O4-3d',
+      label: 'Hostel O4',
+      labelOffsetY: -0.5,
+      labelOffsetY3d: -2.0,
       format: 'procedural',
       build: () => buildOLaneHostel({ length: 58, bboxDepth: 36, wingCount: 5 }),
       lng: 73.1170278, lat: 26.4749548,
@@ -799,6 +812,9 @@ const Landmarks3D = (() => {
     },
     {
       id: 'hostel-Y3-3d',
+      label: 'Hostel Y3',
+      labelOffsetY: -0.5,
+      labelOffsetY3d: -2.0,
       format: 'procedural',
       build: () => buildOLaneHostel({ length: 58, bboxDepth: 32, wingCount: 5 }),
       lng: 73.1171422, lat: 26.4744791,
@@ -809,6 +825,9 @@ const Landmarks3D = (() => {
     },
     {
       id: 'hostel-Y4-3d',
+      label: 'Hostel Y4',
+      labelOffsetY: -0.5,
+      labelOffsetY3d: -2.0,
       format: 'procedural',
       build: () => buildOLaneHostel({ length: 58, bboxDepth: 32, wingCount: 5 }),
       lng: 73.1168888, lat: 26.4740272,
@@ -822,6 +841,9 @@ const Landmarks3D = (() => {
     // Computer Centre — square footprint, longest edge bearing 4° (N-S)
     {
       id: 'computer-centre-3d',
+      label: 'Computer Centre',
+      labelOffsetY: -0.5,
+      labelOffsetY3d: -1.8,
       format: 'procedural',
       build: buildComputerCentre,
       lng: 73.1140009, lat: 26.4715934,
@@ -837,6 +859,9 @@ const Landmarks3D = (() => {
     // portico faces WEST toward OoA across the central canopy plaza).
     {
       id: 'chanakya-admin-3d',
+      label: 'Office of Administration',
+      labelOffsetY: -0.5,
+      labelOffsetY3d: -1.8,
       format: 'procedural',
       build: () => buildChanakyaWing({ length: 40, depth: 16, height: 13, portal: true, portalSide: 'east' }),
       lng: 73.1131579, lat: 26.4711373,
@@ -847,6 +872,9 @@ const Landmarks3D = (() => {
     },
     {
       id: 'chanakya-students-3d',
+      label: 'Office of Students',
+      labelOffsetY: -0.5,
+      labelOffsetY3d: -1.8,
       format: 'procedural',
       build: () => buildChanakyaWing({ length: 34, depth: 15, height: 13, portal: true, portalSide: 'west' }),
       lng: 73.1140003, lat: 26.4711330,
@@ -859,6 +887,7 @@ const Landmarks3D = (() => {
     // sits in the courtyard space midway between OoA and OoS.
     {
       id: 'iitj-name-canopy-3d',
+      label: null,
       format: 'procedural',
       build: buildIITJNameCanopy,
       lng: 73.1135791, lat: 26.4710902,           // midpoint shifted ~5 m south
@@ -870,6 +899,9 @@ const Landmarks3D = (() => {
     // Point-feature landmarks — Fountain and Prithvi Missile
     {
       id: 'fountain-3d',
+      label: 'IITJ Fountain',
+      labelOffsetY: -0.4,
+      labelOffsetY3d: -1.6,
       format: 'procedural',
       build: buildFountain,
       lng: 73.1136467, lat: 26.4704637,
@@ -879,6 +911,9 @@ const Landmarks3D = (() => {
     },
     {
       id: 'prithvi-missile-3d',
+      label: 'Prithvi Missile',
+      labelOffsetY: -0.4,
+      labelOffsetY3d: -1.5,
       format: 'procedural',
       build: buildPrithviMissile,
       lng: 73.1147901, lat: 26.4669087,
@@ -906,6 +941,7 @@ const Landmarks3D = (() => {
   //   • show()/hide() just toggle layer visibility
   // ─────────────────────────────────────────────────────────────────────
   const LAYER_ID = 'iitj-landmarks-3d';
+  const LABEL_LAYER_ID = 'landmark-labels';
   const ORIGIN_LNG = 73.1147, ORIGIN_LAT = 26.4727;   // campus centre
 
   let _map = null;
@@ -1078,13 +1114,37 @@ const Landmarks3D = (() => {
     }
   }
 
-  // Move the layer to the very top of the stack. setStyle() (satellite/
-  // dark toggle) uses MapLibre's style-diff, which keeps our custom layer
-  // alive but relocates it to the BOTTOM of the order — underneath the
-  // base-map raster, so it renders but is immediately painted over. Any
-  // time we (re)show the layer we must raise it back above everything.
+  // Move the 3D layer and its labels to the very top of the stack.
+  // setStyle() style-diff keeps custom layers but buries them under the
+  // base raster; labels must stay above the 3D mesh so they are not hidden.
   function _raise() {
+    if (!_map) return;
     try { _map.moveLayer(LAYER_ID); } catch (_) {}
+    try {
+      if (_map.getLayer(LABEL_LAYER_ID)) _map.moveLayer(LABEL_LAYER_ID);
+    } catch (_) {}
+  }
+
+  function getLabelGeoJSON() {
+    const features = [];
+    for (const cfg of LANDMARKS) {
+      if (!cfg.label) continue;
+      features.push({
+        type: 'Feature',
+        geometry: { type: 'Point', coordinates: [cfg.lng, cfg.lat] },
+        properties: {
+          name: cfg.label,
+          offset_y: cfg.labelOffsetY ?? -0.5,
+          offset_y_3d: cfg.labelOffsetY3d ?? -1.8,
+        },
+      });
+    }
+    return { type: 'FeatureCollection', features };
+  }
+
+  /** Lowercase names used to suppress duplicate place-marker labels. */
+  function landmarkLabelNames() {
+    return LANDMARKS.filter(l => l.label).map(l => l.label.toLowerCase().trim());
   }
 
   function show() {
@@ -1130,5 +1190,8 @@ const Landmarks3D = (() => {
     return ids;
   }
 
-  return { init, show, hide, isVisible, listIds, replacedBuildingIds };
+  return {
+    init, show, hide, isVisible, listIds, replacedBuildingIds,
+    getLabelGeoJSON, landmarkLabelNames, labelLayerId: () => LABEL_LAYER_ID, raise: _raise,
+  };
 })();
