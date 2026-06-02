@@ -1817,20 +1817,24 @@ function drawRoute(geometry) {
   if (map.getSource('route')) map.removeSource('route');
 
   map.addSource('route', { type: 'geojson', data });
+
+  // Outer soft halo (deep blue glow)
   map.addLayer({
     id: 'route-glow', type: 'line', source: 'route',
     layout: { 'line-join': 'round', 'line-cap': 'round' },
-    paint: { 'line-color': '#0a0a0a', 'line-width': isSatellite ? 14 : 12, 'line-opacity': isSatellite ? 0.2 : 0.12 }
+    paint: { 'line-color': '#007AFF', 'line-width': isSatellite ? 20 : 18, 'line-opacity': 0.18, 'line-blur': 4 }
   });
+  // White border / casing for contrast
   map.addLayer({
     id: 'route-casing', type: 'line', source: 'route',
     layout: { 'line-join': 'round', 'line-cap': 'round' },
-    paint: { 'line-color': '#262626', 'line-width': 7, 'line-opacity': 0.9 }
+    paint: { 'line-color': '#ffffff', 'line-width': 10, 'line-opacity': 1 }
   });
+  // Core bright blue — matches Apple Maps style
   map.addLayer({
     id: 'route-line', type: 'line', source: 'route',
     layout: { 'line-join': 'round', 'line-cap': 'round' },
-    paint: { 'line-color': '#ffffff', 'line-width': 3.5, 'line-opacity': 1 }
+    paint: { 'line-color': '#007AFF', 'line-width': 6.5, 'line-opacity': 1 }
   });
 }
 
