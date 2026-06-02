@@ -246,27 +246,49 @@
 
     <!-- Navigation Panel -->
     <div id="nav-panel" class="nav-panel hidden">
-      <div class="nav-progress-bar"><div id="nav-progress" class="nav-progress-fill"></div></div>
-      <div class="nav-header">
-        <div class="nav-destination" id="nav-destination"></div>
-        <div class="nav-stats">
-          <span class="nav-eta-badge" id="nav-eta"></span>
-          <span class="nav-dist" id="nav-distance"></span>
-        </div>
-        <button class="nav-close" id="nav-close">End</button>
+      <!-- Rerouting overlay -->
+      <div class="nav-rerouting hidden" id="nav-rerouting">
+        <div class="nav-rerouting-spinner"></div>
+        <span>Recalculating route…</span>
       </div>
-      <div class="nav-body">
-        <div class="nav-instruction">
-          <div class="nav-icon-wrap" id="nav-icon">↑</div>
-          <div class="nav-text-wrap">
-            <div class="nav-text" id="nav-text"></div>
-            <div class="nav-next hidden" id="nav-next"></div>
-          </div>
+
+      <!-- Off-route warning bar -->
+      <div class="nav-offroute hidden" id="nav-offroute">
+        <span class="nav-offroute-icon">⚠</span>
+        <span>Off route — returning to route</span>
+      </div>
+
+      <!-- Current instruction (top) -->
+      <div class="nav-instruction-bar">
+        <div class="nav-arrow-wrap" id="nav-arrow-wrap">
+          <div class="nav-arrow-icon" id="nav-arrow-icon">↑</div>
         </div>
-        <div class="nav-step-btns">
-          <button class="nav-step-btn" id="nav-prev" title="Previous step">‹</button>
-          <button class="nav-step-btn" id="nav-next-btn" title="Next step">›</button>
+        <div class="nav-instruction-main">
+          <div class="nav-turn-dist" id="nav-turn-dist">—</div>
+          <div class="nav-turn-text" id="nav-text">Calculating…</div>
         </div>
+        <button class="nav-close-btn" id="nav-close-btn" aria-label="End navigation">✕</button>
+      </div>
+
+      <!-- Next instruction -->
+      <div class="nav-next-bar hidden" id="nav-next-bar">
+        <span class="nav-next-label">Then</span>
+        <div class="nav-next-arrow" id="nav-next-arrow">↑</div>
+        <span class="nav-next-text" id="nav-next"></span>
+      </div>
+
+      <!-- Progress bar -->
+      <div class="nav-progress-bar"><div id="nav-progress" class="nav-progress-fill"></div></div>
+
+      <!-- Footer: ETA + dest + end -->
+      <div class="nav-footer">
+        <div class="nav-footer-left">
+          <div class="nav-eta-time" id="nav-eta">—</div>
+          <div class="nav-footer-sep">·</div>
+          <div class="nav-dist-rem" id="nav-distance">—</div>
+        </div>
+        <div class="nav-footer-dest" id="nav-destination">Destination</div>
+        <button class="nav-end-btn" id="nav-end-btn">End</button>
       </div>
     </div>
 

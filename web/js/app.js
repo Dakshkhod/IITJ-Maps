@@ -1755,10 +1755,12 @@ async function calculateDirectionsRoute() {
     document.getElementById('dir-summary-type').textContent = summaryType;
 
     document.getElementById('nav-destination').textContent = directionsTo.name;
-    document.getElementById('nav-eta').textContent         =
+    document.getElementById('nav-eta').textContent =
       `${route.eta_minutes} min ${route.profile === 'driving' ? 'drive' : 'walk'}`;
-    document.getElementById('nav-distance').textContent    = formatDist(route.distance);
-    updateNavInstruction();
+    document.getElementById('nav-distance').textContent = formatDist(route.distance);
+    updateNavInstruction(route.instructions[0]?.distance ?? null);
+    _showOffRoute(false);
+    _showRerouting(false);
     document.getElementById('nav-panel').classList.remove('hidden');
 
     minimizeDirectionsPanel();
@@ -1779,17 +1781,27 @@ async function calculateDirectionsRoute() {
 }
 
 // ============================================================
-// Navigation
+// Navigation — route markers + progress tracking + rerouting
 // ============================================================
+let routeOriginMarker = null;   // blue dot at start
+let routeDestMarker   = null;   // red pin at destination
+let _rerouteCooldown  = false;  // prevents spam-rerouting
+
 async function reRoute() {
-  if (!navDestination) return;
+  if (!navDestination || _rerouteCooldown) return;
+  _rerouteCooldown = true;
+  setTimeout(() => { _rerouteCooldown = false; }, 8000);
+
+  _showRerouting(true);
   if (directionsFrom && directionsTo) {
+    // Update from-point to current GPS if available
+    if (userLocation) directionsFrom = { lat: userLocation.lat, lng: userLocation.lng, name: 'Your location' };
     await calculateDirectionsRoute();
-    return;
+  } else if (userLocation) {
+    selectedPlace = navDestination;
+    await startNavigation();
   }
-  if (!userLocation) return;
-  selectedPlace = navDestination;
-  await startNavigation();
+  _showRerouting(false);
 }
 
 async function startNavigation() {
@@ -1807,52 +1819,176 @@ async function startNavigation() {
   }
 }
 
+function _removeRouteMarkers() {
+  if (routeOriginMarker) { routeOriginMarker.remove(); routeOriginMarker = null; }
+  if (routeDestMarker)   { routeDestMarker.remove();   routeDestMarker   = null; }
+}
+
+function _addRouteMarkers(startCoord, endCoord) {
+  _removeRouteMarkers();
+
+  // ── Start: blue circle ──
+  const startEl = document.createElement('div');
+  startEl.className = 'route-origin-marker';
+  routeOriginMarker = new maplibregl.Marker({ element: startEl, anchor: 'center' })
+    .setLngLat(startCoord).addTo(map);
+
+  // ── End: red teardrop pin ──
+  const endEl = document.createElement('div');
+  endEl.className = 'route-dest-marker';
+  routeDestMarker = new maplibregl.Marker({ element: endEl, anchor: 'bottom' })
+    .setLngLat(endCoord).addTo(map);
+}
+
 function drawRoute(geometry) {
   const data = { type: 'Feature', geometry };
 
   // Remove old route layers so they can be re-added on top after style reload
-  ['route-line', 'route-casing', 'route-glow'].forEach(id => {
+  ['route-traveled', 'route-glow', 'route-casing', 'route-line'].forEach(id => {
     if (map.getLayer(id)) map.removeLayer(id);
   });
-  if (map.getSource('route')) map.removeSource('route');
+  ['route', 'route-traveled-src'].forEach(id => {
+    if (map.getSource(id)) map.removeSource(id);
+  });
 
   map.addSource('route', { type: 'geojson', data });
 
-  // Outer soft halo (deep blue glow)
+  // Traveled portion source (updated as user moves)
+  map.addSource('route-traveled-src', { type: 'geojson', data: { type: 'Feature', geometry: { type: 'LineString', coordinates: [] } } });
+
+  // Outer soft glow
   map.addLayer({
     id: 'route-glow', type: 'line', source: 'route',
     layout: { 'line-join': 'round', 'line-cap': 'round' },
-    paint: { 'line-color': '#007AFF', 'line-width': isSatellite ? 20 : 18, 'line-opacity': 0.18, 'line-blur': 4 }
+    paint: { 'line-color': '#007AFF', 'line-width': 18, 'line-opacity': 0.18, 'line-blur': 4 }
   });
-  // White border / casing for contrast
+  // White casing
   map.addLayer({
     id: 'route-casing', type: 'line', source: 'route',
     layout: { 'line-join': 'round', 'line-cap': 'round' },
     paint: { 'line-color': '#ffffff', 'line-width': 10, 'line-opacity': 1 }
   });
-  // Core bright blue — matches Apple Maps style
+  // Core bright blue
   map.addLayer({
     id: 'route-line', type: 'line', source: 'route',
     layout: { 'line-join': 'round', 'line-cap': 'round' },
     paint: { 'line-color': '#007AFF', 'line-width': 6.5, 'line-opacity': 1 }
   });
+  // Gray overlay for already-traveled portion (on top)
+  map.addLayer({
+    id: 'route-traveled', type: 'line', source: 'route-traveled-src',
+    layout: { 'line-join': 'round', 'line-cap': 'round' },
+    paint: { 'line-color': '#9ca3af', 'line-width': 6.5, 'line-opacity': 0.85 }
+  });
+
+  // Place start/end markers
+  const coords = geometry.coordinates;
+  _addRouteMarkers(coords[0], coords[coords.length - 1]);
 }
 
-function updateNavInstruction() {
+// Update the "traveled" gray overlay up to segIdx/t on the route
+function _updateTraveledOverlay(segIdx, t, coords) {
+  if (!map.getSource('route-traveled-src')) return;
+  const traveled = coords.slice(0, segIdx + 1);
+  if (t > 0 && segIdx < coords.length - 1) {
+    const [x1, y1] = coords[segIdx], [x2, y2] = coords[segIdx + 1];
+    traveled.push([x1 + t * (x2 - x1), y1 + t * (y2 - y1)]);
+  }
+  map.getSource('route-traveled-src').setData({
+    type: 'Feature',
+    geometry: { type: 'LineString', coordinates: traveled }
+  });
+}
+
+// ── Direction arrow SVG icons ─────────────────────────────────
+const NAV_ARROWS = {
+  straight: '↑',
+  'turn-right': '↱',
+  'turn-left':  '↰',
+  'sharp-right':'⬏',
+  'sharp-left': '⬎',
+  arrive:       '⬤',
+  depart:       '↑',
+};
+
+function _instrArrow(instr) {
+  if (instr.type === 'arrive') return NAV_ARROWS.arrive;
+  const t = instr.text.toLowerCase();
+  if (t.includes('sharp') && t.includes('right')) return NAV_ARROWS['sharp-right'];
+  if (t.includes('sharp') && t.includes('left'))  return NAV_ARROWS['sharp-left'];
+  if (t.includes('right'))  return NAV_ARROWS['turn-right'];
+  if (t.includes('left'))   return NAV_ARROWS['turn-left'];
+  return NAV_ARROWS.straight;
+}
+
+function _showRerouting(show) {
+  document.getElementById('nav-rerouting')?.classList.toggle('hidden', !show);
+}
+function _showOffRoute(show) {
+  document.getElementById('nav-offroute')?.classList.toggle('hidden', !show);
+}
+
+// Project user onto nearest segment of route; return { segIdx, t, dist }
+function _nearestOnRoute(lat, lng, coords) {
+  let minDist = Infinity, bestSeg = 0, bestT = 0;
+  for (let i = 0; i < coords.length - 1; i++) {
+    const [x1, y1] = coords[i], [x2, y2] = coords[i + 1];
+    const dx = x2 - x1, dy = y2 - y1;
+    const lenSq = dx * dx + dy * dy;
+    let t = lenSq > 0 ? ((lng - x1) * dx + (lat - y1) * dy) / lenSq : 0;
+    t = Math.max(0, Math.min(1, t));
+    const nx = x1 + t * dx, ny = y1 + t * dy;
+    const d = haversine(lat, lng, ny, nx);
+    if (d < minDist) { minDist = d; bestSeg = i; bestT = t; }
+  }
+  return { segIdx: bestSeg, t: bestT, dist: minDist };
+}
+
+// Remaining distance along route from a given segment/t
+function _remainingDist(segIdx, t, coords) {
+  let d = 0;
+  if (segIdx < coords.length - 1) {
+    const [x1, y1] = coords[segIdx], [x2, y2] = coords[segIdx + 1];
+    const mx = x1 + t * (x2 - x1), my = y1 + t * (y2 - y1);
+    d += haversine(my, mx, y2, x2);
+  }
+  for (let i = segIdx + 1; i < coords.length - 1; i++) {
+    d += haversine(coords[i][1], coords[i][0], coords[i + 1][1], coords[i + 1][0]);
+  }
+  return d;
+}
+
+function updateNavInstruction(distToNextTurn) {
   if (!currentRoute?.instructions) return;
   const instr = currentRoute.instructions[navInstructionIndex];
   if (!instr) return;
 
-  const txt = instr.text.toLowerCase();
-  const icon = instr.type === 'arrive' ? '—' : (txt.includes('right') ? 'R' : (txt.includes('left') ? 'L' : '↑'));
-  document.getElementById('nav-icon').textContent = icon;
+  // Arrow icon
+  document.getElementById('nav-arrow-icon').textContent = _instrArrow(instr);
+
+  // Distance to next turn
+  const distEl = document.getElementById('nav-turn-dist');
+  if (distToNextTurn != null && distToNextTurn > 0) {
+    distEl.textContent = formatDist(distToNextTurn);
+  } else {
+    distEl.textContent = instr.type === 'arrive' ? 'Arriving' : (instr.distance ? formatDist(instr.distance) : '—');
+  }
+
+  // Instruction text
   document.getElementById('nav-text').textContent = instr.text;
 
-  const next   = currentRoute.instructions[navInstructionIndex + 1];
-  const nextEl = document.getElementById('nav-next');
-  if (next) { nextEl.textContent = `Then: ${next.text}`; nextEl.classList.remove('hidden'); }
-  else nextEl.classList.add('hidden');
+  // Next instruction
+  const next  = currentRoute.instructions[navInstructionIndex + 1];
+  const bar   = document.getElementById('nav-next-bar');
+  if (next && next.type !== 'arrive') {
+    document.getElementById('nav-next-arrow').textContent = _instrArrow(next);
+    document.getElementById('nav-next').textContent = next.text;
+    bar?.classList.remove('hidden');
+  } else {
+    bar?.classList.add('hidden');
+  }
 
+  // Progress bar
   const pct = Math.round(navInstructionIndex / Math.max(1, currentRoute.instructions.length - 1) * 100);
   document.getElementById('nav-progress').style.width = `${pct}%`;
 }
@@ -1861,9 +1997,17 @@ function clearRoute() {
   navigationActive = false;
   currentRoute     = null;
   navDestination   = null;
+  _rerouteCooldown = false;
+  _showOffRoute(false);
+  _showRerouting(false);
   document.getElementById('nav-panel').classList.add('hidden');
-  ['route-line', 'route-casing', 'route-glow'].forEach(id => { if (map.getLayer(id)) map.removeLayer(id); });
-  if (map.getSource('route')) map.removeSource('route');
+  ['route-traveled', 'route-glow', 'route-casing', 'route-line'].forEach(id => {
+    if (map.getLayer(id)) map.removeLayer(id);
+  });
+  ['route', 'route-traveled-src'].forEach(id => {
+    if (map.getSource(id)) map.removeSource(id);
+  });
+  _removeRouteMarkers();
 }
 
 function endNavigation() {
@@ -1890,20 +2034,59 @@ function requestUserLocation() {
         speed:    pos.coords.speed,
       };
 
-      // Auto-reroute when navigating and off-course
-      if (navigationActive && currentRoute && userLocation) {
-        const offRoute = Math.min(...currentRoute.geometry.coordinates.map(c =>
-          haversine(loc.lat, loc.lng, c[1], c[0])));
-        if (offRoute > 40) {
-          showToast('Recalculating…', 'info');
+      // ── Live navigation tracking ──────────────────────────────
+      if (navigationActive && currentRoute) {
+        const coords = currentRoute.geometry.coordinates;
+        const instrs = currentRoute.instructions;
+
+        // Project user onto nearest route segment
+        const { segIdx, t, dist: distToRoute } = _nearestOnRoute(loc.lat, loc.lng, coords);
+
+        // Update gray "traveled" overlay
+        _updateTraveledOverlay(segIdx, t, coords);
+
+        if (distToRoute > 45) {
+          // Off-route: show warning and reroute
+          _showOffRoute(true);
           reRoute();
         } else {
-          const coords = currentRoute.geometry.coordinates;
-          const frac   = (navInstructionIndex + 1) / currentRoute.instructions.length;
-          const wpIdx  = Math.min(Math.round(frac * (coords.length - 1)), coords.length - 1);
-          if (haversine(loc.lat, loc.lng, coords[wpIdx][1], coords[wpIdx][0]) < 25) {
-            navInstructionIndex = Math.min(navInstructionIndex + 1, currentRoute.instructions.length - 1);
-            updateNavInstruction();
+          _showOffRoute(false);
+
+          // Advance instruction index based on coordinate position
+          while (
+            navInstructionIndex < instrs.length - 1 &&
+            segIdx >= (instrs[navInstructionIndex + 1].coord_index ?? Infinity)
+          ) {
+            navInstructionIndex++;
+          }
+
+          // Calculate distance to next instruction's coordinate
+          const nextInstr = instrs[navInstructionIndex + 1];
+          let distToTurn = null;
+          if (nextInstr && nextInstr.coord_index != null) {
+            const nCoord = coords[nextInstr.coord_index];
+            const midLng = coords[segIdx][0] + t * (coords[segIdx + 1]?.[0] - coords[segIdx][0] || 0);
+            const midLat = coords[segIdx][1] + t * (coords[segIdx + 1]?.[1] - coords[segIdx][1] || 0);
+            // Sum distance from current snap to next instruction coord
+            distToTurn = haversine(midLat, midLng, coords[segIdx + 1]?.[1] ?? midLat, coords[segIdx + 1]?.[0] ?? midLng);
+            for (let k = segIdx + 1; k < nextInstr.coord_index; k++) {
+              distToTurn += haversine(coords[k][1], coords[k][0], coords[k + 1][1], coords[k + 1][0]);
+            }
+          }
+
+          // Remaining distance and ETA
+          const remDist = _remainingDist(segIdx, t, coords);
+          const walkMps = currentRoute.profile === 'driving' ? 8.3 : 1.4;
+          const remMin  = Math.max(1, Math.round(remDist / walkMps / 60));
+          const verb    = currentRoute.profile === 'driving' ? 'drive' : 'walk';
+          document.getElementById('nav-eta').textContent       = `${remMin} min ${verb}`;
+          document.getElementById('nav-distance').textContent  = formatDist(remDist);
+
+          updateNavInstruction(distToTurn);
+
+          // Auto-pan to follow user heading if autoFollow is on
+          if (autoFollow && loc.heading != null) {
+            map.easeTo({ center: [loc.lng, loc.lat], bearing: loc.heading, duration: 500 });
           }
         }
       }
@@ -2123,13 +2306,8 @@ function setupEventListeners() {
   });
   document.getElementById('sheet-close').addEventListener('click', closePlaceSheet);
 
-  document.getElementById('nav-close').addEventListener('click',    endNavigation);
-  document.getElementById('nav-prev').addEventListener('click', () => {
-    if (navInstructionIndex > 0) { navInstructionIndex--; updateNavInstruction(); }
-  });
-  document.getElementById('nav-next-btn').addEventListener('click', () => {
-    if (currentRoute && navInstructionIndex < currentRoute.instructions.length - 1) { navInstructionIndex++; updateNavInstruction(); }
-  });
+  document.getElementById('nav-close-btn')?.addEventListener('click', endNavigation);
+  document.getElementById('nav-end-btn')?.addEventListener('click',   endNavigation);
 
   document.getElementById('menu-btn').addEventListener('click',     openMenu);
   document.getElementById('menu-close').addEventListener('click',   closeMenu);

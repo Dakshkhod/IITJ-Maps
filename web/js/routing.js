@@ -135,7 +135,7 @@ const IITJRouter = (() => {
 
     const instructions = [];
     const initBearing = getBearing(coords[0][1], coords[0][0], coords[1][1], coords[1][0]);
-    instructions.push({ type: 'depart', text: `Head ${bearingToCompass(initBearing)}`, distance: 0, bearing: Math.round(initBearing) });
+    instructions.push({ type: 'depart', text: `Head ${bearingToCompass(initBearing)}`, distance: 0, bearing: Math.round(initBearing), coord_index: 0 });
 
     let segDist = 0;
     for (let i = 1; i < coords.length - 1; i++) {
@@ -146,12 +146,12 @@ const IITJRouter = (() => {
       if (Math.abs(turn) > 25 && segDist > 30) {
         const dir = turn > 0 ? 'right' : 'left';
         const sharp = Math.abs(turn) > 100 ? 'Sharp ' : (Math.abs(turn) > 60 ? '' : 'Slight ');
-        instructions.push({ type: 'turn', text: `${sharp}Turn ${dir}`, distance: Math.round(segDist), bearing: Math.round(b2) });
+        instructions.push({ type: 'turn', text: `${sharp}Turn ${dir}`, distance: Math.round(segDist), bearing: Math.round(b2), coord_index: i });
         segDist = 0;
       }
     }
 
-    instructions.push({ type: 'arrive', text: `Arrive at destination (${Math.round(totalDistance)}m · ${etaMinutes} min walk)`, distance: Math.round(totalDistance) });
+    instructions.push({ type: 'arrive', text: 'You have arrived', distance: Math.round(totalDistance), bearing: 0, coord_index: coords.length - 1 });
     return instructions;
   }
 
