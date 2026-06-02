@@ -3,6 +3,7 @@ import json, math, random
 random.seed(42)
 veg = json.load(open('veg_geom.json'))
 b = json.load(open('web/data/buildings.geojson', encoding='utf-8'))
+areas = json.load(open('web/data/areas.geojson', encoding='utf-8'))
 
 # Building footprints (lng/lat rings) for exclusion
 bpolys = []
@@ -10,6 +11,16 @@ for f in b['features']:
     g = f['geometry']
     if g['type'] == 'Polygon':
         bpolys.append(g['coordinates'][0])
+
+# Also exclude trees inside residential / built area polygons (e.g. the
+# General Quarters), so scrub/forest polygons that overlap housing do not
+# scatter trees on top of the quarters — matches F4Map, which keeps trees
+# off buildings.
+# NOTE: only residential — the 'academic' university boundary covers the
+# whole campus, so excluding it would remove every tree.
+for f in areas['features']:
+    if f['properties'].get('category') == 'residential' and f['geometry']['type'] == 'Polygon':
+        bpolys.append(f['geometry']['coordinates'][0])
 
 def pip(x, y, poly):
     inside = False; n = len(poly); j = n-1

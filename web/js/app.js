@@ -432,6 +432,7 @@ let styleLoadGeneration = 0;
 // paint properties baked for the previous isSatellite/isDark state. We wipe
 // them before re-adding so the create-fresh path runs every time.
 const OVERLAY_LAYER_IDS = [
+  'greens-fill',
   'campus-roads-casing', 'campus-roads-line', 'campus-roads-ped',
   'campus-roads-hit', 'campus-roads-labels',
   'areas-fill', 'areas-outline', 'areas-labels',
@@ -440,7 +441,7 @@ const OVERLAY_LAYER_IDS = [
   'places-circles', 'places-labels',
 ];
 const OVERLAY_SOURCE_IDS = [
-  'campus-roads', 'named-areas', 'area-labels-src', 'buildings', 'places-points',
+  'campus-greens', 'campus-roads', 'named-areas', 'area-labels-src', 'buildings', 'places-points',
 ];
 
 function clearOverlayLayers() {
@@ -481,6 +482,7 @@ async function applyMapStyle() {
 
         clearOverlayLayers();
 
+        addGreensLayer(IITJData.getGreens());
         addRoadsLayer(roadsRes);
         addAreasLayer(areasRes);
         addBuildingsLayer(buildingsRes);
@@ -559,6 +561,7 @@ async function loadMapData() {
     // Names already labeled on buildings/areas/landmark layers — exclude from point markers
     labeledNames = buildLabeledNames(areasRes, buildingsRes);
 
+    addGreensLayer(IITJData.getGreens());
     addRoadsLayer(roadsRes);
     addAreasLayer(areasRes);
     addBuildingsLayer(buildingsRes);
@@ -610,6 +613,35 @@ function dedupeAreaLabels(features) {
     },
     properties: { name: g.name, category: g.category }
   }));
+}
+
+// Flat green ground patches from OSM grass / park / pitch / forest polygons
+// (the same source F4Map paints green). Rendered at the very bottom of the
+// overlay stack so roads, areas and buildings sit on top. Hidden on
+// satellite (the imagery already shows real grass).
+function addGreensLayer(data) {
+  if (map.getSource('campus-greens')) {
+    map.getSource('campus-greens').setData(data);
+    return;
+  }
+  map.addSource('campus-greens', { type: 'geojson', data });
+  map.addLayer({
+    id: 'greens-fill',
+    type: 'fill',
+    source: 'campus-greens',
+    layout: { visibility: isSatellite ? 'none' : 'visible' },
+    paint: {
+      'fill-color': [
+        'match', ['get', 'g'],
+        'forest', isDark ? '#36502f' : '#a9c78f',
+        'scrub',  isDark ? '#33502f' : '#bcd49a',
+        'pitch',  isDark ? '#2f4a36' : '#bcd996',
+        /* grass */ isDark ? '#2f4632' : '#c8e0a6'
+      ],
+      'fill-opacity': isSatellite ? 0 : (isDark ? 0.5 : 0.9),
+      'fill-antialias': true
+    }
+  });
 }
 
 function addAreasLayer(data) {
@@ -713,15 +745,18 @@ function addRoadsLayer(data) {
   // entrance avenue / ring road read correctly against the narrow service
   // lanes, matching the satellite. The casing is a few px wider than the
   // surface to form a curb edge.
+  // Wide, type-aware road widths so the carriageways read like F4Map's broad
+  // asphalt ribbons. The casing is a few px wider than the surface to form a
+  // crisp dark kerb edge.
   const surfaceW = ['interpolate', ['linear'], ['zoom'],
-    13, ['match', ['get', 'highway_type'], 'trunk', 3.2, 'trunk_link', 2.2, 'primary', 3.0, 'unclassified', 2.4, 'residential', 1.8, 1.6],
-    16, ['match', ['get', 'highway_type'], 'trunk', 7.0, 'trunk_link', 5.0, 'primary', 6.5, 'unclassified', 5.5, 'residential', 3.6, 3.2],
-    19, ['match', ['get', 'highway_type'], 'trunk', 12,  'trunk_link', 8.0, 'primary', 11,  'unclassified', 9.0, 'residential', 6.0, 5.0],
+    13, ['match', ['get', 'highway_type'], 'trunk', 4.4, 'trunk_link', 3.0, 'primary', 4.2, 'unclassified', 3.6, 'residential', 2.8, 2.6],
+    16, ['match', ['get', 'highway_type'], 'trunk', 9.5, 'trunk_link', 6.5, 'primary', 9.0, 'unclassified', 7.6, 'residential', 5.6, 5.2],
+    19, ['match', ['get', 'highway_type'], 'trunk', 17,  'trunk_link', 11,  'primary', 16,  'unclassified', 13.5,'residential', 10,  9.0],
   ];
   const casingW = ['interpolate', ['linear'], ['zoom'],
-    13, ['match', ['get', 'highway_type'], 'trunk', 4.6, 'trunk_link', 3.4, 'primary', 4.4, 'unclassified', 3.6, 'residential', 2.9, 2.6],
-    16, ['match', ['get', 'highway_type'], 'trunk', 9.5, 'trunk_link', 7.0, 'primary', 9.0, 'unclassified', 7.8, 'residential', 5.4, 4.8],
-    19, ['match', ['get', 'highway_type'], 'trunk', 15,  'trunk_link', 11,  'primary', 14,  'unclassified', 12,  'residential', 8.6, 7.2],
+    13, ['match', ['get', 'highway_type'], 'trunk', 6.0, 'trunk_link', 4.4, 'primary', 5.8, 'unclassified', 5.2, 'residential', 4.2, 4.0],
+    16, ['match', ['get', 'highway_type'], 'trunk', 12.5,'trunk_link', 9.0, 'primary', 12,  'unclassified', 10.4,'residential', 8.0, 7.6],
+    19, ['match', ['get', 'highway_type'], 'trunk', 22,  'trunk_link', 15,  'primary', 21,  'unclassified', 18,  'residential', 13.5,12.5],
   ];
 
   map.addLayer({
@@ -737,11 +772,10 @@ function addRoadsLayer(data) {
       'line-width': 0,
       'line-opacity': 0
     } : {
-      // Curb edge — a light grey outline that reads as the road kerb,
-      // matching F4Map's thin road casing.
-      'line-color': isDark ? '#0f1726' : '#b3b8bf',
+      // Dark kerb edge that frames every road, like F4Map's road outline.
+      'line-color': isDark ? '#0b1220' : '#5f6368',
       'line-width': casingW,
-      'line-opacity': 0.95
+      'line-opacity': 1
     }
   });
 
@@ -759,11 +793,11 @@ function addRoadsLayer(data) {
       'line-width': ['interpolate', ['linear'], ['zoom'], 13, 1.2, 16, 3, 19, 5],
       'line-opacity': 0.92
     } : {
-      // Pale concrete/asphalt surface like F4Map — near-white minor lanes,
-      // a touch greyer for the main carriageways, defined by the casing.
+      // Medium asphalt-grey carriageway, like F4Map — clearly darker than the
+      // ground, with main roads a touch darker than the minor service lanes.
       'line-color': isDark
         ? ['match', ['get', 'highway_type'], 'service', '#3b475b', 'residential', '#374254', '#3f4c61']
-        : ['match', ['get', 'highway_type'], 'service', '#eef0f2', 'residential', '#ecedef', '#e3e6ea'],
+        : ['match', ['get', 'highway_type'], 'service', '#9ca1a6', 'residential', '#989da2', '#8d9298'],
       'line-width': surfaceW,
       'line-opacity': 1
     }

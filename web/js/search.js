@@ -12,6 +12,7 @@ const IITJData = (() => {
   let _areas       = null;
   let _categories  = null;
   let _entrances   = null;   // { "Hostel B1": { lat, lng, gate_name, osm_id } }
+  let _greens      = null;   // OSM grass / park / pitch / forest polygons
   let _searchTokens = null;
   let _ready       = false;
   const _readyCallbacks = [];
@@ -19,7 +20,7 @@ const IITJData = (() => {
   // ── Loader ──────────────────────────────────────────────────
   async function init() {
     const base = '/data';
-    const [places, buildings, roads, areas, searchIndex, categories, entrances] = await Promise.all([
+    const [places, buildings, roads, areas, searchIndex, categories, entrances, greens] = await Promise.all([
       fetch(`${base}/places.geojson`).then(r => r.json()),
       fetch(`${base}/buildings.geojson`).then(r => r.json()),
       fetch(`${base}/roads.geojson`).then(r => r.json()),
@@ -27,6 +28,7 @@ const IITJData = (() => {
       fetch(`${base}/search-index.json`).then(r => r.json()),
       fetch(`${base}/categories.json`).then(r => r.json()),
       fetch(`${base}/entrances.json`).then(r => r.ok ? r.json() : {}).catch(() => ({})),
+      fetch(`${base}/greens.geojson`).then(r => r.ok ? r.json() : null).catch(() => null),
     ]);
 
     _places     = places;
@@ -35,6 +37,7 @@ const IITJData = (() => {
     _areas      = areas;
     _categories = categories;
     _entrances  = entrances || {};
+    _greens     = greens || { type: 'FeatureCollection', features: [] };
 
     // Pre-build search token strings once
     _searchTokens = searchIndex.map(entry => ({
@@ -114,6 +117,7 @@ const IITJData = (() => {
   function getBuildings() { return _buildings || { type: 'FeatureCollection', features: [] }; }
   function getRoads()     { return _roads     || { type: 'FeatureCollection', features: [] }; }
   function getAreas()     { return _areas     || { type: 'FeatureCollection', features: [] }; }
+  function getGreens()    { return _greens    || { type: 'FeatureCollection', features: [] }; }
   function getCategories(){ return _categories || []; }
 
   // Returns the entry-point coordinates for a destination if one is mapped
@@ -134,5 +138,5 @@ const IITJData = (() => {
 
   function isReady() { return _ready; }
 
-  return { init, onReady, isReady, search, getPlaces, getBuildings, getRoads, getAreas, getCategories, getEntrance, nearby };
+  return { init, onReady, isReady, search, getPlaces, getBuildings, getRoads, getAreas, getGreens, getCategories, getEntrance, nearby };
 })();
