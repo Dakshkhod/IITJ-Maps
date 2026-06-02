@@ -47,6 +47,18 @@ var Landmarks3D = (() => {
     redStoneDark:  new THREE.MeshStandardMaterial({ color: 0x8d6e4f, metalness: 0.05, roughness: 0.9 }),
     portalWhite:   new THREE.MeshStandardMaterial({ color: 0xefe9dc, metalness: 0.05, roughness: 0.65 }),
 
+    // Department building palette — same sandstone as the library (warm
+    // beige), cream-white concrete portico (matches Chanakya), light teal
+    // curtain-wall glazing, slim recessed jali panels.
+    deptStone:     new THREE.MeshStandardMaterial({ color: 0xc7a979, metalness: 0.04, roughness: 0.88 }),
+    deptStoneDark: new THREE.MeshStandardMaterial({ color: 0x9d8055, metalness: 0.04, roughness: 0.90 }),
+    deptStoneLight:new THREE.MeshStandardMaterial({ color: 0xd9bf95, metalness: 0.04, roughness: 0.80 }),
+    deptConcrete:  new THREE.MeshStandardMaterial({ color: 0xefe9dc, metalness: 0.04, roughness: 0.62 }),
+    deptGlass:     new THREE.MeshStandardMaterial({ color: 0x9ab9c4, metalness: 0.45, roughness: 0.30 }),
+    deptWinFrame:  new THREE.MeshStandardMaterial({ color: 0x4a4a4a, metalness: 0.30, roughness: 0.55 }),
+    deptDoor:      new THREE.MeshStandardMaterial({ color: 0x6a8090, metalness: 0.40, roughness: 0.35 }),
+    deptSolar:     new THREE.MeshStandardMaterial({ color: 0x394a5e, metalness: 0.45, roughness: 0.40 }),
+
     // Fountain — polished chrome sculpture + sandstone basin
     chromeSculp:   new THREE.MeshStandardMaterial({ color: 0xd6d6dc, metalness: 0.75, roughness: 0.18 }),
     water:         new THREE.MeshStandardMaterial({ color: 0x3e6b8a, metalness: 0.3, roughness: 0.25 }),
@@ -952,6 +964,371 @@ var Landmarks3D = (() => {
     return g;
   }
 
+  // ─────────────────────────────────────────────────────────────────────
+  // DEPARTMENT BUILDING — uniform academic block design
+  // ─────────────────────────────────────────────────────────────────────
+  // The Physics / Mechanical / Metallurgical / Civil / Electrical /
+  // Chemistry departments share one architectural template (per the
+  // front-view and satellite photos):
+  //
+  //   • H-shaped footprint: two tall side wings running front-to-back
+  //     plus a connecting spine across the middle. Courtyard pockets on
+  //     each side of the spine.
+  //   • Library-sandstone walls (warm beige, same palette as the main
+  //     library), slim sandstone string-course at first-floor level
+  //   • The central front facade is RECESSED between the two side wings;
+  //     a cream-white concrete portico (two columns supporting horizontal
+  //     and angled cross-beams — pergola look) stands in front of a tall
+  //     light-teal glass curtain wall that lights the central atrium
+  //   • Small parapet "vent" caps along the top of the central pavilion
+  //   • Discreet jali (stone-screen) panels on the wings' outer side
+  //     walls, narrow vertical windows in groups along each wing
+  //   • Flat roof with small parapet wall + low-profile solar arrays on
+  //     each wing
+  //
+  // Mesh-local axes: +X right (E-W facade width), +Y up, +Z = entrance
+  // direction. Build is centred on (0,0,0) at ground; caller positions/
+  // rotates via the landmark cfg (lng/lat + bearingOffset).
+  function buildDepartmentBuilding(opts = {}) {
+    const length   = opts.length      ?? 50;   // facade width (X)
+    const bboxD    = opts.bboxDepth   ?? 48;   // total front-back depth (Z)
+    const wingW    = opts.wingWidth   ?? 13;   // each side wing's width in X
+    const spineD   = opts.spineDepth  ?? 14;   // central spine depth in Z
+    const height   = opts.height      ?? 16;   // 4 storeys × ~4 m
+    const pavH     = opts.pavilionHeight ?? 17.5;  // taller central pavilion
+
+    const g = new THREE.Group();
+
+    // ── Plinth (thin sandstone base running under everything)
+    const plinthH = 0.55;
+    const plinth = new THREE.Mesh(
+      new THREE.BoxGeometry(length + 0.6, plinthH, bboxD + 0.6),
+      MAT.deptStoneLight
+    );
+    plinth.position.set(0, plinthH / 2, 0);
+    g.add(plinth);
+
+    // ── Two side wings (left + right) — long in Z, narrow in X.
+    // Side wings extend from -bboxD/2 to +bboxD/2 in Z (the full N-S extent).
+    const wingBodyH = height - plinthH;
+    const wingFrontZ = bboxD / 2;                // wing front face
+    const wingBackZ  = -bboxD / 2;
+    const leftX  = -length / 2 + wingW / 2;
+    const rightX =  length / 2 - wingW / 2;
+    [leftX, rightX].forEach((cx) => {
+      const wing = new THREE.Mesh(
+        new THREE.BoxGeometry(wingW, wingBodyH, bboxD),
+        MAT.deptStone
+      );
+      wing.position.set(cx, plinthH + wingBodyH / 2, 0);
+      g.add(wing);
+
+      // Darker sandstone coping at the very top
+      const cap = new THREE.Mesh(
+        new THREE.BoxGeometry(wingW + 0.1, 0.45, bboxD + 0.1),
+        MAT.deptStoneDark
+      );
+      cap.position.set(cx, height - 0.225, 0);
+      g.add(cap);
+
+      // Slim string-course between 1st and 2nd floor
+      const band = new THREE.Mesh(
+        new THREE.BoxGeometry(wingW + 0.08, 0.18, bboxD + 0.08),
+        MAT.deptStoneLight
+      );
+      band.position.set(cx, plinthH + wingBodyH * 0.27, 0);
+      g.add(band);
+
+      // A second slim band higher up (between 3rd and 4th floor)
+      const band2 = new THREE.Mesh(
+        new THREE.BoxGeometry(wingW + 0.08, 0.14, bboxD + 0.08),
+        MAT.deptStoneLight
+      );
+      band2.position.set(cx, plinthH + wingBodyH * 0.78, 0);
+      g.add(band2);
+    });
+
+    // ── Central spine connecting the two wings (the bar of the H).
+    // Runs in X across the middle, Z-depth = spineD, height = main height.
+    const spineW = length - 2 * wingW;
+    const spineFrontZ = spineD / 2;
+    const spineBackZ  = -spineD / 2;
+    const spine = new THREE.Mesh(
+      new THREE.BoxGeometry(spineW, wingBodyH, spineD),
+      MAT.deptStone
+    );
+    spine.position.set(0, plinthH + wingBodyH / 2, 0);
+    g.add(spine);
+    const spineCap = new THREE.Mesh(
+      new THREE.BoxGeometry(spineW + 0.1, 0.45, spineD + 0.1),
+      MAT.deptStoneDark
+    );
+    spineCap.position.set(0, height - 0.225, 0);
+    g.add(spineCap);
+    // Spine string-courses (match wings)
+    [0.27, 0.78].forEach((frac, i) => {
+      const sb = new THREE.Mesh(
+        new THREE.BoxGeometry(spineW + 0.08, i === 0 ? 0.18 : 0.14, spineD + 0.08),
+        MAT.deptStoneLight
+      );
+      sb.position.set(0, plinthH + wingBodyH * frac, 0);
+      g.add(sb);
+    });
+
+    // ── Central pavilion — a slightly taller volume rising above the
+    // spine, sandwiched between the two wings. This is what's visible in
+    // the front photos as the "tall middle block" with parapet caps.
+    const pavilion = new THREE.Mesh(
+      new THREE.BoxGeometry(spineW, pavH - height, spineD),
+      MAT.deptStone
+    );
+    pavilion.position.set(0, height + (pavH - height) / 2, 0);
+    g.add(pavilion);
+    const pavCap = new THREE.Mesh(
+      new THREE.BoxGeometry(spineW + 0.2, 0.45, spineD + 0.2),
+      MAT.deptStoneDark
+    );
+    pavCap.position.set(0, pavH - 0.225, 0);
+    g.add(pavCap);
+
+    // Four small parapet "vent" boxes along the pavilion top (the little
+    // square caps visible above the central facade in the photos).
+    const ventCount = 4;
+    for (let i = 0; i < ventCount; i++) {
+      const vx = -spineW / 2 + spineW * (i + 0.5) / ventCount;
+      const vent = new THREE.Mesh(
+        new THREE.BoxGeometry(1.6, 0.9, spineD - 2),
+        MAT.deptStoneLight
+      );
+      vent.position.set(vx, pavH + 0.45, 0);
+      g.add(vent);
+    }
+
+    // ── Tall glass curtain wall on the central pavilion's south face
+    //    (lights the central atrium). Light teal, NOT near-black.
+    const curtainW = spineW - 2.0;
+    const curtainH = pavH - plinthH - 1.0;
+    const curtain = new THREE.Mesh(
+      new THREE.BoxGeometry(curtainW, curtainH, 0.25),
+      MAT.deptGlass
+    );
+    curtain.position.set(0, plinthH + curtainH / 2 + 0.4, spineFrontZ + 0.13);
+    g.add(curtain);
+
+    // Vertical mullions on the curtain wall (the iconic vertical-strip look)
+    const mullionMat = MAT.deptConcrete;
+    const mullCount = 7;
+    for (let i = 0; i < mullCount; i++) {
+      const mx = -curtainW / 2 + (curtainW / (mullCount - 1)) * i;
+      const m = new THREE.Mesh(
+        new THREE.BoxGeometry(0.22, curtainH - 0.4, 0.15),
+        mullionMat
+      );
+      m.position.set(mx, plinthH + curtainH / 2 + 0.4, spineFrontZ + 0.27);
+      g.add(m);
+    }
+    // Two horizontal cross-bars dividing the curtain into 3 stacked panels
+    [0.34, 0.68].forEach((frac) => {
+      const xb = new THREE.Mesh(
+        new THREE.BoxGeometry(curtainW - 0.2, 0.18, 0.15),
+        mullionMat
+      );
+      xb.position.set(0, plinthH + curtainH * frac + 0.4, spineFrontZ + 0.27);
+      g.add(xb);
+    });
+
+    // ── Portico — two cream-white columns standing in front of the
+    //    curtain wall, supporting horizontal beams + angled cross-beams
+    //    (the pergola/trellis structure visible in the front photos).
+    const colH       = pavH - 1.8;
+    const colW       = 1.4;
+    const colD       = 1.4;
+    const colSpan    = curtainW * 0.78;       // distance between the columns
+    const porticoZ   = wingFrontZ - 1.6;       // sits in the recess
+    [-colSpan / 2, colSpan / 2].forEach((cx) => {
+      const col = new THREE.Mesh(
+        new THREE.BoxGeometry(colW, colH, colD),
+        MAT.deptConcrete
+      );
+      col.position.set(cx, plinthH + colH / 2, porticoZ);
+      g.add(col);
+    });
+    // Top horizontal beam tying the columns together
+    const beamY = plinthH + colH - 0.8;
+    const topBeam = new THREE.Mesh(
+      new THREE.BoxGeometry(colSpan + colW, 0.9, colD),
+      MAT.deptConcrete
+    );
+    topBeam.position.set(0, beamY, porticoZ);
+    g.add(topBeam);
+    // Angled cross-beams projecting back from the top beam toward the
+    // curtain wall (the slanted pergola rafters in the photos).
+    const rafterLen = porticoZ - spineFrontZ + 0.4;
+    const rafterCount = 5;
+    for (let i = 0; i < rafterCount; i++) {
+      const rx = -colSpan / 2 + (colSpan / (rafterCount - 1)) * i;
+      const rafter = new THREE.Mesh(
+        new THREE.BoxGeometry(0.35, 0.35, rafterLen),
+        MAT.deptConcrete
+      );
+      rafter.position.set(rx, beamY + 0.65, porticoZ - rafterLen / 2 + 0.45);
+      // Slight downward tilt toward the curtain wall (gives sun-shade look)
+      rafter.rotation.x = -0.12;
+      g.add(rafter);
+    }
+    // A second, lower horizontal beam between the columns (the photos show
+    // a double-beam portico)
+    const lowBeam = new THREE.Mesh(
+      new THREE.BoxGeometry(colSpan + colW, 0.45, colD * 0.7),
+      MAT.deptConcrete
+    );
+    lowBeam.position.set(0, beamY - 1.3, porticoZ + 0.1);
+    g.add(lowBeam);
+
+    // ── Ground-level entrance: small glass door under the portico, plus
+    //    a couple of stair-treads in front of it.
+    const doorW = 3.2;
+    const doorH = 2.8;
+    const door = new THREE.Mesh(
+      new THREE.BoxGeometry(doorW, doorH, 0.2),
+      MAT.deptDoor
+    );
+    door.position.set(0, plinthH + doorH / 2, spineFrontZ + 0.32);
+    g.add(door);
+    // Light frame around the door
+    const frameMat = MAT.deptWinFrame;
+    [-doorW / 2, doorW / 2].forEach((dx) => {
+      const jamb = new THREE.Mesh(
+        new THREE.BoxGeometry(0.15, doorH + 0.2, 0.25),
+        frameMat
+      );
+      jamb.position.set(dx, plinthH + (doorH + 0.2) / 2, spineFrontZ + 0.33);
+      g.add(jamb);
+    });
+    const lintel = new THREE.Mesh(
+      new THREE.BoxGeometry(doorW + 0.3, 0.18, 0.25),
+      frameMat
+    );
+    lintel.position.set(0, plinthH + doorH + 0.15, spineFrontZ + 0.33);
+    g.add(lintel);
+    // Two stair-treads in front of the door
+    for (let i = 0; i < 2; i++) {
+      const step = new THREE.Mesh(
+        new THREE.BoxGeometry(doorW + 1.6 - i * 0.4, 0.18, 0.6),
+        MAT.deptStoneLight
+      );
+      step.position.set(0, 0.09 + i * 0.18, spineFrontZ + 0.6 + i * 0.4);
+      g.add(step);
+    }
+
+    // ── Wing front facades — recessed rectangular windows arranged in a
+    //    regular grid (matches the photos: clean modern punched windows
+    //    rather than narrow vertical strips).
+    const winMat = MAT.deptGlass;
+    const winFrameMat = MAT.deptStoneLight;
+    const winW = 1.6;
+    const winH = 1.5;
+    const floors = 4;
+    const floorH = wingBodyH / floors;
+    [
+      { cx: leftX,  faceZ: wingFrontZ + 0.01, dir: 1 },
+      { cx: rightX, faceZ: wingFrontZ + 0.01, dir: 1 },
+      { cx: leftX,  faceZ: wingBackZ - 0.01,  dir: -1 },
+      { cx: rightX, faceZ: wingBackZ - 0.01,  dir: -1 },
+    ].forEach(({ cx, faceZ }) => {
+      // 1 window per floor (the wings are narrow in X so just one column)
+      for (let f = 0; f < floors; f++) {
+        const wy = plinthH + floorH * (f + 0.5);
+        // Frame surround
+        const fr = new THREE.Mesh(
+          new THREE.BoxGeometry(winW + 0.3, winH + 0.3, 0.1),
+          winFrameMat
+        );
+        fr.position.set(cx, wy, faceZ);
+        g.add(fr);
+        const w = new THREE.Mesh(
+          new THREE.BoxGeometry(winW, winH, 0.15),
+          winMat
+        );
+        w.position.set(cx, wy, faceZ);
+        g.add(w);
+      }
+    });
+
+    // ── Side-facing facades of the wings — recessed jali (stone screen)
+    //    panels. Each wing's outer side wall has 4 floors of jali grids.
+    const jaliMat = MAT.deptStoneDark;
+    [
+      { x: -length / 2 - 0.02, sgn: -1 },                    // left wing's left face
+      { x:  length / 2 + 0.02, sgn:  1 },                    // right wing's right face
+    ].forEach(({ x }) => {
+      for (let f = 0; f < floors; f++) {
+        const wy = plinthH + floorH * (f + 0.5);
+        const panelZSpan = bboxD * 0.7;
+        // Panels arranged along Z, one per "bay" in the wing
+        const bays = 3;
+        for (let b = 0; b < bays; b++) {
+          const z = -panelZSpan / 2 + panelZSpan * (b + 0.5) / bays;
+          const jali = new THREE.Mesh(
+            new THREE.BoxGeometry(0.06, floorH * 0.7, panelZSpan / bays - 0.6),
+            jaliMat
+          );
+          jali.position.set(x, wy, z);
+          g.add(jali);
+        }
+      }
+    });
+
+    // ── Side-facing windows on the spine ends (the gable strips that
+    //    connect the wings — visible as small windows on the sides of the
+    //    pavilion in the photos)
+    [
+      { x: -spineW / 2 - 0.01, sgn: -1 },
+      { x:  spineW / 2 + 0.01, sgn:  1 },
+    ].forEach(({ x }) => {
+      for (let f = 0; f < floors; f++) {
+        const wy = plinthH + floorH * (f + 0.5);
+        const w = new THREE.Mesh(
+          new THREE.BoxGeometry(0.12, winH * 0.8, 1.2),
+          winMat
+        );
+        w.position.set(x, wy, 0);
+        g.add(w);
+      }
+    });
+
+    // ── Wing roof parapets (low sandstone walls around each wing roof)
+    [leftX, rightX].forEach((cx) => {
+      const parH = 0.55;
+      // Four parapet edges per wing
+      const fr = new THREE.Mesh(new THREE.BoxGeometry(wingW + 0.1, parH, 0.25), MAT.deptStoneLight);
+      fr.position.set(cx, height + parH / 2, wingFrontZ - 0.12);
+      g.add(fr);
+      const bk = new THREE.Mesh(new THREE.BoxGeometry(wingW + 0.1, parH, 0.25), MAT.deptStoneLight);
+      bk.position.set(cx, height + parH / 2, wingBackZ + 0.12);
+      g.add(bk);
+    });
+
+    // ── Low-profile solar arrays on each wing roof (not so prominent
+    //    they dominate the view).
+    function addSolarPad(centerX, centerZ, spanX, spanZ) {
+      const sheet = new THREE.Mesh(
+        new THREE.BoxGeometry(spanX, 0.10, spanZ),
+        MAT.deptSolar
+      );
+      sheet.position.set(centerX, height + 0.18, centerZ);
+      sheet.rotation.x = -0.10;
+      g.add(sheet);
+    }
+    // Two rows of panels per wing (front half + back half)
+    [leftX, rightX].forEach((cx) => {
+      addSolarPad(cx, bboxD * 0.22, wingW - 2, bboxD * 0.32);
+      addSolarPad(cx, -bboxD * 0.22, wingW - 2, bboxD * 0.32);
+    });
+
+    return g;
+  }
+
   // ── Landmark registry ───────────────────────────────────────────────────
   // Height of the tiered base that the Brain Tree sits on top of.
   // Sum of all tier thicknesses + pedestal in buildBrainTreeBase().
@@ -1161,6 +1538,117 @@ var Landmarks3D = (() => {
       rotateMeshToUp: Y_UP_TO_Z_UP,
       // Gun points NE toward Prithvi Missile (~45° compass = 45° CCW from east)
       bearingOffset: 45 * Math.PI / 180,
+    },
+
+    // ── Department buildings (Physics, Mechanical, Metallurgical, Civil,
+    //    Electrical, Chemistry) — uniform H-shaped academic block design.
+    //    Centroids are the OSM polygon centroids; bearings come from each
+    //    polygon's longest edge so the model's long wing-axis lines up
+    //    with the building's actual orientation on the ground.
+    {
+      id: 'dept-physics-3d',
+      label: 'Department of Physics',
+      labelOffsetY: -0.5,
+      labelOffsetY3d: -2.0,
+      format: 'procedural',
+      build: () => buildDepartmentBuilding({ length: 46, bboxDepth: 48 }),
+      lng: 73.1162468, lat: 26.4798001,
+      heightMeters: null,
+      rotateMeshToUp: Y_UP_TO_Z_UP,
+      // Longest polygon edge bearing 74° (wings tilt slightly N of east)
+      bearingOffset: -16 * Math.PI / 180,
+      replacesOsmBuildings: ['1266941050'],
+    },
+    {
+      id: 'dept-mechanical-3d',
+      label: 'Department of Mechanical Engineering',
+      labelOffsetY: -0.5,
+      labelOffsetY3d: -2.0,
+      format: 'procedural',
+      build: () => buildDepartmentBuilding({ length: 52, bboxDepth: 52 }),
+      lng: 73.1166527, lat: 26.4791398,
+      heightMeters: null,
+      rotateMeshToUp: Y_UP_TO_Z_UP,
+      bearingOffset: -16 * Math.PI / 180,
+      replacesOsmBuildings: ['773587411'],
+    },
+    {
+      id: 'dept-metallurgical-3d',
+      label: 'Department of Metallurgical & Materials Engineering',
+      labelOffsetY: -0.5,
+      labelOffsetY3d: -2.0,
+      format: 'procedural',
+      build: () => buildDepartmentBuilding({ length: 50, bboxDepth: 52 }),
+      lng: 73.1169780, lat: 26.4796345,
+      heightMeters: null,
+      rotateMeshToUp: Y_UP_TO_Z_UP,
+      bearingOffset: -18 * Math.PI / 180,
+      replacesOsmBuildings: ['1223174130'],
+    },
+    {
+      id: 'dept-civil-3d',
+      label: 'Department of Civil & Infrastructure Engineering',
+      labelOffsetY: -0.5,
+      labelOffsetY3d: -2.0,
+      format: 'procedural',
+      build: () => buildDepartmentBuilding({ length: 46, bboxDepth: 46 }),
+      lng: 73.1151943, lat: 26.4800794,
+      heightMeters: null,
+      rotateMeshToUp: Y_UP_TO_Z_UP,
+      bearingOffset: -28 * Math.PI / 180,
+      replacesOsmBuildings: ['1516539950'],
+    },
+    {
+      id: 'dept-electrical-3d',
+      label: 'Department of Electrical Engineering',
+      labelOffsetY: -0.5,
+      labelOffsetY3d: -2.0,
+      format: 'procedural',
+      build: () => buildDepartmentBuilding({ length: 50, bboxDepth: 50 }),
+      lng: 73.1160441, lat: 26.4792975,
+      heightMeters: null,
+      rotateMeshToUp: Y_UP_TO_Z_UP,
+      bearingOffset: -14 * Math.PI / 180,
+      replacesOsmBuildings: ['1025144735'],
+    },
+    {
+      id: 'dept-chemistry-3d',
+      label: 'Department of Chemistry',
+      labelOffsetY: -0.5,
+      labelOffsetY3d: -2.0,
+      format: 'procedural',
+      build: () => buildDepartmentBuilding({ length: 46, bboxDepth: 50 }),
+      lng: 73.1150405, lat: 26.4754859,
+      heightMeters: null,
+      rotateMeshToUp: Y_UP_TO_Z_UP,
+      bearingOffset: -14 * Math.PI / 180,
+      replacesOsmBuildings: ['773587412'],
+    },
+    {
+      id: 'dept-cse-3d',
+      label: 'Department of Computer Science & Engineering',
+      labelOffsetY: -0.5,
+      labelOffsetY3d: -2.0,
+      format: 'procedural',
+      build: () => buildDepartmentBuilding({ length: 46, bboxDepth: 56 }),
+      lng: 73.1143996, lat: 26.4750582,
+      heightMeters: null,
+      rotateMeshToUp: Y_UP_TO_Z_UP,
+      bearingOffset: -15 * Math.PI / 180,
+      replacesOsmBuildings: ['773690910'],
+    },
+    {
+      id: 'dept-bb-3d',
+      label: 'Department of Bioscience & Bioengineering',
+      labelOffsetY: -0.5,
+      labelOffsetY3d: -2.0,
+      format: 'procedural',
+      build: () => buildDepartmentBuilding({ length: 46, bboxDepth: 48 }),
+      lng: 73.1145045, lat: 26.4756434,
+      heightMeters: null,
+      rotateMeshToUp: Y_UP_TO_Z_UP,
+      bearingOffset: -14 * Math.PI / 180,
+      replacesOsmBuildings: ['1266941049'],
     },
   ];
 
