@@ -62,11 +62,9 @@ var Landmarks3D = (() => {
     // Low-poly vegetation — two foliage greens for subtle variation, one
     // trunk, and two earthy tones for the landscaped berm mounds. All flat
     // (no maps) so a single instanced draw call stays cheap.
-    treeFoliage:   new THREE.MeshStandardMaterial({ color: 0x5b7f3a, metalness: 0.0, roughness: 0.95, flatShading: true }),
-    treeFoliage2:  new THREE.MeshStandardMaterial({ color: 0x6f9447, metalness: 0.0, roughness: 0.95, flatShading: true }),
+    // White base so per-instance tint (setColorAt) shows through directly.
+    canopy:        new THREE.MeshStandardMaterial({ color: 0xffffff, metalness: 0.0, roughness: 0.95, flatShading: true }),
     treeTrunk:     new THREE.MeshStandardMaterial({ color: 0x6b4a2f, metalness: 0.0, roughness: 1.0 }),
-    moundGrass:    new THREE.MeshStandardMaterial({ color: 0x7a8c4e, metalness: 0.0, roughness: 1.0, flatShading: true }),
-    moundSand:     new THREE.MeshStandardMaterial({ color: 0xc2a878, metalness: 0.0, roughness: 1.0, flatShading: true }),
 
     // Fountain — polished chrome sculpture + sandstone basin
     chromeSculp:   new THREE.MeshStandardMaterial({ color: 0xd6d6dc, metalness: 0.75, roughness: 0.18 }),
@@ -1713,6 +1711,8 @@ var Landmarks3D = (() => {
   let _rendererGl = null;
   let _originMcX = 0, _originMcY = 0, _originMcZ = 0;
   let _mercPerMeter = 1;
+  let _treeData = null;       // { full:[lng,lat,...], bush:[lng,lat,...] }
+  let _treesBuilt = false;
 
   // Reusable buffers — allocated once, mutated each frame
   const _rotX = new THREE.Matrix4().makeRotationAxis(new THREE.Vector3(1, 0, 0), Y_UP_TO_Z_UP);
@@ -1745,136 +1745,83 @@ var Landmarks3D = (() => {
 
     for (const cfg of LANDMARKS) _addLandmark(cfg, originMc);
 
-    // Lightweight landscape: instanced low-poly trees + simple berm mounds,
-    // placed only where vegetation is visible in the satellite imagery.
-    _addVegetation(originMc);
+    // OSM-driven instanced trees (data may already be loaded; otherwise the
+    // fetch in init() will call _buildVegetation() when it resolves).
+    _buildVegetation();
   }
 
   // ─────────────────────────────────────────────────────────────────────
-  // VEGETATION — instanced low-poly trees + simple landscaped berm mounds
+  // VEGETATION — instanced low-poly trees, driven by the SAME OpenStreetMap
+  // vegetation that F4Map renders: landuse=forest, natural=scrub,
+  // leisure=park / leisure=garden polygons.
+  //
+  // Tree positions are pre-baked offline (web/data/trees.json) by scattering
+  // points inside each OSM polygon at a per-type density and removing any
+  // that fall on a building footprint. At runtime we just stream them into a
+  // couple of InstancedMeshes — full trees (trunk + canopy) and low scrub
+  // bushes (canopy only) — so even a few thousand trees stay at ~3 draw
+  // calls and a static scene.
   // ─────────────────────────────────────────────────────────────────────
-  // Placement is driven by the satellite imagery: the dense E-W green belt
-  // south of the academic core, the SE sapling plantation, the campus
-  // gardens/lawns, and the landscaped entrance ("W Berms"). Barren desert
-  // is intentionally left empty. Everything is rendered with TWO instanced
-  // draw calls (foliage + trunk) so hundreds of trees cost almost nothing.
-  //
-  // Placement is intentionally CONSERVATIVE: a small number of tight, dense
-  // groves sitting exactly on the vegetation masses that are unmistakable in
-  // the satellite — the curved green embankment south of the core, the dense
-  // SE sapling plantation by the expressway, and a couple of campus gardens.
-  // No avenue rows, no thin bands (those read as random floating dots), and
-  // nothing on barren ground.
-  //
-  // Zone type (coords are [lng, lat]):
-  //   cluster : scatter `count` trees in a disc of radius `r` (metres)
-  const VEGETATION = [
-    // ── Central green belt — dense groves along the landscaped embankment
-    { t: 'cluster', a: [73.111531, 26.470558], r: 8,  count: 11 },
-    { t: 'cluster', a: [73.112755, 26.470100], r: 8,  count: 11 },
-    { t: 'cluster', a: [73.114032, 26.470028], r: 8,  count: 11 },
-    { t: 'cluster', a: [73.115256, 26.470390], r: 8,  count: 11 },
-    // ── SE planted-tree wedge — dense sapling grove beside the expressway
-    { t: 'cluster', a: [73.115300, 26.468750], r: 10, count: 14 },
-    { t: 'cluster', a: [73.115150, 26.468400], r: 10, count: 14 },
-    { t: 'cluster', a: [73.115400, 26.468080], r: 8,  count: 9  },
-    // ── Campus gardens & lawns (genuinely planted areas)
-    { t: 'cluster', a: [73.112320, 26.470950], r: 7,  count: 7  },  // Director Lawn
-    { t: 'cluster', a: [73.111936, 26.473909], r: 9,  count: 9  },  // Type B Park
-    { t: 'cluster', a: [73.116831, 26.472644], r: 8,  count: 8  },  // B2 & B3 Garden
-  ];
-
-  // No berm mounds for now (kept intentionally empty).
-  const MOUNDS = [];
-
-  function _lngLatToLocal(lng, lat, originMc) {
+  function _lngLatToLocal(lng, lat) {
     const mc = maplibregl.MercatorCoordinate.fromLngLat([lng, lat], 0);
-    return [(mc.x - originMc.x) / _mercPerMeter, (mc.y - originMc.y) / _mercPerMeter];
+    return [(mc.x - _originMcX) / _mercPerMeter, (mc.y - _originMcY) / _mercPerMeter];
   }
 
-  function _addVegetation(originMc) {
-    // Deterministic RNG so the layout is identical every load.
+  function _buildVegetation() {
+    if (_treesBuilt || !_treeData || !_root) return;
+    _treesBuilt = true;
+
     let seed = 0x1a2b3c4d;
     const rnd = () => { seed = (seed * 1664525 + 1013904223) >>> 0; return seed / 4294967296; };
 
-    const trees = [];   // { x, z, s }
-    const pushTree = (x, z, s) => trees.push({ x, z, s });
+    const m = new THREE.Matrix4(), q = new THREE.Quaternion();
+    const up = new THREE.Vector3(0, 1, 0), sv = new THREE.Vector3(), pv = new THREE.Vector3();
 
-    for (const z of VEGETATION) {
-      if (z.t === 'cluster') {
-        const [cx, cz] = _lngLatToLocal(z.a[0], z.a[1], originMc);
-        for (let i = 0; i < z.count; i++) {
-          const ang = rnd() * Math.PI * 2;
-          const rr = Math.sqrt(rnd()) * z.r;          // uniform disc
-          pushTree(cx + Math.cos(ang) * rr, cz + Math.sin(ang) * rr, 0.8 + rnd() * 0.7);
-        }
-      } else if (z.t === 'band') {
-        const [ax, az] = _lngLatToLocal(z.a[0], z.a[1], originMc);
-        const [bx, bz] = _lngLatToLocal(z.b[0], z.b[1], originMc);
-        const dx = bx - ax, dz = bz - az, len = Math.hypot(dx, dz) || 1;
-        const ux = dx / len, uz = dz / len, px = -uz, pz = ux;   // perpendicular
-        for (let i = 0; i < z.count; i++) {
-          const t = rnd() * len, ww = (rnd() - 0.5) * z.w;
-          pushTree(ax + ux * t + px * ww, az + uz * t + pz * ww, 0.8 + rnd() * 0.7);
-        }
-      } else if (z.t === 'row') {
-        const [ax, az] = _lngLatToLocal(z.a[0], z.a[1], originMc);
-        const [bx, bz] = _lngLatToLocal(z.b[0], z.b[1], originMc);
-        const dx = bx - ax, dz = bz - az, len = Math.hypot(dx, dz) || 1;
-        const n = Math.max(1, Math.round(len / (z.gap || 9)));
-        for (let i = 0; i <= n; i++) {
-          const t = i / n;
-          pushTree(ax + dx * t + (rnd() - 0.5) * 1.2, az + dz * t + (rnd() - 0.5) * 1.2, 0.9 + rnd() * 0.4);
-        }
+    // ── Full trees: trunk + icosahedron canopy ──
+    const full = _treeData.full || [];
+    const nFull = full.length >> 1;
+    if (nFull) {
+      const trunkGeo = new THREE.CylinderGeometry(0.12, 0.2, 1.5, 5); trunkGeo.translate(0, 0.75, 0);
+      const folGeo   = new THREE.IcosahedronGeometry(1.55, 0);        folGeo.translate(0, 2.45, 0);
+      const trunk = new THREE.InstancedMesh(trunkGeo, MAT.treeTrunk, nFull);
+      const fol   = new THREE.InstancedMesh(folGeo,   MAT.canopy,    nFull);
+      trunk.frustumCulled = false; fol.frustumCulled = false;
+      const greens = [new THREE.Color(0x4f7a36), new THREE.Color(0x6f9447), new THREE.Color(0x5f8a3e), new THREE.Color(0x5a7d33)];
+      for (let i = 0; i < nFull; i++) {
+        const [x, z] = _lngLatToLocal(full[i * 2], full[i * 2 + 1]);
+        const s = 0.78 + rnd() * 0.7;
+        q.setFromAxisAngle(up, rnd() * 6.283);
+        sv.set(s, s * (0.88 + rnd() * 0.4), s); pv.set(x, 0, z); m.compose(pv, q, sv);
+        trunk.setMatrixAt(i, m); fol.setMatrixAt(i, m);
+        fol.setColorAt(i, greens[(rnd() * greens.length) | 0]);
       }
+      trunk.instanceMatrix.needsUpdate = true; fol.instanceMatrix.needsUpdate = true;
+      if (fol.instanceColor) fol.instanceColor.needsUpdate = true;
+      _root.add(trunk); _root.add(fol);
     }
 
-    if (trees.length) {
-      // Shared low-poly tree geometry (built once, instanced):
-      //   trunk  = short cylinder, foliage = 1-detail icosahedron blob.
-      const trunkGeo   = new THREE.CylinderGeometry(0.14, 0.22, 1.6, 5);
-      trunkGeo.translate(0, 0.8, 0);
-      const foliageGeo = new THREE.IcosahedronGeometry(1.7, 0);
-      foliageGeo.translate(0, 2.7, 0);
-
-      const trunkMesh   = new THREE.InstancedMesh(trunkGeo,   MAT.treeTrunk,    trees.length);
-      const foliageMesh = new THREE.InstancedMesh(foliageGeo, MAT.treeFoliage,  trees.length);
-      trunkMesh.frustumCulled = false;
-      foliageMesh.frustumCulled = false;
-      // Per-instance foliage tint (two greens) for a touch of variety.
-      const cA = new THREE.Color(0x5b7f3a), cB = new THREE.Color(0x6f9447);
-
-      const m = new THREE.Matrix4();
-      const q = new THREE.Quaternion();
-      const up = new THREE.Vector3(0, 1, 0);
-      const sv = new THREE.Vector3();
-      const pv = new THREE.Vector3();
-      for (let i = 0; i < trees.length; i++) {
-        const tr = trees[i];
-        q.setFromAxisAngle(up, i * 2.399963);       // golden-angle spin
-        sv.set(tr.s, tr.s * (0.9 + (i % 3) * 0.12), tr.s);
-        pv.set(tr.x, 0, tr.z);
-        m.compose(pv, q, sv);
-        trunkMesh.setMatrixAt(i, m);
-        foliageMesh.setMatrixAt(i, m);
-        foliageMesh.setColorAt(i, (i % 2 === 0) ? cA : cB);
+    // ── Scrub bushes: low rounded shrubs, no trunk ──
+    const bush = _treeData.bush || [];
+    const nBush = bush.length >> 1;
+    if (nBush) {
+      const bGeo = new THREE.IcosahedronGeometry(1.0, 0); bGeo.translate(0, 0.6, 0);
+      const bMesh = new THREE.InstancedMesh(bGeo, MAT.canopy, nBush);
+      bMesh.frustumCulled = false;
+      const scrub = [new THREE.Color(0x8a9550), new THREE.Color(0x9aa860), new THREE.Color(0x7e8a48)];
+      for (let i = 0; i < nBush; i++) {
+        const [x, z] = _lngLatToLocal(bush[i * 2], bush[i * 2 + 1]);
+        const s = 0.7 + rnd() * 0.6;
+        q.setFromAxisAngle(up, rnd() * 6.283);
+        sv.set(s * (1 + rnd() * 0.3), s * 0.7, s * (1 + rnd() * 0.3)); pv.set(x, 0, z); m.compose(pv, q, sv);
+        bMesh.setMatrixAt(i, m);
+        bMesh.setColorAt(i, scrub[(rnd() * scrub.length) | 0]);
       }
-      trunkMesh.instanceMatrix.needsUpdate = true;
-      foliageMesh.instanceMatrix.needsUpdate = true;
-      if (foliageMesh.instanceColor) foliageMesh.instanceColor.needsUpdate = true;
-      _root.add(trunkMesh);
-      _root.add(foliageMesh);
+      bMesh.instanceMatrix.needsUpdate = true;
+      if (bMesh.instanceColor) bMesh.instanceColor.needsUpdate = true;
+      _root.add(bMesh);
     }
 
-    // ── Berm mounds — low half-ellipsoid domes (upper hemisphere only).
-    for (const [lng, lat, r, h, sandy] of MOUNDS) {
-      const [cx, cz] = _lngLatToLocal(lng, lat, originMc);
-      const dome = new THREE.SphereGeometry(1, 12, 6, 0, Math.PI * 2, 0, Math.PI / 2);
-      const mound = new THREE.Mesh(dome, sandy ? MAT.moundSand : MAT.moundGrass);
-      mound.scale.set(r, h, r);
-      mound.position.set(cx, 0, cz);
-      _root.add(mound);
-    }
+    if (_map) _map.triggerRepaint();
   }
 
   function _addLandmark(cfg, originMc) {
@@ -2051,6 +1998,16 @@ var Landmarks3D = (() => {
     _map = map;
     _ready = true;
     _ensureLabels();
+
+    // Load the pre-baked OSM tree positions once. If the scene is already
+    // built, inject the trees immediately; otherwise _ensureScene() will pick
+    // up _treeData when it runs.
+    if (!_treeData) {
+      fetch('/data/trees.json')
+        .then(r => r.ok ? r.json() : null)
+        .then(d => { if (d) { _treeData = d; if (_scene) _buildVegetation(); } })
+        .catch(() => {});
+    }
 
     // After setStyle() (theme / satellite toggle) MapLibre removes symbol
     // and custom layers; re-create labels and optionally the 3D mesh layer.

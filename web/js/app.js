@@ -737,8 +737,9 @@ function addRoadsLayer(data) {
       'line-width': 0,
       'line-opacity': 0
     } : {
-      // Curb edge — a darker outline that reads as the road kerb.
-      'line-color': isDark ? '#0f1726' : '#9aa0a6',
+      // Curb edge — a light grey outline that reads as the road kerb,
+      // matching F4Map's thin road casing.
+      'line-color': isDark ? '#0f1726' : '#b3b8bf',
       'line-width': casingW,
       'line-opacity': 0.95
     }
@@ -758,11 +759,11 @@ function addRoadsLayer(data) {
       'line-width': ['interpolate', ['linear'], ['zoom'], 13, 1.2, 16, 3, 19, 5],
       'line-opacity': 0.92
     } : {
-      // Asphalt/concrete surface — neutral grey like the real campus roads
-      // (service lanes slightly lighter concrete than the main carriageways).
+      // Pale concrete/asphalt surface like F4Map — near-white minor lanes,
+      // a touch greyer for the main carriageways, defined by the casing.
       'line-color': isDark
         ? ['match', ['get', 'highway_type'], 'service', '#3b475b', 'residential', '#374254', '#3f4c61']
-        : ['match', ['get', 'highway_type'], 'service', '#c9ccd1', 'residential', '#c4c8cd', '#bcc0c6'],
+        : ['match', ['get', 'highway_type'], 'service', '#eef0f2', 'residential', '#ecedef', '#e3e6ea'],
       'line-width': surfaceW,
       'line-opacity': 1
     }
