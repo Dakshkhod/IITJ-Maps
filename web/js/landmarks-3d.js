@@ -59,6 +59,15 @@ var Landmarks3D = (() => {
     deptDoor:      new THREE.MeshStandardMaterial({ color: 0x6a8090, metalness: 0.40, roughness: 0.35 }),
     deptSolar:     new THREE.MeshStandardMaterial({ color: 0x394a5e, metalness: 0.45, roughness: 0.40 }),
 
+    // Low-poly vegetation — two foliage greens for subtle variation, one
+    // trunk, and two earthy tones for the landscaped berm mounds. All flat
+    // (no maps) so a single instanced draw call stays cheap.
+    treeFoliage:   new THREE.MeshStandardMaterial({ color: 0x5b7f3a, metalness: 0.0, roughness: 0.95, flatShading: true }),
+    treeFoliage2:  new THREE.MeshStandardMaterial({ color: 0x6f9447, metalness: 0.0, roughness: 0.95, flatShading: true }),
+    treeTrunk:     new THREE.MeshStandardMaterial({ color: 0x6b4a2f, metalness: 0.0, roughness: 1.0 }),
+    moundGrass:    new THREE.MeshStandardMaterial({ color: 0x7a8c4e, metalness: 0.0, roughness: 1.0, flatShading: true }),
+    moundSand:     new THREE.MeshStandardMaterial({ color: 0xc2a878, metalness: 0.0, roughness: 1.0, flatShading: true }),
+
     // Fountain — polished chrome sculpture + sandstone basin
     chromeSculp:   new THREE.MeshStandardMaterial({ color: 0xd6d6dc, metalness: 0.75, roughness: 0.18 }),
     water:         new THREE.MeshStandardMaterial({ color: 0x3e6b8a, metalness: 0.3, roughness: 0.25 }),
@@ -1595,12 +1604,19 @@ var Landmarks3D = (() => {
       labelOffsetY: -0.5,
       labelOffsetY3d: -2.0,
       format: 'procedural',
-      build: () => buildDepartmentBuilding({ length: 44, bboxDepth: 44 }),
+      // Per satellite view the actual building is rectangular, longer
+      // N-S, shorter E-W, with the recessed entrance courtyard on the
+      // WEST face.
+      build: () => buildDepartmentBuilding({ length: 38, bboxDepth: 34 }),
       lng: 73.1151943, lat: 26.4800794,
       heightMeters: null,
       rotateMeshToUp: Y_UP_TO_Z_UP,
-      // Entrance faces due west
-      bearingOffset: -90 * Math.PI / 180,
+      // Entrance faces WEST. The campus grid is rotated ~15° off true
+      // north, so a cardinal angle (e.g. -90°) looks tilted next to the
+      // grid-aligned neighbours. Use the same grid bearing as the other
+      // west-facing departments (Metallurgical/Mechanical/Chemistry) so
+      // Civil sits perfectly parallel to its lane, exactly like Physics.
+      bearingOffset: -104.2 * Math.PI / 180,
       replacesOsmBuildings: ['1516539950'],
     },
     {
@@ -1728,6 +1744,140 @@ var Landmarks3D = (() => {
     _mercPerMeter = originMc.meterInMercatorCoordinateUnits();
 
     for (const cfg of LANDMARKS) _addLandmark(cfg, originMc);
+
+    // Lightweight landscape: instanced low-poly trees + simple berm mounds,
+    // placed only where vegetation is visible in the satellite imagery.
+    _addVegetation(originMc);
+  }
+
+  // ─────────────────────────────────────────────────────────────────────
+  // VEGETATION — instanced low-poly trees + simple landscaped berm mounds
+  // ─────────────────────────────────────────────────────────────────────
+  // Placement is driven by the satellite imagery: the dense E-W green belt
+  // south of the academic core, the SE sapling plantation, the campus
+  // gardens/lawns, and the landscaped entrance ("W Berms"). Barren desert
+  // is intentionally left empty. Everything is rendered with TWO instanced
+  // draw calls (foliage + trunk) so hundreds of trees cost almost nothing.
+  //
+  // Primitive zone types (coords are [lng, lat]):
+  //   cluster : scatter `count` trees in a disc of radius `r` (metres)
+  //   band    : scatter `count` trees in a rectangle from a→b, width `w`
+  //   row     : a single avenue line of trees from a→b, every `gap` metres
+  const VEGETATION = [
+    // ── Central green belt (the dense tree corridor south of the core) ──
+    { t: 'band', a: [73.1112, 26.46985], b: [73.1180, 26.46945], w: 22, count: 150 },
+    // ── SE sapling plantation (triangular grid between Brain Tree & exp2) ─
+    { t: 'band', a: [73.1138, 26.46905], b: [73.1162, 26.46805], w: 34, count: 90 },
+    { t: 'band', a: [73.1150, 26.46980], b: [73.1162, 26.46870], w: 20, count: 30 },
+    // ── Campus gardens & lawns (from areas.geojson recreation polygons) ──
+    { t: 'cluster', a: [73.116831, 26.472644], r: 16, count: 22 },  // B2 & B3 Garden
+    { t: 'cluster', a: [73.111936, 26.473909], r: 18, count: 26 },  // Type B Park
+    { t: 'cluster', a: [73.112317, 26.470948], r: 16, count: 22 },  // Director Lawn
+    { t: 'cluster', a: [73.112050, 26.470430], r: 12, count: 12 },  // Director Bungalow grove
+    // ── Hostel-side garden strips (lighter greenery) ──
+    { t: 'cluster', a: [73.116600, 26.474300], r: 12, count: 12 },
+    // ── Avenue tree rows along the main ceremonial entrance & inner loop ──
+    { t: 'row', a: [73.11270, 26.46880], b: [73.11430, 26.47010], gap: 9 },
+    { t: 'row', a: [73.11470, 26.47055], b: [73.11250, 26.46920], gap: 9 },
+  ];
+
+  // Landscaped berm mounds at the main entrance ("W Berms" in satellite).
+  // Each: [lng, lat, radiusMetres, heightMetres, sandy?]
+  const MOUNDS = [
+    [73.11240, 26.46945, 9, 1.6, false],
+    [73.11195, 26.46930, 8, 1.4, false],
+    [73.11150, 26.46915, 8, 1.5, true],
+    [73.11300, 26.46965, 8, 1.3, false],
+  ];
+
+  function _lngLatToLocal(lng, lat, originMc) {
+    const mc = maplibregl.MercatorCoordinate.fromLngLat([lng, lat], 0);
+    return [(mc.x - originMc.x) / _mercPerMeter, (mc.y - originMc.y) / _mercPerMeter];
+  }
+
+  function _addVegetation(originMc) {
+    // Deterministic RNG so the layout is identical every load.
+    let seed = 0x1a2b3c4d;
+    const rnd = () => { seed = (seed * 1664525 + 1013904223) >>> 0; return seed / 4294967296; };
+
+    const trees = [];   // { x, z, s }
+    const pushTree = (x, z, s) => trees.push({ x, z, s });
+
+    for (const z of VEGETATION) {
+      if (z.t === 'cluster') {
+        const [cx, cz] = _lngLatToLocal(z.a[0], z.a[1], originMc);
+        for (let i = 0; i < z.count; i++) {
+          const ang = rnd() * Math.PI * 2;
+          const rr = Math.sqrt(rnd()) * z.r;          // uniform disc
+          pushTree(cx + Math.cos(ang) * rr, cz + Math.sin(ang) * rr, 0.8 + rnd() * 0.7);
+        }
+      } else if (z.t === 'band') {
+        const [ax, az] = _lngLatToLocal(z.a[0], z.a[1], originMc);
+        const [bx, bz] = _lngLatToLocal(z.b[0], z.b[1], originMc);
+        const dx = bx - ax, dz = bz - az, len = Math.hypot(dx, dz) || 1;
+        const ux = dx / len, uz = dz / len, px = -uz, pz = ux;   // perpendicular
+        for (let i = 0; i < z.count; i++) {
+          const t = rnd() * len, ww = (rnd() - 0.5) * z.w;
+          pushTree(ax + ux * t + px * ww, az + uz * t + pz * ww, 0.8 + rnd() * 0.7);
+        }
+      } else if (z.t === 'row') {
+        const [ax, az] = _lngLatToLocal(z.a[0], z.a[1], originMc);
+        const [bx, bz] = _lngLatToLocal(z.b[0], z.b[1], originMc);
+        const dx = bx - ax, dz = bz - az, len = Math.hypot(dx, dz) || 1;
+        const n = Math.max(1, Math.round(len / (z.gap || 9)));
+        for (let i = 0; i <= n; i++) {
+          const t = i / n;
+          pushTree(ax + dx * t + (rnd() - 0.5) * 1.2, az + dz * t + (rnd() - 0.5) * 1.2, 0.9 + rnd() * 0.4);
+        }
+      }
+    }
+
+    if (trees.length) {
+      // Shared low-poly tree geometry (built once, instanced):
+      //   trunk  = short cylinder, foliage = 1-detail icosahedron blob.
+      const trunkGeo   = new THREE.CylinderGeometry(0.14, 0.22, 1.6, 5);
+      trunkGeo.translate(0, 0.8, 0);
+      const foliageGeo = new THREE.IcosahedronGeometry(1.7, 0);
+      foliageGeo.translate(0, 2.7, 0);
+
+      const trunkMesh   = new THREE.InstancedMesh(trunkGeo,   MAT.treeTrunk,    trees.length);
+      const foliageMesh = new THREE.InstancedMesh(foliageGeo, MAT.treeFoliage,  trees.length);
+      trunkMesh.frustumCulled = false;
+      foliageMesh.frustumCulled = false;
+      // Per-instance foliage tint (two greens) for a touch of variety.
+      const cA = new THREE.Color(0x5b7f3a), cB = new THREE.Color(0x6f9447);
+
+      const m = new THREE.Matrix4();
+      const q = new THREE.Quaternion();
+      const up = new THREE.Vector3(0, 1, 0);
+      const sv = new THREE.Vector3();
+      const pv = new THREE.Vector3();
+      for (let i = 0; i < trees.length; i++) {
+        const tr = trees[i];
+        q.setFromAxisAngle(up, i * 2.399963);       // golden-angle spin
+        sv.set(tr.s, tr.s * (0.9 + (i % 3) * 0.12), tr.s);
+        pv.set(tr.x, 0, tr.z);
+        m.compose(pv, q, sv);
+        trunkMesh.setMatrixAt(i, m);
+        foliageMesh.setMatrixAt(i, m);
+        foliageMesh.setColorAt(i, (i % 2 === 0) ? cA : cB);
+      }
+      trunkMesh.instanceMatrix.needsUpdate = true;
+      foliageMesh.instanceMatrix.needsUpdate = true;
+      if (foliageMesh.instanceColor) foliageMesh.instanceColor.needsUpdate = true;
+      _root.add(trunkMesh);
+      _root.add(foliageMesh);
+    }
+
+    // ── Berm mounds — low half-ellipsoid domes (upper hemisphere only).
+    for (const [lng, lat, r, h, sandy] of MOUNDS) {
+      const [cx, cz] = _lngLatToLocal(lng, lat, originMc);
+      const dome = new THREE.SphereGeometry(1, 12, 6, 0, Math.PI * 2, 0, Math.PI / 2);
+      const mound = new THREE.Mesh(dome, sandy ? MAT.moundSand : MAT.moundGrass);
+      mound.scale.set(r, h, r);
+      mound.position.set(cx, 0, cz);
+      _root.add(mound);
+    }
   }
 
   function _addLandmark(cfg, originMc) {

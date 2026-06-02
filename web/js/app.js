@@ -709,6 +709,21 @@ function addRoadsLayer(data) {
 
   map.addSource('campus-roads', { type: 'geojson', data });
 
+  // Type-aware vehicle-road widths (metres-ish, scaled by zoom) so the wide
+  // entrance avenue / ring road read correctly against the narrow service
+  // lanes, matching the satellite. The casing is a few px wider than the
+  // surface to form a curb edge.
+  const surfaceW = ['interpolate', ['linear'], ['zoom'],
+    13, ['match', ['get', 'highway_type'], 'trunk', 3.2, 'trunk_link', 2.2, 'primary', 3.0, 'unclassified', 2.4, 'residential', 1.8, 1.6],
+    16, ['match', ['get', 'highway_type'], 'trunk', 7.0, 'trunk_link', 5.0, 'primary', 6.5, 'unclassified', 5.5, 'residential', 3.6, 3.2],
+    19, ['match', ['get', 'highway_type'], 'trunk', 12,  'trunk_link', 8.0, 'primary', 11,  'unclassified', 9.0, 'residential', 6.0, 5.0],
+  ];
+  const casingW = ['interpolate', ['linear'], ['zoom'],
+    13, ['match', ['get', 'highway_type'], 'trunk', 4.6, 'trunk_link', 3.4, 'primary', 4.4, 'unclassified', 3.6, 'residential', 2.9, 2.6],
+    16, ['match', ['get', 'highway_type'], 'trunk', 9.5, 'trunk_link', 7.0, 'primary', 9.0, 'unclassified', 7.8, 'residential', 5.4, 4.8],
+    19, ['match', ['get', 'highway_type'], 'trunk', 15,  'trunk_link', 11,  'primary', 14,  'unclassified', 12,  'residential', 8.6, 7.2],
+  ];
+
   map.addLayer({
     id: 'campus-roads-casing',
     type: 'line',
@@ -722,9 +737,10 @@ function addRoadsLayer(data) {
       'line-width': 0,
       'line-opacity': 0
     } : {
-      'line-color': isDark ? '#1e293b' : '#cbd5e1',
-      'line-width': ['interpolate', ['linear'], ['zoom'], 13, 2.5, 16, 6, 19, 10],
-      'line-opacity': 0.9
+      // Curb edge — a darker outline that reads as the road kerb.
+      'line-color': isDark ? '#0f1726' : '#9aa0a6',
+      'line-width': casingW,
+      'line-opacity': 0.95
     }
   });
 
@@ -742,16 +758,13 @@ function addRoadsLayer(data) {
       'line-width': ['interpolate', ['linear'], ['zoom'], 13, 1.2, 16, 3, 19, 5],
       'line-opacity': 0.92
     } : {
-      'line-color': [
-        'match', ['get', 'highway_type'],
-        'service', '#f59e0b',
-        'residential', '#cbd5e1',
-        'tertiary', '#fbbf24',
-        'secondary', '#fde68a',
-        isDark ? '#818cf8' : '#6366f1'
-      ],
-      'line-width': ['interpolate', ['linear'], ['zoom'], 13, 1.5, 16, 3.5, 19, 5],
-      'line-opacity': 0.9
+      // Asphalt/concrete surface — neutral grey like the real campus roads
+      // (service lanes slightly lighter concrete than the main carriageways).
+      'line-color': isDark
+        ? ['match', ['get', 'highway_type'], 'service', '#3b475b', 'residential', '#374254', '#3f4c61']
+        : ['match', ['get', 'highway_type'], 'service', '#c9ccd1', 'residential', '#c4c8cd', '#bcc0c6'],
+      'line-width': surfaceW,
+      'line-opacity': 1
     }
   });
 
