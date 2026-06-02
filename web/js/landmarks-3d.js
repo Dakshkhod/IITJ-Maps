@@ -1759,36 +1759,33 @@ var Landmarks3D = (() => {
   // is intentionally left empty. Everything is rendered with TWO instanced
   // draw calls (foliage + trunk) so hundreds of trees cost almost nothing.
   //
-  // Primitive zone types (coords are [lng, lat]):
+  // Placement is intentionally CONSERVATIVE: a small number of tight, dense
+  // groves sitting exactly on the vegetation masses that are unmistakable in
+  // the satellite — the curved green embankment south of the core, the dense
+  // SE sapling plantation by the expressway, and a couple of campus gardens.
+  // No avenue rows, no thin bands (those read as random floating dots), and
+  // nothing on barren ground.
+  //
+  // Zone type (coords are [lng, lat]):
   //   cluster : scatter `count` trees in a disc of radius `r` (metres)
-  //   band    : scatter `count` trees in a rectangle from a→b, width `w`
-  //   row     : a single avenue line of trees from a→b, every `gap` metres
   const VEGETATION = [
-    // ── Central green belt (the dense tree corridor south of the core) ──
-    { t: 'band', a: [73.1112, 26.46985], b: [73.1180, 26.46945], w: 22, count: 150 },
-    // ── SE sapling plantation (triangular grid between Brain Tree & exp2) ─
-    { t: 'band', a: [73.1138, 26.46905], b: [73.1162, 26.46805], w: 34, count: 90 },
-    { t: 'band', a: [73.1150, 26.46980], b: [73.1162, 26.46870], w: 20, count: 30 },
-    // ── Campus gardens & lawns (from areas.geojson recreation polygons) ──
-    { t: 'cluster', a: [73.116831, 26.472644], r: 16, count: 22 },  // B2 & B3 Garden
-    { t: 'cluster', a: [73.111936, 26.473909], r: 18, count: 26 },  // Type B Park
-    { t: 'cluster', a: [73.112317, 26.470948], r: 16, count: 22 },  // Director Lawn
-    { t: 'cluster', a: [73.112050, 26.470430], r: 12, count: 12 },  // Director Bungalow grove
-    // ── Hostel-side garden strips (lighter greenery) ──
-    { t: 'cluster', a: [73.116600, 26.474300], r: 12, count: 12 },
-    // ── Avenue tree rows along the main ceremonial entrance & inner loop ──
-    { t: 'row', a: [73.11270, 26.46880], b: [73.11430, 26.47010], gap: 9 },
-    { t: 'row', a: [73.11470, 26.47055], b: [73.11250, 26.46920], gap: 9 },
+    // ── Central green belt — dense groves along the landscaped embankment
+    { t: 'cluster', a: [73.111531, 26.470558], r: 8,  count: 11 },
+    { t: 'cluster', a: [73.112755, 26.470100], r: 8,  count: 11 },
+    { t: 'cluster', a: [73.114032, 26.470028], r: 8,  count: 11 },
+    { t: 'cluster', a: [73.115256, 26.470390], r: 8,  count: 11 },
+    // ── SE planted-tree wedge — dense sapling grove beside the expressway
+    { t: 'cluster', a: [73.115300, 26.468750], r: 10, count: 14 },
+    { t: 'cluster', a: [73.115150, 26.468400], r: 10, count: 14 },
+    { t: 'cluster', a: [73.115400, 26.468080], r: 8,  count: 9  },
+    // ── Campus gardens & lawns (genuinely planted areas)
+    { t: 'cluster', a: [73.112320, 26.470950], r: 7,  count: 7  },  // Director Lawn
+    { t: 'cluster', a: [73.111936, 26.473909], r: 9,  count: 9  },  // Type B Park
+    { t: 'cluster', a: [73.116831, 26.472644], r: 8,  count: 8  },  // B2 & B3 Garden
   ];
 
-  // Landscaped berm mounds at the main entrance ("W Berms" in satellite).
-  // Each: [lng, lat, radiusMetres, heightMetres, sandy?]
-  const MOUNDS = [
-    [73.11240, 26.46945, 9, 1.6, false],
-    [73.11195, 26.46930, 8, 1.4, false],
-    [73.11150, 26.46915, 8, 1.5, true],
-    [73.11300, 26.46965, 8, 1.3, false],
-  ];
+  // No berm mounds for now (kept intentionally empty).
+  const MOUNDS = [];
 
   function _lngLatToLocal(lng, lat, originMc) {
     const mc = maplibregl.MercatorCoordinate.fromLngLat([lng, lat], 0);
