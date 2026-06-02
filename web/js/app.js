@@ -436,6 +436,7 @@ const OVERLAY_LAYER_IDS = [
   'campus-roads-hit', 'campus-roads-labels',
   'areas-fill', 'areas-outline', 'areas-labels',
   'buildings-fill', 'buildings-outline', 'buildings-3d', 'buildings-labels',
+  'buildings-highlight-fill', 'buildings-highlight-outline',
   'places-circles', 'places-labels',
 ];
 const OVERLAY_SOURCE_IDS = [
@@ -900,6 +901,90 @@ function addBuildingsLayer(data) {
     },
     paint: labelPaint()
   });
+
+  // Highlight fill — glowing colour for the active category (hidden by default)
+  const NEVER = ['==', ['literal', 1], 0]; // filter that never matches
+  map.addLayer({
+    id: 'buildings-highlight-fill',
+    type: 'fill',
+    source: 'buildings',
+    filter: NEVER,
+    layout: { visibility: 'visible' },
+    paint: {
+      'fill-color': categoryHighlightColorExpr(),
+      'fill-opacity': 0.55,
+    }
+  });
+
+  // Highlight outline — thick bright border (above fill)
+  map.addLayer({
+    id: 'buildings-highlight-outline',
+    type: 'line',
+    source: 'buildings',
+    filter: NEVER,
+    layout: { visibility: 'visible' },
+    paint: {
+      'line-color': categoryHighlightColorExpr(),
+      'line-width': ['interpolate', ['linear'], ['zoom'], 14, 2, 17, 4.5, 19, 6],
+      'line-opacity': 1.0,
+      'line-blur': 1.5,
+    }
+  });
+}
+
+// Returns a MapLibre match expression: category → bright highlight colour
+function categoryHighlightColorExpr() {
+  return ['match', ['get', 'category'],
+    'academic',       '#3b82f6',   // blue
+    'hostel',         '#f97316',   // orange
+    'dining',         '#ef4444',   // red
+    'sports',         '#22c55e',   // green
+    'medical',        '#ec4899',   // pink
+    'administrative', '#8b5cf6',   // purple
+    'residential',    '#eab308',   // yellow
+    '#6366f1'                      // fallback indigo
+  ];
+}
+
+// ─── Category highlight / pulse ───────────────────────────────────────────────
+let _pulseTimer = null;
+let _pulseHigh = true;
+
+function startBuildingHighlight(categoryId) {
+  stopBuildingHighlight();
+  if (!categoryId) return;
+
+  const polyFilter = ['all',
+    ['==', ['geometry-type'], 'Polygon'],
+    ['==', ['get', 'category'], categoryId]
+  ];
+
+  if (map.getLayer('buildings-highlight-fill')) {
+    map.setFilter('buildings-highlight-fill',    polyFilter);
+    map.setFilter('buildings-highlight-outline', polyFilter);
+  }
+
+  // Pulsing opacity animation
+  _pulseHigh = true;
+  _pulseTimer = setInterval(() => {
+    _pulseHigh = !_pulseHigh;
+    if (!map.getLayer('buildings-highlight-fill')) return;
+    map.setPaintProperty('buildings-highlight-fill',    'fill-opacity',  _pulseHigh ? 0.55 : 0.18);
+    map.setPaintProperty('buildings-highlight-outline', 'line-opacity',  _pulseHigh ? 1.0  : 0.35);
+    map.setPaintProperty('buildings-highlight-outline', 'line-width',
+      ['interpolate', ['linear'], ['zoom'], 14, _pulseHigh ? 2 : 1, 17, _pulseHigh ? 4.5 : 2.5]);
+  }, 700);
+}
+
+function stopBuildingHighlight() {
+  if (_pulseTimer) { clearInterval(_pulseTimer); _pulseTimer = null; }
+  const NEVER = ['==', ['literal', 1], 0];
+  if (map.getLayer('buildings-highlight-fill')) {
+    map.setFilter('buildings-highlight-fill',    NEVER);
+    map.setFilter('buildings-highlight-outline', NEVER);
+    map.setPaintProperty('buildings-highlight-fill',    'fill-opacity',  0.55);
+    map.setPaintProperty('buildings-highlight-outline', 'line-opacity',  1.0);
+  }
 }
 
 // ============================================================
@@ -1086,6 +1171,13 @@ async function filterByCategory(categoryId, chipEl) {
 
   const data = IITJData.getPlaces(categoryId || null);
   addPlacesLayer(data.features);
+
+  // Highlight / pulse matching buildings; clear when "All" selected
+  if (categoryId) {
+    startBuildingHighlight(categoryId);
+  } else {
+    stopBuildingHighlight();
+  }
 }
 
 // ============================================================
@@ -1939,6 +2031,7 @@ function restoreLocationLayer() {
 const SATELLITE_MAX_ZOOM = 17;
 
 async function toggleSatellite() {
+  stopBuildingHighlight(); // clear pulse before style swap
   isSatellite = !isSatellite;
   if (isSatellite) {
     isDark = false;
