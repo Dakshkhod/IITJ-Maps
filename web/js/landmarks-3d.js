@@ -1540,23 +1540,27 @@ var Landmarks3D = (() => {
       bearingOffset: 45 * Math.PI / 180,
     },
 
-    // ── Department buildings (Physics, Mechanical, Metallurgical, Civil,
-    //    Electrical, Chemistry) — uniform H-shaped academic block design.
-    //    Centroids are the OSM polygon centroids; bearings come from each
-    //    polygon's longest edge so the model's long wing-axis lines up
-    //    with the building's actual orientation on the ground.
+    // ── Department buildings — uniform H-shaped academic block design.
+    //    bearingOffset orients each building so its entrance faces its
+    //    paired partner across the central plaza:
+    //      Physics ↔ Metallurgical, Electrical ↔ Mechanical (north cluster)
+    //      Chemistry ↔ BB (south cluster)
+    //    Civil sits north of the main cluster and faces south toward it.
+    //    CSE sits south of BB and faces north toward it.
+    // Model dimensions are sized so that, after rotation by bearingOffset,
+    // the model's bounding box fits comfortably inside the OSM polygon
+    // (with ~2 m buffer) — keeps wings off the surrounding roads.
     {
       id: 'dept-physics-3d',
       label: 'Department of Physics',
       labelOffsetY: -0.5,
       labelOffsetY3d: -2.0,
       format: 'procedural',
-      build: () => buildDepartmentBuilding({ length: 46, bboxDepth: 48 }),
+      build: () => buildDepartmentBuilding({ length: 36, bboxDepth: 36 }),
       lng: 73.1162468, lat: 26.4798001,
       heightMeters: null,
       rotateMeshToUp: Y_UP_TO_Z_UP,
-      // Longest polygon edge bearing 74° (wings tilt slightly N of east)
-      bearingOffset: -16 * Math.PI / 180,
+      bearingOffset: 75.8 * Math.PI / 180,
       replacesOsmBuildings: ['1266941050'],
     },
     {
@@ -1565,11 +1569,11 @@ var Landmarks3D = (() => {
       labelOffsetY: -0.5,
       labelOffsetY3d: -2.0,
       format: 'procedural',
-      build: () => buildDepartmentBuilding({ length: 52, bboxDepth: 52 }),
+      build: () => buildDepartmentBuilding({ length: 42, bboxDepth: 42 }),
       lng: 73.1166527, lat: 26.4791398,
       heightMeters: null,
       rotateMeshToUp: Y_UP_TO_Z_UP,
-      bearingOffset: -16 * Math.PI / 180,
+      bearingOffset: -106.15 * Math.PI / 180,
       replacesOsmBuildings: ['773587411'],
     },
     {
@@ -1578,11 +1582,11 @@ var Landmarks3D = (() => {
       labelOffsetY: -0.5,
       labelOffsetY3d: -2.0,
       format: 'procedural',
-      build: () => buildDepartmentBuilding({ length: 50, bboxDepth: 52 }),
+      build: () => buildDepartmentBuilding({ length: 40, bboxDepth: 40 }),
       lng: 73.1169780, lat: 26.4796345,
       heightMeters: null,
       rotateMeshToUp: Y_UP_TO_Z_UP,
-      bearingOffset: -18 * Math.PI / 180,
+      bearingOffset: -104.2 * Math.PI / 180,
       replacesOsmBuildings: ['1223174130'],
     },
     {
@@ -1591,11 +1595,12 @@ var Landmarks3D = (() => {
       labelOffsetY: -0.5,
       labelOffsetY3d: -2.0,
       format: 'procedural',
-      build: () => buildDepartmentBuilding({ length: 46, bboxDepth: 46 }),
+      build: () => buildDepartmentBuilding({ length: 44, bboxDepth: 44 }),
       lng: 73.1151943, lat: 26.4800794,
       heightMeters: null,
       rotateMeshToUp: Y_UP_TO_Z_UP,
-      bearingOffset: -28 * Math.PI / 180,
+      // Entrance faces due west
+      bearingOffset: -90 * Math.PI / 180,
       replacesOsmBuildings: ['1516539950'],
     },
     {
@@ -1604,11 +1609,11 @@ var Landmarks3D = (() => {
       labelOffsetY: -0.5,
       labelOffsetY3d: -2.0,
       format: 'procedural',
-      build: () => buildDepartmentBuilding({ length: 50, bboxDepth: 50 }),
+      build: () => buildDepartmentBuilding({ length: 41, bboxDepth: 41 }),
       lng: 73.1160441, lat: 26.4792975,
       heightMeters: null,
       rotateMeshToUp: Y_UP_TO_Z_UP,
-      bearingOffset: -14 * Math.PI / 180,
+      bearingOffset: 73.85 * Math.PI / 180,
       replacesOsmBuildings: ['1025144735'],
     },
     {
@@ -1617,11 +1622,11 @@ var Landmarks3D = (() => {
       labelOffsetY: -0.5,
       labelOffsetY3d: -2.0,
       format: 'procedural',
-      build: () => buildDepartmentBuilding({ length: 46, bboxDepth: 50 }),
+      build: () => buildDepartmentBuilding({ length: 34, bboxDepth: 34 }),
       lng: 73.1150405, lat: 26.4754859,
       heightMeters: null,
       rotateMeshToUp: Y_UP_TO_Z_UP,
-      bearingOffset: -14 * Math.PI / 180,
+      bearingOffset: -108.17 * Math.PI / 180,
       replacesOsmBuildings: ['773587412'],
     },
     {
@@ -1630,11 +1635,11 @@ var Landmarks3D = (() => {
       labelOffsetY: -0.5,
       labelOffsetY3d: -2.0,
       format: 'procedural',
-      build: () => buildDepartmentBuilding({ length: 46, bboxDepth: 56 }),
+      build: () => buildDepartmentBuilding({ length: 35, bboxDepth: 35 }),
       lng: 73.1143996, lat: 26.4750582,
       heightMeters: null,
       rotateMeshToUp: Y_UP_TO_Z_UP,
-      bearingOffset: -15 * Math.PI / 180,
+      bearingOffset: 73.06 * Math.PI / 180,
       replacesOsmBuildings: ['773690910'],
     },
     {
@@ -1643,11 +1648,11 @@ var Landmarks3D = (() => {
       labelOffsetY: -0.5,
       labelOffsetY3d: -2.0,
       format: 'procedural',
-      build: () => buildDepartmentBuilding({ length: 46, bboxDepth: 48 }),
+      build: () => buildDepartmentBuilding({ length: 34, bboxDepth: 34 }),
       lng: 73.1145045, lat: 26.4756434,
       heightMeters: null,
       rotateMeshToUp: Y_UP_TO_Z_UP,
-      bearingOffset: -14 * Math.PI / 180,
+      bearingOffset: 71.83 * Math.PI / 180,
       replacesOsmBuildings: ['1266941049'],
     },
   ];
