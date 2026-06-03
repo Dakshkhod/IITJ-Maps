@@ -1713,6 +1713,9 @@ var Landmarks3D = (() => {
   let _mercPerMeter = 1;
   let _treeData = null;       // { full:[lng,lat,...], bush:[lng,lat,...] }
   let _treesBuilt = false;
+  let _targetOpacity = 1.0;   // remembered so setOpacity called before the scene
+                              // mounts still takes effect when meshes appear
+  let _targetIds = null;      // null = apply to all; Set = apply only to these landmark ids
 
   // Reusable buffers — allocated once, mutated each frame
   const _rotX = new THREE.Matrix4().makeRotationAxis(new THREE.Vector3(1, 0, 0), Y_UP_TO_Z_UP);
@@ -1748,6 +1751,9 @@ var Landmarks3D = (() => {
     // OSM-driven instanced trees (data may already be loaded; otherwise the
     // fetch in init() will call _buildVegetation() when it resolves).
     _buildVegetation();
+
+    // If setOpacity was called before the scene existed, apply it now.
+    if (_targetOpacity < 0.999) _applyOpacity(_targetOpacity, _targetIds);
   }
 
   // ─────────────────────────────────────────────────────────────────────
@@ -1838,6 +1844,12 @@ var Landmarks3D = (() => {
     const dx = (mc.x - originMc.x) / _mercPerMeter;
     const dz = (mc.y - originMc.y) / _mercPerMeter;
     group.position.set(dx, 0, dz);
+
+    // Stamp the cfg so app.js can later target a single landmark for fading
+    group.userData.landmarkId    = cfg.id;
+    group.userData.landmarkLabel = cfg.label || null;
+    group.userData.lng = cfg.lng;
+    group.userData.lat = cfg.lat;
 
     const place = (root) => {
       if (cfg.format !== 'procedural' && cfg.material) {
@@ -2103,6 +2115,81 @@ var Landmarks3D = (() => {
   function isVisible() { return _visible; }
   function listIds() { return [LAYER_ID, LABEL_LAYER_ID]; }
 
+  // Per-group fade: materials are shared across many landmarks (the
+  // sandstone palette is reused everywhere), so to fade one landmark
+  // without touching the others we clone its meshes' materials on first
+  // fade and swap them back to the original on restore. The clones live in
+  // group.userData.fadeOriginals so this remains idempotent.
+  function _fadeGroup(group, opacity) {
+    const transparent = opacity < 0.999;
+
+    if (!transparent) {
+      // Restore originals
+      const origs = group.userData.fadeOriginals;
+      if (origs) {
+        origs.forEach(({ mesh, material }) => { mesh.material = material; });
+        delete group.userData.fadeOriginals;
+      }
+      return;
+    }
+
+    if (!group.userData.fadeOriginals) {
+      const origs = [];
+      group.traverse(obj => {
+        if (!obj.isMesh || !obj.material) return;
+        const apply = (mat) => {
+          const clone = mat.clone();
+          clone.transparent = true;
+          clone.depthWrite = false;
+          return clone;
+        };
+        if (Array.isArray(obj.material)) {
+          origs.push({ mesh: obj, material: obj.material });
+          obj.material = obj.material.map(apply);
+        } else {
+          origs.push({ mesh: obj, material: obj.material });
+          obj.material = apply(obj.material);
+        }
+      });
+      group.userData.fadeOriginals = origs;
+    }
+
+    // Tune the clone opacity (cheap — no new allocation)
+    group.traverse(obj => {
+      if (!obj.isMesh || !obj.material) return;
+      const list = Array.isArray(obj.material) ? obj.material : [obj.material];
+      for (const m of list) m.opacity = opacity;
+    });
+  }
+
+  // Apply opacity to every landmark group (or only those matching idSet).
+  function _applyOpacity(opacity, idSet) {
+    if (!_root) return;
+    _root.children.forEach(group => {
+      const id = group.userData?.landmarkId;
+      if (idSet && !idSet.has(id)) {
+        _fadeGroup(group, 1.0);  // ensure not-targeted groups are fully opaque
+      } else {
+        _fadeGroup(group, opacity);
+      }
+    });
+    if (_map) _map.triggerRepaint();
+  }
+
+  // setOpacity(opacity)           → fade ALL landmarks (used to restore by passing 1.0)
+  // setOpacity(opacity, [ids])    → fade only the named landmark groups
+  function setOpacity(opacity, ids) {
+    const idSet = Array.isArray(ids) ? new Set(ids) : null;
+    _targetOpacity = opacity;
+    _targetIds = idSet;
+    _applyOpacity(opacity, idSet);
+  }
+
+  // [{ id, label, lng, lat }] — used by app.js to pick occluders
+  function getLandmarks() {
+    return LANDMARKS.map(l => ({ id: l.id, label: l.label || null, lng: l.lng, lat: l.lat }));
+  }
+
   // OSM building IDs that a detailed landmark replaces — used by app.js to
   // suppress the plain extrusion under the model.
   function replacedBuildingIds() {
@@ -2114,7 +2201,7 @@ var Landmarks3D = (() => {
   }
 
   return {
-    init, show, hide, isVisible, listIds, replacedBuildingIds,
+    init, show, hide, isVisible, listIds, replacedBuildingIds, setOpacity, getLandmarks,
     getLabelGeoJSON, landmarkLabelNames, labelLayerId: () => LABEL_LAYER_ID,
     syncLabels, raise: _raise,
   };

@@ -571,13 +571,82 @@ html, body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 10px;
+  gap: 12px;
   font-size: 13px;
   font-weight: 500;
   color: var(--text-primary);
 }
 
+.dir-summary-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1;
+}
+
 .dir-summary-type { font-size: 12px; color: var(--text-muted); }
+
+.dir-start-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 11px 22px;
+  border: none;
+  border-radius: 99px;
+  background: #1a73e8;
+  color: #fff;
+  font-family: var(--font);
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(26, 115, 232, 0.35);
+  transition: background 0.15s, transform 0.1s, box-shadow 0.15s;
+  flex-shrink: 0;
+}
+.dir-start-btn:hover { background: #1765c4; box-shadow: 0 3px 12px rgba(26, 115, 232, 0.45); }
+.dir-start-btn:active { transform: scale(0.97); }
+.dir-start-btn svg { flex-shrink: 0; }
+
+/* Re-centre button — floats above nav-panel during immersive nav */
+.nav-recenter-btn {
+  position: absolute;
+  left: 50%;
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 230px);
+  transform: translateX(-50%);
+  z-index: 26;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  border: none;
+  border-radius: 99px;
+  background: var(--bg-elevated);
+  color: #1a73e8;
+  font-family: var(--font);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.22);
+  animation: recenter-pop 0.22s cubic-bezier(.4,0,.2,1);
+}
+.nav-recenter-btn:hover { background: var(--surface); }
+.nav-recenter-btn svg { flex-shrink: 0; }
+
+@keyframes recenter-pop {
+  from { opacity: 0; transform: translate(-50%, 8px); }
+  to   { opacity: 1; transform: translate(-50%, 0); }
+}
+
+/* Hide most chrome while immersive nav is active to maximise the 3D view */
+body.immersive-nav .map-controls,
+body.immersive-nav #search-container,
+body.immersive-nav #directions-panel,
+body.immersive-nav #place-sheet,
+body.immersive-nav #layer-panel,
+body.immersive-nav #search-results { display: none !important; }
 
 .dir-from-marker {
   width: 16px;
@@ -1335,21 +1404,52 @@ input[type="checkbox"]:checked + .toggle-track .toggle-thumb { transform: transl
 /* ============================================================
    Location Marker
    ============================================================ */
-.location-marker { position: relative; width: 24px; height: 24px; }
+.location-marker {
+  position: relative;
+  width: 28px;
+  height: 28px;
+  --loc-heading: 0deg;
+}
+
+/* Google-Maps-style direction cone — only visible when has-heading is set. */
+.location-heading {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 48px;
+  height: 48px;
+  margin: -24px 0 0 -24px;
+  pointer-events: none;
+  opacity: 0;
+  transform: rotate(var(--loc-heading));
+  transform-origin: 50% 50%;
+  transition: opacity 0.25s ease;
+  background:
+    conic-gradient(
+      from -25deg,
+      rgba(26, 115, 232, 0.55) 0deg,
+      rgba(26, 115, 232, 0.0) 50deg,
+      rgba(26, 115, 232, 0.0) 310deg,
+      rgba(26, 115, 232, 0.55) 360deg
+    );
+  -webkit-mask-image: radial-gradient(circle, transparent 6px, #000 7px, #000 22px, transparent 23px);
+          mask-image: radial-gradient(circle, transparent 6px, #000 7px, #000 22px, transparent 23px);
+  z-index: 1;
+}
+.location-marker.has-heading .location-heading { opacity: 1; }
 
 .location-dot {
-  width: 16px;
-  height: 16px;
-  background: #0a0a0a;
+  width: 14px;
+  height: 14px;
+  background: #1a73e8;
   border: 2.5px solid #ffffff;
   border-radius: 50%;
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  box-shadow: var(--shadow-md);
-  z-index: 2;
-  transition: transform 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.4);
+  z-index: 3;
 }
 
 .location-pulse {
@@ -1357,16 +1457,17 @@ input[type="checkbox"]:checked + .toggle-track .toggle-thumb { transform: transl
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 40px;
-  height: 40px;
-  background: rgba(0, 0, 0, 0.08);
+  width: 28px;
+  height: 28px;
+  background: rgba(26, 115, 232, 0.20);
   border-radius: 50%;
   animation: gps-pulse 2.5s ease-out infinite;
+  z-index: 2;
 }
 
 @keyframes gps-pulse {
-  0%   { transform: translate(-50%, -50%) scale(0.5); opacity: 0.8; }
-  100% { transform: translate(-50%, -50%) scale(2); opacity: 0; }
+  0%   { transform: translate(-50%, -50%) scale(0.6); opacity: 0.8; }
+  100% { transform: translate(-50%, -50%) scale(2.4); opacity: 0; }
 }
 
 .map-ctrl-btn.location-active { color: var(--text-primary); }

@@ -31,10 +31,17 @@ const IITJData = (() => {
       fetch(`${base}/greens.geojson`).then(r => r.ok ? r.json() : null).catch(() => null),
     ]);
 
-    _places     = places;
-    _buildings  = buildings;
-    _roads      = roads;
-    _areas      = areas;
+    // Apply admin-approved OSM overlay (bundled + this browser's localStorage)
+    // BEFORE we save the FCs — every downstream getter then sees the merged set.
+    if (typeof IITJOverlay !== 'undefined') {
+      try { await IITJOverlay.init(); } catch (_) {}
+      _places    = IITJOverlay.apply(places,    'places');
+      _buildings = IITJOverlay.apply(buildings, 'buildings');
+      _roads     = IITJOverlay.apply(roads,     'roads');
+      _areas     = IITJOverlay.apply(areas,     'areas');
+    } else {
+      _places = places; _buildings = buildings; _roads = roads; _areas = areas;
+    }
     _categories = categories;
     _entrances  = entrances || {};
     _greens     = greens || { type: 'FeatureCollection', features: [] };

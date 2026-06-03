@@ -142,8 +142,16 @@
       <div id="dir-pick-hint" class="dir-pick-hint hidden">Tap the map to set this point</div>
       <button class="dir-go-btn" id="dir-go" type="button" disabled>Get directions</button>
       <div id="dir-summary" class="dir-summary hidden">
-        <span id="dir-summary-text"></span>
-        <span id="dir-summary-type" class="dir-summary-type"></span>
+        <div class="dir-summary-info">
+          <span id="dir-summary-text"></span>
+          <span id="dir-summary-type" class="dir-summary-type"></span>
+        </div>
+        <button class="dir-start-btn" id="dir-start" type="button">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="5 3 19 12 5 21 5 3" fill="currentColor"/>
+          </svg>
+          Start
+        </button>
       </div>
       </div><!-- /dir-form-body -->
     </div>
@@ -292,6 +300,14 @@
       </div>
     </div>
 
+    <!-- Re-centre button (shown during immersive navigation when user pans away) -->
+    <button id="nav-recenter-btn" class="nav-recenter-btn hidden" type="button" aria-label="Re-centre">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polygon points="3 11 22 2 13 21 11 13 3 11" fill="currentColor"/>
+      </svg>
+      <span>Re-centre</span>
+    </button>
+
     <!-- Side Menu -->
     <div id="side-menu" class="side-menu hidden">
       <div class="menu-header">
@@ -335,9 +351,10 @@
     <div id="menu-overlay" class="menu-overlay hidden"></div>
   </div>
 
+  <script src="js/data-overlay.js"></script>
   <script src="js/search.js"></script>
   <script src="js/routing.js"></script>
-  <script src="js/landmarks-3d.js?v=4" defer></script>
-  <script src="js/app.js?v=4"></script>
+  <script src="js/landmarks-3d.js?v=9" defer></script>
+  <script src="js/app.js?v=9"></script>
 </body>
 </html>

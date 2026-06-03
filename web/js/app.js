@@ -312,6 +312,10 @@ let currentRoute = null;
 let navDestination = null;           // preserved so re-route works after sheet close
 let navigationActive = false;
 let navInstructionIndex = 0;
+let immersiveNav = false;            // true while in Google-Maps-style immersive 3D nav view
+let preNavCameraState = null;        // saved pitch/bearing/zoom/center to restore on End
+let pre3DState = false;              // saved is3D flag so we can restore on End
+let _lastFadeKey = '';               // memo so we don't reapply identical occluder sets each GPS tick
 
 // Directions panel state
 let directionsOpen = false;
@@ -352,6 +356,8 @@ async function init() {
       setAutoFollow(false);
       document.getElementById('btn-locate').classList.remove('location-follow');
     }
+    // In immersive nav, surface a Re-centre chip so the user can snap back
+    if (immersiveNav) showRecenterBtn();
   });
 
   map.on('error', (e) => console.error('MapLibre error:', e.error?.message || e));
@@ -1631,13 +1637,20 @@ function removeDirectionsMarkers() {
 
 function updateDirectionsMarkers() {
   removeDirectionsMarkers();
-  if (directionsFrom) {
+  // Skip the from-marker when navigation is live AND the start is the
+  // user's location — the live puck already marks that spot. Drawing a
+  // second grey circle on top is a duplicate.
+  const skipFrom = navigationActive && userLocation
+    && directionsFrom?.name === 'Your location';
+  if (directionsFrom && !skipFrom) {
     const el = document.createElement('div');
     el.className = 'dir-from-marker';
     directionsFromMarker = new maplibregl.Marker({ element: el, anchor: 'center' })
       .setLngLat([directionsFrom.lng, directionsFrom.lat]).addTo(map);
   }
-  if (directionsTo) {
+  // Likewise skip the to-marker once nav is live — the red route-dest pin
+  // takes over.
+  if (directionsTo && !navigationActive) {
     const el = document.createElement('div');
     el.className = 'dir-to-marker';
     directionsToMarker = new maplibregl.Marker({ element: el, anchor: 'bottom' })
@@ -1722,6 +1735,7 @@ function setupDirectionsPanel() {
 
   document.getElementById('dir-swap').addEventListener('click', swapDirectionsPoints);
   document.getElementById('dir-go').addEventListener('click', calculateDirectionsRoute);
+  document.getElementById('dir-start').addEventListener('click', startImmersiveNavigation);
   document.getElementById('dir-close').addEventListener('click', closeDirectionsPanel);
   document.getElementById('dir-close-mini').addEventListener('click', closeDirectionsPanel);
   document.getElementById('dir-expand').addEventListener('click', expandDirectionsPanel);
@@ -1764,7 +1778,10 @@ async function calculateDirectionsRoute() {
 
   closePlaceSheet();
   clearDirectionsPickMode();
-  showLoadingToast('Calculating route…');
+  // A reroute during immersive nav should NOT pop the user back to the
+  // overview — preserve the in-flight state so we can resume seamlessly.
+  const wasImmersive = immersiveNav;
+  if (!wasImmersive) showLoadingToast('Calculating route…');
 
   try {
     // Snap to the registered entrance gate if the destination has one
@@ -1787,10 +1804,21 @@ async function calculateDirectionsRoute() {
 
     currentRoute        = route;
     navInstructionIndex = 0;
-    navigationActive    = true;
+    navigationActive    = wasImmersive;   // routes are previews unless we're already navigating
     navDestination      = { ...directionsTo };
 
     drawRoute(route.geometry);
+
+    // Mid-nav reroute: just refresh the line + ETA in the nav-panel; skip
+    // the preview UI, the fitBounds, and the "best route" toast.
+    if (wasImmersive) {
+      document.getElementById('nav-destination').textContent = directionsTo.name;
+      document.getElementById('nav-eta').textContent =
+        `${route.eta_minutes} min ${route.profile === 'driving' ? 'drive' : 'walk'}`;
+      document.getElementById('nav-distance').textContent = formatDist(route.distance);
+      updateNavInstruction(route.instructions[0]?.distance ?? null);
+      return;
+    }
 
     document.getElementById('dir-summary').classList.remove('hidden');
     const travelVerb = route.profile === 'driving' ? 'drive' : 'walk';
@@ -1802,6 +1830,8 @@ async function calculateDirectionsRoute() {
     else summaryType = route.profile === 'driving' ? 'Driving · main roads' : 'Walking · campus paths';
     document.getElementById('dir-summary-type').textContent = summaryType;
 
+    // Prime the nav-panel content so it's ready the moment Start is pressed,
+    // but keep the panel hidden until then (Google Maps-style preview).
     document.getElementById('nav-destination').textContent = directionsTo.name;
     document.getElementById('nav-eta').textContent =
       `${route.eta_minutes} min ${route.profile === 'driving' ? 'drive' : 'walk'}`;
@@ -1809,13 +1839,10 @@ async function calculateDirectionsRoute() {
     updateNavInstruction(route.instructions[0]?.distance ?? null);
     _showOffRoute(false);
     _showRerouting(false);
-    document.getElementById('nav-panel').classList.remove('hidden');
-
-    minimizeDirectionsPanel();
 
     const coords = route.geometry.coordinates;
     const bounds = coords.reduce((b, c) => b.extend(c), new maplibregl.LngLatBounds(coords[0], coords[0]));
-    map.fitBounds(bounds, { padding: { top: 72, bottom: 200, left: 40, right: 40 }, duration: 1000 });
+    map.fitBounds(bounds, { padding: { top: 72, bottom: 260, left: 40, right: 40 }, duration: 1000 });
 
     showToast(
       route.using_road_network ? 'Best route found' : 'Direct route (no road nearby)',
@@ -1875,11 +1902,15 @@ function _removeRouteMarkers() {
 function _addRouteMarkers(startCoord, endCoord) {
   _removeRouteMarkers();
 
-  // ── Start: blue circle ──
-  const startEl = document.createElement('div');
-  startEl.className = 'route-origin-marker';
-  routeOriginMarker = new maplibregl.Marker({ element: startEl, anchor: 'center' })
-    .setLngLat(startCoord).addTo(map);
+  // ── Start: blue circle. Skipped during active navigation because the
+  // live user puck already sits at this position — drawing both was the
+  // "two location pointers" bug the user saw.
+  if (!navigationActive || !userLocation) {
+    const startEl = document.createElement('div');
+    startEl.className = 'route-origin-marker';
+    routeOriginMarker = new maplibregl.Marker({ element: startEl, anchor: 'center' })
+      .setLngLat(startCoord).addTo(map);
+  }
 
   // ── End: red teardrop pin ──
   const endEl = document.createElement('div');
@@ -2041,7 +2072,233 @@ function updateNavInstruction(distToNextTurn) {
   document.getElementById('nav-progress').style.width = `${pct}%`;
 }
 
+// ============================================================
+// Immersive Navigation — Google-Maps-style first-person 3D view
+// ============================================================
+function _routeStartBearing() {
+  const coords = currentRoute?.geometry?.coordinates;
+  if (!coords || coords.length < 2) return 0;
+  const [x1, y1] = coords[0], [x2, y2] = coords[1];
+  // getBearing is defined inside IITJRouter; recompute locally to avoid coupling
+  const lat1 = y1, lng1 = x1, lat2 = y2, lng2 = x2;
+  const dLng = (lng2 - lng1) * Math.PI / 180;
+  const y = Math.sin(dLng) * Math.cos(lat2 * Math.PI / 180);
+  const x = Math.cos(lat1 * Math.PI / 180) * Math.sin(lat2 * Math.PI / 180) -
+    Math.sin(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.cos(dLng);
+  return ((Math.atan2(y, x) * 180 / Math.PI) + 360) % 360;
+}
+
+function startImmersiveNavigation() {
+  if (!currentRoute) return;
+
+  // Save state so End restores the user's prior view
+  preNavCameraState = {
+    center:  map.getCenter(),
+    zoom:    map.getZoom(),
+    pitch:   map.getPitch(),
+    bearing: map.getBearing(),
+  };
+  pre3DState = is3D;
+
+  navigationActive = true;
+  immersiveNav     = true;
+
+  // Re-evaluate route + directions markers now that navigationActive flipped
+  // (so the duplicate-suppression in updateDirectionsMarkers/_addRouteMarkers
+  // takes effect).
+  updateDirectionsMarkers();
+  if (currentRoute?.geometry?.coordinates) {
+    const c = currentRoute.geometry.coordinates;
+    _addRouteMarkers(c[0], c[c.length - 1]);
+  }
+
+  // Hide the form chrome so the 3D view is full-bleed; show the nav-panel
+  document.body.classList.add('immersive-nav');
+  document.getElementById('nav-panel').classList.remove('hidden');
+
+  // Switch on 3D buildings/landmarks if not already
+  if (!is3D && !isSatellite) {
+    // Reuse the existing toggle so visibility/landmark layers stay consistent
+    toggle3D();
+  }
+
+  // Buildings occlude the route line and the user puck at street-level pitch.
+  // Fade ONLY the structures right around the start position (not everything).
+  const focusCoord = (userLocation && directionsFrom?.name === 'Your location')
+    ? [userLocation.lng, userLocation.lat]
+    : currentRoute.geometry.coordinates[0];
+  applyImmersiveBuildingFade(focusCoord);
+
+  // Centre + tilt camera to first-person view. Use GPS if available,
+  // otherwise pull up to the route's starting coord & bearing.
+  const startCoord = (userLocation && directionsFrom?.name === 'Your location')
+    ? [userLocation.lng, userLocation.lat]
+    : currentRoute.geometry.coordinates[0];
+  const bearing = (userLocation?.heading != null)
+    ? userLocation.heading
+    : (headingDeg ?? _routeStartBearing());
+
+  // Bottom padding puts the user puck in the lower third of the screen,
+  // matching Google Maps' "look ahead" framing. Set autoFollow directly
+  // (don't call setAutoFollow — its built-in flyTo would race this easeTo).
+  autoFollow = true;
+  document.getElementById('btn-locate').classList.add('location-follow');
+  map.easeTo({
+    center: startCoord,
+    zoom: 18,
+    pitch: 65,
+    bearing,
+    padding: { top: 0, bottom: 280, left: 0, right: 0 },
+    duration: 900,
+  });
+
+  hideRecenterBtn();
+
+  if (!userLocation) {
+    showToast('Enable GPS for live navigation', 'info');
+  }
+}
+
+function exitImmersiveNavigation() {
+  if (!immersiveNav) return;
+  immersiveNav = false;
+  document.body.classList.remove('immersive-nav');
+  hideRecenterBtn();
+  setAutoFollow(false);
+
+  // Restore full-opacity buildings before any 3D toggle so we don't fight
+  // toggle3D's visibility writes mid-transition.
+  applyImmersiveBuildingFade(null);
+
+  const restore = preNavCameraState || {};
+  map.easeTo({
+    center:  restore.center  || CAMPUS_CENTER,
+    zoom:    restore.zoom    ?? CAMPUS_ZOOM,
+    pitch:   restore.pitch   ?? 0,
+    bearing: restore.bearing ?? 0,
+    padding: { top: 0, bottom: 0, left: 0, right: 0 },
+    duration: 700,
+  });
+
+  // Restore 3D toggle to whatever it was before nav
+  if (is3D !== pre3DState) toggle3D();
+
+  preNavCameraState = null;
+}
+
+// Find building osm_ids and landmark ids that occlude the view from `coord`.
+// A building counts as an occluder if its centroid lies within `radiusM`
+// metres of the camera focus point — i.e. it's right on top of the puck.
+function _occludersNear(coord, radiusM = 35) {
+  const [lng, lat] = coord;
+  const buildingIds = [];
+  const landmarkIds = [];
+
+  const buildings = IITJData.getBuildings();
+  for (const f of buildings.features || []) {
+    if (f.geometry?.type !== 'Polygon' && f.geometry?.type !== 'MultiPolygon') continue;
+    const c = f.centroid;
+    if (!c) continue;
+    if (haversine(lat, lng, c.lat, c.lng) <= radiusM) {
+      const id = f.properties?.osm_id;
+      if (id != null) buildingIds.push(String(id));
+    }
+  }
+
+  if (typeof Landmarks3D !== 'undefined' && typeof Landmarks3D.getLandmarks === 'function') {
+    for (const l of Landmarks3D.getLandmarks()) {
+      if (haversine(lat, lng, l.lat, l.lng) <= radiusM) landmarkIds.push(l.id);
+    }
+  }
+
+  return { buildingIds, landmarkIds };
+}
+
+// Make ONLY the structures occluding `coord` see-through. Pass coord=null
+// to restore everything to full opacity (used on End).
+//
+// fill-extrusion-opacity is layer-wide (MapLibre doesn't support data-driven
+// for it), so we fade individual features via fill-extrusion-color alpha
+// instead — color expressions ARE data-driven.
+function applyImmersiveBuildingFade(coord) {
+  const labelsLayer = map.getLayer('buildings-labels');
+  const fillLayer   = map.getLayer('buildings-3d');
+
+  // Base solid color matches what addBuildingsLayer originally used.
+  const baseColor = isDark ? '#475569' : '#f1f5f9';
+  const fadeColor = isDark ? 'rgba(71,85,105,0.18)' : 'rgba(241,245,249,0.18)';
+
+  if (!coord) {
+    _lastFadeKey = '';
+    if (fillLayer) map.setPaintProperty('buildings-3d', 'fill-extrusion-color', baseColor);
+    if (labelsLayer) {
+      map.setLayoutProperty('buildings-labels', 'visibility',
+        LAYERS.buildings ? 'visible' : 'none');
+    }
+    if (typeof Landmarks3D !== 'undefined' && typeof Landmarks3D.setOpacity === 'function') {
+      Landmarks3D.setOpacity(1.0);
+    }
+    return;
+  }
+
+  const { buildingIds, landmarkIds } = _occludersNear(coord);
+
+  // Identical occluder set → skip the (expensive) repaint trigger
+  const key = buildingIds.slice().sort().join(',') + '|' + landmarkIds.slice().sort().join(',');
+  if (key === _lastFadeKey) return;
+  _lastFadeKey = key;
+
+  if (fillLayer) {
+    if (buildingIds.length) {
+      map.setPaintProperty('buildings-3d', 'fill-extrusion-color',
+        ['case', ['in', ['get', 'osm_id'], ['literal', buildingIds]], fadeColor, baseColor]);
+    } else {
+      map.setPaintProperty('buildings-3d', 'fill-extrusion-color', baseColor);
+    }
+  }
+
+  // Labels still get hidden globally — turn names overlap the turn arrow
+  if (labelsLayer) map.setLayoutProperty('buildings-labels', 'visibility', 'none');
+
+  if (typeof Landmarks3D !== 'undefined' && typeof Landmarks3D.setOpacity === 'function') {
+    if (landmarkIds.length) Landmarks3D.setOpacity(0.25, landmarkIds);
+    else Landmarks3D.setOpacity(1.0);
+  }
+}
+
+function showRecenterBtn() {
+  if (!immersiveNav) return;
+  document.getElementById('nav-recenter-btn')?.classList.remove('hidden');
+}
+function hideRecenterBtn() {
+  document.getElementById('nav-recenter-btn')?.classList.add('hidden');
+}
+
+function recenterImmersive() {
+  if (!immersiveNav) return;
+  const coords = currentRoute?.geometry?.coordinates;
+  const center = userLocation
+    ? [userLocation.lng, userLocation.lat]
+    : (coords ? coords[0] : map.getCenter());
+  const bearing = (userLocation?.heading != null)
+    ? userLocation.heading
+    : (headingDeg ?? _routeStartBearing());
+  autoFollow = true;
+  document.getElementById('btn-locate').classList.add('location-follow');
+  map.easeTo({
+    center,
+    zoom: 18,
+    pitch: 65,
+    bearing,
+    padding: { top: 0, bottom: 280, left: 0, right: 0 },
+    duration: 500,
+  });
+  hideRecenterBtn();
+}
+
 function clearRoute() {
+  // Make sure the immersive camera/style is restored before we tear down
+  if (immersiveNav) exitImmersiveNavigation();
   navigationActive = false;
   currentRoute     = null;
   navDestination   = null;
@@ -2049,6 +2306,8 @@ function clearRoute() {
   _showOffRoute(false);
   _showRerouting(false);
   document.getElementById('nav-panel').classList.add('hidden');
+  document.getElementById('dir-summary').classList.add('hidden');
+  hideRecenterBtn();
   ['route-traveled', 'route-glow', 'route-casing', 'route-line'].forEach(id => {
     if (map.getLayer(id)) map.removeLayer(id);
   });
@@ -2064,164 +2323,358 @@ function endNavigation() {
 }
 
 // ============================================================
-// User Location — accuracy circle, heading, auto-follow
+// LocationTracker — Kalman-lite GPS pipeline (single source of truth)
+// ============================================================
+// One module owns the watchPosition handle, smooths raw fixes with a
+// Kalman-lite filter, rejects outliers, fuses GPS heading with the
+// compass, and runs a requestAnimationFrame loop that interpolates the
+// rendered position toward the latest filtered estimate. Subscribers
+// (marker, camera, nav) consume the smooth `display` position instead
+// of the noisy raw `coords`.
+const LocationTracker = (() => {
+  // Tunables
+  const PROCESS_NOISE_MPS        = 4;    // assumed motion model std-dev (m/s)
+  const MAX_ACCEPTABLE_ACCURACY  = 200;  // throw out fixes worse than this (m)
+  const MIN_ACCURACY             = 3;    // floor — phones report 0–1 sometimes
+  const OUTLIER_SIGMA            = 4;    // jumps beyond Nσ get heavily down-weighted
+  const POS_INTERP_FACTOR        = 0.22; // per-frame ease toward estimate
+  const ACC_INTERP_FACTOR        = 0.15;
+  const HEADING_INTERP_FACTOR    = 0.20;
+
+  let _raw  = null;   // last accepted raw fix (lat,lng,accuracy,heading,speed,t)
+  let _est  = null;   // Kalman estimate (lat,lng,variance,t)
+  let _disp = null;   // smoothly interpolated render position (lat,lng,accuracy,heading)
+  let _gpsHeading     = null;
+  let _compassHeading = null;
+  let _speed          = null;
+  let _watchId = null;
+  let _rafId   = 0;
+  const _listeners = new Set();
+
+  function _haversine(lat1, lng1, lat2, lng2) {
+    const R = 6371000;
+    const a = Math.sin((lat2 - lat1) * Math.PI / 360) ** 2 +
+      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+      Math.sin((lng2 - lng1) * Math.PI / 360) ** 2;
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  }
+
+  // Returns true if the fix was accepted into the filter.
+  function _ingest(lat, lng, accuracy, tMs) {
+    accuracy = Math.max(accuracy || 30, MIN_ACCURACY);
+    if (accuracy > MAX_ACCEPTABLE_ACCURACY) return false;
+    if (!isFinite(lat) || !isFinite(lng)) return false;
+
+    if (!_est) {
+      _est = { lat, lng, variance: accuracy * accuracy, t: tMs };
+      return true;
+    }
+
+    const dt = Math.max(0.05, Math.min(10, (tMs - _est.t) / 1000));
+    const procVar = (PROCESS_NOISE_MPS * dt) ** 2;
+    const predVar = _est.variance + procVar;
+    const measVar = accuracy * accuracy;
+
+    // Outlier rejection: if the jump is way bigger than the expected
+    // uncertainty, fold in only a small fraction so a bad fix can't yank
+    // the puck off the road.
+    const jumpM = _haversine(_est.lat, _est.lng, lat, lng);
+    const sigma = Math.sqrt(predVar + measVar);
+    let gain = predVar / (predVar + measVar);
+    if (jumpM > OUTLIER_SIGMA * sigma) gain *= 0.12;
+
+    _est.lat += gain * (lat - _est.lat);
+    _est.lng += gain * (lng - _est.lng);
+    _est.variance = (1 - gain) * predVar;
+    _est.t = tMs;
+    return true;
+  }
+
+  function _rotateAngle(from, to, factor) {
+    let delta = to - from;
+    while (delta > 180) delta -= 360;
+    while (delta < -180) delta += 360;
+    return ((from + delta * factor) + 360) % 360;
+  }
+
+  // Fuse GPS heading (good when moving) with compass heading (good at rest).
+  function _bestHeading() {
+    if (_speed != null && _speed > 1.4 && _gpsHeading != null && !isNaN(_gpsHeading)) return _gpsHeading;
+    if (_compassHeading != null) return _compassHeading;
+    if (_gpsHeading != null && !isNaN(_gpsHeading)) return _gpsHeading;
+    return null;
+  }
+
+  function _frame() {
+    _rafId = requestAnimationFrame(_frame);
+    if (!_est) return;
+
+    const targetAcc = Math.sqrt(_est.variance);
+    const targetH   = _bestHeading();
+
+    if (!_disp) {
+      _disp = { lat: _est.lat, lng: _est.lng, accuracy: targetAcc, heading: targetH ?? 0 };
+    } else {
+      _disp.lat       += (_est.lat - _disp.lat) * POS_INTERP_FACTOR;
+      _disp.lng       += (_est.lng - _disp.lng) * POS_INTERP_FACTOR;
+      _disp.accuracy  += (targetAcc - _disp.accuracy) * ACC_INTERP_FACTOR;
+      if (targetH != null) _disp.heading = _rotateAngle(_disp.heading, targetH, HEADING_INTERP_FACTOR);
+    }
+
+    for (const cb of _listeners) {
+      try { cb(_disp, _raw); } catch (e) { console.error('[LocationTracker]', e); }
+    }
+  }
+
+  function _onCompass(e) {
+    let h = null;
+    // iOS Safari provides webkitCompassHeading (true-north, 0..360)
+    if (typeof e.webkitCompassHeading === 'number' && !isNaN(e.webkitCompassHeading)) {
+      h = e.webkitCompassHeading;
+    } else if (e.alpha != null && !isNaN(e.alpha)) {
+      h = (360 - e.alpha) % 360;
+    }
+    if (h != null) _compassHeading = h;
+  }
+
+  function start(onError) {
+    if (_watchId !== null) return true;
+    if (!navigator.geolocation) { onError?.({ code: 0, message: 'unsupported' }); return false; }
+
+    _watchId = navigator.geolocation.watchPosition(
+      (pos) => {
+        const c = pos.coords;
+        const tMs = pos.timestamp || Date.now();
+        if (!_ingest(c.latitude, c.longitude, c.accuracy, tMs)) return;
+        _raw = {
+          lat: c.latitude, lng: c.longitude, accuracy: c.accuracy,
+          heading: c.heading, speed: c.speed, t: tMs,
+        };
+        if (c.heading != null && !isNaN(c.heading)) _gpsHeading = c.heading;
+        if (c.speed   != null && !isNaN(c.speed))   _speed      = c.speed;
+      },
+      (err) => { onError?.(err); },
+      // maximumAge:0 — never accept a stale cached fix; that's the #1 source
+      // of the "jumps back" bug on Chrome Android.
+      { enableHighAccuracy: true, maximumAge: 0, timeout: 20000 }
+    );
+
+    if (window.DeviceOrientationEvent && typeof DeviceOrientationEvent.requestPermission === 'function') {
+      DeviceOrientationEvent.requestPermission().catch(() => {});
+    }
+    window.addEventListener('deviceorientationabsolute', _onCompass, { passive: true });
+    window.addEventListener('deviceorientation',         _onCompass, { passive: true });
+
+    if (!_rafId) _rafId = requestAnimationFrame(_frame);
+    return true;
+  }
+
+  function subscribe(cb) { _listeners.add(cb); return () => _listeners.delete(cb); }
+  function getDisplay() { return _disp; }
+  function getRaw()     { return _raw; }
+  function hasFix()     { return !!_disp; }
+  function watching()   { return _watchId !== null; }
+
+  return { start, subscribe, getDisplay, getRaw, hasFix, watching };
+})();
+
+// ============================================================
+// User Location — marker, accuracy circle, auto-follow, nav tracking
 // ============================================================
 function requestUserLocation() {
+  if (LocationTracker.watching()) return;
   if (!navigator.geolocation) { showToast('Location not supported on this device', 'error'); return; }
-  if (watchId !== null) return; // already watching
-
   showToast('Finding your location…', 'info');
-
-  watchId = navigator.geolocation.watchPosition(
-    (pos) => {
-      const loc = {
-        lat:      pos.coords.latitude,
-        lng:      pos.coords.longitude,
-        accuracy: pos.coords.accuracy,
-        heading:  pos.coords.heading,
-        speed:    pos.coords.speed,
-      };
-
-      // ── Live navigation tracking ──────────────────────────────
-      if (navigationActive && currentRoute) {
-        const coords = currentRoute.geometry.coordinates;
-        const instrs = currentRoute.instructions;
-
-        // Project user onto nearest route segment
-        const { segIdx, t, dist: distToRoute } = _nearestOnRoute(loc.lat, loc.lng, coords);
-
-        // Update gray "traveled" overlay
-        _updateTraveledOverlay(segIdx, t, coords);
-
-        if (distToRoute > 45) {
-          // Off-route: show warning and reroute
-          _showOffRoute(true);
-          reRoute();
-        } else {
-          _showOffRoute(false);
-
-          // Advance instruction index based on coordinate position
-          while (
-            navInstructionIndex < instrs.length - 1 &&
-            segIdx >= (instrs[navInstructionIndex + 1].coord_index ?? Infinity)
-          ) {
-            navInstructionIndex++;
-          }
-
-          // Calculate distance to next instruction's coordinate
-          const nextInstr = instrs[navInstructionIndex + 1];
-          let distToTurn = null;
-          if (nextInstr && nextInstr.coord_index != null) {
-            const nCoord = coords[nextInstr.coord_index];
-            const midLng = coords[segIdx][0] + t * (coords[segIdx + 1]?.[0] - coords[segIdx][0] || 0);
-            const midLat = coords[segIdx][1] + t * (coords[segIdx + 1]?.[1] - coords[segIdx][1] || 0);
-            // Sum distance from current snap to next instruction coord
-            distToTurn = haversine(midLat, midLng, coords[segIdx + 1]?.[1] ?? midLat, coords[segIdx + 1]?.[0] ?? midLng);
-            for (let k = segIdx + 1; k < nextInstr.coord_index; k++) {
-              distToTurn += haversine(coords[k][1], coords[k][0], coords[k + 1][1], coords[k + 1][0]);
-            }
-          }
-
-          // Remaining distance and ETA
-          const remDist = _remainingDist(segIdx, t, coords);
-          const walkMps = currentRoute.profile === 'driving' ? 8.3 : 1.4;
-          const remMin  = Math.max(1, Math.round(remDist / walkMps / 60));
-          const verb    = currentRoute.profile === 'driving' ? 'drive' : 'walk';
-          document.getElementById('nav-eta').textContent       = `${remMin} min ${verb}`;
-          document.getElementById('nav-distance').textContent  = formatDist(remDist);
-
-          updateNavInstruction(distToTurn);
-
-          // Auto-pan to follow user heading if autoFollow is on
-          if (autoFollow && loc.heading != null) {
-            map.easeTo({ center: [loc.lng, loc.lat], bearing: loc.heading, duration: 500 });
-          }
-        }
-      }
-
-      const firstFix = !userLocation;
-      userLocation = loc;
-      if (loc.heading != null) headingDeg = loc.heading;
-
-      updateLocationMarker();
-
-      if (firstFix) {
-        showToast('Location found', 'success');
-        setAutoFollow(true);
-        document.getElementById('btn-locate').classList.add('location-active');
-      } else if (autoFollow) {
-        map.easeTo({ center: [loc.lng, loc.lat], duration: 400 });
-      }
-    },
-    (err) => {
-      watchId = null;
-      const msgs = { 1: 'Location access denied — enable in browser settings', 2: 'Location unavailable', 3: 'Location request timed out' };
-      showToast(msgs[err.code] || 'Location error', 'warn');
-      document.getElementById('btn-locate').classList.remove('location-active', 'location-follow');
-    },
-    { enableHighAccuracy: true, maximumAge: 2000, timeout: 15000 }
-  );
-
-  // Compass heading on mobile
-  if (window.DeviceOrientationEvent && typeof DeviceOrientationEvent.requestPermission === 'function') {
-    DeviceOrientationEvent.requestPermission().catch(() => {});
-  }
-  window.addEventListener('deviceorientationabsolute', onDeviceOrientation, { passive: true });
-  window.addEventListener('deviceorientation',         onDeviceOrientation, { passive: true });
-}
-
-function onDeviceOrientation(e) {
-  const deg = e.alpha != null ? (360 - e.alpha) % 360 : null;
-  if (deg != null) {
-    headingDeg = deg;
-    const dot = document.querySelector('.location-dot');
-    if (dot) dot.style.transform = `rotate(${deg}deg)`;
+  const started = LocationTracker.start((err) => {
+    const msgs = { 1: 'Location access denied — enable in browser settings', 2: 'Location unavailable', 3: 'Location request timed out' };
+    showToast(msgs[err.code] || 'Location error', 'warn');
+    document.getElementById('btn-locate').classList.remove('location-active', 'location-follow');
+  });
+  if (!started) return;
+  if (!_locationSubscribed) {
+    _locationSubscribed = true;
+    LocationTracker.subscribe(onLocationFrame);
   }
 }
 
-function updateLocationMarker() {
-  if (!userLocation) return;
+// One subscriber drives every consumer (marker + camera + nav) so there's
+// no chance of out-of-order writes between watchPosition callbacks and the
+// renderer. Runs at ~60Hz on the rAF loop.
+let _locationSubscribed = false;
+let _firstFixShown      = false;
+let _easingTo           = false;   // throttle camera ease to one in-flight at a time
 
-  const lngLat = [userLocation.lng, userLocation.lat];
+function onLocationFrame(disp, raw) {
+  // Snap to route during active nav — uses smoothed estimate, NOT raw GPS.
+  let renderLat = disp.lat, renderLng = disp.lng;
+  let snapInfo  = null;
 
-  // Accuracy circle — MapLibre circle layer for precision
-  const accuracyGeoJSON = {
-    type: 'FeatureCollection',
-    features: [{ type: 'Feature', geometry: { type: 'Point', coordinates: lngLat } }]
+  if (navigationActive && currentRoute) {
+    const coords = currentRoute.geometry.coordinates;
+    snapInfo = _nearestOnRoute(disp.lat, disp.lng, coords);
+    if (snapInfo.dist < 22) {
+      // Within road buffer → render the puck on the route line itself
+      const [x1, y1] = coords[snapInfo.segIdx];
+      const next    = coords[snapInfo.segIdx + 1] || coords[snapInfo.segIdx];
+      renderLng = x1 + snapInfo.t * (next[0] - x1);
+      renderLat = y1 + snapInfo.t * (next[1] - y1);
+    }
+  }
+
+  userLocation = {
+    lat: renderLat, lng: renderLng,
+    accuracy: disp.accuracy, heading: disp.heading,
+    raw, // keep raw available for sharing/precision-sensitive consumers
   };
+  // Legacy global kept for code paths that still read it directly
+  if (disp.heading != null) headingDeg = disp.heading;
+
+  _renderLocationMarker(renderLat, renderLng, disp.accuracy, disp.heading);
+
+  if (!_firstFixShown) {
+    _firstFixShown = true;
+    showToast('Location found', 'success');
+    setAutoFollow(true);
+    document.getElementById('btn-locate').classList.add('location-active');
+  }
+
+  // Drive nav side-effects (instruction advance / reroute / ETA / camera) ONCE
+  // per frame, using the snapped position so off-road jitter doesn't trigger
+  // false reroutes.
+  if (navigationActive && currentRoute && snapInfo) {
+    _navTick(renderLat, renderLng, snapInfo);
+  } else if (autoFollow) {
+    _cameraFollow(renderLat, renderLng, disp.heading, /*nav=*/false);
+  }
+}
+
+function _renderLocationMarker(lat, lng, accuracyM, heading) {
+  if (!map) return;
+  const lngLat = [lng, lat];
+
+  // Accuracy circle (single GeoJSON source, single layer; never duplicated)
+  const data = { type: 'FeatureCollection', features: [{ type: 'Feature', geometry: { type: 'Point', coordinates: lngLat } }] };
   if (map.getSource('user-accuracy')) {
-    map.getSource('user-accuracy').setData(accuracyGeoJSON);
-    const metersPerPx = 156543.03392 * Math.cos(userLocation.lat * Math.PI / 180) / Math.pow(2, map.getZoom());
-    const radiusPx = Math.max(8, (userLocation.accuracy || 10) / metersPerPx);
-    if (map.getLayer('user-accuracy-circle')) map.setPaintProperty('user-accuracy-circle', 'circle-radius', radiusPx);
+    map.getSource('user-accuracy').setData(data);
   } else if (map.isStyleLoaded()) {
-    map.addSource('user-accuracy', { type: 'geojson', data: accuracyGeoJSON });
-    const metersPerPx = 156543.03392 * Math.cos(userLocation.lat * Math.PI / 180) / Math.pow(2, map.getZoom());
-    const radiusPx = Math.max(8, (userLocation.accuracy || 10) / metersPerPx);
+    map.addSource('user-accuracy', { type: 'geojson', data });
     map.addLayer({
       id: 'user-accuracy-circle', type: 'circle', source: 'user-accuracy',
-      paint: { 'circle-color': '#0a0a0a', 'circle-opacity': 0.1, 'circle-radius': radiusPx, 'circle-stroke-width': 1, 'circle-stroke-color': '#525252', 'circle-stroke-opacity': 0.3 }
+      paint: {
+        'circle-color': '#1a73e8', 'circle-opacity': 0.08,
+        'circle-stroke-width': 1, 'circle-stroke-color': '#1a73e8', 'circle-stroke-opacity': 0.18,
+        'circle-radius': 12,
+      },
     });
   }
-
-  // User location dot marker
-  if (locationMarker) {
-    locationMarker.setLngLat(lngLat);
-  } else {
-    const el = document.createElement('div');
-    el.className = 'location-marker';
-    el.innerHTML = `<div class="location-dot"></div><div class="location-pulse"></div>`;
-    locationMarker = new maplibregl.Marker({ element: el, anchor: 'center' }).setLngLat(lngLat).addTo(map);
+  if (map.getLayer('user-accuracy-circle')) {
+    const mpp = 156543.03392 * Math.cos(lat * Math.PI / 180) / Math.pow(2, map.getZoom());
+    const r = Math.max(10, Math.min(120, accuracyM / mpp));
+    map.setPaintProperty('user-accuracy-circle', 'circle-radius', r);
   }
 
-  // Update zoom-based accuracy circle radius when zoom changes
+  // Bind zoom listener exactly once
   if (!map._locationZoomBound) {
     map._locationZoomBound = true;
     map.on('zoom', () => {
       if (!userLocation || !map.getLayer('user-accuracy-circle')) return;
       const mpp = 156543.03392 * Math.cos(userLocation.lat * Math.PI / 180) / Math.pow(2, map.getZoom());
-      map.setPaintProperty('user-accuracy-circle', 'circle-radius', Math.max(8, (userLocation.accuracy || 10) / mpp));
+      map.setPaintProperty('user-accuracy-circle', 'circle-radius',
+        Math.max(10, Math.min(120, (userLocation.accuracy || 12) / mpp)));
     });
+  }
+
+  // Singleton HTML marker. We REUSE the existing element across updates,
+  // which is why the "two pointers" bug could only ever come from a
+  // different marker class (routeOriginMarker / directionsFromMarker) —
+  // those are now hidden when navigation is active.
+  if (!locationMarker) {
+    const el = document.createElement('div');
+    el.className = 'location-marker';
+    el.innerHTML = '<div class="location-heading"></div><div class="location-dot"></div><div class="location-pulse"></div>';
+    locationMarker = new maplibregl.Marker({ element: el, anchor: 'center', rotationAlignment: 'map' })
+      .setLngLat(lngLat).addTo(map);
+  } else {
+    locationMarker.setLngLat(lngLat);
+  }
+  // Rotate the heading cone underneath the dot
+  const wrapper = locationMarker.getElement();
+  if (heading != null) {
+    wrapper.style.setProperty('--loc-heading', `${heading}deg`);
+    wrapper.classList.add('has-heading');
+  } else {
+    wrapper.classList.remove('has-heading');
+  }
+}
+
+function _cameraFollow(lat, lng, heading, nav) {
+  // Skip if a previous ease is still running — overlapping eases are the
+  // source of the visible "stutter" the user reported.
+  if (_easingTo) return;
+  _easingTo = true;
+  const opts = { center: [lng, lat], duration: nav ? 700 : 400, easing: t => t };
+  if (nav) {
+    if (heading != null) opts.bearing = heading;
+    opts.pitch = 65;
+    opts.zoom = 18;
+    opts.padding = { top: 0, bottom: 280, left: 0, right: 0 };
+  } else if (heading != null) {
+    opts.bearing = heading;
+  }
+  const onMoveEnd = () => { _easingTo = false; map.off('moveend', onMoveEnd); };
+  map.once('moveend', onMoveEnd);
+  map.easeTo(opts);
+}
+
+// Single-tick consolidated nav update — replaces the old in-line block
+// inside watchPosition. Uses snapped position to avoid spurious reroutes.
+function _navTick(lat, lng, snap) {
+  const coords = currentRoute.geometry.coordinates;
+  const instrs = currentRoute.instructions;
+  const { segIdx, t, dist: distToRoute } = snap;
+
+  _updateTraveledOverlay(segIdx, t, coords);
+
+  // Off-route uses a slightly higher threshold than the snap buffer so
+  // we don't oscillate between snapped and unsnapped state.
+  if (distToRoute > 45) {
+    _showOffRoute(true);
+    reRoute();
+    return;
+  }
+  _showOffRoute(false);
+
+  while (
+    navInstructionIndex < instrs.length - 1 &&
+    segIdx >= (instrs[navInstructionIndex + 1].coord_index ?? Infinity)
+  ) {
+    navInstructionIndex++;
+  }
+
+  const nextInstr = instrs[navInstructionIndex + 1];
+  let distToTurn = null;
+  if (nextInstr && nextInstr.coord_index != null) {
+    const next = coords[segIdx + 1];
+    const midLng = coords[segIdx][0] + t * ((next?.[0] ?? coords[segIdx][0]) - coords[segIdx][0]);
+    const midLat = coords[segIdx][1] + t * ((next?.[1] ?? coords[segIdx][1]) - coords[segIdx][1]);
+    distToTurn = haversine(midLat, midLng, next?.[1] ?? midLat, next?.[0] ?? midLng);
+    for (let k = segIdx + 1; k < nextInstr.coord_index; k++) {
+      distToTurn += haversine(coords[k][1], coords[k][0], coords[k + 1][1], coords[k + 1][0]);
+    }
+  }
+
+  const remDist = _remainingDist(segIdx, t, coords);
+  const speedMps = currentRoute.profile === 'driving' ? 8.3 : 1.4;
+  const remMin  = Math.max(1, Math.round(remDist / speedMps / 60));
+  const verb    = currentRoute.profile === 'driving' ? 'drive' : 'walk';
+  document.getElementById('nav-eta').textContent      = `${remMin} min ${verb}`;
+  document.getElementById('nav-distance').textContent = formatDist(remDist);
+
+  updateNavInstruction(distToTurn);
+
+  if (autoFollow) {
+    _cameraFollow(lat, lng, userLocation.heading, /*nav=*/true);
+    if (immersiveNav) applyImmersiveBuildingFade([lng, lat]);
   }
 }
 
@@ -2229,11 +2682,15 @@ function setAutoFollow(on) {
   autoFollow = on;
   const btn = document.getElementById('btn-locate');
   btn.classList.toggle('location-follow', on);
-  if (on && userLocation) map.flyTo({ center: [userLocation.lng, userLocation.lat], zoom: 17, duration: 800 });
+  if (on && userLocation) {
+    // Use a SINGLE ease (not a flyTo + later easeTo race)
+    _easingTo = false;
+    _cameraFollow(userLocation.lat, userLocation.lng, userLocation.heading, /*nav=*/navigationActive);
+  }
 }
 
 function flyToUserLocation() {
-  if (!watchId) {
+  if (!LocationTracker.watching()) {
     requestUserLocation();
     return;
   }
@@ -2247,16 +2704,18 @@ function flyToUserLocation() {
   }
 }
 
-// Re-add location layers after style reload
+// Re-add location layers after style reload — the HTML marker survives
+// (it's not attached to a style layer), so we ONLY clean up the GeoJSON
+// circle. Killing the marker here was a separate bug: it briefly left no
+// pointer at all, then a new one popped in after the next GPS tick.
 function restoreLocationLayer() {
   if (!userLocation) return;
-  // Must remove old marker from map before nulling — it persists across style reloads
-  if (locationMarker) { locationMarker.remove(); locationMarker = null; }
   if (map.getSource('user-accuracy')) {
     try { map.removeLayer('user-accuracy-circle'); } catch (_) {}
     try { map.removeSource('user-accuracy'); } catch (_) {}
   }
-  updateLocationMarker();
+  map._locationZoomBound = false;
+  _renderLocationMarker(userLocation.lat, userLocation.lng, userLocation.accuracy || 12, userLocation.heading);
 }
 
 // ============================================================
@@ -2356,6 +2815,7 @@ function setupEventListeners() {
 
   document.getElementById('nav-close-btn')?.addEventListener('click', endNavigation);
   document.getElementById('nav-end-btn')?.addEventListener('click',   endNavigation);
+  document.getElementById('nav-recenter-btn')?.addEventListener('click', recenterImmersive);
 
   document.getElementById('menu-btn').addEventListener('click',     openMenu);
   document.getElementById('menu-close').addEventListener('click',   closeMenu);
