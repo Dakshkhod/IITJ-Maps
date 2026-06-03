@@ -1408,35 +1408,41 @@ var Landmarks3D = (() => {
     }
 
     // Concrete pipe seating pod — cylinder lying on its side, open at the
-    // east end so the coloured interior is visible from the plaza.
+    // east end so the coloured interior is visible from the plaza. The
+    // tube axis is along world +X (east). The whole pod group has zero
+    // rotation, so it stays perfectly horizontal — no tilt from camera
+    // perspective or accidental Y-rotation.
     function placeTubePod({ E, N, interiorHex }) {
       const c = new THREE.Group();
-      const R = 1.35, L = 3.0;
+      const R = 1.30, L = 2.8;
 
+      // Lay the cylinder on its side: rotate Y-axis to lie along X.
+      // ONLY rotation.z is set — rotation.x/y are 0, so the axis is
+      // strictly horizontal.
       const outer = new THREE.Mesh(new THREE.CylinderGeometry(R, R, L, 24, 1, true), M.concrete);
-      outer.rotation.z = Math.PI / 2;
+      outer.rotation.set(0, 0, Math.PI / 2);
       outer.position.y = R;
       c.add(outer);
 
       const innerMat = M.podInt(interiorHex);
-      const inner = new THREE.Mesh(new THREE.CylinderGeometry(R - 0.08, R - 0.08, L - 0.05, 24, 1, true), innerMat);
-      inner.rotation.z = Math.PI / 2;
+      const inner = new THREE.Mesh(new THREE.CylinderGeometry(R - 0.07, R - 0.07, L - 0.05, 24, 1, true), innerMat);
+      inner.rotation.set(0, 0, Math.PI / 2);
       inner.position.y = R;
       c.add(inner);
 
-      // Solid back wall on one end (entrance is the opposite end)
-      const cap = new THREE.Mesh(new THREE.CircleGeometry(R - 0.05, 24), innerMat);
+      // Solid back wall on the west end (entrance opens east)
+      const cap = new THREE.Mesh(new THREE.CircleGeometry(R - 0.04, 24), innerMat);
       cap.position.set(-L / 2 + 0.03, R, 0);
-      cap.rotation.y = -Math.PI / 2;
+      cap.rotation.set(0, -Math.PI / 2, 0);
       c.add(cap);
 
-      // Small artificial-turf pad in front of the entrance
+      // Artificial-turf landing pad in front of the entrance
       const pad = new THREE.Mesh(new THREE.BoxGeometry(L + 0.4, 0.06, 2 * R + 0.6), M.pavingD);
       pad.position.y = 0.03;
       c.add(pad);
 
       c.position.set(E, 0, -N);
-      // Tubes lie east-west — entrance opens to the east (toward seating)
+      // No c.rotation.* — keep the pod absolutely level.
       return c;
     }
 
@@ -1531,9 +1537,30 @@ var Landmarks3D = (() => {
       return c;
     }
 
-    // No ground pad — the campus area/paving layers underneath handle the
-    //    surface, and a 40 × 44 m brown slab covered grass that's actually
-    //    there. Just drop the structures onto the existing terrain.
+    // ── Ground pad — a rounded-rectangle paving slab that matches the
+    //    food court footprint. Without it, the campus footways and the
+    //    west-side service road from roads.geojson visibly cut through
+    //    the plaza. The pad sits 8 cm above ground so road lines render
+    //    underneath, and uses a soft cream tone so it blends with the
+    //    surrounding campus paving instead of stamping a giant brown box.
+    {
+      const PAD_HW = 19, PAD_HD = 18, PAD_R = 4;
+      const shape = new THREE.Shape();
+      shape.moveTo(-PAD_HW + PAD_R, -PAD_HD);
+      shape.lineTo( PAD_HW - PAD_R, -PAD_HD);
+      shape.quadraticCurveTo( PAD_HW, -PAD_HD,  PAD_HW, -PAD_HD + PAD_R);
+      shape.lineTo( PAD_HW,  PAD_HD - PAD_R);
+      shape.quadraticCurveTo( PAD_HW,  PAD_HD,  PAD_HW - PAD_R,  PAD_HD);
+      shape.lineTo(-PAD_HW + PAD_R,  PAD_HD);
+      shape.quadraticCurveTo(-PAD_HW,  PAD_HD, -PAD_HW,  PAD_HD - PAD_R);
+      shape.lineTo(-PAD_HW, -PAD_HD + PAD_R);
+      shape.quadraticCurveTo(-PAD_HW, -PAD_HD, -PAD_HW + PAD_R, -PAD_HD);
+      const padGeom = new THREE.ShapeGeometry(shape);
+      const pad = new THREE.Mesh(padGeom, M.paving);
+      pad.rotation.x = -Math.PI / 2;
+      pad.position.set(3, 0.08, -8);
+      g.add(pad);
+    }
 
     // ── Nine container restaurants. The polygon bboxes in places.geojson
     //    include the outdoor deck + awning surrounding each container, so
@@ -1551,29 +1578,34 @@ var Landmarks3D = (() => {
     g.add(placeContainer({ E:  -7.9, N:  23.0, w:  6.0, d: 3.0, bearingDeg:  35, body: M.cBlue,   roof: M.roofGalv, sign: M.cOrange })); // Domino's
     g.add(placeContainer({ E: -16.4, N:   3.7, w: 10.0, d: 2.5, bearingDeg:  18, body: M.cBlue,   roof: M.roofGalv })); // Unnamed west container (Manchaha-style)
 
-    // ── Five concrete tube pods, N–S row on the western edge of the
-    //    central plaza. Now visible because the containers are no longer
-    //    oversized.
+    // ── Five concrete tube pods, N–S row at E=-10. Spaced ~1.7 m apart
+    //    edge-to-edge so each colour reads as its own pod from above
+    //    (matching the drone photos). Position is clear of the western
+    //    container (E max -13.7) and the long row (Tealogy E min -6.5).
+    //    All pods are strictly horizontal — see placeTubePod above.
     const podColors = [0xe8e0d0, 0xe8b430, 0x2f7fb8, 0xb83820, 0x3a8a4a]; // white, yellow, blue, red, green
     for (let i = 0; i < 5; i++) {
-      g.add(placeTubePod({ E: -11.5, N: -2 + i * 3.4, interiorHex: podColors[i] }));
+      g.add(placeTubePod({ E: -10, N: -2 + i * 4.0, interiorHex: podColors[i] }));
     }
 
-    // ── Two tensile-fabric shade canopies above the open seating
-    g.add(placeShade({ E:  5, N:  1, size: 6, height: 3.4 })); // SW central seating
-    g.add(placeShade({ E:  6, N: 12, size: 7, height: 3.6 })); // NE central seating
+    // ── Two tensile-fabric shade canopies, positioned in the OPEN gaps
+    //    between container rows so the poles touch ground, not buildings.
+    //    SW shade: in the strip between Tealogy (S, N max -1.2) and
+    //    Amritsari (N, N min 4.7), clear of Patiala (E min 9.1).
+    //    NE shade: in the strip between Amritsari (N max 7.7) and Baap
+    //    of Rolls (N min 14.8), clear of Zorko (E min 10.7).
+    g.add(placeShade({ E: 4, N:  1.7,  size: 5, height: 3.4 }));
+    g.add(placeShade({ E: 4, N: 11.25, size: 5, height: 3.6 }));
 
-    // ── Round amphitheatre stage between the food court and the road
-    //    (north-east corner per the drone photos).
-    g.add(placeStage({ E: 4, N: 24, radius: 3.5 }));
+    // ── Round amphitheatre stage in the open NE corner
+    g.add(placeStage({ E: -2, N: 14, radius: 3.0 }));
 
-    // ── Picnic benches in the open central plaza between the rows
+    // ── Picnic benches under the two shade canopies
     [
-      { E:  4, N:  1,  bearingDeg: 107 },
-      { E:  7, N:  1,  bearingDeg: 107 },
-      { E:  3, N: 11,  bearingDeg: 107 },
-      { E:  7, N: 11,  bearingDeg: 107 },
-      { E:  4, N: -1,  bearingDeg: 107 },
+      { E:  3, N:   0.5, bearingDeg: 107 },
+      { E:  6, N:   2.5, bearingDeg: 107 },
+      { E:  3, N:  10.5, bearingDeg: 107 },
+      { E:  6, N:  12.0, bearingDeg: 107 },
     ].forEach((b) => g.add(placeBench(b)));
 
     return g;
