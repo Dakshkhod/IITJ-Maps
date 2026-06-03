@@ -1,5 +1,63 @@
 {
-  "buildings": {},
+  "buildings": {
+    "1525580879": {
+      "type": "Feature",
+      "properties": {
+        "osm_id": "1525580879",
+        "name": "Satvik",
+        "source": "osm",
+        "amenity": "restaurant",
+        "building": "yes",
+        "cuisine": "indian;chinese",
+        "category": "dining",
+        "building_type": "yes",
+        "levels": null
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              73.1109229,
+              26.4784098
+            ],
+            [
+              73.1109653,
+              26.47838
+            ],
+            [
+              73.1110077,
+              26.4783502
+            ],
+            [
+              73.1111491,
+              26.4785125
+            ],
+            [
+              73.1111013,
+              26.4785453
+            ],
+            [
+              73.1110312,
+              26.4784669
+            ],
+            [
+              73.1109974,
+              26.4784984
+            ],
+            [
+              73.1109229,
+              26.4784098
+            ]
+          ]
+        ]
+      },
+      "centroid": {
+        "lng": 73.11101222500001,
+        "lat": 26.478446612500004
+      }
+    }
+  },
   "places": {},
   "roads": {},
   "areas": {},
@@ -10,6 +68,5 @@
     "areas": []
   },
   "version": 1,
-  "updatedAt": null,
-  "_comment": "Approved OSM changes go here. Admins generate this file via the Export overlay button in /admin.html, then commit it to the repo. The main app fetches this at startup and merges it with the bundled GeoJSON."
+  "updatedAt": "2026-06-03T08:13:35.422Z"
 }
