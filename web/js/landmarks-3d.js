@@ -1367,11 +1367,13 @@ var Landmarks3D = (() => {
       pole:     new THREE.MeshStandardMaterial({ color: 0x2a2a2a, metalness: 0.35, roughness: 0.55 }),
       door:     new THREE.MeshStandardMaterial({ color: 0x1f1f22, metalness: 0.30, roughness: 0.55 }),
       concrete: new THREE.MeshStandardMaterial({ color: 0xb5b0a3, metalness: 0.04, roughness: 0.92 }),
-      // Pad tone matches the basemap (#fafafa) so the food-court plaza
-      // disappears into the surrounding campus ground instead of stamping
-      // a brown box on the map.
-      paving:   new THREE.MeshStandardMaterial({ color: 0xefebe2, metalness: 0.03, roughness: 0.92 }),
+      // Pad tones picked to blend with the #fafafa basemap. Paving is a
+      // near-white so the cream slab disappears into the surrounding
+      // campus ground; grass is a soft sage so the lawn patches read as
+      // landscaping, not a pop-out colour blob.
+      paving:   new THREE.MeshStandardMaterial({ color: 0xf3f1ea, metalness: 0.03, roughness: 0.92 }),
       pavingD:  new THREE.MeshStandardMaterial({ color: 0xc7c0b1, metalness: 0.04, roughness: 0.92 }),
+      grass:    new THREE.MeshStandardMaterial({ color: 0x9cb87a, metalness: 0.02, roughness: 0.96 }),
       wood:     new THREE.MeshStandardMaterial({ color: 0xa67746, metalness: 0.05, roughness: 0.85 }),
       podInt: (hex) => new THREE.MeshStandardMaterial({ color: hex, metalness: 0.10, roughness: 0.70, side: THREE.DoubleSide }),
     };
@@ -1540,17 +1542,24 @@ var Landmarks3D = (() => {
       return c;
     }
 
-    // ── Plaza pad — tight to the structures (no longer a giant brown
-    //    rectangle). Coloured to match the basemap ground (#fafafa) so it
-    //    visually disappears, while still rendering 6 cm above the OSM
-    //    road tiles so the footways + service road that cut through the
-    //    food court don't show through.
+    // ── Plaza ground — two layers that match the actual food-court
+    //    landscaping: a near-white paving base (blends with the #fafafa
+    //    basemap so the slab edge isn't visible), then sage-green grass
+    //    patches on top in the zones where the drone photos show lawn
+    //    strips (under the pod row, along the south edge, and in
+    //    pockets next to the perimeter road). The result no longer
+    //    looks like a brown rectangle popping out of the terrain.
+    function _shapeFrom(pts) {
+      const s = new THREE.Shape();
+      s.moveTo(pts[0][0], pts[0][1]);
+      for (let i = 1; i < pts.length; i++) s.lineTo(pts[i][0], pts[i][1]);
+      s.lineTo(pts[0][0], pts[0][1]);
+      return s;
+    }
     {
-      const padShape = new THREE.Shape();
-      // Irregular hex-ish outline tracing the actual structure cluster:
-      // tighter on the east (no buildings past Prasadanam) and reaches
-      // out to the western unnamed container.
-      const pts = [
+      // Paving base — tight to the actual structure cluster so the slab
+      // edge doesn't reach into open grass beyond the food court.
+      const pavingPts = [
         [-22, -1], [-22,  10],   // west edge (encloses unnamed + pods)
         [-12,  20], [ -4,  27],  // NW corner (Domino's)
         [  8,  24], [ 18,  20],  // NE corner (Prasadanam / Baap)
@@ -1558,17 +1567,30 @@ var Landmarks3D = (() => {
         [  0, -10],              // south edge (Waffcha / Tealogy)
         [-12,  -8],              // SW back to start
       ];
-      padShape.moveTo(pts[0][0], pts[0][1]);
-      for (let i = 1; i < pts.length; i++) padShape.lineTo(pts[i][0], pts[i][1]);
-      padShape.lineTo(pts[0][0], pts[0][1]);
-      const padGeom = new THREE.ShapeGeometry(padShape);
-      const pad = new THREE.Mesh(padGeom, M.paving);
+      const pad = new THREE.Mesh(new THREE.ShapeGeometry(_shapeFrom(pavingPts)), M.paving);
       pad.rotation.x = -Math.PI / 2;
-      // ShapeGeometry is built in XY (Y is "north" in shape space). After
-      // rotation.x = -π/2, shape +Y maps to mesh -Z (= world +N). So the
-      // shape's coords are already in (E, N) — no flipping needed.
-      pad.position.set(0, 0.06, 0);
+      pad.position.set(0, 0.05, 0);
       g.add(pad);
+
+      // Sage-green grass patches sitting just above the paving so the
+      // boundary between lawn and concrete reads as landscaping. Zones
+      // chosen to match the drone photos:
+      //   1. Long strip under the 5 pods (each pod sits on lawn)
+      //   2. South-edge buffer between the road and Tealogy/Waffcha
+      //   3. NE pocket between Baap of Rolls and Prasadanam
+      //   4. SE pocket east of Patiala / Zorko
+      const grassZones = [
+        _shapeFrom([[-13, -1], [-13, 13], [-7, 13], [-7, -1]]),         // pod row lawn
+        _shapeFrom([[-6, -9], [-6, -6], [12, -6], [14, -9]]),           // south edge strip
+        _shapeFrom([[10, 17], [10, 22], [16, 20], [16, 16]]),           // NE pocket
+        _shapeFrom([[14, 0], [14, 6], [17, 6], [17, 0]]),               // SE pocket
+      ];
+      for (const gs of grassZones) {
+        const lawn = new THREE.Mesh(new THREE.ShapeGeometry(gs), M.grass);
+        lawn.rotation.x = -Math.PI / 2;
+        lawn.position.set(0, 0.06, 0);  // 1 cm above paving — no Z-fight
+        g.add(lawn);
+      }
     }
 
     // ── Nine container restaurants. The polygon bboxes in places.geojson
