@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IITJ Maps — Admin Review</title>
+  <meta name="theme-color" content="#0a0a0a">
+
+  <link href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" rel="stylesheet">
+  <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="css/admin.css">
+</head>
+<body>
+  <!-- Passphrase gate (client-side only — for casual deterrence) -->
+  <div id="gate" class="gate">
+    <div class="gate-card">
+      <h1>Admin Review</h1>
+      <p>Enter the admin passphrase to continue.</p>
+      <input id="gate-input" type="password" placeholder="Passphrase" autocomplete="off">
+      <button id="gate-btn">Unlock</button>
+      <p class="gate-hint">First-time setup: any passphrase you enter will be saved to this browser. Clear localStorage to reset.</p>
+    </div>
+  </div>
+
+  <div id="app" class="hidden">
+    <!-- Top bar -->
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-logo">
+          <svg width="28" height="28" viewBox="0 0 56 56" fill="none">
+            <rect width="56" height="56" rx="12" fill="#0a0a0a"/>
+            <path d="M28 14C22.477 14 18 18.477 18 24C18 31 28 42 28 42C28 42 38 31 38 24C38 18.477 33.523 14 28 14Z" fill="#fafafa"/>
+            <circle cx="28" cy="24" r="5" fill="#0a0a0a"/>
+          </svg>
+        </div>
+        <div>
+          <div class="brand-title">IITJ Maps · Admin</div>
+          <div class="brand-sub">OSM change review</div>
+        </div>
+      </div>
+
+      <div class="topbar-actions">
+        <button id="btn-sync" class="btn btn-primary">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 12a9 9 0 1 1-3-6.7L21 8"/><path d="M21 3v5h-5"/>
+          </svg>
+          <span id="btn-sync-label">Sync from OSM</span>
+        </button>
+        <button id="btn-export" class="btn btn-ghost" title="Download the current accepted overlay so you can commit it to web/data/overlay.json">Export overlay</button>
+        <label class="btn btn-ghost" for="import-input" title="Import a previously exported overlay JSON (merges with current)">Import overlay
+          <input id="import-input" type="file" accept="application/json" hidden>
+        </label>
+        <a href="index.html" class="btn btn-ghost" title="Back to the main map">Open map</a>
+      </div>
+    </header>
+
+    <!-- Stats row -->
+    <section class="stats">
+      <div class="stat-card stat-pending">
+        <div class="stat-label">Pending</div>
+        <div class="stat-value" id="stat-pending">—</div>
+      </div>
+      <div class="stat-card stat-approved">
+        <div class="stat-label">Approved</div>
+        <div class="stat-value" id="stat-approved">—</div>
+      </div>
+      <div class="stat-card stat-rejected">
+        <div class="stat-label">Rejected</div>
+        <div class="stat-value" id="stat-rejected">—</div>
+      </div>
+      <div class="stat-card stat-sync">
+        <div class="stat-label">Last sync</div>
+        <div class="stat-value stat-value-sm" id="stat-last-sync">never</div>
+      </div>
+    </section>
+
+    <!-- Filters -->
+    <section class="filters">
+      <div class="filter-group" id="filter-status">
+        <button class="chip chip-active" data-status="pending">Pending</button>
+        <button class="chip" data-status="approved">Approved</button>
+        <button class="chip" data-status="rejected">Rejected</button>
+        <button class="chip" data-status="all">All</button>
+      </div>
+      <div class="filter-group" id="filter-kind">
+        <button class="chip chip-active" data-kind="all">All kinds</button>
+        <button class="chip" data-kind="buildings">Buildings</button>
+        <button class="chip" data-kind="places">Places</button>
+        <button class="chip" data-kind="roads">Roads</button>
+      </div>
+      <div class="filter-group" id="filter-type">
+        <button class="chip chip-active" data-type="all">All types</button>
+        <button class="chip chip-added" data-type="added">Added</button>
+        <button class="chip chip-modified" data-type="modified">Modified</button>
+        <button class="chip chip-deleted" data-type="deleted">Deleted</button>
+      </div>
+      <div class="filter-search">
+        <input id="filter-search" type="text" placeholder="Search by name / OSM id…" autocomplete="off">
+      </div>
+    </section>
+
+    <!-- Main layout: list on left, detail on right -->
+    <section class="workspace">
+      <aside class="changes-list" id="changes-list">
+        <div class="empty-state" id="empty-state">
+          <p>No changes match these filters.</p>
+          <p class="empty-hint">Click <strong>Sync from OSM</strong> to pull the latest data.</p>
+        </div>
+      </aside>
+
+      <main class="detail" id="detail">
+        <div class="detail-empty" id="detail-empty">
+          <h2>Select a change</h2>
+          <p>Pick a pending OSM update on the left to review it side-by-side with the current map.</p>
+        </div>
+        <div class="detail-content hidden" id="detail-content">
+          <header class="detail-header">
+            <div>
+              <div class="detail-type" id="detail-type"></div>
+              <h2 class="detail-title" id="detail-title"></h2>
+              <div class="detail-meta">
+                <span id="detail-kind"></span>
+                <span class="sep">·</span>
+                <span id="detail-osm-id"></span>
+                <span class="sep">·</span>
+                <span id="detail-fetched"></span>
+              </div>
+            </div>
+            <div class="detail-actions">
+              <button class="btn btn-reject" id="btn-reject">Reject</button>
+              <button class="btn btn-accept" id="btn-accept">Accept</button>
+            </div>
+          </header>
+
+          <div class="detail-grid">
+            <!-- Map preview -->
+            <div class="panel">
+              <div class="panel-head">
+                <h3>Map preview</h3>
+                <div class="legend">
+                  <span><i class="dot dot-current"></i>Current</span>
+                  <span><i class="dot dot-new"></i>OSM update</span>
+                </div>
+              </div>
+              <div id="mini-map" class="mini-map"></div>
+            </div>
+
+            <!-- Property diff -->
+            <div class="panel">
+              <div class="panel-head">
+                <h3>Properties</h3>
+                <span class="panel-sub" id="diff-summary"></span>
+              </div>
+              <div class="diff-table" id="diff-table"></div>
+            </div>
+          </div>
+
+          <!-- Decision history (visible once decided) -->
+          <div class="decision-log hidden" id="decision-log"></div>
+        </div>
+      </main>
+    </section>
+
+    <!-- Toast -->
+    <div id="toast" class="toast hidden"></div>
+  </div>
+
+  <script src="js/data-overlay.js"></script>
+  <script src="js/admin.js"></script>
+</body>
+</html>

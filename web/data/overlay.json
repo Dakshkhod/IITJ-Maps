@@ -1,0 +1,15 @@
+{
+  "buildings": {},
+  "places": {},
+  "roads": {},
+  "areas": {},
+  "deleted": {
+    "buildings": [],
+    "places": [],
+    "roads": [],
+    "areas": []
+  },
+  "version": 1,
+  "updatedAt": null,
+  "_comment": "Approved OSM changes go here. Admins generate this file via the Export overlay button in /admin.html, then commit it to the repo. The main app fetches this at startup and merges it with the bundled GeoJSON."
+}
