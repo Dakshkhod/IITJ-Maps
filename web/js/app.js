@@ -564,6 +564,9 @@ async function loadMapData() {
     const areasRes     = IITJData.getAreas();
     const categoriesRes = IITJData.getCategories();
 
+    // Build the ambient road-snap index once, off the same FC the layer renders
+    try { RoadSnap.build(roadsRes); } catch (e) { console.warn('[RoadSnap] build failed:', e); }
+
     // Names already labeled on buildings/areas/landmark layers — exclude from point markers
     labeledNames = buildLabeledNames(areasRes, buildingsRes);
 
@@ -2037,6 +2040,121 @@ function _remainingDist(segIdx, t, coords) {
   return d;
 }
 
+// ============================================================
+// RoadSnap — ambient snap-to-road for the user puck
+// ============================================================
+// During free roaming (no active navigation) raw filtered GPS routinely
+// drifts 5–25 m to either side of the road the user is actually walking
+// on. We build a coarse spatial grid over every roads.geojson segment
+// once at startup; per-frame we look up the 9 nearest cells, project
+// the puck onto the closest segment, and render the projection if it's
+// inside a small buffer (scaled by GPS accuracy so noisy fixes don't
+// magnet onto unrelated paths).
+const RoadSnap = (() => {
+  const CELL_DEG = 0.0005;            // ~55 m at IITJ latitude — comfortably > snap radius
+  const SNAP_RADIUS_M = 18;           // base snap buffer
+  const SNAP_RADIUS_HARD_CAP_M = 30;  // even with bad accuracy, never snap past this
+  const MAX_ACC_FOR_SNAP_M = 40;      // ignore snap when GPS is worse than this
+
+  let _segs = null;       // [{ ax, ay, bx, by }, ...] flat list of segments
+  let _grid = null;       // Map<cellKey, segIdx[]>
+  let _built = false;
+
+  function _cellKey(ix, iy) { return ix + '|' + iy; }
+  function _cellOf(lng, lat) {
+    return [Math.floor(lng / CELL_DEG), Math.floor(lat / CELL_DEG)];
+  }
+
+  // Add every cell the segment's bbox touches so a lookup near either
+  // end (or in the middle of a long way) still finds it.
+  function _indexSegment(idx, ax, ay, bx, by) {
+    const [ix1, iy1] = _cellOf(Math.min(ax, bx), Math.min(ay, by));
+    const [ix2, iy2] = _cellOf(Math.max(ax, bx), Math.max(ay, by));
+    for (let ix = ix1; ix <= ix2; ix++) {
+      for (let iy = iy1; iy <= iy2; iy++) {
+        const k = _cellKey(ix, iy);
+        let arr = _grid.get(k);
+        if (!arr) { arr = []; _grid.set(k, arr); }
+        arr.push(idx);
+      }
+    }
+  }
+
+  function build(roadsFC) {
+    if (!roadsFC || !roadsFC.features) return;
+    _segs = [];
+    _grid = new Map();
+    for (const f of roadsFC.features) {
+      const g = f.geometry;
+      if (!g) continue;
+      // Skip non-walkable highway types if we ever add them; for now
+      // every entry in roads.geojson is walkable (service / footway /
+      // residential / etc.) so we accept them all.
+      const lines = g.type === 'LineString' ? [g.coordinates]
+                  : g.type === 'MultiLineString' ? g.coordinates
+                  : null;
+      if (!lines) continue;
+      for (const coords of lines) {
+        for (let i = 0; i < coords.length - 1; i++) {
+          const [ax, ay] = coords[i], [bx, by] = coords[i + 1];
+          if (!isFinite(ax) || !isFinite(ay) || !isFinite(bx) || !isFinite(by)) continue;
+          _segs.push({ ax, ay, bx, by });
+          _indexSegment(_segs.length - 1, ax, ay, bx, by);
+        }
+      }
+    }
+    _built = true;
+  }
+
+  // Project (lat,lng) onto the nearest segment in the 3×3 cell neighbourhood.
+  // Returns { lat, lng, dist } when a segment was found, else null.
+  function nearest(lat, lng) {
+    if (!_built || !_segs || _segs.length === 0) return null;
+    const [cx, cy] = _cellOf(lng, lat);
+    let best = null;
+    for (let dx = -1; dx <= 1; dx++) {
+      for (let dy = -1; dy <= 1; dy++) {
+        const arr = _grid.get(_cellKey(cx + dx, cy + dy));
+        if (!arr) continue;
+        for (const si of arr) {
+          const s = _segs[si];
+          const ux = s.bx - s.ax, uy = s.by - s.ay;
+          const lenSq = ux * ux + uy * uy;
+          let t = lenSq > 0 ? ((lng - s.ax) * ux + (lat - s.ay) * uy) / lenSq : 0;
+          if (t < 0) t = 0; else if (t > 1) t = 1;
+          const px = s.ax + t * ux, py = s.ay + t * uy;
+          const d = haversine(lat, lng, py, px);
+          if (!best || d < best.dist) best = { lat: py, lng: px, dist: d };
+        }
+      }
+    }
+    return best;
+  }
+
+  // Snap a fix to the nearest road if (a) we have an index, (b) the
+  // GPS accuracy isn't too poor to trust the snap, and (c) the road is
+  // close enough. Returns the snapped point or null to fall through to
+  // the raw filtered position.
+  function snap(lat, lng, accuracyM) {
+    if (accuracyM != null && accuracyM > MAX_ACC_FOR_SNAP_M) return null;
+    const best = nearest(lat, lng);
+    if (!best) return null;
+    // Allow a slightly wider buffer when accuracy itself is large
+    // (the GPS error explains why we're "off" the road), but never
+    // past the hard cap.
+    const buffer = Math.min(
+      SNAP_RADIUS_HARD_CAP_M,
+      Math.max(SNAP_RADIUS_M, (accuracyM || 0) * 0.6)
+    );
+    if (best.dist > buffer) return null;
+    return best;
+  }
+
+  function ready() { return _built; }
+
+  return { build, nearest, snap, ready };
+})();
+
 function updateNavInstruction(distToNextTurn) {
   if (!currentRoute?.instructions) return;
   const instr = currentRoute.instructions[navInstructionIndex];
@@ -2518,6 +2636,14 @@ function onLocationFrame(disp, raw) {
       const next    = coords[snapInfo.segIdx + 1] || coords[snapInfo.segIdx];
       renderLng = x1 + snapInfo.t * (next[0] - x1);
       renderLat = y1 + snapInfo.t * (next[1] - y1);
+    }
+  } else if (RoadSnap.ready()) {
+    // Free roaming — snap to nearest road in roads.geojson so the puck
+    // doesn't drift onto grass / buildings while the user is on a path.
+    const snapped = RoadSnap.snap(disp.lat, disp.lng, disp.accuracy);
+    if (snapped) {
+      renderLat = snapped.lat;
+      renderLng = snapped.lng;
     }
   }
 
