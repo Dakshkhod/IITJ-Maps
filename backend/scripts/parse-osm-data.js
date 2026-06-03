@@ -277,6 +277,9 @@ function extractFeatures(osmData) {
 }
 
 function classifyBuilding(tags) {
+  // Name-based hints for buildings whose OSM tags lack a category-defining amenity
+  const nameLower = (tags.name || tags['name:en'] || '').toLowerCase();
+  if (/\b(phc|primary health centre|primary health center|health centre|hospital|clinic)\b/.test(nameLower)) return 'medical';
   if (tags.amenity === 'university' || tags.building === 'university' || tags.building === 'college') return 'academic';
   if (tags.building === 'dormitory' || tags.tourism === 'hostel' || tags.building === 'hostel') return 'hostel';
   if (tags.amenity === 'restaurant' || tags.amenity === 'cafe' || tags.amenity === 'food_court') return 'dining';
@@ -337,11 +340,9 @@ function getHardcodedPlaces() {
   return [
     { name: "Gate 1 (Main Gate - NH62)", category: "gate", lat: 26.4587, lng: 73.1103, keywords: ["gate", "entrance", "exit", "main gate", "nh62", "security"], description: "Principal campus entrance from NH-62" },
     { name: "Gate 2 (South Gate)", category: "gate", lat: 26.4666, lng: 73.1078, keywords: ["gate 2", "south gate", "entrance", "exit"], description: "South campus gate" },
-    { name: "Primary Health Centre (PHC)", category: "medical", lat: 26.4822, lng: 73.1195, keywords: ["medical", "hospital", "doctor", "ambulance", "emergency", "phc", "health"], description: "24x7 medical facility and emergency services" },
     { name: "ATM (SBI)", category: "bank", lat: 26.4718, lng: 73.1133, keywords: ["atm", "cash", "money", "bank", "withdraw", "sbi"], description: "SBI ATM near academic area" },
     { name: "Post Office", category: "utility", lat: 26.4716, lng: 73.1131, keywords: ["post", "mail", "courier", "letter"], description: "Campus post office" },
     { name: "Bus Stop (Main Gate)", category: "transport", lat: 26.4591, lng: 73.1106, keywords: ["bus", "stop", "transport", "bus stop"], description: "Main campus bus stop near Gate 1" },
-    { name: "Amphitheatre", category: "recreation", lat: 26.4762, lng: 73.1152, keywords: ["amphitheatre", "stage", "performance", "cultural"], description: "Open-air amphitheatre for cultural events" },
     { name: "Parking (4-Wheeler)", category: "parking", lat: 26.4668, lng: 73.1115, keywords: ["parking", "car", "4 wheeler", "vehicle"], description: "4-wheeler parking area" },
     { name: "Parking (2-Wheeler)", category: "parking", lat: 26.4671, lng: 73.1110, keywords: ["parking", "bike", "2 wheeler", "scooter", "motorcycle"], description: "2-wheeler parking area" },
     { name: "Visitor's Hostel", category: "hostel", lat: 26.4682, lng: 73.1127, keywords: ["visitor", "guest house", "accommodation", "visitors hostel"], description: "Guest accommodation for campus visitors" },
