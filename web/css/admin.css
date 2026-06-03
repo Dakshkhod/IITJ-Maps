@@ -86,6 +86,84 @@ html, body { margin: 0; padding: 0; height: 100%; background: var(--bg); color: 
 .btn-accept:hover { background: #176f31; }
 .btn-reject { background: var(--bg-elevated); color: var(--red); border-color: var(--red); padding: 9px 18px; font-weight: 600; }
 .btn-reject:hover { background: var(--red-soft); }
+.btn-publish { background: var(--green); color: #fff; border-color: var(--green); font-weight: 600; }
+.btn-publish:hover:not(:disabled) { background: #176f31; border-color: #176f31; }
+.btn-publish:disabled { opacity: 0.55; cursor: not-allowed; }
+.btn:disabled { opacity: 0.55; cursor: not-allowed; }
+
+/* ─── Settings modal ─────────────────────────────────────────── */
+.modal {
+  position: fixed; inset: 0; z-index: 60;
+  display: flex; align-items: center; justify-content: center;
+}
+.modal-backdrop {
+  position: absolute; inset: 0;
+  background: rgba(10, 10, 14, 0.55);
+  backdrop-filter: blur(2px);
+}
+.modal-card {
+  position: relative;
+  width: min(560px, 92vw); max-height: 90vh;
+  background: var(--bg-elevated);
+  border-radius: var(--radius);
+  box-shadow: 0 20px 60px rgba(0,0,0,.35);
+  display: flex; flex-direction: column;
+  overflow: hidden;
+}
+.modal-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 20px; border-bottom: 1px solid var(--border);
+}
+.modal-head h2 { margin: 0; font-size: 17px; font-weight: 700; letter-spacing: -.02em; }
+.modal-close {
+  border: none; background: transparent; cursor: pointer;
+  font-size: 24px; line-height: 1; color: var(--text-muted);
+  width: 28px; height: 28px; border-radius: 6px;
+}
+.modal-close:hover { background: var(--surface-hover); color: var(--text); }
+.modal-body { padding: 20px; overflow-y: auto; }
+.modal-intro {
+  margin: 0 0 18px; font-size: 13.5px; color: var(--text-secondary); line-height: 1.5;
+}
+.modal-intro code {
+  background: var(--surface); padding: 1px 6px; border-radius: 4px;
+  font-family: var(--mono); font-size: 12px;
+}
+.modal-foot {
+  display: flex; gap: 8px; justify-content: flex-end;
+  padding: 14px 20px; border-top: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.form-row {
+  display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px;
+}
+.form-row label {
+  font-size: 12px; font-weight: 600; color: var(--text);
+  text-transform: uppercase; letter-spacing: .04em;
+}
+.form-row input {
+  padding: 9px 12px; border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm); font-family: var(--font); font-size: 13.5px;
+  outline: none; background: var(--bg-elevated); color: var(--text);
+}
+.form-row input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+.form-hint {
+  font-size: 11.5px; color: var(--text-muted); line-height: 1.5;
+}
+.form-hint code {
+  background: var(--surface); padding: 0 4px; border-radius: 3px;
+  font-family: var(--mono); font-size: 10.5px;
+}
+.form-hint a { color: var(--accent); }
+.form-status {
+  font-size: 12.5px; padding: 10px 12px; border-radius: var(--radius-sm);
+  margin-top: 4px; line-height: 1.5;
+}
+.form-status.ok    { background: var(--green-soft); color: var(--green); }
+.form-status.error { background: var(--red-soft);   color: var(--red); }
+.form-status.warn  { background: var(--amber-soft); color: var(--amber); }
+.form-status:empty { display: none; }
 
 /* ─── Stats row ──────────────────────────────────────────────── */
 .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; padding: 18px 24px 0; }

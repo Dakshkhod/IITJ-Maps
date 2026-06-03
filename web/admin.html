@@ -50,13 +50,82 @@
           </svg>
           <span id="btn-sync-label">Sync from OSM</span>
         </button>
-        <button id="btn-export" class="btn btn-ghost" title="Download the current accepted overlay so you can commit it to web/data/overlay.json">Export overlay</button>
-        <label class="btn btn-ghost" for="import-input" title="Import a previously exported overlay JSON (merges with current)">Import overlay
+        <button id="btn-publish" class="btn btn-publish" title="Commit the current accepted overlay straight to the repo via the GitHub API">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 19V5"/><path d="m5 12 7-7 7 7"/>
+          </svg>
+          <span id="btn-publish-label">Publish to live site</span>
+        </button>
+        <button id="btn-export" class="btn btn-ghost" title="Download the current accepted overlay so you can commit it manually">Export</button>
+        <label class="btn btn-ghost" for="import-input" title="Import a previously exported overlay JSON (merges with current)">Import
           <input id="import-input" type="file" accept="application/json" hidden>
         </label>
+        <button id="btn-settings" class="btn btn-ghost" title="GitHub publishing settings" aria-label="Settings">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+          </svg>
+        </button>
         <a href="index.html" class="btn btn-ghost" title="Back to the main map">Open map</a>
       </div>
     </header>
+
+    <!-- Settings modal — GitHub publishing config -->
+    <div id="settings-modal" class="modal hidden">
+      <div class="modal-backdrop"></div>
+      <div class="modal-card">
+        <header class="modal-head">
+          <h2>GitHub publishing</h2>
+          <button id="settings-close" class="modal-close" aria-label="Close">×</button>
+        </header>
+        <div class="modal-body">
+          <p class="modal-intro">
+            Configure direct publish so clicking <strong>Publish to live site</strong>
+            commits <code>web/data/overlay.json</code> to your repo through the GitHub API.
+            Vercel will auto-redeploy from there.
+          </p>
+
+          <div class="form-row">
+            <label for="cfg-owner">Repo owner</label>
+            <input id="cfg-owner" type="text" placeholder="Dakshkhod" autocomplete="off" spellcheck="false">
+            <span class="form-hint">The GitHub user or organisation that owns the repository.</span>
+          </div>
+
+          <div class="form-row">
+            <label for="cfg-repo">Repo name</label>
+            <input id="cfg-repo" type="text" placeholder="IITJ-Maps" autocomplete="off" spellcheck="false">
+          </div>
+
+          <div class="form-row">
+            <label for="cfg-branch">Branch</label>
+            <input id="cfg-branch" type="text" placeholder="main" autocomplete="off" spellcheck="false">
+            <span class="form-hint">The branch Vercel deploys from (usually <code>main</code>).</span>
+          </div>
+
+          <div class="form-row">
+            <label for="cfg-path">File path</label>
+            <input id="cfg-path" type="text" placeholder="web/data/overlay.json" autocomplete="off" spellcheck="false">
+          </div>
+
+          <div class="form-row">
+            <label for="cfg-token">Personal Access Token</label>
+            <input id="cfg-token" type="password" placeholder="github_pat_…" autocomplete="off" spellcheck="false">
+            <span class="form-hint">
+              Stored only in this browser's localStorage. Create a
+              <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">fine-grained PAT</a>
+              scoped to <em>only</em> the IITJ Maps repo with <strong>Contents: Read &amp; write</strong>. Revoke it anytime.
+            </span>
+          </div>
+
+          <div class="form-status" id="settings-status"></div>
+        </div>
+        <footer class="modal-foot">
+          <button class="btn btn-ghost" id="settings-test">Test connection</button>
+          <button class="btn btn-ghost" id="settings-forget">Forget token</button>
+          <button class="btn btn-primary" id="settings-save">Save</button>
+        </footer>
+      </div>
+    </div>
 
     <!-- Stats row -->
     <section class="stats">
@@ -169,7 +238,7 @@
     <div id="toast" class="toast hidden"></div>
   </div>
 
-  <script src="js/data-overlay.js?v=2"></script>
-  <script src="js/admin.js?v=2"></script>
+  <script src="js/data-overlay.js?v=3"></script>
+  <script src="js/admin.js?v=3"></script>
 </body>
 </html>

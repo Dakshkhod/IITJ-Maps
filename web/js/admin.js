@@ -25,6 +25,8 @@ const OVERPASS_ENDPOINTS = [
 const PENDING_KEY  = 'iitj-pending-changes-v1';
 const LAST_SYNC_KEY = 'iitj-last-sync-v1';
 const GATE_KEY      = 'iitj-admin-passphrase';
+const GH_CFG_KEY    = 'iitj-github-config-v1';   // { owner, repo, branch, path, token }
+const LAST_PUBLISH_KEY = 'iitj-last-publish-v1';
 
 // Tags we DIFF (everything else is metadata churn from the OSM editor)
 const DIFF_TAGS = {
@@ -407,6 +409,7 @@ let _miniMap      = null;
 function render() {
   renderStats();
   renderList();
+  updatePublishButton();
 }
 
 function renderStats() {
@@ -669,6 +672,197 @@ function fitMiniToFeatures(feats) {
 }
 
 // ============================================================
+// GitHub publish — commits overlay.json straight to the repo so
+// Vercel redeploys without the admin ever touching a git client.
+// ============================================================
+function loadGhConfig() {
+  try {
+    const o = JSON.parse(localStorage.getItem(GH_CFG_KEY) || '{}');
+    return {
+      owner:  o.owner  || '',
+      repo:   o.repo   || '',
+      branch: o.branch || 'main',
+      path:   o.path   || 'web/data/overlay.json',
+      token:  o.token  || '',
+    };
+  } catch (_) {
+    return { owner: '', repo: '', branch: 'main', path: 'web/data/overlay.json', token: '' };
+  }
+}
+function saveGhConfig(cfg) { localStorage.setItem(GH_CFG_KEY, JSON.stringify(cfg)); }
+function ghConfigured() {
+  const c = loadGhConfig();
+  return !!(c.owner && c.repo && c.token);
+}
+
+function updatePublishButton() {
+  const btn = document.getElementById('btn-publish');
+  const label = document.getElementById('btn-publish-label');
+  if (!btn) return;
+  if (!ghConfigured()) {
+    btn.disabled = false; // still clickable — opens settings
+    btn.title = 'Click to set up GitHub publishing (one-time configuration)';
+    label.textContent = 'Publish to live site';
+  } else {
+    btn.disabled = false;
+    btn.title = 'Commit the accepted overlay to GitHub; Vercel will redeploy automatically';
+    const last = localStorage.getItem(LAST_PUBLISH_KEY);
+    label.textContent = last
+      ? `Publish to live site · last ${timeAgo(last)}`
+      : 'Publish to live site';
+  }
+}
+
+// Base64 encoder that handles UTF-8 cleanly (btoa alone breaks on non-ASCII).
+function utf8ToBase64(str) {
+  const bytes = new TextEncoder().encode(str);
+  let binary = '';
+  for (const b of bytes) binary += String.fromCharCode(b);
+  return btoa(binary);
+}
+
+async function ghRequest(cfg, path, init = {}) {
+  const url = `https://api.github.com${path}`;
+  const res = await fetch(url, {
+    ...init,
+    headers: {
+      'Accept': 'application/vnd.github+json',
+      'X-GitHub-Api-Version': '2022-11-28',
+      'Authorization': `Bearer ${cfg.token}`,
+      ...(init.body ? { 'Content-Type': 'application/json' } : {}),
+      ...(init.headers || {}),
+    },
+  });
+  let body = null;
+  try { body = await res.json(); } catch (_) {}
+  if (!res.ok) {
+    const msg = body?.message || `HTTP ${res.status}`;
+    const err = new Error(msg);
+    err.status = res.status;
+    err.body = body;
+    throw err;
+  }
+  return body;
+}
+
+async function publishOverlay() {
+  if (!ghConfigured()) {
+    showToast('Set up GitHub publishing first', 'warn');
+    openSettings();
+    return;
+  }
+  const cfg = loadGhConfig();
+  const btn = document.getElementById('btn-publish');
+  const label = document.getElementById('btn-publish-label');
+  btn.disabled = true;
+  label.textContent = 'Publishing…';
+
+  try {
+    const overlay = IITJOverlay.loadLocal();
+    const content = JSON.stringify(overlay, null, 2);
+    const base64  = utf8ToBase64(content);
+
+    // 1. Look up the existing file's sha (required by GitHub to update)
+    let existingSha = null;
+    try {
+      const meta = await ghRequest(cfg,
+        `/repos/${cfg.owner}/${cfg.repo}/contents/${encodeURIComponent(cfg.path)}?ref=${encodeURIComponent(cfg.branch)}`);
+      existingSha = meta.sha;
+    } catch (e) {
+      // 404 is fine — the file just doesn't exist yet on that branch
+      if (e.status !== 404) throw e;
+    }
+
+    // 2. Commit (create or update) — uses Contents API which is one HTTP call
+    const counts = countOverlayEntries(overlay);
+    const commitMsg = `Update admin overlay (${counts.total} feature${counts.total === 1 ? '' : 's'}` +
+      ` across ${counts.kinds.length} kind${counts.kinds.length === 1 ? '' : 's'})`;
+    await ghRequest(cfg,
+      `/repos/${cfg.owner}/${cfg.repo}/contents/${encodeURIComponent(cfg.path)}`,
+      {
+        method: 'PUT',
+        body: JSON.stringify({
+          message: commitMsg,
+          content: base64,
+          branch: cfg.branch,
+          ...(existingSha ? { sha: existingSha } : {}),
+        }),
+      }
+    );
+
+    localStorage.setItem(LAST_PUBLISH_KEY, new Date().toISOString());
+    showToast('Published — Vercel will redeploy in ~30 seconds', 'success');
+  } catch (e) {
+    console.error('[publish]', e);
+    const hint = e.status === 401 ? ' (check your token — it may be expired or wrong-scoped)'
+               : e.status === 403 ? ' (token lacks Contents: Read & write on this repo)'
+               : e.status === 404 ? ' (owner/repo/branch path is wrong)'
+               : '';
+    showToast(`Publish failed: ${e.message}${hint}`, 'error');
+  } finally {
+    updatePublishButton();
+  }
+}
+
+function countOverlayEntries(o) {
+  const kinds = [];
+  let total = 0;
+  for (const k of ['buildings', 'places', 'roads', 'areas']) {
+    const n = Object.keys(o[k] || {}).length + (o.deleted?.[k]?.length || 0);
+    if (n) { kinds.push(k); total += n; }
+  }
+  return { total, kinds };
+}
+
+// ── Settings modal ────────────────────────────────────────────
+function openSettings() {
+  const cfg = loadGhConfig();
+  document.getElementById('cfg-owner').value  = cfg.owner;
+  document.getElementById('cfg-repo').value   = cfg.repo;
+  document.getElementById('cfg-branch').value = cfg.branch;
+  document.getElementById('cfg-path').value   = cfg.path;
+  document.getElementById('cfg-token').value  = cfg.token;
+  document.getElementById('settings-status').textContent = '';
+  document.getElementById('settings-status').className = 'form-status';
+  document.getElementById('settings-modal').classList.remove('hidden');
+}
+function closeSettings() {
+  document.getElementById('settings-modal').classList.add('hidden');
+}
+function readSettingsForm() {
+  return {
+    owner:  document.getElementById('cfg-owner').value.trim(),
+    repo:   document.getElementById('cfg-repo').value.trim(),
+    branch: document.getElementById('cfg-branch').value.trim() || 'main',
+    path:   document.getElementById('cfg-path').value.trim() || 'web/data/overlay.json',
+    token:  document.getElementById('cfg-token').value.trim(),
+  };
+}
+function showSettingsStatus(msg, kind) {
+  const el = document.getElementById('settings-status');
+  el.className = 'form-status ' + (kind || '');
+  el.textContent = msg;
+}
+async function testGhConnection() {
+  const cfg = readSettingsForm();
+  if (!cfg.owner || !cfg.repo || !cfg.token) {
+    showSettingsStatus('Fill in owner, repo, and token first.', 'warn');
+    return;
+  }
+  showSettingsStatus('Testing…', 'warn');
+  try {
+    const repo = await ghRequest(cfg, `/repos/${cfg.owner}/${cfg.repo}`);
+    if (!repo.permissions?.push) {
+      showSettingsStatus('Token can read the repo but lacks push permission. Re-create it with Contents: Read & write.', 'error');
+      return;
+    }
+    showSettingsStatus(`Connected to ${repo.full_name} on branch ${cfg.branch}. Permissions look good.`, 'ok');
+  } catch (e) {
+    showSettingsStatus(`${e.message}${e.status === 401 ? ' — token rejected' : ''}`, 'error');
+  }
+}
+
+// ============================================================
 // Export / Import overlay
 // ============================================================
 function exportOverlay() {
@@ -761,11 +955,33 @@ function checkGate() {
 function boot() {
   document.getElementById('btn-sync').addEventListener('click', runSync);
   document.getElementById('btn-export').addEventListener('click', exportOverlay);
+  document.getElementById('btn-publish').addEventListener('click', publishOverlay);
+  document.getElementById('btn-settings').addEventListener('click', openSettings);
+  document.getElementById('settings-close').addEventListener('click', closeSettings);
+  document.querySelector('#settings-modal .modal-backdrop').addEventListener('click', closeSettings);
+  document.getElementById('settings-save').addEventListener('click', () => {
+    const cfg = readSettingsForm();
+    if (!cfg.owner || !cfg.repo) { showSettingsStatus('Owner and repo are required.', 'error'); return; }
+    saveGhConfig(cfg);
+    showSettingsStatus('Saved.', 'ok');
+    updatePublishButton();
+    setTimeout(closeSettings, 600);
+  });
+  document.getElementById('settings-test').addEventListener('click', testGhConnection);
+  document.getElementById('settings-forget').addEventListener('click', () => {
+    const cfg = loadGhConfig();
+    cfg.token = '';
+    saveGhConfig(cfg);
+    document.getElementById('cfg-token').value = '';
+    showSettingsStatus('Token cleared from this browser.', 'warn');
+    updatePublishButton();
+  });
   document.getElementById('import-input').addEventListener('change', (e) => {
     const f = e.target.files?.[0];
     if (f) importOverlay(f);
     e.target.value = '';
   });
+  updatePublishButton();
 
   for (const grp of ['filter-status', 'filter-kind', 'filter-type']) {
     const el = document.getElementById(grp);
