@@ -9,7 +9,19 @@
 // Config
 // ============================================================
 const CAMPUS_BBOX = '26.4500,73.0900,26.4900,73.1300'; // south,west,north,east
-const OVERPASS_URL = 'https://overpass-api.de/api/interpreter';
+
+// Overpass mirrors that ship CORS headers (required for browser-origin POST).
+// Listed in preferred order — we try each in turn so a temporary outage on
+// one mirror doesn't break the workflow. The main overpass-api.de host is
+// NOT CORS-friendly for cross-origin browser requests, so it goes last as a
+// hail-mary; usually one of the earlier mirrors responds first.
+const OVERPASS_ENDPOINTS = [
+  'https://overpass.kumi.systems/api/interpreter',
+  'https://overpass.private.coffee/api/interpreter',
+  'https://overpass.osm.jp/api/interpreter',
+  'https://maps.mail.ru/osm/tools/overpass/api/interpreter',
+  'https://overpass-api.de/api/interpreter',
+];
 const PENDING_KEY  = 'iitj-pending-changes-v1';
 const LAST_SYNC_KEY = 'iitj-last-sync-v1';
 const GATE_KEY      = 'iitj-admin-passphrase';
@@ -110,13 +122,29 @@ async function fetchFromOverpass() {
     );
     out geom;
   `;
-  const res = await fetch(OVERPASS_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: 'data=' + encodeURIComponent(query),
-  });
-  if (!res.ok) throw new Error(`Overpass HTTP ${res.status}`);
-  return res.json();
+  const body = 'data=' + encodeURIComponent(query);
+  const headers = { 'Content-Type': 'application/x-www-form-urlencoded' };
+
+  let lastErr = null;
+  for (const url of OVERPASS_ENDPOINTS) {
+    try {
+      const res = await fetch(url, { method: 'POST', headers, body });
+      if (!res.ok) {
+        // 504 / 429 → try the next mirror instead of giving up
+        lastErr = new Error(`HTTP ${res.status} from ${new URL(url).host}`);
+        continue;
+      }
+      return await res.json();
+    } catch (e) {
+      // Network or CORS failure — try the next one
+      lastErr = e;
+      console.warn(`[Overpass] ${new URL(url).host} failed:`, e.message);
+    }
+  }
+  throw new Error(
+    `All Overpass mirrors failed${lastErr ? ' (last: ' + lastErr.message + ')' : ''}. ` +
+    `Check your internet connection and try again in a minute.`
+  );
 }
 
 // Convert one Overpass element into a GeoJSON Feature in our schema.
