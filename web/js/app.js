@@ -1864,10 +1864,12 @@ async function calculateDirectionsRoute() {
 let routeOriginMarker = null;   // blue dot at start
 let routeDestMarker   = null;   // red pin at destination
 let _rerouteCooldown  = false;  // prevents spam-rerouting
+let _offRouteSince    = 0;      // performance.now() the puck first crossed the off-route threshold; 0 when on-route
 
 async function reRoute() {
   if (!navDestination || _rerouteCooldown) return;
   _rerouteCooldown = true;
+  _offRouteSince   = 0;  // any in-flight off-route streak is now stale
   setTimeout(() => { _rerouteCooldown = false; }, 8000);
 
   _showRerouting(true);
@@ -2421,6 +2423,7 @@ function clearRoute() {
   currentRoute     = null;
   navDestination   = null;
   _rerouteCooldown = false;
+  _offRouteSince   = 0;
   _showOffRoute(false);
   _showRerouting(false);
   document.getElementById('nav-panel').classList.add('hidden');
@@ -2636,6 +2639,16 @@ function onLocationFrame(disp, raw) {
       const next    = coords[snapInfo.segIdx + 1] || coords[snapInfo.segIdx];
       renderLng = x1 + snapInfo.t * (next[0] - x1);
       renderLat = y1 + snapInfo.t * (next[1] - y1);
+    } else if (RoadSnap.ready()) {
+      // The suggested route is too far away to be plausible — the user
+      // is on a different road. Snap to the road they're actually on so
+      // the puck reads correctly while _navTick decides whether to
+      // reroute.
+      const snapped = RoadSnap.snap(disp.lat, disp.lng, disp.accuracy);
+      if (snapped) {
+        renderLat = snapped.lat;
+        renderLng = snapped.lng;
+      }
     }
   } else if (RoadSnap.ready()) {
     // Free roaming — snap to nearest road in roads.geojson so the puck
@@ -2761,14 +2774,29 @@ function _navTick(lat, lng, snap) {
 
   _updateTraveledOverlay(segIdx, t, coords);
 
-  // Off-route uses a slightly higher threshold than the snap buffer so
-  // we don't oscillate between snapped and unsnapped state.
-  if (distToRoute > 45) {
+  // Off-route detection with hysteresis. The old 45 m threshold was too
+  // loose for the campus: parallel paths are routinely 25-35 m apart,
+  // so walking on the road next to the suggested one stayed silently
+  // "on route". Now: above 25 m the badge appears immediately; if it
+  // stays above 25 m for ~2 s of GPS fixes we trigger a real reroute.
+  // This filters spurious one-fix outliers without ignoring a genuine
+  // detour.
+  const OFFROUTE_M       = 25;
+  const OFFROUTE_HOLD_MS = 2000;
+  const now = (typeof performance !== 'undefined' ? performance.now() : Date.now());
+  if (distToRoute > OFFROUTE_M) {
     _showOffRoute(true);
-    reRoute();
-    return;
+    if (_offRouteSince === 0) _offRouteSince = now;
+    if (now - _offRouteSince >= OFFROUTE_HOLD_MS) {
+      _offRouteSince = 0;          // reset so the next streak measures itself
+      showToast('Rerouting…', 'info');
+      reRoute();
+      return;
+    }
+  } else {
+    _offRouteSince = 0;
+    _showOffRoute(false);
   }
-  _showOffRoute(false);
 
   while (
     navInstructionIndex < instrs.length - 1 &&
