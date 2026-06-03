@@ -1336,6 +1336,248 @@ var Landmarks3D = (() => {
     return g;
   }
 
+  // ─────────────────────────────────────────────────────────────────────
+  // SHAMIYANA FOOD COURT — shipping-container restaurants laid out around
+  // a central open-air plaza, with concrete tube seating pods along the
+  // west edge, two tensile-fabric shade canopies, and a small round
+  // amphitheatre stage. Each restaurant has its own GeoJSON polygon in
+  // places.geojson; this builder draws all of them as one mesh and the
+  // LANDMARKS entry uses `replacesOsmBuildings` to hide the plain
+  // extrusions so we don't double up.
+  //
+  // Layout offsets (E = east, N = north, both in metres from the OSM
+  // 'Shamiyana' POI) and long-edge bearings come from the polygon
+  // centroids — computed once offline and hard-coded here.
+  // Mesh convention: +X = east, +Y = up, -Z = north.
+  // ─────────────────────────────────────────────────────────────────────
+  function buildShamiyanaComplex() {
+    const g = new THREE.Group();
+
+    // Local palette — kept inside the builder so we don't pollute MAT for
+    // a one-off model. Colours sampled from the on-site drone photos.
+    const M = {
+      cBlue:    new THREE.MeshStandardMaterial({ color: 0x2c6da8, metalness: 0.20, roughness: 0.60 }),
+      cRed:     new THREE.MeshStandardMaterial({ color: 0x8a2a2a, metalness: 0.20, roughness: 0.60 }),
+      cYellow:  new THREE.MeshStandardMaterial({ color: 0xe8b430, metalness: 0.20, roughness: 0.55 }),
+      cOrange:  new THREE.MeshStandardMaterial({ color: 0xd2622a, metalness: 0.20, roughness: 0.58 }),
+      cPink:    new THREE.MeshStandardMaterial({ color: 0xc8636c, metalness: 0.20, roughness: 0.58 }),
+      roofRust: new THREE.MeshStandardMaterial({ color: 0x6c3a26, metalness: 0.25, roughness: 0.70 }),
+      roofGalv: new THREE.MeshStandardMaterial({ color: 0xd7d5c8, metalness: 0.45, roughness: 0.45 }),
+      fabric:   new THREE.MeshStandardMaterial({ color: 0xefe6d2, metalness: 0.02, roughness: 0.95, side: THREE.DoubleSide }),
+      pole:     new THREE.MeshStandardMaterial({ color: 0x2a2a2a, metalness: 0.35, roughness: 0.55 }),
+      door:     new THREE.MeshStandardMaterial({ color: 0x1f1f22, metalness: 0.30, roughness: 0.55 }),
+      concrete: new THREE.MeshStandardMaterial({ color: 0xb5b0a3, metalness: 0.04, roughness: 0.92 }),
+      paving:   new THREE.MeshStandardMaterial({ color: 0xc7a679, metalness: 0.05, roughness: 0.85 }),
+      pavingD:  new THREE.MeshStandardMaterial({ color: 0x8d6e4f, metalness: 0.05, roughness: 0.90 }),
+      wood:     new THREE.MeshStandardMaterial({ color: 0xa67746, metalness: 0.05, roughness: 0.85 }),
+      podInt: (hex) => new THREE.MeshStandardMaterial({ color: hex, metalness: 0.10, roughness: 0.70, side: THREE.DoubleSide }),
+    };
+
+    // Single shipping-container restaurant. (E,N) is the centroid offset
+    // from the Shamiyana POI; bearingDeg is the long-edge bearing
+    // (0 = north, 90 = east). Width is along the long edge.
+    function placeContainer({ E, N, w, d, bearingDeg, body, roof, stories = 1, sign = null }) {
+      const c = new THREE.Group();
+      const H = 2.7 * stories;
+
+      const box = new THREE.Mesh(new THREE.BoxGeometry(w, H, d), body);
+      box.position.y = H / 2;
+      c.add(box);
+
+      // Slight roof overhang
+      const roofMesh = new THREE.Mesh(new THREE.BoxGeometry(w + 0.4, 0.22, d + 0.4), roof);
+      roofMesh.position.y = H + 0.11;
+      c.add(roofMesh);
+
+      // Dark recessed door on the long (south-facing) side
+      const door = new THREE.Mesh(new THREE.BoxGeometry(0.95, 1.95, 0.04), M.door);
+      door.position.set(0, 0.975, d / 2 + 0.025);
+      c.add(door);
+
+      // Optional accent sign panel sitting on top of the container (e.g.
+      // the orange Domino's signage above the blue base).
+      if (sign) {
+        const s = new THREE.Mesh(new THREE.BoxGeometry(w + 0.5, 0.7, d + 0.5), sign);
+        s.position.y = H + 0.22 + 0.35;
+        c.add(s);
+      }
+
+      c.position.set(E, 0, -N);
+      c.rotation.y = (90 - bearingDeg) * Math.PI / 180;
+      return c;
+    }
+
+    // Concrete pipe seating pod — cylinder lying on its side, open at the
+    // east end so the coloured interior is visible from the plaza.
+    function placeTubePod({ E, N, interiorHex }) {
+      const c = new THREE.Group();
+      const R = 1.35, L = 3.0;
+
+      const outer = new THREE.Mesh(new THREE.CylinderGeometry(R, R, L, 24, 1, true), M.concrete);
+      outer.rotation.z = Math.PI / 2;
+      outer.position.y = R;
+      c.add(outer);
+
+      const innerMat = M.podInt(interiorHex);
+      const inner = new THREE.Mesh(new THREE.CylinderGeometry(R - 0.08, R - 0.08, L - 0.05, 24, 1, true), innerMat);
+      inner.rotation.z = Math.PI / 2;
+      inner.position.y = R;
+      c.add(inner);
+
+      // Solid back wall on one end (entrance is the opposite end)
+      const cap = new THREE.Mesh(new THREE.CircleGeometry(R - 0.05, 24), innerMat);
+      cap.position.set(-L / 2 + 0.03, R, 0);
+      cap.rotation.y = -Math.PI / 2;
+      c.add(cap);
+
+      // Small artificial-turf pad in front of the entrance
+      const pad = new THREE.Mesh(new THREE.BoxGeometry(L + 0.4, 0.06, 2 * R + 0.6), M.pavingD);
+      pad.position.y = 0.03;
+      c.add(pad);
+
+      c.position.set(E, 0, -N);
+      // Tubes lie east-west — entrance opens to the east (toward seating)
+      return c;
+    }
+
+    // Tensile-fabric shade canopy — 4 corner poles + central mast, with a
+    // 4-sided pyramid fabric panel pulled up at the centre.
+    function placeShade({ E, N, size, height }) {
+      const c = new THREE.Group();
+      const POLE_R = 0.07;
+      const POLE_H = height + 0.2;
+
+      [[+1, +1], [+1, -1], [-1, +1], [-1, -1]].forEach(([sx, sz]) => {
+        const p = new THREE.Mesh(new THREE.CylinderGeometry(POLE_R, POLE_R, POLE_H, 8), M.pole);
+        p.position.set(sx * size / 2, POLE_H / 2, sz * size / 2);
+        c.add(p);
+      });
+
+      const apex = height + 1.0;
+      const half = size / 2;
+      const v = new Float32Array([
+        -half, height, -half,    half, height, -half,    0, apex, 0,
+         half, height, -half,    half, height,  half,    0, apex, 0,
+         half, height,  half,   -half, height,  half,    0, apex, 0,
+        -half, height,  half,   -half, height, -half,    0, apex, 0,
+      ]);
+      const geo = new THREE.BufferGeometry();
+      geo.setAttribute('position', new THREE.BufferAttribute(v, 3));
+      geo.computeVertexNormals();
+      c.add(new THREE.Mesh(geo, M.fabric));
+
+      c.position.set(E, 0, -N);
+      return c;
+    }
+
+    // Round amphitheatre stage with central mast + conical fabric canopy
+    function placeStage({ E, N, radius }) {
+      const c = new THREE.Group();
+
+      const base = new THREE.Mesh(new THREE.CylinderGeometry(radius, radius, 0.35, 32), M.paving);
+      base.position.y = 0.175;
+      c.add(base);
+      const ring = new THREE.Mesh(new THREE.TorusGeometry(radius - 0.02, 0.08, 6, 32), M.pavingD);
+      ring.position.y = 0.35;
+      ring.rotation.x = Math.PI / 2;
+      c.add(ring);
+
+      const POLE_H = 3.8;
+      const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, POLE_H, 8), M.pole);
+      pole.position.y = 0.35 + POLE_H / 2;
+      c.add(pole);
+
+      // Cone fabric — fan of triangles from apex down to the rim
+      const SHADE_R = radius - 0.3;
+      const apex = 0.35 + POLE_H;
+      const rim = 0.35 + POLE_H - 1.1;
+      const segs = 18;
+      const verts = [];
+      for (let i = 0; i < segs; i++) {
+        const a1 = (i / segs) * Math.PI * 2;
+        const a2 = ((i + 1) / segs) * Math.PI * 2;
+        verts.push(
+          SHADE_R * Math.cos(a1), rim, SHADE_R * Math.sin(a1),
+          SHADE_R * Math.cos(a2), rim, SHADE_R * Math.sin(a2),
+          0, apex, 0,
+        );
+      }
+      const gs = new THREE.BufferGeometry();
+      gs.setAttribute('position', new THREE.BufferAttribute(new Float32Array(verts), 3));
+      gs.computeVertexNormals();
+      c.add(new THREE.Mesh(gs, M.fabric));
+
+      c.position.set(E, 0, -N);
+      return c;
+    }
+
+    function placeBench({ E, N, bearingDeg = 0 }) {
+      const c = new THREE.Group();
+      const top = new THREE.Mesh(new THREE.BoxGeometry(1.8, 0.06, 0.7), M.wood);
+      top.position.y = 0.72;
+      c.add(top);
+      [-0.55, 0.55].forEach((dz) => {
+        const seat = new THREE.Mesh(new THREE.BoxGeometry(1.8, 0.04, 0.32), M.wood);
+        seat.position.set(0, 0.42, dz);
+        c.add(seat);
+      });
+      [[-0.7, -0.7], [-0.7, 0.7], [0.7, -0.7], [0.7, 0.7]].forEach(([dx, dz]) => {
+        const leg = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.7, 0.06), M.wood);
+        leg.position.set(dx, 0.36, dz);
+        c.add(leg);
+      });
+      c.position.set(E, 0, -N);
+      c.rotation.y = (90 - bearingDeg) * Math.PI / 180;
+      return c;
+    }
+
+    // ── Ground pad covering the whole complex (40 × 44 m around the
+    //    geometric centre of the restaurants).
+    const gc = { E: 3, N: 9 };
+    const rim = new THREE.Mesh(new THREE.BoxGeometry(40.6, 0.05, 44.6), M.pavingD);
+    rim.position.set(gc.E, 0.025, -gc.N);
+    g.add(rim);
+    const ground = new THREE.Mesh(new THREE.BoxGeometry(40, 0.08, 44), M.paving);
+    ground.position.set(gc.E, 0.07, -gc.N);
+    g.add(ground);
+
+    // ── Eight container restaurants (positions + bearings from polygons)
+    g.add(placeContainer({ E:  -1.0, N:  -4.2, w: 12.1, d: 7.6, bearingDeg: 107, body: M.cBlue,   roof: M.roofGalv, stories: 1 })); // Tealogy
+    g.add(placeContainer({ E:   0.9, N:   6.2, w: 13.2, d: 8.1, bearingDeg: 107, body: M.cRed,    roof: M.roofRust, stories: 1 })); // Amritsari Kulcha
+    g.add(placeContainer({ E:  11.1, N:   2.3, w:  6.2, d: 6.6, bearingDeg:  18, body: M.cRed,    roof: M.roofRust, stories: 1 })); // Patiala Chicken
+    g.add(placeContainer({ E:   9.0, N:  -7.2, w:  4.5, d: 5.2, bearingDeg:  15, body: M.cBlue,   roof: M.roofGalv, stories: 1 })); // Waffcha
+    g.add(placeContainer({ E:  12.8, N:   7.9, w:  6.1, d: 6.9, bearingDeg:  20, body: M.cRed,    roof: M.roofGalv, stories: 1 })); // Zorko
+    g.add(placeContainer({ E:   7.2, N:  18.1, w:  8.7, d: 6.8, bearingDeg: 110, body: M.cYellow, roof: M.roofGalv, stories: 2 })); // Baap of Rolls (yellow 2-storey)
+    g.add(placeContainer({ E:  14.1, N:  15.7, w:  7.9, d: 6.4, bearingDeg: 108, body: M.cPink,   roof: M.roofRust, stories: 1 })); // Prasadanam
+    g.add(placeContainer({ E:  -7.9, N:  23.0, w: 10.0, d: 9.4, bearingDeg:  35, body: M.cBlue,   roof: M.roofGalv, stories: 1, sign: M.cOrange })); // Domino's
+
+    // ── Five concrete tube pods in a N–S row along the western edge,
+    //    sitting on a strip of artificial turf between the central plaza
+    //    and the perimeter road. Interior colours from the photos.
+    const podColors = [0xe8e0d0, 0xe8b430, 0x2f7fb8, 0xb83820, 0x3a8a4a]; // white, yellow, blue, red, green
+    for (let i = 0; i < 5; i++) {
+      g.add(placeTubePod({ E: -6.5, N: 1 + i * 3.4, interiorHex: podColors[i] }));
+    }
+
+    // ── Two tensile-fabric shade canopies above the open seating
+    g.add(placeShade({ E:  6, N: 10, size: 10, height: 3.6 }));
+    g.add(placeShade({ E: 12, N: -3, size:  7, height: 3.2 }));
+
+    // ── Round amphitheatre stage at the south-west corner
+    g.add(placeStage({ E: -11, N: 14, radius: 3.5 }));
+
+    // ── Picnic benches scattered through the central plaza
+    [
+      { E:  5, N:  9,  bearingDeg: 107 },
+      { E:  8, N: 12,  bearingDeg: 107 },
+      { E:  3, N: 12,  bearingDeg: 107 },
+      { E:  5, N: -1,  bearingDeg: 107 },
+      { E: 13, N: -5,  bearingDeg:  18 },
+    ].forEach((b) => g.add(placeBench(b)));
+
+    return g;
+  }
+
   // ── Landmark registry ───────────────────────────────────────────────────
   // Height of the tiered base that the Brain Tree sits on top of.
   // Sum of all tier thicknesses + pedestal in buildBrainTreeBase().
@@ -1668,6 +1910,34 @@ var Landmarks3D = (() => {
       rotateMeshToUp: Y_UP_TO_Z_UP,
       bearingOffset: 71.83 * Math.PI / 180,
       replacesOsmBuildings: ['1266941049'],
+    },
+
+    // Shamiyana — open-air food court of container restaurants. The eight
+    // restaurant polygons would otherwise extrude as plain boxes; the
+    // builder draws them in detail and replacesOsmBuildings hides the
+    // duplicates. The model is anchored at the OSM 'Shamiyana' POI and
+    // contains its own absolute offsets, so bearingOffset = 0.
+    {
+      id: 'shamiyana-3d',
+      label: 'Shamiyana',
+      labelOffsetY: -0.5,
+      labelOffsetY3d: -2.2,
+      format: 'procedural',
+      build: buildShamiyanaComplex,
+      lng: 73.1141839, lat: 26.4767383,
+      heightMeters: null,
+      rotateMeshToUp: Y_UP_TO_Z_UP,
+      bearingOffset: 0,
+      replacesOsmBuildings: [
+        '1412504064', // Baap of Rolls
+        '1412504065', // Amritsari Kulcha
+        '1412504066', // Tealogy
+        '1412504067', // Domino's
+        '1524213392', // Waffcha
+        '1524213393', // Prasadanam
+        '1524213394', // Zorko
+        '1524213395', // Patiala Chicken
+      ],
     },
   ];
 
