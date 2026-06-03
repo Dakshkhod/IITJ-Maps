@@ -2420,6 +2420,9 @@ function clearRoute() {
   // Make sure the immersive camera/style is restored before we tear down
   if (immersiveNav) exitImmersiveNavigation();
   navigationActive = false;
+  // Gyroscope is only ever on during nav — shut it off as soon as nav ends
+  // so it doesn't keep firing in the background.
+  LocationTracker.disableCompass();
   currentRoute     = null;
   navDestination   = null;
   _rerouteCooldown = false;
@@ -2460,13 +2463,24 @@ const LocationTracker = (() => {
   const OUTLIER_SIGMA            = 4;    // jumps beyond Nσ get heavily down-weighted
   const POS_INTERP_FACTOR        = 0.22; // per-frame ease toward estimate
   const ACC_INTERP_FACTOR        = 0.15;
-  const HEADING_INTERP_FACTOR    = 0.20;
+  const HEADING_INTERP_FACTOR    = 0.06; // gentle ease toward target bearing
+
+  // Compass sensitivity controls — phones emit deviceorientation at 30–100Hz
+  // and the raw alpha jitters by several degrees even when the device is
+  // perfectly still. Throttle + smooth + deadzone so the camera doesn't
+  // visibly twitch on every wobble.
+  const COMPASS_MIN_INTERVAL_MS  = 120;  // hard rate limit on accepted samples
+  const COMPASS_SMOOTH_FACTOR    = 0.15; // low-pass on raw compass input
+  const COMPASS_DEADZONE_DEG     = 1.5;  // ignore sub-degree micro-rotations
 
   let _raw  = null;   // last accepted raw fix (lat,lng,accuracy,heading,speed,t)
   let _est  = null;   // Kalman estimate (lat,lng,variance,t)
   let _disp = null;   // smoothly interpolated render position (lat,lng,accuracy,heading)
   let _gpsHeading     = null;
   let _compassHeading = null;
+  let _compassRaw     = null;  // smoothed raw bearing before deadzone gating
+  let _compassLastT   = 0;
+  let _compassEnabled = false;
   let _speed          = null;
   let _watchId = null;
   let _rafId   = 0;
@@ -2555,7 +2569,26 @@ const LocationTracker = (() => {
     } else if (e.alpha != null && !isNaN(e.alpha)) {
       h = (360 - e.alpha) % 360;
     }
-    if (h != null) _compassHeading = h;
+    if (h == null) return;
+
+    const now = (typeof performance !== 'undefined' ? performance.now() : Date.now());
+    if (now - _compassLastT < COMPASS_MIN_INTERVAL_MS) return;
+    _compassLastT = now;
+
+    // Low-pass filter on the raw input — flattens the high-frequency wobble
+    // before it reaches the deadzone / interp stage.
+    _compassRaw = (_compassRaw == null) ? h : _rotateAngle(_compassRaw, h, COMPASS_SMOOTH_FACTOR);
+
+    // Deadzone — only publish a new heading when it moved meaningfully.
+    if (_compassHeading == null) {
+      _compassHeading = _compassRaw;
+      return;
+    }
+    let d = _compassRaw - _compassHeading;
+    while (d > 180) d -= 360;
+    while (d < -180) d += 360;
+    if (Math.abs(d) < COMPASS_DEADZONE_DEG) return;
+    _compassHeading = _compassRaw;
   }
 
   function start(onError) {
@@ -2580,14 +2613,32 @@ const LocationTracker = (() => {
       { enableHighAccuracy: true, maximumAge: 0, timeout: 20000 }
     );
 
+    if (!_rafId) _rafId = requestAnimationFrame(_frame);
+    return true;
+  }
+
+  // Compass is OFF by default — it's only useful when the camera is following
+  // bearing (i.e. during turn-by-turn nav). Attaching it always leaks the
+  // gyroscope's twitchy input into the marker heading and any UI that reads
+  // _bestHeading() at rest, which is what made the puck feel jittery.
+  function enableCompass() {
+    if (_compassEnabled) return;
+    _compassEnabled = true;
     if (window.DeviceOrientationEvent && typeof DeviceOrientationEvent.requestPermission === 'function') {
       DeviceOrientationEvent.requestPermission().catch(() => {});
     }
     window.addEventListener('deviceorientationabsolute', _onCompass, { passive: true });
     window.addEventListener('deviceorientation',         _onCompass, { passive: true });
+  }
 
-    if (!_rafId) _rafId = requestAnimationFrame(_frame);
-    return true;
+  function disableCompass() {
+    if (!_compassEnabled) return;
+    _compassEnabled = false;
+    window.removeEventListener('deviceorientationabsolute', _onCompass);
+    window.removeEventListener('deviceorientation',         _onCompass);
+    _compassHeading = null;
+    _compassRaw     = null;
+    _compassLastT   = 0;
   }
 
   function subscribe(cb) { _listeners.add(cb); return () => _listeners.delete(cb); }
@@ -2595,8 +2646,9 @@ const LocationTracker = (() => {
   function getRaw()     { return _raw; }
   function hasFix()     { return !!_disp; }
   function watching()   { return _watchId !== null; }
+  function compassEnabled() { return _compassEnabled; }
 
-  return { start, subscribe, getDisplay, getRaw, hasFix, watching };
+  return { start, subscribe, getDisplay, getRaw, hasFix, watching, enableCompass, disableCompass, compassEnabled };
 })();
 
 // ============================================================
@@ -2846,13 +2898,26 @@ function setAutoFollow(on) {
 function flyToUserLocation() {
   if (!LocationTracker.watching()) {
     requestUserLocation();
+    // First click ever — if we happen to already be in directions, opt the
+    // user straight into heading-tracked follow.
+    if (navigationActive) LocationTracker.enableCompass();
     return;
   }
   if (autoFollow) {
-    setAutoFollow(false);
-    showToast('Auto-follow off', 'info');
+    // During directions, the first click while already following enables the
+    // gyroscope ("follow with heading" — same gesture Google Maps uses).
+    // A second click then turns everything off.
+    if (navigationActive && !LocationTracker.compassEnabled()) {
+      LocationTracker.enableCompass();
+      showToast('Following heading', 'info');
+    } else {
+      setAutoFollow(false);
+      LocationTracker.disableCompass();
+      showToast('Auto-follow off', 'info');
+    }
   } else {
     setAutoFollow(true);
+    if (navigationActive) LocationTracker.enableCompass();
     if (!userLocation) showToast('Waiting for GPS signal…', 'info');
     else showToast('Following your location', 'info');
   }
