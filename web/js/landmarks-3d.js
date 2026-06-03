@@ -1367,8 +1367,11 @@ var Landmarks3D = (() => {
       pole:     new THREE.MeshStandardMaterial({ color: 0x2a2a2a, metalness: 0.35, roughness: 0.55 }),
       door:     new THREE.MeshStandardMaterial({ color: 0x1f1f22, metalness: 0.30, roughness: 0.55 }),
       concrete: new THREE.MeshStandardMaterial({ color: 0xb5b0a3, metalness: 0.04, roughness: 0.92 }),
-      paving:   new THREE.MeshStandardMaterial({ color: 0xc7a679, metalness: 0.05, roughness: 0.85 }),
-      pavingD:  new THREE.MeshStandardMaterial({ color: 0x8d6e4f, metalness: 0.05, roughness: 0.90 }),
+      // Pad tone matches the basemap (#fafafa) so the food-court plaza
+      // disappears into the surrounding campus ground instead of stamping
+      // a brown box on the map.
+      paving:   new THREE.MeshStandardMaterial({ color: 0xefebe2, metalness: 0.03, roughness: 0.92 }),
+      pavingD:  new THREE.MeshStandardMaterial({ color: 0xc7c0b1, metalness: 0.04, roughness: 0.92 }),
       wood:     new THREE.MeshStandardMaterial({ color: 0xa67746, metalness: 0.05, roughness: 0.85 }),
       podInt: (hex) => new THREE.MeshStandardMaterial({ color: hex, metalness: 0.10, roughness: 0.70, side: THREE.DoubleSide }),
     };
@@ -1537,28 +1540,34 @@ var Landmarks3D = (() => {
       return c;
     }
 
-    // ── Ground pad — a rounded-rectangle paving slab that matches the
-    //    food court footprint. Without it, the campus footways and the
-    //    west-side service road from roads.geojson visibly cut through
-    //    the plaza. The pad sits 8 cm above ground so road lines render
-    //    underneath, and uses a soft cream tone so it blends with the
-    //    surrounding campus paving instead of stamping a giant brown box.
+    // ── Plaza pad — tight to the structures (no longer a giant brown
+    //    rectangle). Coloured to match the basemap ground (#fafafa) so it
+    //    visually disappears, while still rendering 6 cm above the OSM
+    //    road tiles so the footways + service road that cut through the
+    //    food court don't show through.
     {
-      const PAD_HW = 19, PAD_HD = 18, PAD_R = 4;
-      const shape = new THREE.Shape();
-      shape.moveTo(-PAD_HW + PAD_R, -PAD_HD);
-      shape.lineTo( PAD_HW - PAD_R, -PAD_HD);
-      shape.quadraticCurveTo( PAD_HW, -PAD_HD,  PAD_HW, -PAD_HD + PAD_R);
-      shape.lineTo( PAD_HW,  PAD_HD - PAD_R);
-      shape.quadraticCurveTo( PAD_HW,  PAD_HD,  PAD_HW - PAD_R,  PAD_HD);
-      shape.lineTo(-PAD_HW + PAD_R,  PAD_HD);
-      shape.quadraticCurveTo(-PAD_HW,  PAD_HD, -PAD_HW,  PAD_HD - PAD_R);
-      shape.lineTo(-PAD_HW, -PAD_HD + PAD_R);
-      shape.quadraticCurveTo(-PAD_HW, -PAD_HD, -PAD_HW + PAD_R, -PAD_HD);
-      const padGeom = new THREE.ShapeGeometry(shape);
+      const padShape = new THREE.Shape();
+      // Irregular hex-ish outline tracing the actual structure cluster:
+      // tighter on the east (no buildings past Prasadanam) and reaches
+      // out to the western unnamed container.
+      const pts = [
+        [-22, -1], [-22,  10],   // west edge (encloses unnamed + pods)
+        [-12,  20], [ -4,  27],  // NW corner (Domino's)
+        [  8,  24], [ 18,  20],  // NE corner (Prasadanam / Baap)
+        [ 18,   2], [ 14, -10],  // east edge tapering south
+        [  0, -10],              // south edge (Waffcha / Tealogy)
+        [-12,  -8],              // SW back to start
+      ];
+      padShape.moveTo(pts[0][0], pts[0][1]);
+      for (let i = 1; i < pts.length; i++) padShape.lineTo(pts[i][0], pts[i][1]);
+      padShape.lineTo(pts[0][0], pts[0][1]);
+      const padGeom = new THREE.ShapeGeometry(padShape);
       const pad = new THREE.Mesh(padGeom, M.paving);
       pad.rotation.x = -Math.PI / 2;
-      pad.position.set(3, 0.08, -8);
+      // ShapeGeometry is built in XY (Y is "north" in shape space). After
+      // rotation.x = -π/2, shape +Y maps to mesh -Z (= world +N). So the
+      // shape's coords are already in (E, N) — no flipping needed.
+      pad.position.set(0, 0.06, 0);
       g.add(pad);
     }
 
@@ -1588,24 +1597,22 @@ var Landmarks3D = (() => {
       g.add(placeTubePod({ E: -10, N: -2 + i * 4.0, interiorHex: podColors[i] }));
     }
 
-    // ── Two tensile-fabric shade canopies, positioned in the OPEN gaps
-    //    between container rows so the poles touch ground, not buildings.
-    //    SW shade: in the strip between Tealogy (S, N max -1.2) and
-    //    Amritsari (N, N min 4.7), clear of Patiala (E min 9.1).
-    //    NE shade: in the strip between Amritsari (N max 7.7) and Baap
-    //    of Rolls (N min 14.8), clear of Zorko (E min 10.7).
-    g.add(placeShade({ E: 4, N:  1.7,  size: 5, height: 3.4 }));
-    g.add(placeShade({ E: 4, N: 11.25, size: 5, height: 3.6 }));
+    // ── ONE tensile-fabric shade canopy over the central picnic seating
+    //    (per the drone photos — there's only one big sail above the
+    //    tables, not two). Fits in the verified-empty strip between
+    //    Amritsari (N max 7.7) and Baap of Rolls (N min 14.8).
+    g.add(placeShade({ E: 4, N: 11.25, size: 5.5, height: 3.6 }));
 
-    // ── Round amphitheatre stage in the open NE corner
-    g.add(placeStage({ E: -2, N: 14, radius: 3.0 }));
+    // ── Boat-sail amphitheatre at the SW corner of the food court (the
+    //    distinctive crescent-shaped stage visible in every drone photo).
+    g.add(placeStage({ E: -19, N: -5, radius: 3.2 }));
 
-    // ── Picnic benches under the two shade canopies
+    // ── Picnic benches under the central shade
     [
-      { E:  3, N:   0.5, bearingDeg: 107 },
-      { E:  6, N:   2.5, bearingDeg: 107 },
-      { E:  3, N:  10.5, bearingDeg: 107 },
-      { E:  6, N:  12.0, bearingDeg: 107 },
+      { E:  3, N: 10.5, bearingDeg: 107 },
+      { E:  6, N: 12.0, bearingDeg: 107 },
+      { E:  4, N:  2.0, bearingDeg: 107 },
+      { E:  7, N:  3.5, bearingDeg: 107 },
     ].forEach((b) => g.add(placeBench(b)));
 
     return g;
