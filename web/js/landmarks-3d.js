@@ -1531,48 +1531,49 @@ var Landmarks3D = (() => {
       return c;
     }
 
-    // ── Ground pad covering the whole complex (40 × 44 m around the
-    //    geometric centre of the restaurants).
-    const gc = { E: 3, N: 9 };
-    const rim = new THREE.Mesh(new THREE.BoxGeometry(40.6, 0.05, 44.6), M.pavingD);
-    rim.position.set(gc.E, 0.025, -gc.N);
-    g.add(rim);
-    const ground = new THREE.Mesh(new THREE.BoxGeometry(40, 0.08, 44), M.paving);
-    ground.position.set(gc.E, 0.07, -gc.N);
-    g.add(ground);
+    // No ground pad — the campus area/paving layers underneath handle the
+    //    surface, and a 40 × 44 m brown slab covered grass that's actually
+    //    there. Just drop the structures onto the existing terrain.
 
-    // ── Eight container restaurants (positions + bearings from polygons)
-    g.add(placeContainer({ E:  -1.0, N:  -4.2, w: 12.1, d: 7.6, bearingDeg: 107, body: M.cBlue,   roof: M.roofGalv, stories: 1 })); // Tealogy
-    g.add(placeContainer({ E:   0.9, N:   6.2, w: 13.2, d: 8.1, bearingDeg: 107, body: M.cRed,    roof: M.roofRust, stories: 1 })); // Amritsari Kulcha
-    g.add(placeContainer({ E:  11.1, N:   2.3, w:  6.2, d: 6.6, bearingDeg:  18, body: M.cRed,    roof: M.roofRust, stories: 1 })); // Patiala Chicken
-    g.add(placeContainer({ E:   9.0, N:  -7.2, w:  4.5, d: 5.2, bearingDeg:  15, body: M.cBlue,   roof: M.roofGalv, stories: 1 })); // Waffcha
-    g.add(placeContainer({ E:  12.8, N:   7.9, w:  6.1, d: 6.9, bearingDeg:  20, body: M.cRed,    roof: M.roofGalv, stories: 1 })); // Zorko
-    g.add(placeContainer({ E:   7.2, N:  18.1, w:  8.7, d: 6.8, bearingDeg: 110, body: M.cYellow, roof: M.roofGalv, stories: 2 })); // Baap of Rolls (yellow 2-storey)
-    g.add(placeContainer({ E:  14.1, N:  15.7, w:  7.9, d: 6.4, bearingDeg: 108, body: M.cPink,   roof: M.roofRust, stories: 1 })); // Prasadanam
-    g.add(placeContainer({ E:  -7.9, N:  23.0, w: 10.0, d: 9.4, bearingDeg:  35, body: M.cBlue,   roof: M.roofGalv, stories: 1, sign: M.cOrange })); // Domino's
+    // ── Nine container restaurants. The polygon bboxes in places.geojson
+    //    include the outdoor deck + awning surrounding each container, so
+    //    using them as the container body made everything overlap into a
+    //    solid mass. Hard-coded sizes below are the actual container body
+    //    only (most are standard 20-ft / 40-ft shipping containers,
+    //    2.4 m wide), centred on the polygon centroid.
+    g.add(placeContainer({ E:  -1.0, N:  -4.2, w: 10.5, d: 3.0, bearingDeg: 107, body: M.cBlue,   roof: M.roofGalv })); // Tealogy
+    g.add(placeContainer({ E:   0.9, N:   6.2, w: 11.0, d: 3.0, bearingDeg: 107, body: M.cRed,    roof: M.roofRust })); // Amritsari Kulcha
+    g.add(placeContainer({ E:  11.1, N:   2.3, w:  5.5, d: 2.5, bearingDeg:  18, body: M.cRed,    roof: M.roofRust })); // Patiala Chicken
+    g.add(placeContainer({ E:   9.0, N:  -7.2, w:  4.0, d: 2.5, bearingDeg:  15, body: M.cBlue,   roof: M.roofGalv })); // Waffcha
+    g.add(placeContainer({ E:  12.8, N:   7.9, w:  5.5, d: 2.5, bearingDeg:  20, body: M.cRed,    roof: M.roofGalv })); // Zorko
+    g.add(placeContainer({ E:   7.2, N:  18.1, w:  7.0, d: 4.5, bearingDeg: 110, body: M.cYellow, roof: M.roofGalv, stories: 2 })); // Baap of Rolls (yellow 2-storey)
+    g.add(placeContainer({ E:  14.1, N:  15.7, w:  6.5, d: 2.5, bearingDeg: 108, body: M.cPink,   roof: M.roofRust })); // Prasadanam
+    g.add(placeContainer({ E:  -7.9, N:  23.0, w:  6.0, d: 3.0, bearingDeg:  35, body: M.cBlue,   roof: M.roofGalv, sign: M.cOrange })); // Domino's
+    g.add(placeContainer({ E: -16.4, N:   3.7, w: 10.0, d: 2.5, bearingDeg:  18, body: M.cBlue,   roof: M.roofGalv })); // Unnamed west container (Manchaha-style)
 
-    // ── Five concrete tube pods in a N–S row along the western edge,
-    //    sitting on a strip of artificial turf between the central plaza
-    //    and the perimeter road. Interior colours from the photos.
+    // ── Five concrete tube pods, N–S row on the western edge of the
+    //    central plaza. Now visible because the containers are no longer
+    //    oversized.
     const podColors = [0xe8e0d0, 0xe8b430, 0x2f7fb8, 0xb83820, 0x3a8a4a]; // white, yellow, blue, red, green
     for (let i = 0; i < 5; i++) {
-      g.add(placeTubePod({ E: -6.5, N: 1 + i * 3.4, interiorHex: podColors[i] }));
+      g.add(placeTubePod({ E: -11.5, N: -2 + i * 3.4, interiorHex: podColors[i] }));
     }
 
     // ── Two tensile-fabric shade canopies above the open seating
-    g.add(placeShade({ E:  6, N: 10, size: 10, height: 3.6 }));
-    g.add(placeShade({ E: 12, N: -3, size:  7, height: 3.2 }));
+    g.add(placeShade({ E:  5, N:  1, size: 6, height: 3.4 })); // SW central seating
+    g.add(placeShade({ E:  6, N: 12, size: 7, height: 3.6 })); // NE central seating
 
-    // ── Round amphitheatre stage at the south-west corner
-    g.add(placeStage({ E: -11, N: 14, radius: 3.5 }));
+    // ── Round amphitheatre stage between the food court and the road
+    //    (north-east corner per the drone photos).
+    g.add(placeStage({ E: 4, N: 24, radius: 3.5 }));
 
-    // ── Picnic benches scattered through the central plaza
+    // ── Picnic benches in the open central plaza between the rows
     [
-      { E:  5, N:  9,  bearingDeg: 107 },
-      { E:  8, N: 12,  bearingDeg: 107 },
-      { E:  3, N: 12,  bearingDeg: 107 },
-      { E:  5, N: -1,  bearingDeg: 107 },
-      { E: 13, N: -5,  bearingDeg:  18 },
+      { E:  4, N:  1,  bearingDeg: 107 },
+      { E:  7, N:  1,  bearingDeg: 107 },
+      { E:  3, N: 11,  bearingDeg: 107 },
+      { E:  7, N: 11,  bearingDeg: 107 },
+      { E:  4, N: -1,  bearingDeg: 107 },
     ].forEach((b) => g.add(placeBench(b)));
 
     return g;
@@ -1933,6 +1934,7 @@ var Landmarks3D = (() => {
         '1412504065', // Amritsari Kulcha
         '1412504066', // Tealogy
         '1412504067', // Domino's
+        '1412504068', // Unnamed west container
         '1524213392', // Waffcha
         '1524213393', // Prasadanam
         '1524213394', // Zorko
