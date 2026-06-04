@@ -41,6 +41,34 @@ var Landmarks3D = (() => {
     hostelScreen:  new THREE.MeshStandardMaterial({ color: 0x6b4a36, metalness: 0.05, roughness: 0.80 }),
     hostelRoof:    new THREE.MeshStandardMaterial({ color: 0x847362, metalness: 0.05, roughness: 0.85 }),
 
+    // G-block hostels (G1/G4) — rough-cut Jodhpur sandstone block masonry.
+    // Warmer, lighter tan than the O-lane cream; string courses are a
+    // shade darker, parapets/sunlit faces a shade lighter. Windows are
+    // wooden louvered shutters (gLouver) inside a cream reveal (gFrame).
+    gStone:     new THREE.MeshStandardMaterial({ color: 0xc2a878, metalness: 0.03, roughness: 0.90 }),
+    gStoneDark: new THREE.MeshStandardMaterial({ color: 0xa1855a, metalness: 0.03, roughness: 0.92 }),
+    gStoneLite: new THREE.MeshStandardMaterial({ color: 0xd6c096, metalness: 0.03, roughness: 0.82 }),
+    gLouver:    new THREE.MeshStandardMaterial({ color: 0x8a7551, metalness: 0.06, roughness: 0.78 }),
+    gFrame:     new THREE.MeshStandardMaterial({ color: 0xe7dcc4, metalness: 0.04, roughness: 0.68 }),
+    gRoof:      new THREE.MeshStandardMaterial({ color: 0xe8e3d6, metalness: 0.03, roughness: 0.90 }),
+    gCourt:     new THREE.MeshStandardMaterial({ color: 0x55634a, metalness: 0.02, roughness: 0.95 }),
+    gTank:      new THREE.MeshStandardMaterial({ color: 0xdcdcd2, metalness: 0.10, roughness: 0.60 }),
+    gTankGrn:   new THREE.MeshStandardMaterial({ color: 0x7d9a57, metalness: 0.10, roughness: 0.60 }),
+
+    // Mess / dining blocks (Old + New Mess) — reddish Jodhpur sandstone-brick
+    // solid block with perforated jali window bays and an equipment-covered
+    // white roof (AHUs, ducts, water tanks, solar water heaters).
+    messBrick:  new THREE.MeshStandardMaterial({ color: 0xa9785a, metalness: 0.03, roughness: 0.90 }),
+    messBrickD: new THREE.MeshStandardMaterial({ color: 0x855a3f, metalness: 0.03, roughness: 0.92 }),
+    messPil:    new THREE.MeshStandardMaterial({ color: 0xc09972, metalness: 0.03, roughness: 0.85 }),
+    messJali:   new THREE.MeshStandardMaterial({ color: 0x5f4632, metalness: 0.05, roughness: 0.82 }),
+    messRoof:   new THREE.MeshStandardMaterial({ color: 0xe6e2d6, metalness: 0.03, roughness: 0.90 }),
+    ahuTeal:    new THREE.MeshStandardMaterial({ color: 0x4f93a0, metalness: 0.30, roughness: 0.45 }),
+    ahuBlue:    new THREE.MeshStandardMaterial({ color: 0x3f6f9c, metalness: 0.30, roughness: 0.45 }),
+    duct:       new THREE.MeshStandardMaterial({ color: 0xbdbdb4, metalness: 0.45, roughness: 0.40 }),
+    solarPanel: new THREE.MeshStandardMaterial({ color: 0xd9d9cf, metalness: 0.20, roughness: 0.45 }),
+    tankYellow: new THREE.MeshStandardMaterial({ color: 0xcfc24a, metalness: 0.10, roughness: 0.55 }),
+
     // All campus stone buildings use the library sandstone palette so the
     // whole campus reads as one architectural family (per user request)
     redStone:      new THREE.MeshStandardMaterial({ color: 0xb89a78, metalness: 0.05, roughness: 0.85 }),
@@ -224,6 +252,394 @@ var Landmarks3D = (() => {
     const beamPara = new THREE.Mesh(new THREE.BoxGeometry(beamWidth + 0.2, 0.5, beamDepth + 0.2), MAT.hostelRoof);
     beamPara.position.set(0, height + 0.25, beamCenterZ);
     g.add(beamPara);
+
+    return g;
+  }
+
+  // ─────────────────────────────────────────────────────────────────────
+  // G-BLOCK HOSTELS (G1 / G4) — closed sandstone courtyard ring
+  // ─────────────────────────────────────────────────────────────────────
+  // Top-view drone photo: a square ring of 4-storey wings wrapping a
+  // central courtyard that holds a sports court, with stair towers
+  // projecting above the roofline at the corners and rooftop water tanks.
+  // Front-view photo: rough-cut Jodhpur sandstone block masonry, G+2
+  // (three floors), paired wooden-louvered windows, recessed horizontal string
+  // courses at each floor line, a louvered clerestory band under the
+  // parapet, and a recessed entrance reached by a short flight of steps.
+  //
+  // Mesh-local convention: +X = east (length), +Y = up, +Z = south.
+  // Built parametrically so G1 and G4 share the design with their own
+  // footprint dimensions; bearingOffset in the LANDMARKS entry rotates
+  // the ring to match each polygon's true orientation.
+  function buildGHostel(opts = {}) {
+    const size   = opts.size   ?? 40;     // outer E-W length
+    const depth  = opts.depth  ?? 43;     // outer N-S depth
+    const FLOORS = opts.floors ?? 3;      // G+2 = ground + 2 upper floors
+    const H      = opts.height ?? 11;     // 3 storeys × ~3.6 m
+    const wingD  = 9.5;                    // wing thickness (room depth)
+    // Which wing carries the recessed entrance + steps. Mesh +Z = south,
+    // so 'south' is the default front; G4's gate faces north.
+    const entranceSide = opts.entranceSide ?? 'south';
+    const g = new THREE.Group();
+    const halfX = size / 2, halfZ = depth / 2;
+
+    // Build ONE wing: sandstone block of `wLen` along local X, depth
+    // `wingD` along Z, with all detail on the outward (+Z) face. Placed
+    // and rotated into the ring afterwards so the detailing is written
+    // once. `withEntrance` carves the central doorway + steps (south wing).
+    function makeWing(wLen, withEntrance) {
+      const wg = new THREE.Group();
+      const outZ = wingD / 2;
+
+      // Main block
+      const block = new THREE.Mesh(new THREE.BoxGeometry(wLen, H, wingD), MAT.gStone);
+      block.position.y = H / 2;
+      wg.add(block);
+
+      // Base plinth (darker, slightly proud)
+      const plinth = new THREE.Mesh(new THREE.BoxGeometry(wLen + 0.2, 0.7, wingD + 0.2), MAT.gStoneDark);
+      plinth.position.set(0, 0.35, 0);
+      wg.add(plinth);
+
+      // Horizontal string courses at each floor line
+      for (let i = 1; i < FLOORS; i++) {
+        const y = H * i / FLOORS;
+        const band = new THREE.Mesh(new THREE.BoxGeometry(wLen + 0.14, 0.32, wingD + 0.14), MAT.gStoneDark);
+        band.position.set(0, y, 0);
+        wg.add(band);
+      }
+
+      // Parapet cap
+      const para = new THREE.Mesh(new THREE.BoxGeometry(wLen + 0.28, 0.75, wingD + 0.28), MAT.gStoneLite);
+      para.position.set(0, H + 0.375, 0);
+      wg.add(para);
+
+      // Louvered clerestory vent band just under the parapet (the slatted
+      // strip visible along the top of the facade in the front photo)
+      const vent = new THREE.Mesh(new THREE.BoxGeometry(wLen - 1.4, 0.55, 0.14), MAT.gLouver);
+      vent.position.set(0, H - 0.5, outZ + 0.04);
+      wg.add(vent);
+
+      // Paired louvered windows on the outward face, one pair per bay,
+      // per floor. Frame = cream reveal, insert = louver slats.
+      const winW = 0.95, winH = 1.65, pairGap = 0.55;
+      const bayW = 4.2;
+      const usable = wLen - 2.4;
+      const nBays = Math.max(2, Math.round(usable / bayW));
+      for (let f = 0; f < FLOORS; f++) {
+        const cy = H * (f + 0.5) / FLOORS + 0.15;
+        for (let b = 0; b < nBays; b++) {
+          const bx = -usable / 2 + usable * (b + 0.5) / nBays;
+          // Leave the central bay of the ground floor open for the entrance
+          if (withEntrance && f === 0 && Math.abs(bx) < bayW * 0.7) continue;
+          [-1, 1].forEach((s) => {
+            const wx = bx + s * (winW / 2 + pairGap / 2);
+            const fr = new THREE.Mesh(new THREE.BoxGeometry(winW + 0.20, winH + 0.20, 0.10), MAT.gFrame);
+            fr.position.set(wx, cy, outZ + 0.05);
+            wg.add(fr);
+            const lv = new THREE.Mesh(new THREE.BoxGeometry(winW, winH, 0.07), MAT.gLouver);
+            lv.position.set(wx, cy, outZ + 0.09);
+            wg.add(lv);
+          });
+        }
+      }
+
+      // Recessed entrance + steps on the front wing
+      if (withEntrance) {
+        const pW = 4.2, pH = 4.3;
+        // Cream surround framing the portal
+        const surround = new THREE.Mesh(new THREE.BoxGeometry(pW + 0.9, pH + 0.7, 0.28), MAT.gFrame);
+        surround.position.set(0, (pH + 0.7) / 2, outZ + 0.06);
+        wg.add(surround);
+        // Dark recessed opening
+        const portal = new THREE.Mesh(new THREE.BoxGeometry(pW, pH, 0.5), MAT.entrance);
+        portal.position.set(0, pH / 2, outZ + 0.12);
+        wg.add(portal);
+        // Short flight of entrance steps
+        for (let i = 0; i < 3; i++) {
+          const stp = new THREE.Mesh(new THREE.BoxGeometry(pW + 1.6 - i * 0.5, 0.2, 0.55), MAT.gStoneLite);
+          stp.position.set(0, 0.1 + i * 0.2, outZ + 0.55 + (2 - i) * 0.5);
+          wg.add(stp);
+        }
+      }
+
+      return wg;
+    }
+
+    // East/west wings span the gap between the front and back wings so the
+    // ring closes cleanly without overlapping corners.
+    const sideLen = depth - 2 * wingD + 0.4;
+
+    // South (front, +Z)
+    const sWing = makeWing(size, entranceSide === 'south');
+    sWing.position.set(0, 0, halfZ - wingD / 2);
+    g.add(sWing);
+    // North (back, -Z)
+    const nWing = makeWing(size, entranceSide === 'north');
+    nWing.rotation.y = Math.PI;
+    nWing.position.set(0, 0, -(halfZ - wingD / 2));
+    g.add(nWing);
+    // East (+X) — rotate so local +Z faces +X
+    const eWing = makeWing(sideLen, entranceSide === 'east');
+    eWing.rotation.y = Math.PI / 2;
+    eWing.position.set(halfX - wingD / 2, 0, 0);
+    g.add(eWing);
+    // West (-X)
+    const wWing = makeWing(sideLen, entranceSide === 'west');
+    wWing.rotation.y = -Math.PI / 2;
+    wWing.position.set(-(halfX - wingD / 2), 0, 0);
+    g.add(wWing);
+
+    // ── Optional central N-S cross-wing dividing a wide courtyard into two
+    //    (the bigger G/B/I hostels have a central spine in the drone photo).
+    if (opts.crossWing) {
+      const innerDepth = depth - 2 * wingD;   // courtyard N-S span
+      const cwW = 8;                           // cross-wing width (E-W)
+      const cwLen = innerDepth + 0.4;
+      const cw = new THREE.Mesh(new THREE.BoxGeometry(cwW, H, cwLen), MAT.gStone);
+      cw.position.set(0, H / 2, 0);
+      g.add(cw);
+      const cwPl = new THREE.Mesh(new THREE.BoxGeometry(cwW + 0.2, 0.7, cwLen + 0.2), MAT.gStoneDark);
+      cwPl.position.set(0, 0.35, 0);
+      g.add(cwPl);
+      for (let i = 1; i < FLOORS; i++) {
+        const y = H * i / FLOORS;
+        const b = new THREE.Mesh(new THREE.BoxGeometry(cwW + 0.14, 0.32, cwLen + 0.14), MAT.gStoneDark);
+        b.position.set(0, y, 0);
+        g.add(b);
+      }
+      const cwPa = new THREE.Mesh(new THREE.BoxGeometry(cwW + 0.28, 0.75, cwLen + 0.28), MAT.gStoneLite);
+      cwPa.position.set(0, H + 0.375, 0);
+      g.add(cwPa);
+      // (No windows on the central cross-wing — it reads as a plain spine.)
+    }
+
+    // ── Corner stair towers — taller, capped, projecting above the roof
+    const TWR   = wingD + 0.6;
+    const TWR_H = H + 2.4;
+    [[halfX - TWR / 2,  halfZ - TWR / 2], [-(halfX - TWR / 2),  halfZ - TWR / 2],
+     [halfX - TWR / 2, -(halfZ - TWR / 2)], [-(halfX - TWR / 2), -(halfZ - TWR / 2)]
+    ].forEach(([tx, tz]) => {
+      const t = new THREE.Mesh(new THREE.BoxGeometry(TWR, TWR_H, TWR), MAT.gStone);
+      t.position.set(tx, TWR_H / 2, tz);
+      g.add(t);
+      const cap = new THREE.Mesh(new THREE.BoxGeometry(TWR + 0.3, 0.6, TWR + 0.3), MAT.gStoneLite);
+      cap.position.set(tx, TWR_H + 0.3, tz);
+      g.add(cap);
+      // Small louver vent high on the tower's outward corner
+      const tv = new THREE.Mesh(new THREE.BoxGeometry(TWR - 2.0, 0.6, 0.12), MAT.gLouver);
+      tv.position.set(tx, TWR_H - 1.0, tz + TWR / 2 + 0.04);
+      g.add(tv);
+    });
+
+    // ── Central courtyard floor with a sports court
+    const courtX = size - 2 * wingD - 1.0;
+    const courtZ = depth - 2 * wingD - 1.0;
+    const court = new THREE.Mesh(new THREE.BoxGeometry(courtX, 0.12, courtZ), MAT.gCourt);
+    court.position.y = 0.06;
+    g.add(court);
+    // Two faint white court lines (centre + baseline) to read as a court
+    const lineMat = MAT.gRoof;
+    const cl1 = new THREE.Mesh(new THREE.BoxGeometry(courtX - 1.5, 0.14, 0.12), lineMat);
+    cl1.position.set(0, 0.07, 0);
+    g.add(cl1);
+    const cl2 = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.14, courtZ - 1.5), lineMat);
+    cl2.position.set(0, 0.07, 0);
+    g.add(cl2);
+
+    // ── Rooftop water tanks on a few wing roofs (white + green, per photo)
+    const tankSpots = [
+      [ halfX * 0.45,  halfZ - wingD / 2, 0],
+      [-halfX * 0.5,  -(halfZ - wingD / 2), 1],
+      [ halfX - wingD / 2, -halfZ * 0.25, 0],
+      [-(halfX - wingD / 2), halfZ * 0.3, 1],
+    ];
+    tankSpots.forEach(([tx, tz, grn]) => {
+      const tank = new THREE.Mesh(new THREE.CylinderGeometry(0.7, 0.7, 1.3, 12), grn ? MAT.gTankGrn : MAT.gTank);
+      tank.position.set(tx, H + 0.65, tz);
+      g.add(tank);
+    });
+
+    // ── A couple of rooftop stair-head boxes (mech rooms) for roof texture
+    [[0, halfZ - wingD / 2], [-halfX * 0.3, -(halfZ - wingD / 2)]].forEach(([mx, mz]) => {
+      const mech = new THREE.Mesh(new THREE.BoxGeometry(3.2, 2.0, 3.0), MAT.gStone);
+      mech.position.set(mx, H + 1.0, mz);
+      g.add(mech);
+      const mcap = new THREE.Mesh(new THREE.BoxGeometry(3.4, 0.3, 3.2), MAT.gStoneLite);
+      mcap.position.set(mx, H + 2.15, mz);
+      g.add(mcap);
+    });
+
+    return g;
+  }
+
+  // ─────────────────────────────────────────────────────────────────────
+  // MESS / DINING BLOCK (Old Mess + New Mess) — solid sandstone-brick block
+  // ─────────────────────────────────────────────────────────────────────
+  // Reference photos: a ~38×34 m solid G+2 block (NOT a courtyard) of
+  // reddish Jodhpur sandstone-brick, with tall perforated jali window bays
+  // framed by pilasters on every face, and a big flat white roof crowded
+  // with mechanical plant — AHU/cooler boxes, galvanised ducts, yellow +
+  // white water tanks, solar water-heater panels, and a stair-head box.
+  //
+  // Mesh-local: +X = long axis, +Y = up, +Z = front. bearingOffset aligns
+  // the block to each footprint.
+  function buildMess(opts = {}) {
+    const size   = opts.size   ?? 38;     // long edge
+    const depth  = opts.depth  ?? 34;     // short edge
+    const H      = opts.height ?? 11;     // G+2 × ~3.6 m
+    const FLOORS = 3;
+    // Which face carries the entrance: 'front'(+Z), 'back'(-Z),
+    // 'right'(+X), 'left'(-X).
+    const entranceSide = opts.entranceSide ?? 'front';
+    const g = new THREE.Group();
+
+    // ── Main solid block
+    const block = new THREE.Mesh(new THREE.BoxGeometry(size, H, depth), MAT.messBrick);
+    block.position.y = H / 2;
+    g.add(block);
+
+    // Base plinth
+    const plinth = new THREE.Mesh(new THREE.BoxGeometry(size + 0.3, 0.8, depth + 0.3), MAT.messBrickD);
+    plinth.position.y = 0.4;
+    g.add(plinth);
+
+    // Floor string courses
+    for (let i = 1; i < FLOORS; i++) {
+      const y = H * i / FLOORS;
+      const band = new THREE.Mesh(new THREE.BoxGeometry(size + 0.16, 0.34, depth + 0.16), MAT.messBrickD);
+      band.position.y = y;
+      g.add(band);
+    }
+
+    // Parapet
+    const para = new THREE.Mesh(new THREE.BoxGeometry(size + 0.35, 0.85, depth + 0.35), MAT.gStoneLite);
+    para.position.y = H + 0.425;
+    g.add(para);
+
+    // ── Jali window bays on every face. Pilasters split each wall into
+    //    bays; each bay holds a tall perforated jali panel framed by a
+    //    lighter reveal. `entranceBay` leaves the centre bay of the front
+    //    face open at ground level for the entrance.
+    function addFace(wallLen, faceCoord, orient, outSign, entrance) {
+      const nBays = Math.max(4, Math.round(wallLen / 6));
+      const bayW  = wallLen / nBays;
+      const panelW = bayW - 1.3;
+      const panelH = H - 2.0;
+      const panelCY = panelH / 2 + 1.0;
+      // Pilasters between bays (full height, slightly proud)
+      for (let i = 0; i <= nBays; i++) {
+        const t = -wallLen / 2 + i * bayW;
+        const pil = orient === 'x'
+          ? new THREE.Mesh(new THREE.BoxGeometry(0.6, H, 0.4), MAT.messPil)
+          : new THREE.Mesh(new THREE.BoxGeometry(0.4, H, 0.6), MAT.messPil);
+        if (orient === 'x') pil.position.set(t, H / 2, faceCoord + outSign * 0.05);
+        else                pil.position.set(faceCoord + outSign * 0.05, H / 2, t);
+        g.add(pil);
+      }
+      // Jali panels
+      for (let b = 0; b < nBays; b++) {
+        const c = -wallLen / 2 + (b + 0.5) * bayW;
+        const isCentre = entrance && Math.abs(c) < bayW * 0.6;
+        // Reveal frame
+        const fr = orient === 'x'
+          ? new THREE.Mesh(new THREE.BoxGeometry(panelW + 0.25, panelH + 0.25, 0.12), MAT.messBrickD)
+          : new THREE.Mesh(new THREE.BoxGeometry(0.12, panelH + 0.25, panelW + 0.25), MAT.messBrickD);
+        // Jali screen (dark perforated)
+        const jH = isCentre ? panelH - 3.0 : panelH;   // shorter over the entrance
+        const jCY = isCentre ? panelCY + 1.5 : panelCY;
+        const jl = orient === 'x'
+          ? new THREE.Mesh(new THREE.BoxGeometry(panelW, jH, 0.08), MAT.messJali)
+          : new THREE.Mesh(new THREE.BoxGeometry(0.08, jH, panelW), MAT.messJali);
+        if (orient === 'x') {
+          fr.position.set(c, panelCY, faceCoord + outSign * 0.08);
+          jl.position.set(c, jCY, faceCoord + outSign * 0.11);
+        } else {
+          fr.position.set(faceCoord + outSign * 0.08, panelCY, c);
+          jl.position.set(faceCoord + outSign * 0.11, jCY, c);
+        }
+        g.add(fr); g.add(jl);
+      }
+      // Entrance portal + canopy on the front face
+      if (entrance) {
+        const portal = new THREE.Mesh(new THREE.BoxGeometry(orient === 'x' ? 4.0 : 0.5, 3.2, orient === 'x' ? 0.5 : 4.0), MAT.entrance);
+        const canopy = new THREE.Mesh(new THREE.BoxGeometry(orient === 'x' ? 5.5 : 1.8, 0.3, orient === 'x' ? 1.8 : 5.5), MAT.gStoneLite);
+        if (orient === 'x') {
+          portal.position.set(0, 1.6, faceCoord + outSign * 0.2);
+          canopy.position.set(0, 3.4, faceCoord + outSign * 1.0);
+        } else {
+          portal.position.set(faceCoord + outSign * 0.2, 1.6, 0);
+          canopy.position.set(faceCoord + outSign * 1.0, 3.4, 0);
+        }
+        g.add(portal); g.add(canopy);
+      }
+    }
+    addFace(size, depth / 2, 'x', +1, entranceSide === 'front');   // front (+Z)
+    addFace(size, -depth / 2, 'x', -1, entranceSide === 'back');    // back (-Z)
+    addFace(depth, size / 2, 'z', +1, entranceSide === 'right');    // right (+X)
+    addFace(depth, -size / 2, 'z', -1, entranceSide === 'left');    // left (-X)
+
+    // ── Roof slab (slightly inset, white) so the roof reads distinct
+    const roof = new THREE.Mesh(new THREE.BoxGeometry(size - 0.4, 0.12, depth - 0.4), MAT.messRoof);
+    roof.position.y = H + 0.06;
+    g.add(roof);
+    const RY = H + 0.12;   // roof working height
+
+    // ── Roof plant clustered along one edge (matches photo). Coordinates
+    //    are in roof-local metres; cluster sits toward -X / +Z corner.
+    // AHU / cooler boxes in a row
+    const ahuMats = [MAT.ahuTeal, MAT.ahuBlue, MAT.ahuTeal, MAT.ahuBlue, MAT.ahuTeal];
+    for (let i = 0; i < 5; i++) {
+      const box = new THREE.Mesh(new THREE.BoxGeometry(2.4, 1.8, 2.2), ahuMats[i]);
+      box.position.set(-size / 2 + 4 + i * 3.0, RY + 0.9, depth / 2 - 4);
+      g.add(box);
+    }
+    // Galvanised duct run linking the AHUs
+    const duct = new THREE.Mesh(new THREE.BoxGeometry(13, 0.8, 0.9), MAT.duct);
+    duct.position.set(-size / 2 + 9, RY + 0.5, depth / 2 - 6.2);
+    g.add(duct);
+    const duct2 = new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.8, 5), MAT.duct);
+    duct2.position.set(-size / 2 + 3.5, RY + 0.5, depth / 2 - 7);
+    g.add(duct2);
+
+    // Water tanks — yellow Sintex + white, on low stands, opposite corner
+    const tanks = [
+      [size / 2 - 4, depth / 2 - 4, MAT.tankYellow],
+      [size / 2 - 6.5, depth / 2 - 4, MAT.tankYellow],
+      [size / 2 - 4, -depth / 2 + 4, MAT.gTank],
+      [size / 2 - 6.5, -depth / 2 + 4, MAT.gTank],
+    ];
+    tanks.forEach(([tx, tz, mat]) => {
+      const stand = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.5, 1.6), MAT.messBrickD);
+      stand.position.set(tx, RY + 0.25, tz);
+      g.add(stand);
+      const tank = new THREE.Mesh(new THREE.CylinderGeometry(0.75, 0.75, 1.4, 14), mat);
+      tank.position.set(tx, RY + 0.5 + 0.7, tz);
+      g.add(tank);
+    });
+
+    // Solar water-heater panels — tilted flat panels in a row
+    for (let i = 0; i < 3; i++) {
+      const panel = new THREE.Mesh(new THREE.BoxGeometry(3.2, 0.12, 1.8), MAT.solarPanel);
+      panel.position.set(-size / 2 + 6 + i * 3.6, RY + 0.7, -depth / 2 + 5);
+      panel.rotation.x = -0.4;
+      g.add(panel);
+    }
+
+    // Stair-head box (taller mech room)
+    const stairHead = new THREE.Mesh(new THREE.BoxGeometry(5, 2.6, 4), MAT.messBrick);
+    stairHead.position.set(size * 0.15, RY + 1.3, -depth * 0.12);
+    g.add(stairHead);
+    const shCap = new THREE.Mesh(new THREE.BoxGeometry(5.3, 0.3, 4.3), MAT.gStoneLite);
+    shCap.position.set(size * 0.15, RY + 2.75, -depth * 0.12);
+    g.add(shCap);
+
+    // Scattered small parapet vent blocks
+    [[-size*0.1, depth*0.2],[size*0.25, depth*0.25],[size*0.3,-depth*0.3],[-size*0.3,-depth*0.15]].forEach(([vx,vz])=>{
+      const v = new THREE.Mesh(new THREE.BoxGeometry(1.0, 0.9, 1.0), MAT.messBrickD);
+      v.position.set(vx, RY + 0.45, vz);
+      g.add(v);
+    });
 
     return g;
   }
@@ -1367,13 +1783,23 @@ var Landmarks3D = (() => {
       pole:     new THREE.MeshStandardMaterial({ color: 0x2a2a2a, metalness: 0.35, roughness: 0.55 }),
       door:     new THREE.MeshStandardMaterial({ color: 0x1f1f22, metalness: 0.30, roughness: 0.55 }),
       concrete: new THREE.MeshStandardMaterial({ color: 0xb5b0a3, metalness: 0.04, roughness: 0.92 }),
-      // Pad tones picked to blend with the #fafafa basemap. Paving is a
-      // near-white so the cream slab disappears into the surrounding
-      // campus ground; grass is a soft sage so the lawn patches read as
-      // landscaping, not a pop-out colour blob.
-      paving:   new THREE.MeshStandardMaterial({ color: 0xf3f1ea, metalness: 0.03, roughness: 0.92 }),
-      pavingD:  new THREE.MeshStandardMaterial({ color: 0xc7c0b1, metalness: 0.04, roughness: 0.92 }),
-      grass:    new THREE.MeshStandardMaterial({ color: 0x9cb87a, metalness: 0.02, roughness: 0.96 }),
+      // Base is GREEN + WHITE only (per the real food court). Paving is a
+      // clean white concrete that blends with the #fafafa basemap; grass
+      // is a clear lawn green. No tan/beige — pavingD is now a light grey
+      // so accent edges stay in the white family.
+      paving:   new THREE.MeshStandardMaterial({ color: 0xf4f4f1, metalness: 0.03, roughness: 0.90 }),
+      pavingD:  new THREE.MeshStandardMaterial({ color: 0xd9d7cf, metalness: 0.04, roughness: 0.92 }),
+      grass:    new THREE.MeshStandardMaterial({ color: 0x8cb85c, metalness: 0.02, roughness: 0.96 }),
+      // New: container detailing
+      deck:     new THREE.MeshStandardMaterial({ color: 0xb5a98f, metalness: 0.04, roughness: 0.88 }),
+      deckEdge: new THREE.MeshStandardMaterial({ color: 0x7d6e54, metalness: 0.04, roughness: 0.90 }),
+      glass:    new THREE.MeshStandardMaterial({ color: 0x7ea3b8, metalness: 0.55, roughness: 0.25, side: THREE.DoubleSide }),
+      frame:    new THREE.MeshStandardMaterial({ color: 0x2a2a2a, metalness: 0.40, roughness: 0.45 }),
+      rail:     new THREE.MeshStandardMaterial({ color: 0x4a4a4a, metalness: 0.50, roughness: 0.40 }),
+      step:     new THREE.MeshStandardMaterial({ color: 0x3d3d3d, metalness: 0.30, roughness: 0.55 }),
+      signBand: new THREE.MeshStandardMaterial({ color: 0x1f1f22, metalness: 0.25, roughness: 0.55 }),
+      planter:  new THREE.MeshStandardMaterial({ color: 0x6b4a2f, metalness: 0.05, roughness: 0.90 }),
+      hedge:    new THREE.MeshStandardMaterial({ color: 0x6f9853, metalness: 0.02, roughness: 0.95, flatShading: true }),
       wood:     new THREE.MeshStandardMaterial({ color: 0xa67746, metalness: 0.05, roughness: 0.85 }),
       podInt: (hex) => new THREE.MeshStandardMaterial({ color: hex, metalness: 0.10, roughness: 0.70, side: THREE.DoubleSide }),
     };
@@ -1381,29 +1807,113 @@ var Landmarks3D = (() => {
     // Single shipping-container restaurant. (E,N) is the centroid offset
     // from the Shamiyana POI; bearingDeg is the long-edge bearing
     // (0 = north, 90 = east). Width is along the long edge.
+    //
+    // Each container now ships with:
+    //   • a wooden deck platform extending in front of the door
+    //   • a dark sign-band strip below the roof (where the brand name sits)
+    //   • a metal-framed front door
+    //   • two windows on the long face (skipped for the tiny <5m containers)
+    //   • a stair + upper railing for 2-storey blocks (e.g. Baap of Rolls)
     function placeContainer({ E, N, w, d, bearingDeg, body, roof, stories = 1, sign = null }) {
       const c = new THREE.Group();
       const H = 2.7 * stories;
 
+      // Body
       const box = new THREE.Mesh(new THREE.BoxGeometry(w, H, d), body);
       box.position.y = H / 2;
       c.add(box);
 
-      // Slight roof overhang
-      const roofMesh = new THREE.Mesh(new THREE.BoxGeometry(w + 0.4, 0.22, d + 0.4), roof);
-      roofMesh.position.y = H + 0.11;
-      c.add(roofMesh);
+      // Dark sign-band strip running the full width just under the roof
+      // (so each container reads as a branded food-court unit, not a
+      // bare cube). 0.55 m tall, sits proud of the wall by 2 cm.
+      const bandH = 0.55;
+      const band = new THREE.Mesh(new THREE.BoxGeometry(w + 0.06, bandH, d + 0.06), M.signBand);
+      band.position.y = H - bandH / 2 - 0.05;
+      c.add(band);
 
-      // Dark recessed door on the long (south-facing) side
-      const door = new THREE.Mesh(new THREE.BoxGeometry(0.95, 1.95, 0.04), M.door);
-      door.position.set(0, 0.975, d / 2 + 0.025);
+      // Roof with a more pronounced overhang on the front (deck side)
+      const roofMesh = new THREE.Mesh(new THREE.BoxGeometry(w + 0.5, 0.18, d + 1.0), roof);
+      roofMesh.position.set(0, H + 0.09, 0.25);
+      c.add(roofMesh);
+      // Thin dark fascia under the roof front edge
+      const fascia = new THREE.Mesh(new THREE.BoxGeometry(w + 0.5, 0.08, 0.06), M.signBand);
+      fascia.position.set(0, H + 0.04, 0.25 + (d + 1.0) / 2);
+      c.add(fascia);
+
+      // Wooden deck extending in front of the door (south-facing side)
+      const deckW = w + 0.2;
+      const deckD = 1.6;
+      const deck = new THREE.Mesh(new THREE.BoxGeometry(deckW, 0.12, deckD), M.deck);
+      deck.position.set(0, 0.06, d / 2 + deckD / 2);
+      c.add(deck);
+      // Dark deck edge trim (subtle shadow line under the boards)
+      const deckTrim = new THREE.Mesh(new THREE.BoxGeometry(deckW + 0.06, 0.04, deckD + 0.06), M.deckEdge);
+      deckTrim.position.set(0, 0.015, d / 2 + deckD / 2);
+      c.add(deckTrim);
+
+      // Metal-framed front door (centred on the long face)
+      const doorFrame = new THREE.Mesh(new THREE.BoxGeometry(1.05, 2.05, 0.04), M.frame);
+      doorFrame.position.set(0, 1.025, d / 2 + 0.022);
+      c.add(doorFrame);
+      const door = new THREE.Mesh(new THREE.BoxGeometry(0.92, 1.92, 0.05), M.door);
+      door.position.set(0, 1.0, d / 2 + 0.05);
       c.add(door);
+
+      // Windows on the long front face — two per container, skipped on
+      // the smallest huts (under 5 m wide)
+      if (w >= 5) {
+        const winY = stories === 2 ? H * 0.72 : 1.85;
+        const offsets = w >= 9 ? [-w / 2 + 1.7, w / 2 - 1.7] : [-w / 3, w / 3];
+        // Hide windows that overlap the door (within 0.9 m of centre)
+        for (const wx of offsets) {
+          if (Math.abs(wx) < 0.9) continue;
+          const winFrame = new THREE.Mesh(new THREE.BoxGeometry(0.95, 0.72, 0.04), M.frame);
+          winFrame.position.set(wx, winY, d / 2 + 0.025);
+          c.add(winFrame);
+          const winGlass = new THREE.Mesh(new THREE.BoxGeometry(0.84, 0.6, 0.03), M.glass);
+          winGlass.position.set(wx, winY, d / 2 + 0.05);
+          c.add(winGlass);
+        }
+        // Lower row for 2-storey blocks (ground-floor windows)
+        if (stories === 2) {
+          for (const wx of offsets) {
+            if (Math.abs(wx) < 0.9) continue;
+            const lowGlass = new THREE.Mesh(new THREE.BoxGeometry(0.84, 0.6, 0.03), M.glass);
+            lowGlass.position.set(wx, 1.4, d / 2 + 0.05);
+            c.add(lowGlass);
+          }
+        }
+      }
+
+      // External staircase + upper railing for 2-storey blocks
+      if (stories === 2) {
+        // 5-step zigzag stair against the right end of the container,
+        // running down to deck level.
+        const stairX = w / 2 - 0.6;
+        const stairSteps = 5;
+        for (let i = 0; i < stairSteps; i++) {
+          const stepY = 0.3 + i * (H / 2 - 0.3) / (stairSteps - 1);
+          const step = new THREE.Mesh(new THREE.BoxGeometry(1.1, 0.05, 0.32), M.step);
+          step.position.set(stairX, stepY, d / 2 + 0.18 + i * 0.22);
+          c.add(step);
+        }
+        // Upper-floor balcony railing along the front (south face)
+        const rail = new THREE.Mesh(new THREE.BoxGeometry(w - 0.4, 0.08, 0.04), M.rail);
+        rail.position.set(0, H / 2 + 0.95, d / 2 + 0.55);
+        c.add(rail);
+        // Two vertical rail posts
+        [-w / 2 + 0.6, w / 2 - 0.6].forEach((px) => {
+          const post = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.95, 0.06), M.rail);
+          post.position.set(px, H / 2 + 0.475, d / 2 + 0.55);
+          c.add(post);
+        });
+      }
 
       // Optional accent sign panel sitting on top of the container (e.g.
       // the orange Domino's signage above the blue base).
       if (sign) {
-        const s = new THREE.Mesh(new THREE.BoxGeometry(w + 0.5, 0.7, d + 0.5), sign);
-        s.position.y = H + 0.22 + 0.35;
+        const s = new THREE.Mesh(new THREE.BoxGeometry(w + 0.4, 0.65, d + 0.4), sign);
+        s.position.y = H + 0.18 + 0.325;
         c.add(s);
       }
 
@@ -1441,8 +1951,9 @@ var Landmarks3D = (() => {
       cap.rotation.set(0, -Math.PI / 2, 0);
       c.add(cap);
 
-      // Artificial-turf landing pad in front of the entrance
-      const pad = new THREE.Mesh(new THREE.BoxGeometry(L + 0.4, 0.06, 2 * R + 0.6), M.pavingD);
+      // Artificial-turf landing pad in front of the entrance — green, as
+      // in the real photo where each pod sits on a strip of lawn.
+      const pad = new THREE.Mesh(new THREE.BoxGeometry(L + 0.4, 0.06, 2 * R + 0.6), M.grass);
       pad.position.y = 0.03;
       c.add(pad);
 
@@ -1604,7 +2115,7 @@ var Landmarks3D = (() => {
     g.add(placeContainer({ E:  11.1, N:   2.3, w:  5.5, d: 2.5, bearingDeg:  18, body: M.cRed,    roof: M.roofRust })); // Patiala Chicken
     g.add(placeContainer({ E:   9.0, N:  -7.2, w:  4.0, d: 2.5, bearingDeg:  15, body: M.cBlue,   roof: M.roofGalv })); // Waffcha
     g.add(placeContainer({ E:  12.8, N:   7.9, w:  5.5, d: 2.5, bearingDeg:  20, body: M.cRed,    roof: M.roofGalv })); // Zorko
-    g.add(placeContainer({ E:   7.2, N:  18.1, w:  7.0, d: 4.5, bearingDeg: 110, body: M.cYellow, roof: M.roofGalv, stories: 2 })); // Baap of Rolls (yellow 2-storey)
+    g.add(placeContainer({ E:   7.2, N:  18.1, w:  7.0, d: 4.5, bearingDeg: 110, body: M.cYellow, roof: M.roofGalv })); // Baap of Rolls (single-storey yellow, per photo)
     g.add(placeContainer({ E:  14.1, N:  15.7, w:  6.5, d: 2.5, bearingDeg: 108, body: M.cPink,   roof: M.roofRust })); // Prasadanam
     g.add(placeContainer({ E:  -7.9, N:  23.0, w:  6.0, d: 3.0, bearingDeg:  35, body: M.cBlue,   roof: M.roofGalv, sign: M.cOrange })); // Domino's
     g.add(placeContainer({ E: -16.4, N:   3.7, w: 10.0, d: 2.5, bearingDeg:  18, body: M.cBlue,   roof: M.roofGalv })); // Unnamed west container (Manchaha-style)
@@ -1628,6 +2139,26 @@ var Landmarks3D = (() => {
     // ── Boat-sail amphitheatre at the SW corner of the food court (the
     //    distinctive crescent-shaped stage visible in every drone photo).
     g.add(placeStage({ E: -19, N: -5, radius: 3.2 }));
+
+    // ── Hedge planters following the perimeter road, matching the
+    //    pruned bushes that ring the food court in every drone photo.
+    //    Each pip is a low rectangular planter with a clipped-hedge
+    //    canopy on top. Positions sampled along the outer boundary.
+    const hedgeRing = [
+      [-22,  -2], [-22,   3], [-22,   8], [-19,  12],
+      [-15,  18], [-10,  24], [ -3,  27], [  4,  26],
+      [ 11,  23], [ 17,  19], [ 19,  14], [ 19,   8],
+      [ 19,   3], [ 18,  -3], [ 15, -10], [  8, -11],
+      [  2, -11], [ -5, -10], [-10,  -9], [-15,  -7],
+    ];
+    for (const [hx, hn] of hedgeRing) {
+      const planter = new THREE.Mesh(new THREE.BoxGeometry(1.1, 0.25, 0.7), M.planter);
+      planter.position.set(hx, 0.125, -hn);
+      g.add(planter);
+      const bush = new THREE.Mesh(new THREE.BoxGeometry(1.0, 0.55, 0.6), M.hedge);
+      bush.position.set(hx, 0.25 + 0.275, -hn);
+      g.add(bush);
+    }
 
     // ── Picnic benches under the central shade
     [
@@ -1750,6 +2281,137 @@ var Landmarks3D = (() => {
       rotateMeshToUp: Y_UP_TO_Z_UP,
       bearingOffset: -6 * Math.PI / 180,
       replacesOsmBuildings: ['1412504060'],
+    },
+
+    // ── G-block courtyard hostels (G1 / G4). Sandstone ring around a
+    //    central sports court. bearingOffset = -(longestEdgeBearing - 90):
+    //      G1 main edge 92°  → -2°
+    //      G4 main edge 96.8° → -6.8°
+    {
+      id: 'hostel-G1-3d',
+      label: 'Hostel G1',
+      labelOffsetY: -0.5,
+      labelOffsetY3d: -2.0,
+      format: 'procedural',
+      build: () => buildGHostel({ size: 39, depth: 42 }),
+      lng: 73.1156352, lat: 26.4737039,
+      heightMeters: null,
+      rotateMeshToUp: Y_UP_TO_Z_UP,
+      bearingOffset: -2 * Math.PI / 180,
+      replacesOsmBuildings: ['773563511'],
+    },
+    {
+      id: 'hostel-G4-3d',
+      label: 'Hostel G4',
+      labelOffsetY: -0.5,
+      labelOffsetY3d: -2.0,
+      format: 'procedural',
+      build: () => buildGHostel({ size: 37, depth: 44, entranceSide: 'north' }),
+      lng: 73.1170020, lat: 26.4730709,
+      heightMeters: null,
+      rotateMeshToUp: Y_UP_TO_Z_UP,
+      bearingOffset: -6.8 * Math.PI / 180,
+      replacesOsmBuildings: ['773839449'],
+    },
+
+    // ── Remaining G/B/I-lane hostels. Same sandstone G+2 courtyard design.
+    //    The wide (~70×41 m) blocks get a central cross-wing; B3 is a small
+    //    square like G1/G4. Oriented dims + bearingOffset come from each
+    //    polygon's oriented bounding box (long axis ≈ E-W).
+    {
+      id: 'hostel-G2-3d', label: 'Hostel G2', labelOffsetY: -0.5, labelOffsetY3d: -2.0,
+      format: 'procedural',
+      build: () => buildGHostel({ size: 66, depth: 42, crossWing: true }),
+      lng: 73.1165132, lat: 26.4736330, heightMeters: null, rotateMeshToUp: Y_UP_TO_Z_UP,
+      bearingOffset: -7.0 * Math.PI / 180, replacesOsmBuildings: ['773563512'],
+    },
+    {
+      id: 'hostel-G3-3d', label: 'Hostel G3', labelOffsetY: -0.5, labelOffsetY3d: -2.0,
+      format: 'procedural',
+      build: () => buildGHostel({ size: 70, depth: 42, crossWing: true }),
+      lng: 73.1172775, lat: 26.4735577, heightMeters: null, rotateMeshToUp: Y_UP_TO_Z_UP,
+      bearingOffset: -9.4 * Math.PI / 180, replacesOsmBuildings: ['773839448'],
+    },
+    {
+      id: 'hostel-G5-3d', label: 'Hostel G5', labelOffsetY: -0.5, labelOffsetY3d: -2.0,
+      format: 'procedural',
+      build: () => buildGHostel({ size: 70, depth: 41, crossWing: true, entranceSide: 'north' }),
+      lng: 73.1163303, lat: 26.4731241, heightMeters: null, rotateMeshToUp: Y_UP_TO_Z_UP,
+      bearingOffset: -5.9 * Math.PI / 180, replacesOsmBuildings: ['765972767'],
+    },
+    {
+      id: 'hostel-G6-3d', label: 'Hostel G6', labelOffsetY: -0.5, labelOffsetY3d: -2.0,
+      format: 'procedural',
+      build: () => buildGHostel({ size: 70, depth: 42, crossWing: true, entranceSide: 'north' }),
+      lng: 73.1155088, lat: 26.4732049, heightMeters: null, rotateMeshToUp: Y_UP_TO_Z_UP,
+      bearingOffset: -2.0 * Math.PI / 180, replacesOsmBuildings: ['765972768'],
+    },
+    {
+      id: 'hostel-B1-3d', label: 'Hostel B1', labelOffsetY: -0.5, labelOffsetY3d: -2.0,
+      format: 'procedural',
+      build: () => buildGHostel({ size: 70, depth: 42, crossWing: true }),
+      lng: 73.1153200, lat: 26.4727471, heightMeters: null, rotateMeshToUp: Y_UP_TO_Z_UP,
+      bearingOffset: -3.3 * Math.PI / 180, replacesOsmBuildings: ['603118184'],
+    },
+    {
+      id: 'hostel-B2-3d', label: 'Hostel B2', labelOffsetY: -0.5, labelOffsetY3d: -2.0,
+      format: 'procedural',
+      build: () => buildGHostel({ size: 68, depth: 42, crossWing: true }),
+      lng: 73.1162607, lat: 26.4726569, heightMeters: null, rotateMeshToUp: Y_UP_TO_Z_UP,
+      bearingOffset: -5.9 * Math.PI / 180, replacesOsmBuildings: ['603152901'],
+    },
+    {
+      id: 'hostel-B3-3d', label: 'Hostel B3', labelOffsetY: -0.5, labelOffsetY3d: -2.0,
+      format: 'procedural',
+      build: () => buildGHostel({ size: 36, depth: 40 }),
+      lng: 73.1172021, lat: 26.4725383, heightMeters: null, rotateMeshToUp: Y_UP_TO_Z_UP,
+      bearingOffset: -14.7 * Math.PI / 180, replacesOsmBuildings: ['773563504'],
+    },
+    {
+      id: 'hostel-B4-3d', label: 'Hostel B4', labelOffsetY: -0.5, labelOffsetY3d: -2.0,
+      format: 'procedural',
+      build: () => buildGHostel({ size: 68, depth: 42, crossWing: true, entranceSide: 'north' }),
+      lng: 73.1162570, lat: 26.4721932, heightMeters: null, rotateMeshToUp: Y_UP_TO_Z_UP,
+      bearingOffset: -6.4 * Math.PI / 180, replacesOsmBuildings: ['1412504043'],
+    },
+    {
+      id: 'hostel-B5-3d', label: 'Hostel B5', labelOffsetY: -0.5, labelOffsetY3d: -2.0,
+      format: 'procedural',
+      build: () => buildGHostel({ size: 68, depth: 44, crossWing: true, entranceSide: 'north' }),
+      lng: 73.1152548, lat: 26.4722354, heightMeters: null, rotateMeshToUp: Y_UP_TO_Z_UP,
+      bearingOffset: -1.5 * Math.PI / 180, replacesOsmBuildings: ['773069187'],
+    },
+    {
+      id: 'hostel-I2-3d', label: 'Hostel I2', labelOffsetY: -0.5, labelOffsetY3d: -2.0,
+      format: 'procedural',
+      build: () => buildGHostel({ size: 70, depth: 41, crossWing: true }),
+      lng: 73.1152015, lat: 26.4717844, heightMeters: null, rotateMeshToUp: Y_UP_TO_Z_UP,
+      bearingOffset: -1.1 * Math.PI / 180, replacesOsmBuildings: ['773839447'],
+    },
+    {
+      id: 'hostel-I3-3d', label: 'Hostel I3', labelOffsetY: -0.5, labelOffsetY3d: -2.0,
+      format: 'procedural',
+      build: () => buildGHostel({ size: 70, depth: 40, crossWing: true }),
+      lng: 73.1161333, lat: 26.4717144, heightMeters: null, rotateMeshToUp: Y_UP_TO_Z_UP,
+      bearingOffset: -5.3 * Math.PI / 180, replacesOsmBuildings: ['1412392537'],
+    },
+
+    // ── Old Mess & New Mess — solid G+2 dining blocks with jali facades
+    //    and equipment-covered roofs. bearingOffset from each footprint's
+    //    long-edge bearing (Old Mess 26°, New Mess 12°).
+    {
+      id: 'old-mess-3d', label: 'Old Mess', labelOffsetY: -0.5, labelOffsetY3d: -1.8,
+      format: 'procedural',
+      build: () => buildMess({ size: 38, depth: 34, entranceSide: 'back' }),
+      lng: 73.1169744, lat: 26.4720446, heightMeters: null, rotateMeshToUp: Y_UP_TO_Z_UP,
+      bearingOffset: 63.8 * Math.PI / 180, replacesOsmBuildings: ['765972769'],
+    },
+    {
+      id: 'new-mess-3d', label: 'New Mess', labelOffsetY: -0.5, labelOffsetY3d: -1.8,
+      format: 'procedural',
+      build: () => buildMess({ size: 38, depth: 34, entranceSide: 'back' }),
+      lng: 73.1174102, lat: 26.4729709, heightMeters: null, rotateMeshToUp: Y_UP_TO_Z_UP,
+      bearingOffset: 78.2 * Math.PI / 180, replacesOsmBuildings: ['1266941057'],
     },
 
 
