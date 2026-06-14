@@ -6,6 +6,7 @@
 const fs = require('fs');
 const path = require('path');
 const { DOMParser } = require('@xmldom/xmldom');
+const RoadClassifier = require('./road-classifier');
 
 const CAMPUS_BOUNDS = {
   minLat: 26.4500, maxLat: 26.4900,
@@ -225,11 +226,21 @@ function extractFeatures(osmData) {
           highway_type: tags.highway,
           surface: tags.surface || null,
           lit: tags.lit || null,
+          lanes: tags.lanes || null,
+          oneway: tags.oneway || null,
+          service: tags.service || null,
+          access: tags.access || null,
+          vehicle: tags.vehicle || null,
+          motor_vehicle: tags.motor_vehicle || null,
+          motorcar: tags.motorcar || null,
+          foot: tags.foot || null,
+          bicycle: tags.bicycle || null,
+          width: tags.width || null,
           source: 'osm'
         },
         geometry: { type: 'LineString', coordinates: coords }
       };
-      roads.push(feature);
+      roads.push(RoadClassifier.enrichRoadFeature(feature));
     }
 
     // Named open areas: landuse, leisure, natural, sport pitches
@@ -865,7 +876,8 @@ function main() {
   snapPerimeterCodes(mergedPlaces);
 
   // 5. Build road graph and save
-  const { graph, nodeCoords } = buildRoadGraph(roads);
+  const { graph, nodeCoords } = RoadClassifier.buildRoadGraph(roads);
+  const roadAudit = RoadClassifier.buildRoadAudit(roads);
 
   // 6. Write output files
   fs.writeFileSync(path.join(outDir, 'buildings.geojson'),
@@ -880,6 +892,8 @@ function main() {
     JSON.stringify(getCategories(), null, 2));
   fs.writeFileSync(path.join(outDir, 'road-graph.json'),
     JSON.stringify({ graph, nodeCoords }, null, 2));
+  fs.writeFileSync(path.join(outDir, 'road-audit.json'),
+    JSON.stringify(roadAudit, null, 2));
 
   // Build search index (places + areas)
   const allSearchable = [

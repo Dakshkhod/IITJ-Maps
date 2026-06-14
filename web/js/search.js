@@ -23,7 +23,7 @@ const IITJData = (() => {
     const [places, buildings, roads, areas, searchIndex, categories, entrances, greens] = await Promise.all([
       fetch(`${base}/places.geojson`).then(r => r.json()),
       fetch(`${base}/buildings.geojson`).then(r => r.json()),
-      fetch(`${base}/roads.geojson`).then(r => r.json()),
+      fetch(`${base}/roads.geojson?v=26`).then(r => r.json()),
       fetch(`${base}/areas.geojson`).then(r => r.json()),
       fetch(`${base}/search-index.json`).then(r => r.json()),
       fetch(`${base}/categories.json`).then(r => r.json()),

@@ -1278,7 +1278,7 @@ var Landmarks3D = (() => {
   // windows each capped by a slim concrete sunshade (chajja), rows of
   // wall-mounted split-AC outdoor units, a slab-canopy entrance reached by an
   // accessibility RAMP with steel-pipe railings, and yellow/black painted
-  // kerb stones lining the base. SME is a long G+1 block; MBA is an L of two
+  // kerb stones lining the base. SME is a long single-storey block; MBA is an L of two
   // single-storey wings wrapping a paved courtyard with two tree-ring planters.
   //
   // Shared helpers build a single rectangular wing in mesh-local metres
@@ -4330,14 +4330,15 @@ var Landmarks3D = (() => {
       bearingOffset: 86.9 * Math.PI / 180, replacesOsmBuildings: ['603120869'],
     },
 
-    // ── Aakash Sports Complex — indoor sports hall (no OSM building footprint;
-    //    placed inside the "Akaash Complex" area polygon, long axis bearing 47.5°)
+    // ── Aakash Sports Complex — indoor sports hall. The custom model replaces
+    //    OSM footprint 773587402 ("Akaash Complex"), long axis bearing 47.5°.
     {
       id: 'aakash-complex-3d', label: 'Aakash Sports Complex', labelOffsetY: -0.5, labelOffsetY3d: -2.0,
       format: 'procedural',
       build: buildAakashComplex,
       lng: 73.1195842, lat: 26.4768753, heightMeters: null, rotateMeshToUp: Y_UP_TO_Z_UP,
       bearingOffset: 42.5 * Math.PI / 180,
+      replacesOsmBuildings: ['773587402'],
     },
 
     // ── Centre for Advance Scientific Equipment (U-plan academic block)
@@ -4782,6 +4783,15 @@ var Landmarks3D = (() => {
   let _mercPerMeter = 1;
   let _treeData = null;       // { full:[lng,lat,...], bush:[lng,lat,...] }
   let _treesBuilt = false;
+  let _bermsBuilt = false;
+  // Scene build is split so it can be warmed incrementally at idle (prewarm)
+  // and still finish synchronously if 3D is opened before warming completes.
+  let _sceneShellReady = false;   // lights + camera + origin frame in place
+  let _sceneComplete = false;     // every landmark + vegetation + berm built
+  let _buildIndex = 0;            // next LANDMARKS entry awaiting geometry build
+  let _originMc = null;           // cached mercator origin for chunked builds
+  let _buildLoopRunning = false;  // a chunked build loop is currently scheduled
+  let _gpuWarmed = false;         // shaders compiled + buffers uploaded to GPU
   let _targetOpacity = 1.0;   // remembered so setOpacity called before the scene
                               // mounts still takes effect when meshes appear
   let _targetIds = null;      // null = apply to all; Set = apply only to these landmark ids
@@ -4792,8 +4802,11 @@ var Landmarks3D = (() => {
   const _localM = new THREE.Matrix4();
   const _scaleVec = new THREE.Vector3();
 
-  function _ensureScene() {
-    if (_scene) return;
+  // Scene container, lights, camera and origin frame. Cheap (no per-building
+  // geometry) so it is safe to run on the critical path; the heavy landmark
+  // builders run separately via _buildLandmarkChunk().
+  function _initSceneShell() {
+    if (_sceneShellReady) return;
 
     _scene = new THREE.Scene();
     const sun = new THREE.DirectionalLight(0xffffff, 1.05);
@@ -4814,19 +4827,33 @@ var Landmarks3D = (() => {
     _originMcY = originMc.y;
     _originMcZ = originMc.z;
     _mercPerMeter = originMc.meterInMercatorCoordinateUnits();
+    _originMc = originMc;
+    _sceneShellReady = true;
+  }
 
-    for (const cfg of LANDMARKS) _addLandmark(cfg, originMc);
+  // Build up to `count` more landmark groups. Returns true while landmarks
+  // remain. The single build loop (_startBuild) advances the shared _buildIndex
+  // across slices/frames, so a landmark is never built twice or skipped.
+  function _buildLandmarkChunk(count) {
+    if (!_sceneShellReady) _initSceneShell();
+    const end = Math.min(_buildIndex + count, LANDMARKS.length);
+    for (; _buildIndex < end; _buildIndex++) _addLandmark(LANDMARKS[_buildIndex], _originMc);
+    return _buildIndex < LANDMARKS.length;
+  }
 
+  // Vegetation, berms and any pending opacity — run once all landmarks exist.
+  function _finalizeScene() {
+    if (_sceneComplete) return;
     // OSM-driven instanced trees (data may already be loaded; otherwise the
     // fetch in init() will call _buildVegetation() when it resolves).
     _buildVegetation();
-
-    // Perimeter berms — hardcoded geometry, always built immediately.
+    // Perimeter berms — hardcoded geometry.
     _buildBerms();
-
     // If setOpacity was called before the scene existed, apply it now.
     if (_targetOpacity < 0.999) _applyOpacity(_targetOpacity, _targetIds);
+    _sceneComplete = true;
   }
+
 
   // ─────────────────────────────────────────────────────────────────────
   // VEGETATION — instanced low-poly trees, driven by the SAME OpenStreetMap
@@ -5476,7 +5503,8 @@ var Landmarks3D = (() => {
   // Build every campus berm: 8 hostel wave berms (real footprints) + the three
   // south-edge green landscape berms.
   function _buildBerms() {
-    if (!_root) return;
+    if (!_root || _bermsBuilt) return;
+    _bermsBuilt = true;
     for (const id of BERM_IDS) {
       const ring = BERM_RINGS[id];
       if (!ring) continue;
@@ -5604,7 +5632,11 @@ var Landmarks3D = (() => {
       type: 'custom',
       renderingMode: '3d',
       onAdd(map, gl) {
-        _ensureScene();
+        // Set up the scene shell + renderer, then stream the geometry in via
+        // _startBuild() (per animation frame while visible) instead of building
+        // the whole campus synchronously here. A cold toggle therefore tilts
+        // smoothly while detail fills in, rather than freezing on one build.
+        _initSceneShell();
         // Reuse the existing renderer if MapLibre handed us the same GL
         // context (the normal case across setStyle). Only build a new one
         // if there is none yet, or the context was genuinely replaced
@@ -5615,6 +5647,11 @@ var Landmarks3D = (() => {
           _renderer.autoClear = false;
           _rendererGl = gl;
         }
+        _startBuild();
+        // If the geometry is already built (warmed in the background) but the
+        // GPU upload hasn't happened yet, do it now — synchronously, before the
+        // first frame — so the tilt doesn't stutter on the upload.
+        if (_sceneComplete) _warmGpu();
       },
       render(_gl, matrix) {
         if (!_scene || !_renderer) return;
@@ -5721,14 +5758,105 @@ var Landmarks3D = (() => {
     _ensureLabels();
   }
 
+  // Schedule a callback for browser idle time, falling back to a timer.
+  function _idle(fn) {
+    if (typeof requestIdleCallback === 'function') requestIdleCallback(fn, { timeout: 300 });
+    else setTimeout(fn, 1);
+  }
+
+  // Build the 3D scene in small chunks instead of one blocking pass, so
+  // switching to 3D never freezes the main thread (≈50 building generators +
+  // thousands of instanced trees + berm fits) and the GPU never has to upload
+  // every buffer / compile every shader in a single frame. Geometry, materials
+  // and detail are identical to a one-shot build — only the timing is spread:
+  //   • Warming up (called from init, 3D not shown yet): a few buildings per
+  //     browser-idle slice, so the 2D map stays fully responsive.
+  //   • While 3D is visible: a few per animation frame with a repaint, so any
+  //     remaining detail streams in within the tilt rather than blocking it —
+  //     the same way Google/Apple/F4 stream 3D detail in as the camera moves.
+  // Re-entrant-safe: one loop runs at a time and re-reads _visible every tick,
+  // so a toggle mid-warm-up simply upgrades the cadence to per-frame streaming.
+  function _startBuild() {
+    if (_sceneComplete || _buildLoopRunning) return;
+    if (!_threeReady()) { setTimeout(_startBuild, 120); return; }   // loaders not ready yet
+    _buildLoopRunning = true;
+    _initSceneShell();
+    const tick = () => {
+      if (_sceneComplete) { _buildLoopRunning = false; _warmIfIdle(); return; }
+      const more = _buildLandmarkChunk(_visible ? 3 : 6);
+      if (!more) _finalizeScene();
+      if (_visible && _map) _map.triggerRepaint();   // paint newly built models
+      if (_sceneComplete) { _buildLoopRunning = false; _warmIfIdle(); return; }
+      if (_visible) requestAnimationFrame(tick); else _idle(tick);
+    };
+    if (_visible) requestAnimationFrame(tick); else _idle(tick);
+  }
+
+  // Once geometry is built but 3D still isn't shown, pre-upload it to the GPU
+  // in the background so the first toggle doesn't pay that cost on-frame.
+  function _warmIfIdle() {
+    if (!_gpuWarmed && !_visible) _warmLayerHidden();
+  }
+
+  // Compile every shader program and upload every geometry buffer to the GPU
+  // ahead of the first visible frame, so switching to 3D doesn't stall doing it
+  // all at once. Renders the whole scene once into a 1×1 off-screen target with
+  // a camera that contains everything (nothing frustum-culled) — the cost is
+  // the upload, not the single pixel. Best-effort: any failure just falls back
+  // to the (chunk-streamed) on-demand path, so it can never break rendering.
+  function _warmGpu() {
+    if (_gpuWarmed || !_renderer || !_scene || !_camera) return;
+    try {
+      _renderer.compile(_scene, _camera);            // link all shader programs
+      const box = new THREE.Box3().setFromObject(_scene);
+      if (!box.isEmpty()) {
+        const c = box.getCenter(new THREE.Vector3());
+        const r = Math.max(1, box.getSize(new THREE.Vector3()).length());
+        const warmCam = new THREE.OrthographicCamera(-r, r, r, -r, -r, r);
+        warmCam.position.copy(c);
+        warmCam.lookAt(c.x, c.y, c.z - 1);
+        warmCam.updateMatrixWorld();
+        const rt = new THREE.WebGLRenderTarget(1, 1);
+        const prevRT = _renderer.getRenderTarget();
+        _renderer.setRenderTarget(rt);
+        _renderer.render(_scene, warmCam);           // forces buffer uploads
+        _renderer.setRenderTarget(prevRT);
+        rt.dispose();
+      }
+      _renderer.resetState();                          // hand GL state back clean
+      _gpuWarmed = true;
+    } catch (e) { /* best-effort warm-up */ }
+  }
+
+  // While 3D is still hidden, add the custom layer (which gives onAdd a GL
+  // context and builds the renderer), force it hidden in the same tick so it
+  // never paints over the 2D map, then warm the GPU off-screen. show() can then
+  // just flip visibility — no upload on that frame.
+  function _warmLayerHidden() {
+    if (_gpuWarmed || _visible || !_map) return;
+    if (!_map.isStyleLoaded()) { setTimeout(_warmLayerHidden, 150); return; }
+    try {
+      if (!_map.getLayer(LAYER_ID)) {
+        _map.addLayer(_buildLayer());
+        _map.setLayoutProperty(LAYER_ID, 'visibility', 'none');
+      }
+    } catch (e) { return; }
+    _warmGpu();
+  }
+
+  // Public warm-up entry (called from init once the map exists).
+  function prewarm() { _startBuild(); }
+
   function init(map) {
     _map = map;
     _ready = true;
     _ensureLabels();
+    prewarm();   // start warming the 3D scene off the critical path
 
-    // Load the pre-baked OSM tree positions once. If the scene is already
-    // built, inject the trees immediately; otherwise _ensureScene() will pick
-    // up _treeData when it runs.
+    // Load the pre-baked OSM tree positions once. If the scene shell already
+    // exists, inject the trees immediately; otherwise the scene build
+    // (_finalizeScene) picks up _treeData when it runs. _buildVegetation is
+    // idempotent (_treesBuilt), so whichever path runs first wins.
     if (!_treeData) {
       fetch('/data/trees.json')
         .then(r => r.ok ? r.json() : null)
@@ -5928,6 +6056,6 @@ var Landmarks3D = (() => {
   return {
     init, show, hide, isVisible, listIds, replacedBuildingIds, setOpacity, getLandmarks,
     getLabelGeoJSON, landmarkLabelNames, labelLayerId: () => LABEL_LAYER_ID,
-    syncLabels, raise: _raise,
+    syncLabels, raise: _raise, prewarm,
   };
 })();

@@ -470,7 +470,10 @@ let styleLoadGeneration = 0;
 const OVERLAY_LAYER_IDS = [
   'campus-basemask',
   'greens-fill',
-  'campus-roads-casing', 'campus-roads-line', 'campus-roads-ped',
+  'campus-roads-restricted',
+  'campus-roads-service-casing', 'campus-roads-casing',
+  'campus-roads-service', 'campus-roads-line', 'campus-roads-narrow',
+  'campus-roads-ped', 'campus-roads-walkway', 'campus-roads-cycle', 'campus-roads-mixed',
   'campus-roads-hit', 'campus-roads-labels',
   'areas-fill', 'areas-outline', 'areas-labels',
   'buildings-fill', 'buildings-outline', 'buildings-3d', 'buildings-labels',
@@ -479,6 +482,13 @@ const OVERLAY_LAYER_IDS = [
 ];
 const OVERLAY_SOURCE_IDS = [
   'campus-greens', 'campus-roads', 'named-areas', 'area-labels-src', 'buildings', 'places-points',
+];
+const ROAD_LAYER_IDS = [
+  'campus-roads-restricted',
+  'campus-roads-service-casing', 'campus-roads-casing',
+  'campus-roads-service', 'campus-roads-line', 'campus-roads-narrow',
+  'campus-roads-ped', 'campus-roads-walkway', 'campus-roads-cycle', 'campus-roads-mixed',
+  'campus-roads-hit', 'campus-roads-labels',
 ];
 
 function clearOverlayLayers() {
@@ -620,7 +630,7 @@ async function loadMapData() {
 function removeCustomLayers() {
   const layers = [
     'areas-fill', 'areas-outline', 'areas-labels',
-    'campus-roads-casing', 'campus-roads-line', 'campus-roads-ped', 'campus-roads-hit', 'campus-roads-labels',
+    ...ROAD_LAYER_IDS,
     'buildings-fill', 'buildings-outline', 'buildings-3d', 'buildings-labels',
     'landmark-labels',
     'places-circles', 'places-labels',
@@ -780,16 +790,46 @@ function addAreasLayer(data) {
 // ============================================================
 function addRoadsLayer(data) {
   const roadVis = LAYERS.roads ? 'visible' : 'none';
-  const pedFilter = ['any',
-    ['==', ['get', 'highway_type'], 'footway'],
-    ['==', ['get', 'highway_type'], 'path'],
-    ['==', ['get', 'highway_type'], 'steps'],
+  const navIn = (classes) => ['match', ['get', 'navigation_class'], classes, true, false];
+  const typeIn = (types) => ['match', ['get', 'highway_type'], types, true, false];
+  const propIn = (prop, values) => ['match', ['get', prop], values, true, false];
+
+  const solidVehicleFilter = navIn([
+    'major_vehicle_road', 'vehicle_connector',
+    'campus_main_road', 'campus_standard_road',
+    'local_through_road', 'local_street', 'vehicle_road',
+  ]);
+  const serviceFilter = navIn(['campus_service_road', 'campus_service_connector']);
+  const narrowFilter = navIn(['narrow_service_road', 'service_access']);
+  const footwayFilter = typeIn(['footway']);
+  const cycleFilter = typeIn(['cycleway']);
+  const mixedUseFilter = ['all',
+    ['!', cycleFilter],
+    ['any',
+      navIn(['cycle_pedestrian']),
+      ['all',
+        typeIn(['path', 'footway', 'pedestrian']),
+        ['any',
+          propIn('bicycle', ['yes', 'designated', 'permissive']),
+          propIn('cycleway', ['lane', 'track', 'shared_lane']),
+        ],
+      ],
+    ],
   ];
-  const vehFilter = ['!', ['any',
-    ['==', ['get', 'highway_type'], 'footway'],
-    ['==', ['get', 'highway_type'], 'path'],
-    ['==', ['get', 'highway_type'], 'steps'],
-  ]];
+  const walkwayFilter = ['all',
+    navIn(['pedestrian_path', 'stairs']),
+    ['!', footwayFilter],
+    ['!', mixedUseFilter],
+  ];
+  const pedestrianFilter = ['any', footwayFilter, walkwayFilter, cycleFilter, mixedUseFilter];
+  const restrictedFilter = ['all',
+    ['!', pedestrianFilter],
+    ['any',
+      navIn(['restricted_vehicle', 'unpaved_service', 'maintenance_track', 'ambiguous_road', 'non_vehicle_route', 'unknown']),
+      ['==', ['get', 'vehicle_access'], 'no'],
+    ],
+  ];
+  const serviceAndNarrowFilter = ['any', serviceFilter, narrowFilter];
 
   if (map.getSource('campus-roads')) {
     map.getSource('campus-roads').setData(data);
@@ -798,41 +838,165 @@ function addRoadsLayer(data) {
 
   map.addSource('campus-roads', { type: 'geojson', data });
 
-  // Type-aware vehicle-road widths (metres-ish, scaled by zoom) so the wide
-  // entrance avenue / ring road read correctly against the narrow service
-  // lanes, matching the satellite. The casing is a few px wider than the
-  // surface to form a curb edge.
-  // Wide, type-aware road widths so the carriageways read like F4Map's broad
-  // asphalt ribbons. The casing is a few px wider than the surface to form a
-  // crisp dark kerb edge.
-  const surfaceW = ['interpolate', ['linear'], ['zoom'],
-    13, ['match', ['get', 'highway_type'], 'trunk', 4.4, 'trunk_link', 3.0, 'primary', 4.2, 'unclassified', 3.6, 'residential', 2.8, 2.6],
-    16, ['match', ['get', 'highway_type'], 'trunk', 9.5, 'trunk_link', 6.5, 'primary', 9.0, 'unclassified', 7.6, 'residential', 5.6, 5.2],
-    19, ['match', ['get', 'highway_type'], 'trunk', 17,  'trunk_link', 11,  'primary', 16,  'unclassified', 13.5,'residential', 10,  9.0],
+  const vehicleSurfaceW = ['interpolate', ['linear'], ['zoom'],
+    13, ['match', ['get', 'navigation_class'],
+      ['major_vehicle_road'], 4.7,
+      ['vehicle_connector'], 3.8,
+      ['campus_main_road', 'local_through_road'], 3.5,
+      ['campus_standard_road', 'local_street', 'vehicle_road'], 2.2,
+      2.0],
+    16, ['match', ['get', 'navigation_class'],
+      ['major_vehicle_road'], 9.4,
+      ['vehicle_connector'], 7.6,
+      ['campus_main_road', 'local_through_road'], 7.4,
+      ['campus_standard_road', 'local_street', 'vehicle_road'], 5.4,
+      5.0],
+    19, ['match', ['get', 'navigation_class'],
+      ['major_vehicle_road'], 17,
+      ['vehicle_connector'], 13.5,
+      ['campus_main_road', 'local_through_road'], 14,
+      ['campus_standard_road', 'local_street', 'vehicle_road'], 10,
+      9],
   ];
-  const casingW = ['interpolate', ['linear'], ['zoom'],
-    13, ['match', ['get', 'highway_type'], 'trunk', 6.0, 'trunk_link', 4.4, 'primary', 5.8, 'unclassified', 5.2, 'residential', 4.2, 4.0],
-    16, ['match', ['get', 'highway_type'], 'trunk', 12.5,'trunk_link', 9.0, 'primary', 12,  'unclassified', 10.4,'residential', 8.0, 7.6],
-    19, ['match', ['get', 'highway_type'], 'trunk', 22,  'trunk_link', 15,  'primary', 21,  'unclassified', 18,  'residential', 13.5,12.5],
+  const vehicleCasingW = ['interpolate', ['linear'], ['zoom'],
+    13, ['match', ['get', 'navigation_class'],
+      ['major_vehicle_road'], 6.4,
+      ['vehicle_connector'], 5.3,
+      ['campus_main_road', 'local_through_road'], 5.2,
+      ['campus_standard_road', 'local_street', 'vehicle_road'], 3.8,
+      3.4],
+    16, ['match', ['get', 'navigation_class'],
+      ['major_vehicle_road'], 12.8,
+      ['vehicle_connector'], 10.4,
+      ['campus_main_road', 'local_through_road'], 10.5,
+      ['campus_standard_road', 'local_street', 'vehicle_road'], 7.8,
+      7.2],
+    19, ['match', ['get', 'navigation_class'],
+      ['major_vehicle_road'], 22,
+      ['vehicle_connector'], 18,
+      ['campus_main_road', 'local_through_road'], 18.5,
+      ['campus_standard_road', 'local_street', 'vehicle_road'], 13.8,
+      12.5],
   ];
+  const serviceSurfaceW = ['interpolate', ['linear'], ['zoom'],
+    14, ['match', ['get', 'navigation_class'], 'campus_service_road', 1.6, 'campus_service_connector', 1.15, 1],
+    16, ['match', ['get', 'navigation_class'], 'campus_service_road', 4.0, 'campus_service_connector', 3.0, 2.6],
+    19, ['match', ['get', 'navigation_class'], 'campus_service_road', 7.2, 'campus_service_connector', 5.5, 4.8],
+  ];
+  const serviceCasingW = ['interpolate', ['linear'], ['zoom'],
+    14, ['match', ['get', 'navigation_class'], 'campus_service_road', 2.7, 'campus_service_connector', 2.1, 1.8],
+    16, ['match', ['get', 'navigation_class'], 'campus_service_road', 5.8, 'campus_service_connector', 4.6, 4.0],
+    19, ['match', ['get', 'navigation_class'], 'campus_service_road', 10, 'campus_service_connector', 8.0, 7.2],
+  ];
+  const narrowW = ['interpolate', ['linear'], ['zoom'],
+    15, ['match', ['get', 'navigation_class'], 'narrow_service_road', 1.2, 'service_access', 1.0, 0.9],
+    17, ['match', ['get', 'navigation_class'], 'narrow_service_road', 2.6, 'service_access', 2.1, 1.9],
+    19, ['match', ['get', 'navigation_class'], 'narrow_service_road', 4.5, 'service_access', 3.7, 3.3],
+  ];
+  const pathW = ['interpolate', ['linear'], ['zoom'], 15, 0.8, 17, 1.7, 19, 3.1];
+  const cycleW = ['interpolate', ['linear'], ['zoom'], 15, 1.0, 17, 2.2, 19, 3.8];
+  const restrictedW = ['interpolate', ['linear'], ['zoom'], 15, 1.0, 17, 2.0, 19, 3.6];
+
+  // Light-mode roads use a deeper, warmer hierarchy so main arteries read as
+  // strong dark-gold lines instead of washed-out pale yellow, and the bulk
+  // standard/minor roads gain a darker casing for crisp definition against the
+  // near-white basemap. Dark + satellite keep bright surfaces (they need to pop
+  // against a dark/imagery background, where "darker" would hurt legibility).
+  const vehicleCasingColor = isSatellite
+    ? 'rgba(0,0,0,0.62)'
+    : (isDark
+      ? '#0f172a'
+      : ['match', ['get', 'navigation_class'],
+        ['major_vehicle_road', 'vehicle_connector'], '#6f4406',
+        ['campus_main_road', 'local_through_road'], '#9a6a1c',
+        '#7c828b']);
+  const vehicleSurfaceColor = isSatellite
+    ? ['match', ['get', 'navigation_class'],
+      ['major_vehicle_road', 'vehicle_connector'], '#ffd166',
+      ['campus_main_road', 'local_through_road'], '#ffe8a3',
+      '#ffffff']
+    : (isDark
+      ? ['match', ['get', 'navigation_class'],
+        ['major_vehicle_road', 'vehicle_connector'], '#fbbf24',
+        ['campus_main_road', 'local_through_road'], '#f8d87a',
+        '#dbe4ef']
+      : ['match', ['get', 'navigation_class'],
+        ['major_vehicle_road', 'vehicle_connector'], '#d9941a',
+        ['campus_main_road', 'local_through_road'], '#eebb38',
+        '#f2f1ec']);
+  const serviceCasingColor = isSatellite ? 'rgba(0,0,0,0.52)' : (isDark ? '#111827' : '#b7bdc4');
+  const serviceSurfaceColor = isSatellite
+    ? ['match', ['get', 'navigation_class'], 'campus_service_road', '#f8fafc', '#d9e2ec']
+    : (isDark
+      ? ['match', ['get', 'navigation_class'], 'campus_service_road', '#64748b', '#526174']
+      : ['match', ['get', 'navigation_class'], 'campus_service_road', '#e7eaee', '#d3d8de']);
+  const narrowColor = isSatellite ? '#ffffff' : (isDark ? '#94a3b8' : '#9aa1aa');
+  const footwayColor = isSatellite ? '#9ff5bd' : (isDark ? '#5ee589' : '#1f9d55');
+  const walkwayColor = isSatellite ? '#7ddce5' : (isDark ? '#22d3ee' : '#078a8f');
+  const cycleColor = isSatellite ? '#8ec5ff' : (isDark ? '#60a5fa' : '#1a73e8');
+  const mixedColor = isSatellite ? '#c5f06a' : (isDark ? '#a3e635' : '#65a30d');
+  const restrictedColor = isSatellite
+    ? ['match', ['get', 'navigation_class'], 'maintenance_track', '#d6a15f', 'unpaved_service', '#f6ad55', '#ff7a7a']
+    : (isDark
+      ? ['match', ['get', 'navigation_class'], 'maintenance_track', '#b08968', 'unpaved_service', '#d97706', '#f87171']
+      : ['match', ['get', 'navigation_class'], 'maintenance_track', '#94613a', 'unpaved_service', '#b45309', '#dc2626']);
+
+  map.addLayer({
+    id: 'campus-roads-restricted',
+    type: 'line',
+    source: 'campus-roads',
+    minzoom: 15,
+    filter: restrictedFilter,
+    layout: { 'line-join': 'round', 'line-cap': 'round', visibility: roadVis },
+    paint: {
+      'line-color': restrictedColor,
+      'line-width': restrictedW,
+      'line-opacity': ['interpolate', ['linear'], ['zoom'], 15, isSatellite ? 0.68 : 0.45, 17, isSatellite ? 0.82 : 0.68, 19, 0.86],
+      'line-dasharray': [1.2, 1.2]
+    }
+  });
+
+  map.addLayer({
+    id: 'campus-roads-service-casing',
+    type: 'line',
+    source: 'campus-roads',
+    minzoom: 14,
+    filter: serviceAndNarrowFilter,
+    layout: { 'line-join': 'round', 'line-cap': 'round', visibility: roadVis },
+    paint: {
+      'line-color': serviceCasingColor,
+      'line-width': serviceCasingW,
+      'line-opacity': ['interpolate', ['linear'], ['zoom'], 14, isSatellite ? 0.48 : 0.32, 16, isSatellite ? 0.72 : 0.58, 19, isSatellite ? 0.86 : 0.72]
+    }
+  });
 
   map.addLayer({
     id: 'campus-roads-casing',
     type: 'line',
     source: 'campus-roads',
-    layout: {
-      'line-join': 'round', 'line-cap': 'round',
-      visibility: roadVis
-    },
-    paint: isSatellite ? {
-      'line-color': '#ffffff',
-      'line-width': 0,
-      'line-opacity': 0
-    } : {
-      // Dark kerb edge that frames every road, like F4Map's road outline.
-      'line-color': isDark ? '#0b1220' : '#5f6368',
-      'line-width': casingW,
-      'line-opacity': 1
+    filter: solidVehicleFilter,
+    layout: { 'line-join': 'round', 'line-cap': 'round', visibility: roadVis },
+    paint: {
+      'line-color': vehicleCasingColor,
+      'line-width': vehicleCasingW,
+      'line-opacity': ['match', ['get', 'navigation_class'],
+        ['major_vehicle_road', 'vehicle_connector'], isSatellite ? 0.92 : 0.96,
+        ['campus_main_road', 'local_through_road'], isSatellite ? 0.86 : 0.9,
+        isSatellite ? 0.78 : 0.82]
+    }
+  });
+
+  map.addLayer({
+    id: 'campus-roads-service',
+    type: 'line',
+    source: 'campus-roads',
+    minzoom: 14,
+    filter: serviceFilter,
+    layout: { 'line-join': 'round', 'line-cap': 'round', visibility: roadVis },
+    paint: {
+      'line-color': serviceSurfaceColor,
+      'line-width': serviceSurfaceW,
+      'line-opacity': ['interpolate', ['linear'], ['zoom'], 14, isSatellite ? 0.68 : 0.45, 16, isSatellite ? 0.88 : 0.78, 19, isSatellite ? 0.95 : 0.9]
     }
   });
 
@@ -840,23 +1004,30 @@ function addRoadsLayer(data) {
     id: 'campus-roads-line',
     type: 'line',
     source: 'campus-roads',
-    filter: vehFilter,
-    layout: {
-      'line-join': 'round', 'line-cap': 'round',
-      visibility: roadVis
-    },
-    paint: isSatellite ? {
-      'line-color': '#ffffff',
-      'line-width': ['interpolate', ['linear'], ['zoom'], 13, 1.2, 16, 3, 19, 5],
-      'line-opacity': 0.92
-    } : {
-      // Medium asphalt-grey carriageway, like F4Map — clearly darker than the
-      // ground, with main roads a touch darker than the minor service lanes.
-      'line-color': isDark
-        ? ['match', ['get', 'highway_type'], 'service', '#3b475b', 'residential', '#374254', '#3f4c61']
-        : ['match', ['get', 'highway_type'], 'service', '#9ca1a6', 'residential', '#989da2', '#8d9298'],
-      'line-width': surfaceW,
-      'line-opacity': 1
+    filter: solidVehicleFilter,
+    layout: { 'line-join': 'round', 'line-cap': 'round', visibility: roadVis },
+    paint: {
+      'line-color': vehicleSurfaceColor,
+      'line-width': vehicleSurfaceW,
+      'line-opacity': ['match', ['get', 'navigation_class'],
+        ['major_vehicle_road', 'vehicle_connector'], isSatellite ? 0.96 : 1,
+        ['campus_main_road', 'local_through_road'], isSatellite ? 0.92 : 0.96,
+        isSatellite ? 0.88 : 0.94]
+    }
+  });
+
+  map.addLayer({
+    id: 'campus-roads-narrow',
+    type: 'line',
+    source: 'campus-roads',
+    minzoom: 15,
+    filter: narrowFilter,
+    layout: { 'line-join': 'round', 'line-cap': 'round', visibility: roadVis },
+    paint: {
+      'line-color': narrowColor,
+      'line-width': narrowW,
+      'line-opacity': ['interpolate', ['linear'], ['zoom'], 15, isSatellite ? 0.68 : 0.42, 17, isSatellite ? 0.86 : 0.72, 19, isSatellite ? 0.92 : 0.82],
+      'line-dasharray': [1.4, 1.1]
     }
   });
 
@@ -864,21 +1035,59 @@ function addRoadsLayer(data) {
     id: 'campus-roads-ped',
     type: 'line',
     source: 'campus-roads',
-    filter: pedFilter,
-    layout: {
-      'line-join': 'round', 'line-cap': 'round',
-      visibility: roadVis
-    },
-    paint: isSatellite ? {
-      'line-color': '#ffffff',
-      'line-width': ['interpolate', ['linear'], ['zoom'], 13, 0.8, 16, 2, 19, 3],
-      'line-opacity': 0.75,
-      'line-dasharray': [2, 1.5]
-    } : {
-      'line-color': isDark ? '#94a3b8' : '#64748b',
-      'line-width': ['interpolate', ['linear'], ['zoom'], 13, 1, 16, 2.5, 19, 4],
-      'line-opacity': 0.85,
-      'line-dasharray': [2, 1.5]
+    minzoom: 15,
+    filter: footwayFilter,
+    layout: { 'line-join': 'round', 'line-cap': 'round', visibility: roadVis },
+    paint: {
+      'line-color': footwayColor,
+      'line-width': pathW,
+      'line-opacity': ['interpolate', ['linear'], ['zoom'], 15, isSatellite ? 0.72 : 0.5, 17, isSatellite ? 0.86 : 0.78, 19, 0.92],
+      'line-dasharray': [1.0, 1.2]
+    }
+  });
+
+  map.addLayer({
+    id: 'campus-roads-walkway',
+    type: 'line',
+    source: 'campus-roads',
+    minzoom: 15,
+    filter: walkwayFilter,
+    layout: { 'line-join': 'round', 'line-cap': 'round', visibility: roadVis },
+    paint: {
+      'line-color': walkwayColor,
+      'line-width': pathW,
+      'line-opacity': ['interpolate', ['linear'], ['zoom'], 15, isSatellite ? 0.7 : 0.48, 17, isSatellite ? 0.84 : 0.74, 19, 0.9],
+      'line-dasharray': [0.4, 1.4]
+    }
+  });
+
+  map.addLayer({
+    id: 'campus-roads-cycle',
+    type: 'line',
+    source: 'campus-roads',
+    minzoom: 15,
+    filter: cycleFilter,
+    layout: { 'line-join': 'round', 'line-cap': 'round', visibility: roadVis },
+    paint: {
+      'line-color': cycleColor,
+      'line-width': cycleW,
+      'line-opacity': ['interpolate', ['linear'], ['zoom'], 15, isSatellite ? 0.8 : 0.62, 17, isSatellite ? 0.92 : 0.84, 19, 0.96],
+      'line-dasharray': [2.4, 1.0]
+    }
+  });
+
+  map.addLayer({
+    id: 'campus-roads-mixed',
+    type: 'line',
+    source: 'campus-roads',
+    minzoom: 15,
+    filter: mixedUseFilter,
+    layout: { 'line-join': 'round', 'line-cap': 'round', visibility: roadVis },
+    paint: {
+      'line-color': mixedColor,
+      'line-width': cycleW,
+      'line-opacity': ['interpolate', ['linear'], ['zoom'], 15, isSatellite ? 0.76 : 0.58, 17, isSatellite ? 0.9 : 0.82, 19, 0.94],
+      'line-dasharray': [1.2, 0.7, 3.0, 0.7]
     }
   });
 
@@ -1228,6 +1437,10 @@ function toggle3D() {
     if (!isSatellite) showLandmarks3D();
     else if (typeof Landmarks3D !== 'undefined') Landmarks3D.hide();
     syncLandmarkLabels();
+    // Scene geometry is pre-built at idle by Landmarks3D.prewarm(), so showing
+    // it here is cheap and the tilt stays smooth. Keep this easeTo synchronous:
+    // immersive navigation calls toggle3D() then overrides the camera on the
+    // same tick, and a deferred easeTo would clobber that framing a frame later.
     map.easeTo({ pitch: 52, bearing: 0, duration: 900 });
     showToast('3D view — drag to rotate', 'info');
   } else {
@@ -1265,7 +1478,7 @@ function toggleLayer(layerName) {
     buildings: is3D
       ? ['buildings-3d', 'buildings-labels', 'landmark-labels']
       : ['buildings-fill', 'buildings-outline', 'buildings-labels', 'landmark-labels'],
-    roads: ['campus-roads-casing', 'campus-roads-line', 'campus-roads-ped', 'campus-roads-hit', 'campus-roads-labels'],
+    roads: ROAD_LAYER_IDS,
     markers: ['places-circles', 'places-labels'],
   };
 

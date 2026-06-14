@@ -1,0 +1,353 @@
+const CAMPUS_BOUNDS = {
+  minLat: 26.45847, maxLat: 26.48675,
+  minLng: 73.10762, maxLng: 73.12599,
+};
+
+const VEHICLE_TYPES = new Set([
+  'trunk', 'trunk_link', 'primary', 'primary_link',
+  'secondary', 'secondary_link', 'tertiary', 'tertiary_link',
+  'unclassified', 'residential', 'service',
+]);
+
+const PEDESTRIAN_TYPES = new Set(['footway', 'path', 'steps', 'pedestrian', 'cycleway']);
+const NO_VALUES = new Set(['no', 'private', 'agricultural', 'forestry']);
+const YES_VALUES = new Set(['yes', 'designated', 'permissive', 'destination']);
+const PAVED_SURFACES = new Set(['paved', 'asphalt', 'concrete', 'paving_stones', 'sett']);
+const UNPAVED_SURFACES = new Set(['unpaved', 'ground', 'dirt', 'earth', 'sand', 'gravel', 'compacted']);
+
+function haversine(lat1, lng1, lat2, lng2) {
+  const R = 6371000;
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLng = (lng2 - lng1) * Math.PI / 180;
+  const a = Math.sin(dLat / 2) ** 2 +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+    Math.sin(dLng / 2) ** 2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
+function featureLengthM(feature) {
+  const coords = feature?.geometry?.coordinates || [];
+  let length = 0;
+  for (let i = 0; i < coords.length - 1; i++) {
+    length += haversine(coords[i][1], coords[i][0], coords[i + 1][1], coords[i + 1][0]);
+  }
+  return length;
+}
+
+function isInsideCampus(feature) {
+  const coords = feature?.geometry?.coordinates || [];
+  return coords.some(([lng, lat]) =>
+    lng >= CAMPUS_BOUNDS.minLng && lng <= CAMPUS_BOUNDS.maxLng &&
+    lat >= CAMPUS_BOUNDS.minLat && lat <= CAMPUS_BOUNDS.maxLat
+  );
+}
+
+function norm(v) {
+  return String(v || '').trim().toLowerCase();
+}
+
+function oneWayValue(v) {
+  const s = norm(v);
+  return s === 'yes' || s === '1' || s === 'true';
+}
+
+function explicitVehicleBlocked(p) {
+  return NO_VALUES.has(norm(p.motorcar)) ||
+    NO_VALUES.has(norm(p.motor_vehicle)) ||
+    NO_VALUES.has(norm(p.vehicle)) ||
+    NO_VALUES.has(norm(p.access));
+}
+
+function explicitVehicleAllowed(p) {
+  return YES_VALUES.has(norm(p.motorcar)) ||
+    YES_VALUES.has(norm(p.motor_vehicle)) ||
+    YES_VALUES.has(norm(p.vehicle));
+}
+
+function classifyRoadFeature(feature) {
+  const p = feature.properties || {};
+  const type = norm(p.highway_type || p.highway);
+  const surface = norm(p.surface);
+  const lanes = Number.parseFloat(p.lanes);
+  const service = norm(p.service);
+  const lengthM = featureLengthM(feature);
+  const insideCampus = isInsideCampus(feature);
+
+  const base = {
+    is_campus: insideCampus,
+    length_m: Math.round(lengthM),
+    walk_access: 'yes',
+    vehicle_access: 'no',
+    navigation_class: 'unknown',
+    drive_confidence: 0,
+    drive_penalty: null,
+    drive_note: '',
+  };
+
+  if (!type) {
+    return {
+      ...base,
+      navigation_class: 'unknown',
+      drive_confidence: 0.15,
+      drive_note: 'Missing highway type; not used for vehicle routing.',
+    };
+  }
+
+  if (PEDESTRIAN_TYPES.has(type)) {
+    const cls = type === 'cycleway' ? 'cycle_pedestrian' : (type === 'steps' ? 'stairs' : 'pedestrian_path');
+    return {
+      ...base,
+      navigation_class: cls,
+      drive_note: `${type} is excluded from vehicle routing.`,
+    };
+  }
+
+  if (type === 'track') {
+    return {
+      ...base,
+      navigation_class: 'maintenance_track',
+      drive_confidence: surface && !UNPAVED_SURFACES.has(surface) ? 0.35 : 0.2,
+      drive_note: 'Track/maintenance alignment; excluded from normal vehicle routing.',
+    };
+  }
+
+  if (type === 'road' || type === 'unknown') {
+    return {
+      ...base,
+      navigation_class: 'ambiguous_road',
+      drive_confidence: 0.35,
+      drive_note: 'Ambiguous OSM road type; flagged instead of assuming car access.',
+    };
+  }
+
+  if (explicitVehicleBlocked(p)) {
+    return {
+      ...base,
+      navigation_class: 'restricted_vehicle',
+      drive_confidence: 0.1,
+      drive_note: 'OSM access tag blocks private motor vehicle use.',
+    };
+  }
+
+  if (type === 'trunk' || type === 'primary' || type === 'secondary') {
+    return {
+      ...base,
+      vehicle_access: 'yes',
+      navigation_class: 'major_vehicle_road',
+      drive_confidence: 0.98,
+      drive_penalty: 1.0,
+      drive_note: 'Major paved vehicle road.',
+    };
+  }
+
+  if (type.endsWith('_link') || type === 'tertiary') {
+    return {
+      ...base,
+      vehicle_access: 'yes',
+      navigation_class: 'vehicle_connector',
+      drive_confidence: 0.94,
+      drive_penalty: 1.05,
+      drive_note: 'Vehicle connector/link road.',
+    };
+  }
+
+  if (type === 'unclassified') {
+    return {
+      ...base,
+      vehicle_access: 'yes',
+      navigation_class: insideCampus ? 'campus_main_road' : 'local_through_road',
+      drive_confidence: insideCampus ? 0.9 : 0.84,
+      drive_penalty: insideCampus ? 1.08 : 1.15,
+      drive_note: 'General vehicle road; preferred over service roads.',
+    };
+  }
+
+  if (type === 'residential') {
+    return {
+      ...base,
+      vehicle_access: 'yes',
+      navigation_class: insideCampus ? 'campus_standard_road' : 'local_street',
+      drive_confidence: insideCampus ? 0.86 : 0.82,
+      drive_penalty: insideCampus ? 1.22 : 1.3,
+      drive_note: 'Standard vehicle-access road.',
+    };
+  }
+
+  if (type === 'service') {
+    if (UNPAVED_SURFACES.has(surface)) {
+      return {
+        ...base,
+        navigation_class: 'unpaved_service',
+        drive_confidence: 0.25,
+        drive_note: 'Unpaved service road; excluded from vehicle routing.',
+      };
+    }
+
+    if (service === 'parking_aisle' || service === 'driveway' || service === 'alley') {
+      return {
+        ...base,
+        vehicle_access: explicitVehicleAllowed(p) ? 'yes' : 'destination',
+        navigation_class: 'service_access',
+        drive_confidence: 0.58,
+        drive_penalty: 4.2,
+        drive_note: 'Short access/parking/service segment; heavily penalized for drive routing.',
+      };
+    }
+
+    if (lanes >= 2 || PAVED_SURFACES.has(surface)) {
+      return {
+        ...base,
+        vehicle_access: 'yes',
+        navigation_class: 'campus_service_road',
+        drive_confidence: lanes >= 2 ? 0.78 : 0.74,
+        drive_penalty: lanes >= 2 ? 1.8 : 2.0,
+        drive_note: 'Likely drivable campus service road; penalized below main roads.',
+      };
+    }
+
+    if (lanes === 1) {
+      return {
+        ...base,
+        vehicle_access: 'destination',
+        navigation_class: 'narrow_service_road',
+        drive_confidence: 0.55,
+        drive_penalty: 4.0,
+        drive_note: 'Single-lane service road; only used if no reliable alternative exists.',
+      };
+    }
+
+    return {
+      ...base,
+      vehicle_access: lengthM >= 90 ? 'yes' : 'destination',
+      navigation_class: lengthM >= 90 ? 'campus_service_connector' : 'service_access',
+      drive_confidence: lengthM >= 90 ? 0.68 : 0.58,
+      drive_penalty: lengthM >= 90 ? 2.5 : 4.0,
+      drive_note: 'Service road with limited tags; flagged medium/low confidence and penalized.',
+    };
+  }
+
+  if (VEHICLE_TYPES.has(type)) {
+    return {
+      ...base,
+      vehicle_access: 'yes',
+      navigation_class: 'vehicle_road',
+      drive_confidence: 0.72,
+      drive_penalty: 1.8,
+      drive_note: 'Vehicle-capable type with default penalty.',
+    };
+  }
+
+  return {
+    ...base,
+    navigation_class: 'non_vehicle_route',
+    drive_confidence: 0.2,
+    drive_note: `Highway type ${type} is not enabled for vehicle routing.`,
+  };
+}
+
+function enrichRoadFeature(feature) {
+  const classification = classifyRoadFeature(feature);
+  return {
+    ...feature,
+    properties: {
+      ...feature.properties,
+      ...classification,
+    },
+  };
+}
+
+function buildRoadGraph(roads) {
+  const graph = {};
+  const nodeCoords = {};
+  let edgeCount = 0;
+
+  function pushEdge(fromId, toId, road, dist, onewayReverse) {
+    const p = road.properties || {};
+    if (!graph[fromId]) graph[fromId] = [];
+    graph[fromId].push({
+      id: toId,
+      dist,
+      osm_id: String(p.osm_id || ''),
+      type: p.highway_type || p.highway || 'unknown',
+      highway_type: p.highway_type || p.highway || 'unknown',
+      name: p.name || '',
+      navigation_class: p.navigation_class || 'unknown',
+      vehicle_access: p.vehicle_access || 'no',
+      walk_access: p.walk_access || 'yes',
+      drive_confidence: Number(p.drive_confidence || 0),
+      drive_penalty: p.drive_penalty == null ? null : Number(p.drive_penalty),
+      oneway: oneWayValue(p.oneway),
+      oneway_reverse: !!onewayReverse,
+    });
+  }
+
+  for (const rawRoad of roads) {
+    const road = rawRoad.properties?.navigation_class ? rawRoad : enrichRoadFeature(rawRoad);
+    const coords = road.geometry.coordinates;
+    if (coords.length < 2) continue;
+    const isOneWay = oneWayValue(road.properties?.oneway);
+
+    for (let i = 0; i < coords.length - 1; i++) {
+      const fromId = `${coords[i][1].toFixed(6)},${coords[i][0].toFixed(6)}`;
+      const toId = `${coords[i + 1][1].toFixed(6)},${coords[i + 1][0].toFixed(6)}`;
+
+      nodeCoords[fromId] = coords[i];
+      nodeCoords[toId] = coords[i + 1];
+
+      const dist = haversine(coords[i][1], coords[i][0], coords[i + 1][1], coords[i + 1][0]);
+
+      if (!graph[fromId]) graph[fromId] = [];
+      if (!graph[toId]) graph[toId] = [];
+      pushEdge(fromId, toId, road, dist, false);
+      pushEdge(toId, fromId, road, dist, isOneWay);
+      edgeCount++;
+    }
+  }
+
+  return { graph, nodeCoords, edgeCount };
+}
+
+function buildRoadAudit(roads) {
+  const summary = {};
+  const uncertain = [];
+  const excludedVehicle = [];
+
+  for (const road of roads) {
+    const p = road.properties || {};
+    const cls = p.navigation_class || 'unknown';
+    summary[cls] = (summary[cls] || 0) + 1;
+    const item = {
+      osm_id: String(p.osm_id || ''),
+      name: p.name || '',
+      highway_type: p.highway_type || '',
+      navigation_class: cls,
+      vehicle_access: p.vehicle_access || 'no',
+      drive_confidence: Number(p.drive_confidence || 0),
+      drive_note: p.drive_note || '',
+      length_m: p.length_m || Math.round(featureLengthM(road)),
+    };
+    if ((p.vehicle_access === 'destination') || (p.vehicle_access === 'yes' && Number(p.drive_confidence || 0) < 0.7)) {
+      uncertain.push(item);
+    }
+    if (p.vehicle_access === 'no') excludedVehicle.push(item);
+  }
+
+  uncertain.sort((a, b) => a.drive_confidence - b.drive_confidence || b.length_m - a.length_m);
+  excludedVehicle.sort((a, b) => a.highway_type.localeCompare(b.highway_type) || b.length_m - a.length_m);
+
+  return {
+    generated_at: new Date().toISOString(),
+    summary,
+    uncertain_vehicle_segments: uncertain,
+    excluded_from_vehicle_routing: excludedVehicle,
+  };
+}
+
+module.exports = {
+  CAMPUS_BOUNDS,
+  classifyRoadFeature,
+  enrichRoadFeature,
+  buildRoadGraph,
+  buildRoadAudit,
+  haversine,
+};
