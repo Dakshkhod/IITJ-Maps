@@ -3,90 +3,90 @@
     "id": "academic",
     "name": "Academic",
     "icon": "🏛️",
-    "color": "#4A90D9"
+    "color": "#2563eb"
   },
   {
     "id": "hostel",
     "name": "Hostels",
     "icon": "🏠",
-    "color": "#E67E22"
+    "color": "#ea580c"
   },
   {
     "id": "dining",
     "name": "Food & Dining",
     "icon": "🍽️",
-    "color": "#E74C3C"
+    "color": "#dc2626"
   },
   {
     "id": "sports",
     "name": "Sports",
     "icon": "⚽",
-    "color": "#2ECC71"
+    "color": "#16a34a"
   },
   {
     "id": "medical",
     "name": "Medical",
     "icon": "🏥",
-    "color": "#E74C3C"
+    "color": "#db2777"
   },
   {
     "id": "gate",
     "name": "Gates",
     "icon": "🚪",
-    "color": "#8E44AD"
+    "color": "#4f46e5"
   },
   {
     "id": "parking",
     "name": "Parking",
     "icon": "🅿️",
-    "color": "#3498DB"
+    "color": "#0369a1"
   },
   {
     "id": "utility",
     "name": "Utilities",
     "icon": "🔧",
-    "color": "#95A5A6"
+    "color": "#64748b"
   },
   {
     "id": "administrative",
     "name": "Admin",
     "icon": "🏢",
-    "color": "#34495E"
+    "color": "#475569"
   },
   {
     "id": "transport",
     "name": "Transport",
     "icon": "🚌",
-    "color": "#1ABC9C"
+    "color": "#0d9488"
   },
   {
     "id": "recreation",
     "name": "Recreation",
     "icon": "🎭",
-    "color": "#9B59B6"
+    "color": "#9333ea"
   },
   {
     "id": "residential",
     "name": "Residential",
     "icon": "🏘️",
-    "color": "#D35400"
+    "color": "#92400e"
   },
   {
     "id": "bank",
     "name": "Bank / ATM",
     "icon": "🏦",
-    "color": "#059669"
+    "color": "#d97706"
   },
   {
     "id": "building",
     "name": "Buildings",
     "icon": "🏗️",
-    "color": "#7F8C8D"
+    "color": "#7f8c8d"
   },
   {
     "id": "other",
     "name": "Other",
     "icon": "📍",
-    "color": "#BDC3C7"
+    "color": "#94a3b8"
   }
 ]

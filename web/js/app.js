@@ -34,24 +34,26 @@ function categoryAbbr(category) {
   return (CATEGORY_STYLES[category] || CATEGORY_STYLES.other).abbr;
 }
 
-// MapLibre match expression for category → color (used in map layers)
+// MapLibre match expression for category → color (used in map layers).
+// Hues are spread around the wheel so neighbouring dots stay distinguishable;
+// the same palette drives categories.json (filter chips + 3D extrusions).
 function categoryColorExpr() {
   return ['match', ['get', 'category'],
-    'academic',       '#2563eb',
-    'hostel',         '#ea580c',
-    'dining',         '#dc2626',
-    'sports',         '#16a34a',
-    'medical',        '#be123c',
-    'gate',           '#7c3aed',
-    'parking',        '#0284c7',
-    'utility',        '#64748b',
-    'administrative', '#334155',
-    'transport',      '#0d9488',
-    'recreation',     '#9333ea',
-    'residential',    '#b45309',
-    'bank',           '#059669',
+    'academic',       '#2563eb',   // royal blue
+    'hostel',         '#ea580c',   // orange
+    'dining',         '#dc2626',   // red
+    'sports',         '#16a34a',   // emerald
+    'medical',        '#db2777',   // pink
+    'gate',           '#4f46e5',   // indigo
+    'parking',        '#0369a1',   // deep blue
+    'utility',        '#64748b',   // slate
+    'administrative', '#475569',   // dark slate
+    'transport',      '#0d9488',   // teal
+    'recreation',     '#9333ea',   // violet
+    'residential',    '#92400e',   // brown
+    'bank',           '#d97706',   // amber
     'university',     '#2563eb',
-    '#6b7280'
+    '#94a3b8'                      // other → light slate
   ];
 }
 
@@ -229,7 +231,9 @@ const mapHandlers = {
     showCoordPin({ lat: c[1], lng: c[0] }, {
       name: p.name,
       category: p.category,
-      description: p.description,
+      // Prefix the OSM unit code (e.g. "E-16") when the display name is the
+      // real name, so users still see the on-campus signage reference.
+      description: [p.ref, p.description].filter(Boolean).join(' · '),
       is_proposed: p.is_proposed,
     });
   },
@@ -281,6 +285,31 @@ function finishMapLayers() {
 }
 
 const LAYERS = { buildings: true, roads: true, markers: true };
+
+// Lower = higher label priority when markers collide (symbol-sort-key). Keeps
+// the dense perimeter office/utility codes from crowding out real destinations.
+// Gates / parking / transport are bumped into tier 1 because the curated set
+// is small (Gate 1, Gate 2, main parking, bus stop) and these are landmarks
+// people orient by even at campus-overview zoom.
+const LABEL_PRIORITY = {
+  medical: 0, dining: 0, bank: 0,
+  academic: 1, sports: 1, hostel: 1, place_of_worship: 1,
+  gate: 1, parking: 1, transport: 1,
+  recreation: 2,
+  administrative: 4, utility: 4, residential: 4, other: 5,
+};
+
+// Bare unit codes (W-1, E-15, B-3, etc.) — always lowest priority no matter
+// what category they got tagged with, so they only label at high zoom and
+// never crowd out real destinations. A name with a space, dot, or any letter
+// run beyond the prefix counts as a real name.
+const BARE_CODE_RE = /^[A-Za-z]{1,4}[-\s]?\d+[A-Za-z]?$/;
+
+function computeLabelPriority(props) {
+  const name = (props.name || '').trim();
+  if (BARE_CODE_RE.test(name)) return 5;
+  return LABEL_PRIORITY[props.category] ?? 5;
+}
 
 const EMPTY_FC = { type: 'FeatureCollection', features: [] };
 
@@ -345,6 +374,7 @@ async function init() {
     pitchWithRotate: true,
   });
 
+  try { window.__map = map; } catch (e) {}
   map.addControl(new maplibregl.AttributionControl({ compact: true }), 'bottom-left');
   map.addControl(new maplibregl.ScaleControl({ maxWidth: 150, unit: 'metric' }), 'bottom-left');
 
@@ -438,6 +468,7 @@ let styleLoadGeneration = 0;
 // paint properties baked for the previous isSatellite/isDark state. We wipe
 // them before re-adding so the create-fresh path runs every time.
 const OVERLAY_LAYER_IDS = [
+  'campus-basemask',
   'greens-fill',
   'campus-roads-casing', 'campus-roads-line', 'campus-roads-ped',
   'campus-roads-hit', 'campus-roads-labels',
@@ -664,6 +695,23 @@ function addAreasLayer(data) {
   }
 
   map.addSource('named-areas', { type: 'geojson', data });
+
+  // Base-map mask — the CARTO raster bakes light-grey building footprints into
+  // its tiles, which then "ghost" out from under our 3D models (CARTO's
+  // generalised footprints are offset/larger than our OSM polygons, so a
+  // per-building mask can't catch them). Painting the campus area polygons in
+  // the exact CARTO land colour, just above the raster, hides every baked-in
+  // footprint inside campus while leaving the basemap untouched off-campus.
+  // Hidden on satellite (we want the imagery there).
+  if (!isSatellite) {
+    const landColor = isDark ? '#26282a' : '#fafaf8';
+    map.addLayer({
+      id: 'campus-basemask',
+      type: 'fill',
+      source: 'named-areas',
+      paint: { 'fill-color': landColor, 'fill-opacity': 1 },
+    }, map.getLayer('greens-fill') ? 'greens-fill' : undefined);
+  }
 
   // Transparent on satellite; tinted on normal map
   map.addLayer({
@@ -1070,10 +1118,13 @@ function addPlacesLayer(features) {
       geometry: { type: 'Point', coordinates: coords },
       properties: {
         name,
+        ref:         f.properties.ref || '',
         category:    f.properties.category || 'other',
         description: f.properties.description || '',
         source:      f.properties.source || 'osm',
         is_proposed: f.properties.is_proposed || false,
+        // Collision priority: named destinations beat bare admin/office codes.
+        label_priority: computeLabelPriority(f.properties),
       }
     };
   }).filter(Boolean);
@@ -1090,6 +1141,18 @@ function addPlacesLayer(features) {
 
   const colorExpr = categoryColorExpr();
 
+  // Per-priority radius — top destinations get a slightly larger dot, low-
+  // priority codes shrink to small markers so they read as accurate points
+  // rather than the blob of fat dots that crowded the perimeter before.
+  // Dots grow noticeably with zoom-in so high-zoom tap targets are easy to
+  // hit on touch devices (≥ ~22 px diameter from z18).
+  const radiusFor = (zSmall, zBig) => [
+    'case',
+    ['<=', ['get', 'label_priority'], 1], zBig,
+    ['<=', ['get', 'label_priority'], 3], (zSmall + zBig) / 2,
+    zSmall
+  ];
+
   map.addLayer({
     id: 'places-circles',
     type: 'circle',
@@ -1097,29 +1160,50 @@ function addPlacesLayer(features) {
     layout: { visibility: LAYERS.markers ? 'visible' : 'none' },
     paint: {
       'circle-color': colorExpr,
-      'circle-radius': ['interpolate', ['linear'], ['zoom'], 13, 4, 16, 7, 19, 10],
-      'circle-stroke-width': isSatellite ? 0 : ['interpolate', ['linear'], ['zoom'], 13, 1.5, 17, 2.5],
+      'circle-radius': ['interpolate', ['exponential', 1.4], ['zoom'],
+        13, radiusFor(1.5, 2.5),
+        15, radiusFor(2.5, 3.5),
+        17, radiusFor(5, 7),
+        19, radiusFor(8, 11),
+        21, radiusFor(11, 15)
+      ],
+      'circle-stroke-width': isSatellite ? 0 : ['interpolate', ['linear'], ['zoom'], 13, 0.8, 16, 1.2, 19, 2],
       'circle-stroke-color': '#ffffff',
       'circle-opacity': markerCircleOpacity(),
     }
   });
 
-  // Text labels (shown at zoom 16+, with collision avoidance)
+  // Text labels — progressive disclosure by priority so the campus overview
+  // stays readable while every code is still surfaced once you zoom in.
+  //   priority 0–1 (food/medical/bank/academic/hostel/sports)       from z15
+  //   priority 2–3 (recreation/transport/parking/gate)              from z16
+  //   priority 4   (admin/utility with a real descriptive name)     from z17
+  //   priority 5   (bare unit codes: W-1, E-15, indoor labs…)       from z18
   map.addLayer({
     id: 'places-labels',
     type: 'symbol',
     source: 'places-points',
-    minzoom: 16,
+    minzoom: 15,
     layout: {
-      'text-field': ['get', 'name'],
-      'text-size': ['interpolate', ['linear'], ['zoom'], 16, 10, 18, 13],
-      'text-offset': [0, 1.2],
+      'text-field': ['step', ['zoom'],
+        // z 15..16: only the top two priority bands
+        ['case', ['<=', ['get', 'label_priority'], 1], ['get', 'name'], ''],
+        16,
+        ['case', ['<=', ['get', 'label_priority'], 3], ['get', 'name'], ''],
+        17,
+        ['case', ['<=', ['get', 'label_priority'], 4], ['get', 'name'], ''],
+        18,
+        ['get', 'name']
+      ],
+      'symbol-sort-key': ['get', 'label_priority'],
+      'text-size': ['interpolate', ['linear'], ['zoom'], 15, 9, 17, 11, 19, 13],
+      'text-offset': [0, 0.85],
       'text-anchor': 'top',
       'text-max-width': 9,
       'text-font': ['Open Sans Regular'],
       'text-allow-overlap': false,
       'text-optional': true,
-      'text-padding': 4,
+      'text-padding': 3,
       visibility: LAYERS.markers ? 'visible' : 'none'
     },
     paint: labelPaint()

@@ -55,6 +55,23 @@ var Landmarks3D = (() => {
     gTank:      new THREE.MeshStandardMaterial({ color: 0xdcdcd2, metalness: 0.10, roughness: 0.60 }),
     gTankGrn:   new THREE.MeshStandardMaterial({ color: 0x7d9a57, metalness: 0.10, roughness: 0.60 }),
 
+    // General Quarters — salmon / dusty-pink cement plaster (NOT sandstone),
+    // G+4 apartment blocks with cane-railed balconies and white flat roofs.
+    gqWall:    new THREE.MeshStandardMaterial({ color: 0xd6a591, metalness: 0.02, roughness: 0.92 }),
+    gqWallD:   new THREE.MeshStandardMaterial({ color: 0xc08e7a, metalness: 0.02, roughness: 0.93 }),
+    gqBalcony: new THREE.MeshStandardMaterial({ color: 0xbf8a52, metalness: 0.05, roughness: 0.80 }), // cane / wood railing
+    gqTank:    new THREE.MeshStandardMaterial({ color: 0x3a3a3a, metalness: 0.10, roughness: 0.55 }), // dark Sintex tanks in refs
+
+    // Dept. Maths / SOLA — single-storey red rough-cut sandstone-block halls
+    // with a central courtyard and a light-grey hipped CORRUGATED-METAL roof.
+    mathWall:    new THREE.MeshStandardMaterial({ color: 0x9c6648, metalness: 0.02, roughness: 0.94 }), // red sandstone block
+    mathPlinth:  new THREE.MeshStandardMaterial({ color: 0xc98f78, metalness: 0.02, roughness: 0.90 }), // salmon plinth band
+    // Light silvery-grey corrugated metal. Low metalness + a touch of emissive
+    // keeps it reading bright under the map's directional light (pure metal
+    // needs reflections we don't have), matching the pale roofs in the photos.
+    metalRoof:   new THREE.MeshStandardMaterial({ color: 0xd7dbde, emissive: 0x3f4346, metalness: 0.12, roughness: 0.7, side: THREE.DoubleSide }),
+    metalRidge:  new THREE.MeshStandardMaterial({ color: 0xcacfd2, emissive: 0x3a3e41, metalness: 0.15, roughness: 0.65 }),
+
     // Mess / dining blocks (Old + New Mess) — reddish Jodhpur sandstone-brick
     // solid block with perforated jali window bays and an equipment-covered
     // white roof (AHUs, ducts, water tanks, solar water heaters).
@@ -68,6 +85,14 @@ var Landmarks3D = (() => {
     duct:       new THREE.MeshStandardMaterial({ color: 0xbdbdb4, metalness: 0.45, roughness: 0.40 }),
     solarPanel: new THREE.MeshStandardMaterial({ color: 0xd9d9cf, metalness: 0.20, roughness: 0.45 }),
     tankYellow: new THREE.MeshStandardMaterial({ color: 0xcfc24a, metalness: 0.10, roughness: 0.55 }),
+
+    // Aakash Sports Complex — salmon-pink plaster + reddish brick banding,
+    // white roof, dark-blue steel eave fascia + angled brackets.
+    akPink:   new THREE.MeshStandardMaterial({ color: 0xd49a86, metalness: 0.03, roughness: 0.88 }),
+    akPinkD:  new THREE.MeshStandardMaterial({ color: 0xc1836f, metalness: 0.03, roughness: 0.90 }),
+    akBrick:  new THREE.MeshStandardMaterial({ color: 0x9c5a44, metalness: 0.04, roughness: 0.90 }),
+    akBlue:   new THREE.MeshStandardMaterial({ color: 0x2c4a6e, metalness: 0.35, roughness: 0.5 }),
+    akRoof:   new THREE.MeshStandardMaterial({ color: 0xeae6da, metalness: 0.03, roughness: 0.85 }),
 
     // All campus stone buildings use the library sandstone palette so the
     // whole campus reads as one architectural family (per user request)
@@ -86,6 +111,18 @@ var Landmarks3D = (() => {
     deptWinFrame:  new THREE.MeshStandardMaterial({ color: 0x4a4a4a, metalness: 0.30, roughness: 0.55 }),
     deptDoor:      new THREE.MeshStandardMaterial({ color: 0x6a8090, metalness: 0.40, roughness: 0.35 }),
     deptSolar:     new THREE.MeshStandardMaterial({ color: 0x394a5e, metalness: 0.45, roughness: 0.40 }),
+
+    // School of Management & Entrepreneurship (SME) + MBA blocks — warm
+    // cream-plaster prefab academic blocks with WHITE corrugated-metal gable
+    // roofs, white-framed windows with sunshade chajjas, wall-mounted split-AC
+    // outdoor units, and yellow/black painted kerb stones around the base.
+    mgmtWall:  new THREE.MeshStandardMaterial({ color: 0xe7c79c, metalness: 0.03, roughness: 0.90 }),
+    mgmtWallD: new THREE.MeshStandardMaterial({ color: 0xc9a572, metalness: 0.03, roughness: 0.92 }),
+    mgmtAC:    new THREE.MeshStandardMaterial({ color: 0xdcd7cb, metalness: 0.15, roughness: 0.60 }),
+    mgmtACd:   new THREE.MeshStandardMaterial({ color: 0xb4afa3, metalness: 0.20, roughness: 0.55 }),
+    mgmtKerbY: new THREE.MeshStandardMaterial({ color: 0xe3b93a, metalness: 0.04, roughness: 0.80 }),
+    mgmtKerbK: new THREE.MeshStandardMaterial({ color: 0x33312c, metalness: 0.06, roughness: 0.78 }),
+    mgmtRail:  new THREE.MeshStandardMaterial({ color: 0xbfc4c8, metalness: 0.45, roughness: 0.45 }),
 
     // Low-poly vegetation — two foliage greens for subtle variation, one
     // trunk, and two earthy tones for the landscaped berm mounds. All flat
@@ -113,6 +150,31 @@ var Landmarks3D = (() => {
     tankHub:    new THREE.MeshStandardMaterial({ color: 0xcc2020, metalness: 0.20, roughness: 0.65 }),
     tankTrack:  new THREE.MeshStandardMaterial({ color: 0x1a1a1a, metalness: 0.15, roughness: 0.92 }),
     tankPed:    new THREE.MeshStandardMaterial({ color: 0xc8c0b0, metalness: 0.04, roughness: 0.90 }),
+  };
+
+  // Perimeter berm materials — separate from MAT so they aren't traversed
+  // during material-override passes on landmark groups.
+  const BMAT = {
+    // Wave berm exterior: muted blue representing the mural palette
+    // (dominant colour of the blue/white wave murals on the perimeter berm)
+    waveExt: new THREE.MeshStandardMaterial({ color: 0x6fa9c6, metalness: 0.03, roughness: 0.9, side: THREE.DoubleSide }),
+    // Wave berm campus face: warm Jodhpur sandstone — matches campus buildings
+    waveInt: new THREE.MeshStandardMaterial({ color: 0xc2a878, metalness: 0.03, roughness: 0.92, side: THREE.DoubleSide }),
+    // Recessed blind-arch panels on the sandstone campus facade (shadowed)
+    waveArch: new THREE.MeshStandardMaterial({ color: 0x9c8159, metalness: 0.03, roughness: 0.94, side: THREE.DoubleSide }),
+    // Top cap: lighter sandstone coping
+    waveTop: new THREE.MeshStandardMaterial({ color: 0xd4bda0, metalness: 0.03, roughness: 0.86, side: THREE.DoubleSide }),
+    // Structural ribs / pilasters — slim near-white verticals
+    waveRib: new THREE.MeshStandardMaterial({ color: 0xe7dcc4, metalness: 0.03, roughness: 0.82, side: THREE.DoubleSide }),
+
+    // ── Administration / landscape retaining berms (Family 1) ──
+    // Pink Jodhpur-sandstone retaining wall (outer face)
+    bermStone: new THREE.MeshStandardMaterial({ color: 0xc7a079, metalness: 0.03, roughness: 0.92, side: THREE.DoubleSide }),
+    bermStoneTop: new THREE.MeshStandardMaterial({ color: 0xd8c2a2, metalness: 0.03, roughness: 0.85, side: THREE.DoubleSide }),
+    // Terraced landscaped embankment (campus face) — two planting greens + soil
+    bermGreen:  new THREE.MeshStandardMaterial({ color: 0x6f9050, metalness: 0.02, roughness: 0.97, side: THREE.DoubleSide }),
+    bermGreen2: new THREE.MeshStandardMaterial({ color: 0x5c7e44, metalness: 0.02, roughness: 0.97, side: THREE.DoubleSide }),
+    bermSoil:   new THREE.MeshStandardMaterial({ color: 0xa98a63, metalness: 0.02, roughness: 0.98, side: THREE.DoubleSide }),
   };
 
   // ─────────────────────────────────────────────────────────────────────
@@ -252,6 +314,570 @@ var Landmarks3D = (() => {
     const beamPara = new THREE.Mesh(new THREE.BoxGeometry(beamWidth + 0.2, 0.5, beamDepth + 0.2), MAT.hostelRoof);
     beamPara.position.set(0, height + 0.25, beamCenterZ);
     g.add(beamPara);
+
+    return g;
+  }
+
+  // ─────────────────────────────────────────────────────────────────────
+  // TYPE B QUARTERS  (Faculty Housing × 22) + GUEST HOUSE (VISITOR)
+  // ─────────────────────────────────────────────────────────────────────
+  // Reference (aerial photos): a dense cluster of identical G+2 staff/
+  // faculty-housing blocks with a pinwheel/H-shape footprint. Construction
+  // reads as:
+  //   • rough-cut Jodhpur sandstone block masonry (warm peach-tan) on the
+  //     walls, with slim cream stringcourses at each floor line;
+  //   • paired window bays in cream concrete reveals;
+  //   • crisp white flat roofs with low parapets, stepped at the wing ends
+  //     (the central courtyard portion sits one parapet lower than the
+  //     four corner blocks, giving the photogenic tiered silhouette);
+  //   • a small projecting stair-tower headhouse on top of two corners;
+  //   • a cluster of yellow Sintex water tanks + DTH dishes + AC
+  //     condensers scattered on the roof.
+  //
+  // Mesh-local convention: +X = east (length), +Y = up, +Z = south. Built
+  // parametrically (length × depth × floors) so the same function covers
+  // all 22 Type B Quarter blocks and the Guest House next door, with
+  // each LANDMARKS entry passing its own bbox and bearingOffset.
+  function buildTypeBQuarter(opts = {}) {
+    const osmId      = opts.osm_id;
+    const FLOORS     = opts.floors     ?? 3;
+    const floorH     = opts.floorH     ?? 3.4;
+    const H          = FLOORS * floorH;
+    const tankYellow = opts.tankYellow ?? true;
+    const g = new THREE.Group();
+
+    // Materials — default to Jodhpur sandstone; callers (e.g. General
+    // Quarters) can override wallMat/tankMat for a different palette.
+    const wallMat   = opts.wallMat || MAT.gStone;
+    const stringMat = MAT.gStoneDark;
+    const trimMat   = MAT.gFrame;
+    const roofMat   = MAT.gRoof;
+    const louver    = MAT.gLouver;
+    const tankMat   = opts.tankMat || (tankYellow ? MAT.tankYellow : MAT.gTank);
+    const balconyMat = opts.balconyMat || MAT.gqBalcony;
+    const withBalconies = !!opts.balconies;
+    const slabMat = MAT.typeBRoof ?? (MAT.typeBRoof =
+      new THREE.MeshStandardMaterial({
+        color: 0xf6f3ea, emissive: 0x4a4641, metalness: 0.02, roughness: 0.95,
+      }));
+    const acMat = MAT.typeBAc ?? (MAT.typeBAc =
+      new THREE.MeshStandardMaterial({ color: 0xc6c6c2, metalness: 0.4, roughness: 0.55 }));
+
+    // ── Pull the actual OSM polygon and convert to mesh-local meters ─
+    // Look-up happens at build time so the actual H/cross footprint is
+    // extruded (no stylised rectangle). If the data isn't ready yet we
+    // just return an empty group; landmarks-3d.js will retry on next
+    // render anyway, but in practice IITJData is loaded long before the
+    // 3D layer is shown.
+    const buildings = (typeof IITJData !== 'undefined' && IITJData.isReady?.())
+      ? IITJData.getBuildings().features : [];
+    const feat = buildings.find(f => String(f.properties.osm_id) === String(osmId));
+    if (!feat) return g;
+    const ring = feat.geometry.coordinates[0];
+
+    // Centroid (used as the lng/lat anchor in the LANDMARKS entry too).
+    let cLng = 0, cLat = 0;
+    ring.forEach(([lng, lat]) => { cLng += lng; cLat += lat; });
+    cLng /= ring.length; cLat /= ring.length;
+    const mLng = 111320 * Math.cos(cLat * Math.PI / 180);
+
+    // Local meters relative to centroid: +x = east, +y = north.
+    // Drop the closing duplicate so THREE.Shape auto-closes cleanly.
+    const polyXY = ring.slice(0, -1).map(([lng, lat]) =>
+      [(lng - cLng) * mLng, (lat - cLat) * 111320]);
+
+    // Polygon area (signed) — flip if the ring runs clockwise so Shape
+    // gets a CCW outer contour (ExtrudeGeometry assumes CCW).
+    let area2 = 0;
+    for (let i = 0, n = polyXY.length; i < n; i++) {
+      const [x0, y0] = polyXY[i];
+      const [x1, y1] = polyXY[(i + 1) % n];
+      area2 += x0 * y1 - x1 * y0;
+    }
+    if (area2 < 0) polyXY.reverse();
+
+    // Helper: oriented bbox via PCA, returns {ax,ay,bx,by, tMin,tMax, wMin,wMax}
+    function pca(verts) {
+      let sxx = 0, sxy = 0, syy = 0;
+      verts.forEach(([x, y]) => { sxx += x * x; sxy += x * y; syy += y * y; });
+      const theta = 0.5 * Math.atan2(2 * sxy, sxx - syy);
+      const ax = Math.cos(theta), ay = Math.sin(theta);
+      const bx = -ay, by = ax;
+      const T = verts.map(([x, y]) => x * ax + y * ay);
+      const W = verts.map(([x, y]) => x * bx + y * by);
+      return {
+        ax, ay, bx, by, theta,
+        tMin: Math.min(...T), tMax: Math.max(...T),
+        wMin: Math.min(...W), wMax: Math.max(...W),
+      };
+    }
+    const obb = pca(polyXY);
+    const length = obb.tMax - obb.tMin;    // along principal axis
+    const depth  = obb.wMax - obb.wMin;    // perpendicular
+
+    // ── A) Extrude the actual polygon for the main body ─────────────
+    function shapeFromPoly(scale = 1, ox = 0, oy = 0) {
+      const sh = new THREE.Shape();
+      const [x0, y0] = polyXY[0];
+      sh.moveTo(x0 * scale + ox, y0 * scale + oy);
+      for (let i = 1; i < polyXY.length; i++) {
+        const [x, y] = polyXY[i];
+        sh.lineTo(x * scale + ox, y * scale + oy);
+      }
+      sh.closePath();
+      return sh;
+    }
+    const bodyShape = shapeFromPoly();
+    const bodyGeo = new THREE.ExtrudeGeometry(bodyShape, {
+      depth: H, bevelEnabled: false, steps: 1,
+    });
+    bodyGeo.rotateX(-Math.PI / 2);
+    const body = new THREE.Mesh(bodyGeo, wallMat);
+    g.add(body);
+
+    // ── A2) Balconies — projecting slabs + cane-railing bands on the longest
+    //        outer facades, at each upper floor. Only the two longest edges
+    //        get them (the photogenic fronts); they project OUTWARD along a
+    //        straight wall so, unlike bands wrapping the whole outline, they
+    //        never read as slanting lines across the roof.
+    if (withBalconies) {
+      const edges = [];
+      for (let i = 0, n = polyXY.length; i < n; i++) {
+        const [x0, y0] = polyXY[i];
+        const [x1, y1] = polyXY[(i + 1) % n];
+        edges.push({ x0, y0, x1, y1, len: Math.hypot(x1 - x0, y1 - y0) });
+      }
+      edges.sort((a, b) => b.len - a.len);
+      const pip = (px, py) => {       // point-in-polygon
+        let inside = false;
+        for (let i = 0, j = polyXY.length - 1; i < polyXY.length; j = i++) {
+          const [xi, yi] = polyXY[i], [xj, yj] = polyXY[j];
+          if (((yi > py) !== (yj > py)) &&
+              (px < (xj - xi) * (py - yi) / (yj - yi) + xi)) inside = !inside;
+        }
+        return inside;
+      };
+      const balW = 1.2;        // balcony projection depth
+      for (const e of edges.slice(0, 2)) {
+        const dx = e.x1 - e.x0, dy = e.y1 - e.y0;
+        const len = Math.hypot(dx, dy);
+        if (len < 6) continue;
+        const tx = dx / len, ty = dy / len;
+        let nx = ty, ny = -tx;                       // perpendicular
+        const mx = (e.x0 + e.x1) / 2, my = (e.y0 + e.y1) / 2;
+        if (pip(mx + nx * 0.5, my + ny * 0.5)) { nx = -nx; ny = -ny; }   // outward
+        const txW = tx, tzW = -ty, nxW = nx, nzW = -ny;
+        const rotY = Math.atan2(-tzW, txW);
+        const slabLen = len * 0.82;
+        for (let f = 1; f < FLOORS; f++) {           // skip ground floor
+          const y = f * floorH;
+          const cx = mx + nxW * (balW / 2 + 0.02);
+          const cz = -my + nzW * (balW / 2 + 0.02);
+          // balcony floor slab
+          const slabB = new THREE.Mesh(new THREE.BoxGeometry(slabLen, 0.14, balW), wallMat);
+          slabB.position.set(cx, y, cz);
+          slabB.rotation.y = rotY;
+          g.add(slabB);
+          // cane / wood railing band on the outer lip
+          const rail = new THREE.Mesh(new THREE.BoxGeometry(slabLen, 0.85, 0.10), balconyMat);
+          rail.position.set(mx + nxW * (balW + 0.02), y + 0.5, -my + nzW * (balW + 0.02));
+          rail.rotation.y = rotY;
+          g.add(rail);
+        }
+      }
+    }
+
+    // Floor-line stringcourses + cream cornice — intentionally omitted.
+    // Any thin band sitting proud of the H-shaped wall reads as a slanting
+    // dark line from a straight-down map view (and on the inner H-recess
+    // edges, as a line crossing the open courtyard). The plain sandstone
+    // wall + bright white roof slab give the clean read the user asked for.
+
+    // ── B) White roof slab — the exact body polygon, extruded a little and
+    //       lifted 5 cm over the body top face (the lift avoids z-fighting
+    //       between the two coplanar surfaces). Using the same shape means
+    //       no offset math that could self-intersect on the concave H-corners.
+    const slabH = 0.30;
+    const slabLift = 0.05;
+    const slabGeo = new THREE.ExtrudeGeometry(bodyShape, {
+      depth: slabH, bevelEnabled: false, steps: 1,
+    });
+    slabGeo.rotateX(-Math.PI / 2);
+    const slab = new THREE.Mesh(slabGeo, slabMat);
+    slab.position.y = H + slabLift;
+    g.add(slab);
+
+    // ── C) Parapet rim — intentionally omitted. Any thin band sitting proud
+    //       of the H-shaped wall reads as a slanting line from a straight-down
+    //       map view, which clutters the rooftops. The white slab edge already
+    //       gives a clean parapet read, so we leave the rim off.
+
+    // ── D) Window bays — omitted on purpose.
+    //
+    // Earlier revisions placed louvered window bays around every polygon
+    // edge so the facades read at street level, but at the typical map
+    // zoom (with a slight oblique pitch) the 3-floor stack on each edge
+    // rendered as a long dark stripe — and on the H-shape's *inner*
+    // courtyard walls the stripes became long slanting lines crossing the
+    // roof. Both effects fight against the clean sandstone-and-white-roof
+    // read the user asked for, so we leave the facades plain and rely on
+    // the stringcourses + cornice + parapet to carry the elevation detail.
+    // (The legacy placement function is kept commented out below in case
+    // street-view zooms eventually need it again.)
+    /* eslint-disable */
+    function _unusedPlaceWindowsOnEdge(x0, y0, x1, y1) {
+      // y0/y1 are polygon-Y; world Z = -y. Direction tangent (tx, tz) along
+      // edge, outward normal (nx, nz) pointing AWAY from polygon centroid.
+      const dx = x1 - x0, dy = y1 - y0;
+      const segLen = Math.hypot(dx, dy);
+      if (segLen < 5) return;                          // too short for a bay
+      const tx = dx / segLen, ty = dy / segLen;
+      let nx = ty, ny = -tx;                            // perpendicular
+      // Ensure n points outward — sample midpoint, shift along n, check
+      // whether resulting point is inside polygon. If inside, flip.
+      const mxP = (x0 + x1) / 2, myP = (y0 + y1) / 2;
+      function pointInPoly(px, py) {
+        let inside = false;
+        for (let i = 0, j = polyXY.length - 1; i < polyXY.length; j = i++) {
+          const [xi, yi] = polyXY[i], [xj, yj] = polyXY[j];
+          if (((yi > py) !== (yj > py)) &&
+              (px < (xj - xi) * (py - yi) / (yj - yi) + xi)) inside = !inside;
+        }
+        return inside;
+      }
+      if (pointInPoly(mxP + nx * 0.5, myP + ny * 0.5)) { nx = -nx; ny = -ny; }
+
+      // Translate to mesh coords: world X = polygon X, world Z = -polygon Y.
+      const txW = tx,   tzW = -ty;
+      const nxW = nx,   nzW = -ny;
+      // Edge endpoints in mesh coords
+      const ex0 = x0, ez0 = -y0, ex1 = x1, ez1 = -y1;
+
+      const bayPitch = 3.4;                            // ~3.4 m bay spacing
+      const winW = 1.5, winH = 1.7;
+      const bays = Math.max(1, Math.floor(segLen / bayPitch));
+      const margin = (segLen - bays * bayPitch) / 2 + bayPitch / 2;
+      for (let b = 0; b < bays; b++) {
+        const sAlong = margin + b * bayPitch;
+        const px = ex0 + txW * sAlong + nxW * 0.06;
+        const pz = ez0 + tzW * sAlong + nzW * 0.06;
+        // Rotation around Y so the frame's local X axis (its width, the wall-
+        // hugging tangent direction) lines up with the edge tangent. Y-rotation
+        // by θ sends (1,0,0) → (cos θ, 0, −sin θ); setting that to (txW,0,tzW)
+        // gives θ = atan2(−tzW, txW). The earlier code used atan2(nzW,nxW)
+        // which is rotated 90° — that made each frame stand perpendicular to
+        // the wall and read as a long dark stripe across the roof.
+        const winRotY = Math.atan2(-tzW, txW);
+        for (let f = 0; f < FLOORS; f++) {
+          const y = f * floorH + floorH * 0.55;
+          // Cream reveal frame (a thin slab on the wall face).
+          const frame = new THREE.Mesh(
+            new THREE.BoxGeometry(winW + 0.20, winH + 0.20, 0.10),
+            trimMat,
+          );
+          frame.position.set(px, y, pz);
+          frame.rotation.y = winRotY;
+          g.add(frame);
+          // Louvered shutter just behind the frame.
+          const shutter = new THREE.Mesh(
+            new THREE.BoxGeometry(winW, winH, 0.05),
+            louver,
+          );
+          shutter.position.set(px - nxW * 0.04, y, pz - nzW * 0.04);
+          shutter.rotation.y = winRotY;
+          g.add(shutter);
+        }
+      }
+    }
+    // (windows intentionally not placed — see note above)
+    /* eslint-enable */
+
+    // ── Rooftop-placement helpers ──────────────────────────────────
+    // Rooftop accessories were previously positioned from the oriented
+    // bounding box, which on a rotated or non-rectangular footprint let
+    // them hang off the roof edge. These helpers keep every accessory
+    // fully inside the actual polygon.
+    const obbAngle = Math.atan2(obb.ay, obb.ax);   // building rotation (Y axis)
+    function pointInPoly(px, py) {
+      let inside = false;
+      for (let i = 0, j = polyXY.length - 1; i < polyXY.length; j = i++) {
+        const [xi, yi] = polyXY[i], [xj, yj] = polyXY[j];
+        if (((yi > py) !== (yj > py)) &&
+            (px < (xj - xi) * (py - yi) / (yj - yi) + xi)) inside = !inside;
+      }
+      return inside;
+    }
+    function distToPolyEdge(px, py) {
+      let best = Infinity;
+      for (let i = 0, j = polyXY.length - 1; i < polyXY.length; j = i++) {
+        const [xi, yi] = polyXY[i], [xj, yj] = polyXY[j];
+        const dx = xj - xi, dy = yj - yi;
+        const t = Math.max(0, Math.min(1, ((px - xi) * dx + (py - yi) * dy) / (dx * dx + dy * dy || 1)));
+        const cx = xi + t * dx, cy = yi + t * dy;
+        best = Math.min(best, Math.hypot(px - cx, py - cy));
+      }
+      return best;
+    }
+    // Pull a target polygon-coord toward the centroid (origin) until it sits
+    // at least `clearance` inside the polygon. Returns mesh coords [x, z].
+    function placeInside(px, py, clearance) {
+      for (let s = 1; s >= 0; s -= 0.05) {
+        const qx = px * s, qy = py * s;
+        if (pointInPoly(qx, qy) && distToPolyEdge(qx, qy) >= clearance) {
+          return [qx, -qy];                        // polygon-Y → mesh-Z
+        }
+      }
+      return [0, 0];                               // fallback: centroid
+    }
+
+    // ── E) Stair-tower headhouses — rotated to the building angle and
+    //       clamped so they never overhang the roof edge.
+    const towerH = 3.0, towerW = 5.5, towerD = 5.5;
+    const towerClear = Math.hypot(towerW, towerD) / 2 + 0.3;
+    [+1, -1].forEach(sgn => {
+      const tAxis = (obb.tMin + obb.tMax) / 2 + (obb.tMax - obb.tMin) * 0.30 * sgn;
+      const wAxis = (obb.wMin + obb.wMax) / 2 + (obb.wMax - obb.wMin) * 0.18 * sgn;
+      const px = tAxis * obb.ax + wAxis * obb.bx;
+      const py = tAxis * obb.ay + wAxis * obb.by;
+      const [mx, mz] = placeInside(px, py, towerClear);
+      const tower = new THREE.Mesh(new THREE.BoxGeometry(towerW, towerH, towerD), wallMat);
+      tower.position.set(mx, H + slabLift + slabH + towerH / 2 + 0.05, mz);
+      tower.rotation.y = obbAngle;
+      g.add(tower);
+      const tCap = new THREE.Mesh(new THREE.BoxGeometry(towerW + 0.2, 0.35, towerD + 0.2), roofMat);
+      tCap.position.set(mx, H + slabLift + slabH + towerH + 0.20, mz);
+      tCap.rotation.y = obbAngle;
+      g.add(tCap);
+    });
+
+    // ── F) Water tanks scattered along the principal axis, clamped inside.
+    const tankGeo = new THREE.CylinderGeometry(0.55, 0.55, 1.05, 10);
+    const tankYBase = H + slabLift + slabH + 0.6;
+    for (let i = 0; i < 6; i++) {
+      const tAxis = obb.tMin + (obb.tMax - obb.tMin) * (0.18 + i * 0.13);
+      const wSide = (i % 2 === 0) ? 0.32 : -0.32;
+      const wAxis = (obb.wMin + obb.wMax) / 2 + (obb.wMax - obb.wMin) * wSide;
+      const px = tAxis * obb.ax + wAxis * obb.bx;
+      const py = tAxis * obb.ay + wAxis * obb.by;
+      const [mx, mz] = placeInside(px, py, 0.8);
+      const t = new THREE.Mesh(tankGeo, tankMat);
+      t.position.set(mx, tankYBase, mz);
+      g.add(t);
+    }
+
+    // ── G) AC condenser boxes — near (but inside) the long parapets.
+    const acGeo = new THREE.BoxGeometry(0.9, 0.6, 0.7);
+    for (let i = 0; i < 6; i++) {
+      const tAxis = obb.tMin + (obb.tMax - obb.tMin) * (i + 0.5) / 6;
+      for (const wSign of [+1, -1]) {
+        const wAxis = (obb.wMin + obb.wMax) / 2 + (obb.wMax - obb.wMin) * 0.40 * wSign;
+        const px = tAxis * obb.ax + wAxis * obb.bx;
+        const py = tAxis * obb.ay + wAxis * obb.by;
+        const [mx, mz] = placeInside(px, py, 0.8);
+        const ac = new THREE.Mesh(acGeo, acMat);
+        ac.position.set(mx, H + slabLift + slabH + 0.40, mz);
+        ac.rotation.y = obbAngle;
+        g.add(ac);
+      }
+    }
+
+    // ── H) Small mechanical-room box near the centre (already interior).
+    const mech = new THREE.Mesh(new THREE.BoxGeometry(3.2, 1.4, 2.2), wallMat);
+    mech.position.set(0, H + slabLift + slabH + 0.7, 0);
+    mech.rotation.y = obbAngle;
+    g.add(mech);
+    const mechCap = new THREE.Mesh(new THREE.BoxGeometry(3.4, 0.15, 2.4), roofMat);
+    mechCap.position.set(0, H + slabLift + slabH + 1.4, 0);
+    mechCap.rotation.y = obbAngle;
+    g.add(mechCap);
+
+    return g;
+  }
+
+  // ─────────────────────────────────────────────────────────────────────
+  // DEPT. MATHS / SOLA — single-storey courtyard halls with hipped metal roof
+  // ─────────────────────────────────────────────────────────────────────
+  // Reference (drone + front photos): a large (~50 m) single-storey block of
+  // rough-cut RED sandstone masonry wrapping a central open courtyard, capped
+  // by a low-pitch light-grey CORRUGATED-METAL hipped roof that slopes from
+  // the outer eaves up to a ridge and back down into the courtyard. A salmon
+  // plinth band runs along the base and a small gabled porch marks the
+  // entrance. Built from the real OSM polygon (extruded as a ring) so it
+  // aligns exactly; the courtyard + roof are derived by scaling the polygon
+  // toward its centroid.
+  function buildCourtyardHall(opts = {}) {
+    const osmId         = opts.osm_id;
+    const wallH         = opts.wallH         ?? 4.8;
+    const roofRise      = opts.roofRise      ?? 2.4;
+    const courtyardFrac = opts.courtyardFrac ?? 0.36;
+    const g = new THREE.Group();
+
+    const wallMat   = MAT.mathWall;
+    const plinthMat = MAT.mathPlinth;
+    const roofMat   = MAT.metalRoof;
+    const ridgeMat  = MAT.metalRidge;
+
+    // ── OSM polygon → local metres, centred on centroid ──────────────
+    const buildings = (typeof IITJData !== 'undefined' && IITJData.isReady?.())
+      ? IITJData.getBuildings().features : [];
+    const feat = buildings.find(f => String(f.properties.osm_id) === String(osmId));
+    if (!feat) return g;
+    const ring = feat.geometry.coordinates[0];
+    let cLng = 0, cLat = 0;
+    ring.forEach(([lng, lat]) => { cLng += lng; cLat += lat; });
+    cLng /= ring.length; cLat /= ring.length;
+    const mLng = 111320 * Math.cos(cLat * Math.PI / 180);
+    let poly = ring.slice(0, -1).map(([lng, lat]) => [(lng - cLng) * mLng, (lat - cLat) * 111320]);
+    let area2 = 0;
+    for (let i = 0; i < poly.length; i++) {
+      const [x0, y0] = poly[i], [x1, y1] = poly[(i + 1) % poly.length];
+      area2 += x0 * y1 - x1 * y0;
+    }
+    if (area2 < 0) poly.reverse();
+    const n = poly.length;
+    const scaleP = (s) => poly.map(([x, y]) => [x * s, y * s]);   // toward centroid (origin)
+    const court = scaleP(courtyardFrac);
+
+    function ringShape(outer, innerHole) {
+      const sh = new THREE.Shape();
+      outer.forEach(([x, y], i) => i ? sh.lineTo(x, y) : sh.moveTo(x, y));
+      sh.closePath();
+      const h = new THREE.Path();
+      innerHole.forEach(([x, y], i) => i ? h.lineTo(x, y) : h.moveTo(x, y));
+      h.closePath();
+      sh.holes.push(h);
+      return sh;
+    }
+
+    // ── Walls: ring (outer polygon with courtyard hole) extruded to wallH
+    const wGeo = new THREE.ExtrudeGeometry(ringShape(poly, court), { depth: wallH, bevelEnabled: false, steps: 1 });
+    wGeo.rotateX(-Math.PI / 2);
+    g.add(new THREE.Mesh(wGeo, wallMat));
+
+    // ── Salmon plinth band — slightly larger ring, low, at the base
+    const plGeo = new THREE.ExtrudeGeometry(ringShape(scaleP(1.015), scaleP(courtyardFrac * 0.985)), { depth: 0.9, bevelEnabled: false, steps: 1 });
+    plGeo.rotateX(-Math.PI / 2);
+    const plinth = new THREE.Mesh(plGeo, plinthMat);
+    plinth.position.y = 0.001;
+    g.add(plinth);
+
+    // ── Hipped ring roof: outer eave (overhung) → ridge → courtyard eave
+    const eaveY = wallH - 0.10;
+    const ridgeY = wallH + roofRise;
+    const outerEave = scaleP(1.07);
+    const innerEave = scaleP(courtyardFrac * 0.93);
+    const ridgeLoop = scaleP((1.07 + courtyardFrac) / 2);
+    const toMesh = (p, y) => [p[0], y, -p[1]];
+    // INDEXED geometry with shared loop vertices so computeVertexNormals
+    // averages across the hips — this removes the harsh diagonal crease lines
+    // (the "white slanting lines") that per-face flat normals produced, while
+    // keeping the hipped form. Vertex layout: [outerEave(n), ridge(n), innerEave(n)].
+    const verts = [];
+    outerEave.forEach(p => verts.push(...toMesh(p, eaveY)));
+    ridgeLoop.forEach(p => verts.push(...toMesh(p, ridgeY)));
+    innerEave.forEach(p => verts.push(...toMesh(p, eaveY)));
+    const O = i => i, R = i => n + i, I = i => 2 * n + i;
+    const idx = [];
+    for (let i = 0; i < n; i++) {
+      const j = (i + 1) % n;
+      // outer slope (eave → ridge)
+      idx.push(O(i), O(j), R(j), O(i), R(j), R(i));
+      // inner slope (ridge → courtyard)
+      idx.push(R(i), R(j), I(j), R(i), I(j), I(i));
+    }
+    const roofGeo = new THREE.BufferGeometry();
+    roofGeo.setAttribute('position', new THREE.Float32BufferAttribute(verts, 3));
+    roofGeo.setIndex(idx);
+    // Force every roof normal to point straight up so the whole roof shades
+    // uniformly — this eliminates the hip/rafter shading lines (the "white
+    // slanting lines") entirely while the geometry still reads as a hipped
+    // form via its silhouette.
+    const upN = new Float32Array(verts.length);
+    for (let k = 1; k < upN.length; k += 3) upN[k] = 1;
+    roofGeo.setAttribute('normal', new THREE.BufferAttribute(upN, 3));
+    g.add(new THREE.Mesh(roofGeo, roofMat));
+
+    // Ridge caps along the ridge loop
+    for (let i = 0; i < n; i++) {
+      const j = (i + 1) % n;
+      const a = ridgeLoop[i], b = ridgeLoop[j];
+      const dx = b[0] - a[0], dy = b[1] - a[1];
+      const len = Math.hypot(dx, dy);
+      if (len < 0.3) continue;
+      const cap = new THREE.Mesh(new THREE.BoxGeometry(len, 0.16, 0.45), ridgeMat);
+      cap.position.set((a[0] + b[0]) / 2, ridgeY + 0.06, -((a[1] + b[1]) / 2));
+      cap.rotation.y = Math.atan2(-dy, dx);
+      g.add(cap);
+    }
+
+    // ── Gabled entrance porch anchored exactly where the access path meets
+    //    the building. The campus paths dead-end right at the entrance node
+    //    (for both halls the path terminus coincides with footprint vertex
+    //    v2 — the centre kink of the south facade), so we anchor the porch at
+    //    that nearest path point and face it outward (centroid → anchor).
+    const roads = (typeof IITJData !== 'undefined' && IITJData.isReady?.())
+      ? IITJData.getRoads().features : [];
+    let roadLocal = null, bestRoadD = Infinity;
+    for (const r of roads) {
+      for (const [lng, lat] of r.geometry.coordinates) {
+        const lx = (lng - cLng) * mLng, ly = (lat - cLat) * 111320;
+        const d = Math.hypot(lx, ly);
+        if (d < bestRoadD) { bestRoadD = d; roadLocal = [lx, ly]; }
+      }
+    }
+    // Anchor = the closest point on the outer wall to that path terminus, so
+    // the porch sits flush on the facade even if the node is a metre off.
+    const target = roadLocal || [0, -1e6];     // far-south fallback
+    let ax = 0, ay = -1, bestD = Infinity;
+    for (let i = 0; i < n; i++) {
+      const a = poly[i], b = poly[(i + 1) % n];
+      const dx = b[0] - a[0], dy = b[1] - a[1];
+      const L2 = dx * dx + dy * dy || 1;
+      let t = ((target[0] - a[0]) * dx + (target[1] - a[1]) * dy) / L2;
+      t = Math.max(0, Math.min(1, t));
+      const px = a[0] + t * dx, py = a[1] + t * dy;
+      const d = Math.hypot(target[0] - px, target[1] - py);
+      if (d < bestD) { bestD = d; ax = px; ay = py; }
+    }
+    {
+      // Face outward = direction from centroid (origin) to the anchor.
+      const aL = Math.hypot(ax, ay) || 1;
+      const nx = ax / aL, ny = ay / aL;        // outward normal
+      const tx = -ny, ty = nx;                 // tangent (along facade)
+      const pw = 7, proj = 3.4, postH = wallH, apex = wallH + 1.5;
+      const txW = tx, tzW = -ty, nxW = nx, nzW = -ny;     // mesh dirs
+      const cx = ax, cz = -ay;                            // porch anchor in mesh
+      const rotY = Math.atan2(-ty, tx);
+      // two posts at the front corners
+      [-pw / 2, pw / 2].forEach(s => {
+        const px = cx + txW * s + nxW * proj;
+        const pz = cz + tzW * s + nzW * proj;
+        const post = new THREE.Mesh(new THREE.BoxGeometry(0.4, postH, 0.4), wallMat);
+        post.position.set(px, postH / 2, pz);
+        g.add(post);
+      });
+      // gable roof: two sloped quads from the wall (apex ridge) out to the eave
+      const wallTop = (s) => [cx + txW * s, eaveY + 0.6, cz + tzW * s];           // ridge anchored at wall, raised
+      const front = (s) => [cx + txW * s + nxW * proj, postH, cz + tzW * s + nzW * proj];
+      const apexB = (s) => [cx + txW * s + nxW * (proj * 0.5), apex, cz + tzW * s + nzW * (proj * 0.5)];
+      const gp = [];
+      const q = (A, B, C, D) => { gp.push(...A, ...B, ...C, ...A, ...C, ...D); };
+      // ridge runs along the projection at the centre; two slopes to each long side
+      q(wallTop(-pw / 2), wallTop(pw / 2), apexB(pw / 2), apexB(-pw / 2));
+      q(apexB(-pw / 2), apexB(pw / 2), front(pw / 2), front(-pw / 2));
+      const pGeo = new THREE.BufferGeometry();
+      pGeo.setAttribute('position', new THREE.Float32BufferAttribute(gp, 3));
+      pGeo.computeVertexNormals();
+      const pr = new THREE.Mesh(pGeo, roofMat); pr.material.side = THREE.DoubleSide;
+      g.add(pr);
+      // triangular gable face (pediment) at the front, in wall colour
+      const tri = [...front(-pw / 2), ...front(pw / 2), ...apexB(0)];
+      const tGeo = new THREE.BufferGeometry();
+      tGeo.setAttribute('position', new THREE.Float32BufferAttribute(tri, 3));
+      tGeo.computeVertexNormals();
+      const tg = new THREE.Mesh(tGeo, plinthMat); tg.material.side = THREE.DoubleSide;
+      g.add(tg);
+    }
 
     return g;
   }
@@ -645,6 +1271,894 @@ var Landmarks3D = (() => {
   }
 
   // ─────────────────────────────────────────────────────────────────────
+  // SME & MBA — School of Management blocks (matches drone + front photos)
+  // ─────────────────────────────────────────────────────────────────────
+  // Reference photos: warm cream-plaster prefab academic blocks with a bright
+  // WHITE corrugated-metal GABLE roof (deep eave overhang), white-framed
+  // windows each capped by a slim concrete sunshade (chajja), rows of
+  // wall-mounted split-AC outdoor units, a slab-canopy entrance reached by an
+  // accessibility RAMP with steel-pipe railings, and yellow/black painted
+  // kerb stones lining the base. SME is a long G+1 block; MBA is an L of two
+  // single-storey wings wrapping a paved courtyard with two tree-ring planters.
+  //
+  // Shared helpers build a single rectangular wing in mesh-local metres
+  // (+X / +Z plan axes, +Y up); each LANDMARKS entry rotates the wing onto
+  // its footprint via bearingOffset = 90° − (long-axis bearing).
+
+  // White corrugated-metal gable roof over a wing. Ridge runs along the wing's
+  // LONGER plan dimension; eaves overhang by `ov`; gable-end pediments are
+  // filled in wall colour. baseY = wall top.
+  function _mgmtGableRoof(g, cx, cz, w, d, baseY, rise, ov) {
+    ov = ov ?? 0.9;
+    const ridgeAlongX = w >= d;
+    const eaveY = baseY, ridgeY = baseY + rise;
+    const verts = [];
+    const q = (A, B, C, D2) => { verts.push(...A, ...B, ...C, ...A, ...C, ...D2); };
+    const tris = [];
+    const X0 = cx - w / 2 - ov, X1 = cx + w / 2 + ov;
+    const Z0 = cz - d / 2 - ov, Z1 = cz + d / 2 + ov;
+    if (ridgeAlongX) {
+      q([X0, eaveY, Z1], [X1, eaveY, Z1], [X1, ridgeY, cz], [X0, ridgeY, cz]);   // +Z slope
+      q([X0, ridgeY, cz], [X1, ridgeY, cz], [X1, eaveY, Z0], [X0, eaveY, Z0]);   // -Z slope
+      [cx - w / 2, cx + w / 2].forEach(xe => {
+        tris.push([xe, eaveY, cz - d / 2], [xe, eaveY, cz + d / 2], [xe, ridgeY, cz]);
+      });
+      const cap = new THREE.Mesh(new THREE.BoxGeometry(w + 2 * ov, 0.18, 0.5), MAT.metalRidge);
+      cap.position.set(cx, ridgeY + 0.05, cz); g.add(cap);
+      [Z0, Z1].forEach(ze => {
+        const f = new THREE.Mesh(new THREE.BoxGeometry(w + 2 * ov, 0.32, 0.18), MAT.portalWhite);
+        f.position.set(cx, eaveY - 0.02, ze); g.add(f);
+      });
+    } else {
+      q([X1, eaveY, Z0], [X1, eaveY, Z1], [cx, ridgeY, Z1], [cx, ridgeY, Z0]);   // +X slope
+      q([cx, ridgeY, Z0], [cx, ridgeY, Z1], [X0, eaveY, Z1], [X0, eaveY, Z0]);   // -X slope
+      [cz - d / 2, cz + d / 2].forEach(ze => {
+        tris.push([cx - w / 2, eaveY, ze], [cx + w / 2, eaveY, ze], [cx, ridgeY, ze]);
+      });
+      const cap = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.18, d + 2 * ov), MAT.metalRidge);
+      cap.position.set(cx, ridgeY + 0.05, cz); g.add(cap);
+      [X0, X1].forEach(xe => {
+        const f = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.32, d + 2 * ov), MAT.portalWhite);
+        f.position.set(xe, eaveY - 0.02, cz); g.add(f);
+      });
+    }
+    const rg = new THREE.BufferGeometry();
+    rg.setAttribute('position', new THREE.Float32BufferAttribute(verts, 3));
+    rg.computeVertexNormals();
+    g.add(new THREE.Mesh(rg, MAT.metalRoof));
+    const tg = new THREE.BufferGeometry();
+    tg.setAttribute('position', new THREE.Float32BufferAttribute(tris.flat(), 3));
+    tg.computeVertexNormals();
+    const tm = new THREE.Mesh(tg, MAT.mgmtWall); tm.material.side = THREE.DoubleSide;
+    g.add(tm);
+  }
+
+  // Window rows (white frame + dark glass + sunshade) and split-AC units on a
+  // single wall face. `treat` may contain 'win' and/or 'ac'.
+  function _mgmtFace(g, cx, cz, w, d, h, floors, side, treat) {
+    const runsAlongX = (side === '+z' || side === '-z');
+    const wallLen = runsAlongX ? w : d;
+    const faceZ = side === '+z' ? cz + d / 2 : (side === '-z' ? cz - d / 2 : cz);
+    const faceX = side === '+x' ? cx + w / 2 : (side === '-x' ? cx - w / 2 : cx);
+    const outSign = (side === '+x' || side === '+z') ? 1 : -1;
+    const place = (t, cy, proj, bw, bh, bt, mat) => {
+      const m = runsAlongX
+        ? new THREE.Mesh(new THREE.BoxGeometry(bw, bh, bt), mat)
+        : new THREE.Mesh(new THREE.BoxGeometry(bt, bh, bw), mat);
+      if (runsAlongX) m.position.set(cx + t, cy, faceZ + outSign * proj);
+      else            m.position.set(faceX + outSign * proj, cy, cz + t);
+      g.add(m); return m;
+    };
+    const cols = Math.max(2, Math.round(wallLen / 3.6));
+    const colW = wallLen / cols;
+    if (treat.includes('win')) {
+      for (let f = 0; f < floors; f++) {
+        const cy = h * (f + 0.5) / floors;
+        for (let c = 0; c < cols; c++) {
+          const t = -wallLen / 2 + (c + 0.5) * colW;
+          place(t, cy, 0.06, 1.7, 1.5, 0.12, MAT.portalWhite);   // white reveal frame
+          place(t, cy, 0.10, 1.35, 1.2, 0.06, MAT.entrance);     // dark glazing
+          place(t, cy + 0.95, 0.30, 2.05, 0.16, 0.55, MAT.portalWhite); // sunshade chajja
+        }
+      }
+    }
+    if (treat.includes('ac')) {
+      const cy = h - 1.25;
+      for (let c = 0; c < cols; c++) {
+        if (c % 2 === 1) continue;
+        const t = -wallLen / 2 + (c + 0.5) * colW;
+        place(t, cy, 0.30, 1.0, 0.66, 0.40, MAT.mgmtAC);
+        place(t, cy, 0.52, 0.80, 0.50, 0.06, MAT.mgmtACd);   // fan grille
+      }
+    }
+  }
+
+  // A single cream wing: shell + plinth + floor bands + per-face treatment +
+  // optional kerb ring + white gable roof.
+  function _mgmtWing(g, o) {
+    const cx = o.cx ?? 0, cz = o.cz ?? 0, w = o.w, d = o.d;
+    const wallH = o.wallH, floors = o.floors ?? 1, rise = o.rise ?? 2.6;
+    const faces = o.faces || {};
+    const block = new THREE.Mesh(new THREE.BoxGeometry(w, wallH, d), MAT.mgmtWall);
+    block.position.set(cx, wallH / 2, cz); g.add(block);
+    const plinth = new THREE.Mesh(new THREE.BoxGeometry(w + 0.4, 0.7, d + 0.4), MAT.mgmtWallD);
+    plinth.position.set(cx, 0.35, cz); g.add(plinth);
+    for (let i = 1; i < floors; i++) {
+      const band = new THREE.Mesh(new THREE.BoxGeometry(w + 0.14, 0.3, d + 0.14), MAT.mgmtWallD);
+      band.position.set(cx, wallH * i / floors, cz); g.add(band);
+    }
+    for (const side in faces) _mgmtFace(g, cx, cz, w, d, wallH, floors, side, faces[side]);
+    if (o.kerb) _mgmtKerb(g, cx, cz, w, d);
+    _mgmtGableRoof(g, cx, cz, w, d, wallH, rise, o.ov);
+  }
+
+  // Yellow/black kerb ring around a wing's base.
+  function _mgmtKerb(g, cx, cz, w, d) {
+    const off = 0.55, y = 0.18, hk = 0.36;
+    [cz + d / 2 + off, cz - d / 2 - off].forEach(zc => {
+      const curb = new THREE.Mesh(new THREE.BoxGeometry(w + 2 * off, hk, 0.3), MAT.mgmtKerbY);
+      curb.position.set(cx, y, zc); g.add(curb);
+      const n = Math.max(2, Math.round(w / 2.4));
+      for (let i = 0; i <= n; i++) {
+        const cap = new THREE.Mesh(new THREE.BoxGeometry(0.34, hk + 0.02, 0.34), MAT.mgmtKerbK);
+        cap.position.set(cx - w / 2 + i * (w / n), y + 0.01, zc); g.add(cap);
+      }
+    });
+    [cx + w / 2 + off, cx - w / 2 - off].forEach(xc => {
+      const curb = new THREE.Mesh(new THREE.BoxGeometry(0.3, hk, d + 2 * off), MAT.mgmtKerbY);
+      curb.position.set(xc, y, cz); g.add(curb);
+      const n = Math.max(2, Math.round(d / 2.4));
+      for (let i = 0; i <= n; i++) {
+        const cap = new THREE.Mesh(new THREE.BoxGeometry(0.34, hk + 0.02, 0.34), MAT.mgmtKerbK);
+        cap.position.set(xc, y + 0.01, cz - d / 2 + i * (d / n)); g.add(cap);
+      }
+    });
+  }
+
+  // A straight kerb run between two plan points (used along MBA's courtyard).
+  function _mgmtKerbLine(g, ax, az, bx, bz) {
+    const dx = bx - ax, dz = bz - az, L = Math.hypot(dx, dz);
+    const curb = new THREE.Mesh(new THREE.BoxGeometry(L, 0.34, 0.3), MAT.mgmtKerbY);
+    curb.position.set((ax + bx) / 2, 0.17, (az + bz) / 2);
+    curb.rotation.y = Math.atan2(-dz, dx); g.add(curb);
+    const n = Math.max(1, Math.round(L / 2.4));
+    for (let i = 0; i <= n; i++) {
+      const t = i / n;
+      const cap = new THREE.Mesh(new THREE.BoxGeometry(0.34, 0.37, 0.34), MAT.mgmtKerbK);
+      cap.position.set(ax + dx * t, 0.18, az + dz * t); g.add(cap);
+    }
+  }
+
+  // Slab-canopy entrance + accessibility ramp with steel railings. `dir` is the
+  // outward wall normal: '+x' | '-x' | '+z' | '-z'. Built in a local frame
+  // (+x = outward, +z = sideways along the facade) then rotated onto the wall.
+  function _mgmtRampPorch(g, x, z, dir) {
+    const grp = new THREE.Group();
+    const frame = new THREE.Mesh(new THREE.BoxGeometry(0.3, 3.0, 2.7), MAT.portalWhite);
+    frame.position.set(0.06, 1.5, 0); grp.add(frame);
+    const door = new THREE.Mesh(new THREE.BoxGeometry(0.28, 2.7, 2.2), MAT.entrance);
+    door.position.set(0.20, 1.35, 0); grp.add(door);
+    const canopy = new THREE.Mesh(new THREE.BoxGeometry(2.4, 0.25, 3.4), MAT.portalWhite);
+    canopy.position.set(1.1, 3.1, 0); grp.add(canopy);
+    const porch = new THREE.Mesh(new THREE.BoxGeometry(3.2, 0.45, 4.2), MAT.mgmtWallD);
+    porch.position.set(1.8, 0.225, 0); grp.add(porch);
+    // Ramp sloping down to grade along the +z side of the porch.
+    const rampLen = 5.2;
+    const ramp = new THREE.Mesh(new THREE.BoxGeometry(1.9, 0.18, rampLen), MAT.mgmtWallD);
+    ramp.position.set(1.8, 0.22, 4.2 / 2 + rampLen / 2 - 0.4);
+    ramp.rotation.x = -Math.atan2(0.45, rampLen); grp.add(ramp);
+    // Steel-pipe railings down both edges of the ramp.
+    [2.25, 4.55].forEach(zr => {
+      const rail = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.08, rampLen + 1.6), MAT.mgmtRail);
+      rail.position.set(1.4, 1.0, zr); rail.rotation.x = -Math.atan2(0.45, rampLen); grp.add(rail);
+      for (let i = 0; i < 4; i++) {
+        const post = new THREE.Mesh(new THREE.BoxGeometry(0.07, 0.9, 0.07), MAT.mgmtRail);
+        post.position.set(1.4, 0.75 - i * 0.07, zr - 0.8 + i * 1.6); grp.add(post);
+      }
+    });
+    const rotForDir = { '+x': 0, '-x': Math.PI, '+z': -Math.PI / 2, '-z': Math.PI / 2 };
+    grp.position.set(x, 0, z);
+    grp.rotation.y = rotForDir[dir] ?? 0;
+    g.add(grp);
+  }
+
+  // Circular concrete tree-ring planter with soil + a small tree.
+  function _mgmtPlanter(g, x, z, r) {
+    const ringH = 0.5;
+    const ring = new THREE.Mesh(new THREE.CylinderGeometry(r, r, ringH, 20), MAT.duct);
+    ring.position.set(x, ringH / 2, z); g.add(ring);
+    const soil = new THREE.Mesh(new THREE.CylinderGeometry(r - 0.35, r - 0.35, ringH * 0.9, 20), MAT.sandDark);
+    soil.position.set(x, ringH * 0.92, z); g.add(soil);
+    const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.22, 2.2, 8), MAT.treeTrunk);
+    trunk.position.set(x, ringH + 1.1, z); g.add(trunk);
+    const canopy = new THREE.Mesh(new THREE.SphereGeometry(1.6, 10, 8), MAT.gCourt);
+    canopy.position.set(x, ringH + 2.8, z); canopy.scale.set(1, 0.8, 1); g.add(canopy);
+  }
+
+  // SME — one long single-storey cream block. The access path leads up to the
+  // WNW GABLE END (-X face, centred), so the entrance + accessibility ramp sit
+  // there, matching the front photo (door + 4 windows under the gable peak).
+  function buildSME() {
+    const g = new THREE.Group();
+    _mgmtWing(g, {
+      cx: 0, cz: 0, w: 37, d: 24, wallH: 5.8, floors: 1, rise: 3.2, ov: 1.0,
+      faces: { '+z': 'win+ac', '-z': 'win+ac', '+x': 'win', '-x': 'win' }, kerb: true,
+    });
+    _mgmtRampPorch(g, -18.5, 0, '-x');
+    return g;
+  }
+
+  // MBA — L of two single-storey cream wings around a paved courtyard. Long
+  // wing runs N–S (ridge along X); short wing branches WNW (ridge along Z).
+  // Main entrance + ramp at the short wing's outer gable end; AC units on the
+  // courtyard-facing inner faces; two tree-ring planters in the courtyard.
+  function buildMBA() {
+    const g = new THREE.Group();
+    _mgmtWing(g, {                           // long wing
+      cx: -3.45, cz: 6.0, w: 39.6, d: 15, wallH: 4.6, floors: 1, rise: 2.6, ov: 0.85,
+      faces: { '+z': 'win', '-z': 'win+ac', '+x': 'win', '-x': 'win' },
+    });
+    _mgmtWing(g, {                           // short wing
+      cx: 15.75, cz: 0, w: 15, d: 27, wallH: 4.6, floors: 1, rise: 2.6, ov: 0.85,
+      faces: { '+x': 'win', '-x': 'win+ac', '+z': 'win', '-z': 'win' },
+    });
+    _mgmtRampPorch(g, 15.75, -13.5, '-z');
+    _mgmtKerbLine(g, -23.25, 14.1, 16.35, 14.1);   // long wing, road side
+    _mgmtKerbLine(g, -23.25, -2.1, 8.25, -2.1);     // long wing, courtyard side
+    _mgmtKerbLine(g, 8.85, -2.1, 8.85, -13.5);      // short wing, courtyard side
+    _mgmtPlanter(g, -4, -7.5, 2.2);
+    _mgmtPlanter(g, -13, -8.5, 2.2);
+    return g;
+  }
+
+  // ─────────────────────────────────────────────────────────────────────
+  // BASIC LAB — three-part sandstone academic block (matches drone photo)
+  // ─────────────────────────────────────────────────────────────────────
+  // The real building reads as three DIFFERENT volumes along its front:
+  //   • LEFT WING  — tall, clad in fine perforated jali screens
+  //   • CENTRE     — a LOWER recessed entrance bay: white concrete pergola
+  //                  over the door, with a grid of small square punched
+  //                  windows above it
+  //   • RIGHT CUBE — tall, almost entirely BLANK sandstone (only shallow
+  //                  recessed panels + a couple of small windows)
+  // Stepped rooflines, white corner pilasters, and tilted solar-PV arrays
+  // on the tall wing roofs. Footprint is the L-shaped 8-vertex polygon.
+  //
+  // Mesh-local: +X = long axis (local u), +Z = local v.
+  function buildBasicLab() {
+    const g = new THREE.Group();
+    const FLOOR_H = 3.7;
+
+    // ── Per-face treatments ────────────────────────────────────────────
+    // Shared geometry helper: resolve a face into its constant coord,
+    // outward sign, run-axis and wall length.
+    function faceInfo(cx, cz, w, d, side) {
+      const runsAlongX = (side === '+z' || side === '-z');
+      return {
+        runsAlongX,
+        wallLen: runsAlongX ? w : d,
+        faceZ: side === '+z' ? cz + d / 2 : (side === '-z' ? cz - d / 2 : cz),
+        faceX: side === '+x' ? cx + w / 2 : (side === '-x' ? cx - w / 2 : cx),
+        outSign: (side === '+x' || side === '+z') ? 1 : -1,
+      };
+    }
+
+    // Fine jali-screen cladding (left wing): white pilasters + a dense grid
+    // of perforated panels, one per bay per floor.
+    function addJaliFace(cx, cz, w, d, h, side) {
+      const fi = faceInfo(cx, cz, w, d, side);
+      const floors = Math.max(3, Math.round(h / FLOOR_H));
+      const nBays = Math.max(3, Math.round(fi.wallLen / 3.6));
+      const bayW = fi.wallLen / nBays;
+      for (let i = 0; i <= nBays; i++) {
+        const t = -fi.wallLen / 2 + i * bayW;
+        const pil = fi.runsAlongX
+          ? new THREE.Mesh(new THREE.BoxGeometry(0.55, h, 0.3), MAT.gStoneLite)
+          : new THREE.Mesh(new THREE.BoxGeometry(0.3, h, 0.55), MAT.gStoneLite);
+        if (fi.runsAlongX) pil.position.set(cx + t, h / 2, fi.faceZ + fi.outSign * 0.05);
+        else               pil.position.set(fi.faceX + fi.outSign * 0.05, h / 2, cz + t);
+        g.add(pil);
+      }
+      const panelH = (h / floors) * 0.7;
+      for (let f = 0; f < floors; f++) {
+        const cy = h * (f + 0.5) / floors + 0.1;
+        for (let b = 0; b < nBays; b++) {
+          const t = -fi.wallLen / 2 + (b + 0.5) * bayW;
+          const pw = bayW - 1.0;
+          const frame = fi.runsAlongX
+            ? new THREE.Mesh(new THREE.BoxGeometry(pw + 0.18, panelH + 0.18, 0.10), MAT.gStoneDark)
+            : new THREE.Mesh(new THREE.BoxGeometry(0.10, panelH + 0.18, pw + 0.18), MAT.gStoneDark);
+          const jali = fi.runsAlongX
+            ? new THREE.Mesh(new THREE.BoxGeometry(pw, panelH, 0.07), MAT.messJali)
+            : new THREE.Mesh(new THREE.BoxGeometry(0.07, panelH, pw), MAT.messJali);
+          if (fi.runsAlongX) {
+            frame.position.set(cx + t, cy, fi.faceZ + fi.outSign * 0.06);
+            jali.position.set(cx + t, cy, fi.faceZ + fi.outSign * 0.09);
+          } else {
+            frame.position.set(fi.faceX + fi.outSign * 0.06, cy, cz + t);
+            jali.position.set(fi.faceX + fi.outSign * 0.09, cy, cz + t);
+          }
+          g.add(frame); g.add(jali);
+        }
+      }
+    }
+
+    // Grid of small square punched windows (centre entrance bay).
+    function addWindowFace(cx, cz, w, d, h, side) {
+      const fi = faceInfo(cx, cz, w, d, side);
+      const floors = Math.max(3, Math.round(h / FLOOR_H));
+      const cols = Math.max(3, Math.round(fi.wallLen / 2.8));
+      const colW = fi.wallLen / cols;
+      for (let f = 0; f < floors; f++) {
+        const cy = h * (f + 0.5) / floors + 0.2;
+        for (let c = 0; c < cols; c++) {
+          const t = -fi.wallLen / 2 + (c + 0.5) * colW;
+          const fr = fi.runsAlongX
+            ? new THREE.Mesh(new THREE.BoxGeometry(1.05, 1.15, 0.10), MAT.gStoneLite)
+            : new THREE.Mesh(new THREE.BoxGeometry(0.10, 1.15, 1.05), MAT.gStoneLite);
+          const win = fi.runsAlongX
+            ? new THREE.Mesh(new THREE.BoxGeometry(0.85, 0.95, 0.06), MAT.entrance)
+            : new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.95, 0.85), MAT.entrance);
+          if (fi.runsAlongX) {
+            fr.position.set(cx + t, cy, fi.faceZ + fi.outSign * 0.05);
+            win.position.set(cx + t, cy, fi.faceZ + fi.outSign * 0.08);
+          } else {
+            fr.position.set(fi.faceX + fi.outSign * 0.05, cy, cz + t);
+            win.position.set(fi.faceX + fi.outSign * 0.08, cy, cz + t);
+          }
+          g.add(fr); g.add(win);
+        }
+      }
+    }
+
+    // Mostly-blank wall with a few shallow recessed panels (right cube).
+    function addPlainFace(cx, cz, w, d, h, side) {
+      const fi = faceInfo(cx, cz, w, d, side);
+      const nP = Math.max(2, Math.round(fi.wallLen / 7));
+      const pW = fi.wallLen / nP - 1.6;
+      const pH = h - 3.0;
+      for (let i = 0; i < nP; i++) {
+        const t = -fi.wallLen / 2 + (i + 0.5) * (fi.wallLen / nP);
+        const panel = fi.runsAlongX
+          ? new THREE.Mesh(new THREE.BoxGeometry(pW, pH, 0.06), MAT.gStoneDark)
+          : new THREE.Mesh(new THREE.BoxGeometry(0.06, pH, pW), MAT.gStoneDark);
+        if (fi.runsAlongX) panel.position.set(cx + t, h / 2 + 0.5, fi.faceZ + fi.outSign * 0.04);
+        else               panel.position.set(fi.faceX + fi.outSign * 0.04, h / 2 + 0.5, cz + t);
+        g.add(panel);
+      }
+    }
+
+    // Block shell + per-face treatment dispatch + optional solar roof.
+    function addBlock(cx, cz, w, d, h, faceSpec, roofKit) {
+      const block = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), MAT.gStone);
+      block.position.set(cx, h / 2, cz);
+      g.add(block);
+      const plinth = new THREE.Mesh(new THREE.BoxGeometry(w + 0.25, 0.7, d + 0.25), MAT.gStoneDark);
+      plinth.position.set(cx, 0.35, cz);
+      g.add(plinth);
+      const floors = Math.max(3, Math.round(h / FLOOR_H));
+      for (let i = 1; i < floors; i++) {
+        const band = new THREE.Mesh(new THREE.BoxGeometry(w + 0.12, 0.26, d + 0.12), MAT.gStoneDark);
+        band.position.set(cx, h * i / floors, cz);
+        g.add(band);
+      }
+      const para = new THREE.Mesh(new THREE.BoxGeometry(w + 0.3, 0.8, d + 0.3), MAT.gStoneLite);
+      para.position.set(cx, h + 0.4, cz);
+      g.add(para);
+      // White corner pilasters projecting slightly above the parapet
+      [[w/2, d/2],[w/2,-d/2],[-w/2,d/2],[-w/2,-d/2]].forEach(([dx,dz]) => {
+        const cpil = new THREE.Mesh(new THREE.BoxGeometry(1.1, h + 1.0, 1.1), MAT.gStoneLite);
+        cpil.position.set(cx + dx, (h + 1.0) / 2, cz + dz);
+        g.add(cpil);
+      });
+      for (const side in faceSpec) {
+        const t = faceSpec[side];
+        if (t === 'jali')   addJaliFace(cx, cz, w, d, h, side);
+        else if (t === 'window') addWindowFace(cx, cz, w, d, h, side);
+        else if (t === 'plain')  addPlainFace(cx, cz, w, d, h, side);
+      }
+
+      if (roofKit) {
+        const RY = h + 0.45;
+        const roof = new THREE.Mesh(new THREE.BoxGeometry(w - 0.3, 0.1, d - 0.3), MAT.messRoof);
+        roof.position.set(cx, h + 0.05, cz);
+        g.add(roof);
+        const cols = Math.max(2, Math.floor((w - 3) / 4.4));
+        const rows = Math.max(2, Math.floor((d - 3) / 4.4));
+        for (let i = 0; i < cols; i++) {
+          for (let j = 0; j < rows; j++) {
+            const px = cx - w / 2 + 3 + i * ((w - 4) / cols);
+            const pz = cz - d / 2 + 3 + j * ((d - 4) / rows);
+            const leg = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.5, 0.08), MAT.duct);
+            leg.position.set(px, RY + 0.25, pz);
+            g.add(leg);
+            const panel = new THREE.Mesh(new THREE.BoxGeometry(3.4, 0.1, 2.0), MAT.deptSolar);
+            panel.position.set(px, RY + 0.7, pz);
+            panel.rotation.x = -0.42;
+            g.add(panel);
+          }
+        }
+        [[cx - 1, cz], [cx + 1.2, cz + 1.5]].forEach(([vx, vz]) => {
+          const pipe = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.35, 1.6, 10), MAT.duct);
+          pipe.position.set(vx, RY + 0.8, vz);
+          g.add(pipe);
+        });
+      }
+    }
+
+    const H_TALL = 16, H_LOW = 12;
+
+    // Footprint frame: mesh +X = NORTH (long axis), mesh +Z = EAST
+    // (derived from bearingOffset 78.9° → mesh+Z bearing 101°). The
+    // building is an L: a MAIN BLOCK in the NE (the tall plain cube + a
+    // recessed entrance bay) plus a JALI WING protruding to the SW.
+    //   main block: meshX[-8.5,22.8] × meshZ[-10.8,14.8]
+    //   jali wing : meshX[-26.6,-8.5] × meshZ[-23.2,2]
+    // The cube's EAST (+Z) face projects FORWARD toward the entrance plaza
+    // / road (the side the reference photos are taken from). The entrance
+    // bay is recessed west of it; the jali wing sits further back + south.
+
+    // CUBE — north part of the main block; tall, blank; east face forward.
+    addBlock(12.4, 2.0, 20.8, 25.6, H_TALL,
+      { '+z': 'plain', '+x': 'plain', '-z': 'plain' }, true);
+
+    // ENTRANCE bay — south part of the main block; LOWER and RECESSED
+    // ~5 m west of the cube's east face; small punched-window grid + pergola.
+    addBlock(-3.25, -0.5, 10.5, 21.0, H_LOW,
+      { '+z': 'window' }, false);
+
+    // JALI WING — the SW protrusion; tall, jali on every exterior face.
+    addBlock(-17.55, -10.6, 16.0, 23.0, H_TALL,
+      { '-x': 'jali', '+x': 'jali', '+z': 'jali', '-z': 'jali' }, true);
+
+    // ── White concrete pergola over the entrance, on the entrance bay's
+    //    EAST (+Z) face, facing the plaza.
+    {
+      const ex = -3.25, ez = -0.5 + 21.0 / 2;   // entrance bay east face (z=+10)
+      const colH = 4.0;
+      [-2.6, 2.6].forEach((dx) => {
+        const col = new THREE.Mesh(new THREE.BoxGeometry(0.5, colH, 0.5), MAT.portalWhite);
+        col.position.set(ex + dx, colH / 2, ez + 2.4);
+        g.add(col);
+      });
+      // Parallel slats running N-S (X), spaced outward to the east (+Z)
+      for (let i = 0; i < 6; i++) {
+        const slat = new THREE.Mesh(new THREE.BoxGeometry(5.4, 0.35, 0.35), MAT.portalWhite);
+        slat.position.set(ex, colH + 0.2, ez + 0.6 + i * 1.0);
+        g.add(slat);
+      }
+      const beam = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.4, 5.8), MAT.portalWhite);
+      beam.position.set(ex, colH + 0.2, ez + 0.4);
+      g.add(beam);
+      const door = new THREE.Mesh(new THREE.BoxGeometry(3.0, 3.2, 0.4), MAT.entrance);
+      door.position.set(ex, 1.6, ez - 0.1);
+      g.add(door);
+    }
+
+    return g;
+  }
+
+  // ─────────────────────────────────────────────────────────────────────
+  // LHC 1 — Lecture Hall Complex (one continuous wide sandstone building)
+  // ─────────────────────────────────────────────────────────────────────
+  // Reference photos (front = WEST face):
+  //   ONE connected building ~82 m wide whose CENTRE steps BACK and DOWN,
+  //   flanked by two TALL wings (flush/connected through the back mass):
+  //     • NORTH wing (left in photo): mostly BLANK tall sandstone, with a
+  //       band of jali panels only at the base.
+  //     • SOUTH wing (right in photo): a grid of regular square windows.
+  //     • CENTRE: recessed + lower; two RED panels on the upper wall; a
+  //       white PORTAL — one long horizontal beam carried on tall vertical
+  //       columns — stands in front of the recessed entrance.
+  //   Stair towers rise behind the centre; flat white roof with solar PV.
+  //
+  // Mesh-local: bearingOffset 86.9° → mesh+X = NORTH, mesh+Z = EAST.
+  // Front (west) face = -Z. Footprint spans meshX[-40,43] (N-S) and
+  // roughly meshZ[-18,36] (W-E); west face anchored near meshZ=-18.
+  function buildLHC1() {
+    const g = new THREE.Group();
+    const redMat = new THREE.MeshStandardMaterial({ color: 0xc0201e, metalness: 0.2, roughness: 0.6 });
+
+    function faceInfo(cx, cz, w, d, side) {
+      const ax = (side === '+x' || side === '-x');   // wall runs along Z
+      return {
+        ax, len: ax ? d : w,
+        fX: side === '+x' ? cx + w/2 : (side === '-x' ? cx - w/2 : cx),
+        fZ: side === '+z' ? cz + d/2 : (side === '-z' ? cz - d/2 : cz),
+        os: (side === '+x' || side === '+z') ? 1 : -1,
+      };
+    }
+
+    // Grid of jali OR window panels. kind: 'jali' | 'window'.
+    // baseFloors: if set, only the bottom N floors get panels (jali base).
+    function addGrid(cx, cz, w, d, h, side, kind, floors, baseFloors) {
+      const fi = faceInfo(cx, cz, w, d, side);
+      const nb = Math.max(3, Math.round(fi.len / (kind === 'window' ? 3.0 : 4.2)));
+      const bw = fi.len / nb;
+      // White pilasters between bays (jali only — windows sit in plain wall)
+      if (kind === 'jali') {
+        for (let i = 0; i <= nb; i++) {
+          const t = -fi.len/2 + i*bw;
+          const p = fi.ax ? new THREE.Mesh(new THREE.BoxGeometry(0.5,h,0.6), MAT.gStoneLite)
+                          : new THREE.Mesh(new THREE.BoxGeometry(0.6,h,0.5), MAT.gStoneLite);
+          if (fi.ax) p.position.set(fi.fX+fi.os*0.05, h/2, cz+t);
+          else       p.position.set(cx+t, h/2, fi.fZ+fi.os*0.05);
+          g.add(p);
+        }
+      }
+      const maxF = baseFloors || floors;
+      const ph = (h/floors) * (kind === 'window' ? 0.5 : 0.62);
+      const pw = kind === 'window' ? bw*0.5 : bw - 1.0;
+      for (let f = 0; f < maxF; f++) {
+        const cy = h*(f+0.5)/floors + (kind === 'window' ? 0.2 : 0.1);
+        for (let b = 0; b < nb; b++) {
+          const t = -fi.len/2 + (b+0.5)*bw;
+          const fr = fi.ax ? new THREE.Mesh(new THREE.BoxGeometry(0.1, ph+0.18, pw+0.18), MAT.gStoneDark)
+                           : new THREE.Mesh(new THREE.BoxGeometry(pw+0.18, ph+0.18, 0.1), MAT.gStoneDark);
+          const pn = fi.ax ? new THREE.Mesh(new THREE.BoxGeometry(0.07, ph, pw), MAT.messJali)
+                           : new THREE.Mesh(new THREE.BoxGeometry(pw, ph, 0.07), MAT.messJali);
+          if (fi.ax) { fr.position.set(fi.fX+fi.os*0.06, cy, cz+t); pn.position.set(fi.fX+fi.os*0.09, cy, cz+t); }
+          else       { fr.position.set(cx+t, cy, fi.fZ+fi.os*0.06); pn.position.set(cx+t, cy, fi.fZ+fi.os*0.09); }
+          g.add(fr); g.add(pn);
+        }
+      }
+    }
+
+    // Mostly-blank wall with a few shallow recessed panels.
+    function addBlank(cx, cz, w, d, h, side) {
+      const fi = faceInfo(cx, cz, w, d, side);
+      const nP = Math.max(2, Math.round(fi.len / 9));
+      const pW = fi.len/nP - 2.0, pH = h - 4.0;
+      for (let i = 0; i < nP; i++) {
+        const t = -fi.len/2 + (i+0.5)*(fi.len/nP);
+        const pan = fi.ax ? new THREE.Mesh(new THREE.BoxGeometry(0.05, pH, pW), MAT.gStoneDark)
+                          : new THREE.Mesh(new THREE.BoxGeometry(pW, pH, 0.05), MAT.gStoneDark);
+        if (fi.ax) pan.position.set(fi.fX+fi.os*0.03, h/2+1.0, cz+t);
+        else       pan.position.set(cx+t, h/2+1.0, fi.fZ+fi.os*0.03);
+        g.add(pan);
+      }
+    }
+
+    // Plain block shell with plinth + parapet; optional solar roof.
+    function addBlock(cx, cz, w, d, h, solar) {
+      const blk = new THREE.Mesh(new THREE.BoxGeometry(w,h,d), MAT.gStone);
+      blk.position.set(cx, h/2, cz); g.add(blk);
+      const pl = new THREE.Mesh(new THREE.BoxGeometry(w+0.2,0.6,d+0.2), MAT.gStoneDark);
+      pl.position.set(cx, 0.3, cz); g.add(pl);
+      const para = new THREE.Mesh(new THREE.BoxGeometry(w+0.28,0.7,d+0.28), MAT.gStoneLite);
+      para.position.set(cx, h+0.35, cz); g.add(para);
+      if (solar) {
+        const RY = h + 0.4;
+        const roof = new THREE.Mesh(new THREE.BoxGeometry(w-0.3,0.1,d-0.3), MAT.messRoof);
+        roof.position.set(cx, h+0.05, cz); g.add(roof);
+        const cols = Math.max(2, Math.floor((w-4)/5));
+        const rows = Math.max(1, Math.floor((d-4)/4.5));
+        for (let i = 0; i < cols; i++) for (let j = 0; j < rows; j++) {
+          const px = cx - w/2 + 3 + i*((w-5)/cols);
+          const pz = cz - d/2 + 3 + j*((d-4)/rows);
+          const leg = new THREE.Mesh(new THREE.BoxGeometry(0.08,0.5,0.08), MAT.duct);
+          leg.position.set(px, RY+0.25, pz); g.add(leg);
+          const pan = new THREE.Mesh(new THREE.BoxGeometry(4.2,0.1,2.4), MAT.deptSolar);
+          pan.position.set(px, RY+0.7, pz); pan.rotation.x = -0.4; g.add(pan);
+        }
+      }
+    }
+
+    const H_WING = 12.5, H_LOW = 7.5, H_UP = 11, H_TWR = 14.5;
+    // Whole model sized + centred to clear all surrounding roads (verified
+    // ≥8 m clearance): bounding box meshX[-35,35], meshZ[-12,20].
+
+    // ── BACK MASS — full width + deep, ties the whole building together
+    addBlock(0, 11, 70, 18, H_WING, true);       // meshX[-35,35], meshZ[2,20]
+
+    // ── NORTH WING (front, +X / left in photo): blank with jali base
+    addBlock(23.5, -3, 23, 18, H_WING, false);   // meshX[12,35], meshZ[-12,6]
+    addBlank(23.5, -3, 23, 18, H_WING, '-z');
+    addGrid (23.5, -3, 23, 18, H_WING, '-z', 'jali', 3, 1);   // jali base only
+    addBlank(23.5, -3, 23, 18, H_WING, '+x');
+
+    // ── SOUTH WING (front, -X / right in photo): regular window grid
+    addBlock(-23.5, -3, 23, 18, H_WING, false);  // meshX[-35,-12], meshZ[-12,6]
+    addGrid (-23.5, -3, 23, 18, H_WING, '-z', 'window', 3);
+    addGrid (-23.5, -3, 23, 18, H_WING, '-x', 'window', 3);
+
+    // ── CENTRE LOWER (recessed 4 m + one storey lower): jali entrance wall
+    addBlock(0, 0, 24, 16, H_LOW, false);        // front at meshZ=-8
+    addGrid (0, 0, 24, 16, H_LOW, '-z', 'jali', 2);
+
+    // ── CENTRE UPPER (set-back taller wall carrying the two red panels)
+    addBlock(0, 2, 22, 10, H_UP, false);         // front at meshZ=-3
+    [-4.5, 4.5].forEach((rx) => {
+      const r = new THREE.Mesh(new THREE.BoxGeometry(2.4, 1.5, 0.25), redMat);
+      r.position.set(rx, H_LOW + 2.2, -3 - 0.12);   // on centre-upper west face
+      g.add(r);
+    });
+
+    // ── Stair towers rising behind the centre
+    addBlock(-6, 5, 7, 7, H_TWR, false);
+    addBlock( 6, 5, 7, 7, H_TWR, false);
+
+    // ── WHITE PORTAL — one long horizontal beam on tall vertical columns,
+    //    standing in front of the recessed centre (between the two wings).
+    {
+      const PZ = -11.0;             // just in front of the wings' west face (-12)
+      const COLH = H_LOW + 2.0;     // ~9.5 m tall
+      const SPAN = 24;              // X[-12,12] — touches both wing inner faces
+      // Tall columns (gap kept at the centre for the entrance axis)
+      [-12, -6, 6, 12].forEach((px) => {
+        const col = new THREE.Mesh(new THREE.BoxGeometry(0.7, COLH, 0.8), MAT.portalWhite);
+        col.position.set(px, COLH/2, PZ);
+        g.add(col);
+      });
+      // One long thick horizontal beam near the top of the columns
+      const beam = new THREE.Mesh(new THREE.BoxGeometry(SPAN, 0.9, 1.0), MAT.portalWhite);
+      beam.position.set(0, COLH - 0.9, PZ);
+      g.add(beam);
+      // Dark recessed entrance in the centre-lower west wall (meshZ=-8)
+      const door = new THREE.Mesh(new THREE.BoxGeometry(5.0, 3.6, 0.4), MAT.entrance);
+      door.position.set(0, 1.8, -8 - 0.1);
+      g.add(door);
+      // Stone steps up to the entrance
+      for (let i = 0; i < 3; i++) {
+        const stp = new THREE.Mesh(new THREE.BoxGeometry(7 - i*0.6, 0.2, 0.7), MAT.gStoneLite);
+        stp.position.set(0, 0.1 + i*0.2, -8 - 0.6 - (2-i)*0.7);
+        g.add(stp);
+      }
+    }
+
+    return g;
+  }
+
+  // ─────────────────────────────────────────────────────────────────────
+  // CASE — Centre for Advance Scientific Equipment (U-plan academic block)
+  // ─────────────────────────────────────────────────────────────────────
+  // Reference photos: a U-shaped G+3 building — two tall wings (buff
+  // sandstone with salmon-PINK floor bands + pink pilasters and a grid of
+  // windows) joined by a back spine, with a LOWER central entrance bay
+  // recessed between the wings carrying a white concrete pergola portico.
+  // Flat white roofs with large solar-PV arrays on the wings + water tanks.
+  //
+  // Mesh-local: +X = long axis (u), +Z = depth (v). Courtyard/front = -Z.
+  function buildCASE() {
+    const g = new THREE.Group();
+    const H = 15, FLOORS = 4, HC = 8;
+    const tan = MAT.gStone, pink = MAT.akPink, pinkD = MAT.akPinkD, lite = MAT.gStoneLite, dark = MAT.entrance;
+
+    function faceInfo(cx, cz, w, d, side) {
+      const ax = (side === '+x' || side === '-x');
+      return { ax, len: ax ? d : w,
+        fX: side === '+x' ? cx+w/2 : (side === '-x' ? cx-w/2 : cx),
+        fZ: side === '+z' ? cz+d/2 : (side === '-z' ? cz-d/2 : cz),
+        os: (side === '+x' || side === '+z') ? 1 : -1 };
+    }
+    // Window grid framed by pink pilasters
+    function addWin(cx, cz, w, d, h, side, floors) {
+      const fi = faceInfo(cx, cz, w, d, side);
+      const cols = Math.max(3, Math.round(fi.len / 3.2));
+      const colW = fi.len / cols;
+      for (let i = 0; i <= cols; i++) {
+        const t = -fi.len/2 + i*colW;
+        const p = fi.ax ? new THREE.Mesh(new THREE.BoxGeometry(0.45,h,0.5), pinkD)
+                        : new THREE.Mesh(new THREE.BoxGeometry(0.5,h,0.45), pinkD);
+        if (fi.ax) p.position.set(fi.fX+fi.os*0.04, h/2, cz+t);
+        else       p.position.set(cx+t, h/2, fi.fZ+fi.os*0.04);
+        g.add(p);
+      }
+      for (let f = 0; f < floors; f++) {
+        const cy = h*(f+0.5)/floors + 0.2;
+        for (let c = 0; c < cols; c++) {
+          const t = -fi.len/2 + (c+0.5)*colW;
+          const fr = fi.ax ? new THREE.Mesh(new THREE.BoxGeometry(0.08,1.3,1.0), lite)
+                           : new THREE.Mesh(new THREE.BoxGeometry(1.0,1.3,0.08), lite);
+          const wn = fi.ax ? new THREE.Mesh(new THREE.BoxGeometry(0.05,1.0,0.72), dark)
+                           : new THREE.Mesh(new THREE.BoxGeometry(0.72,1.0,0.05), dark);
+          if (fi.ax) { fr.position.set(fi.fX+fi.os*0.05, cy, cz+t); wn.position.set(fi.fX+fi.os*0.08, cy, cz+t); }
+          else       { fr.position.set(cx+t, cy, fi.fZ+fi.os*0.05); wn.position.set(cx+t, cy, fi.fZ+fi.os*0.08); }
+          g.add(fr); g.add(wn);
+        }
+      }
+    }
+    function addBlock(cx, cz, w, d, h, floors, winFaces, solar) {
+      const blk = new THREE.Mesh(new THREE.BoxGeometry(w,h,d), tan);
+      blk.position.set(cx, h/2, cz); g.add(blk);
+      const pl = new THREE.Mesh(new THREE.BoxGeometry(w+0.2,0.6,d+0.2), pinkD);
+      pl.position.set(cx, 0.3, cz); g.add(pl);
+      for (let i = 1; i < floors; i++) {
+        const b = new THREE.Mesh(new THREE.BoxGeometry(w+0.12,0.35,d+0.12), pink);
+        b.position.set(cx, h*i/floors, cz); g.add(b);
+      }
+      const para = new THREE.Mesh(new THREE.BoxGeometry(w+0.25,0.7,d+0.25), lite);
+      para.position.set(cx, h+0.35, cz); g.add(para);
+      for (const s of winFaces) addWin(cx, cz, w, d, h, s, floors);
+      if (solar) {
+        const RY = h + 0.4;
+        const roof = new THREE.Mesh(new THREE.BoxGeometry(w-0.3,0.1,d-0.3), MAT.messRoof);
+        roof.position.set(cx, h+0.05, cz); g.add(roof);
+        const cc = Math.max(1, Math.floor((w-3)/4)), rr = Math.max(2, Math.floor((d-3)/4));
+        for (let i = 0; i < cc; i++) for (let j = 0; j < rr; j++) {
+          const px = cx - w/2 + 2.5 + i*((w-3)/cc), pz = cz - d/2 + 2.5 + j*((d-3)/rr);
+          const leg = new THREE.Mesh(new THREE.BoxGeometry(0.08,0.5,0.08), MAT.duct);
+          leg.position.set(px, RY+0.25, pz); g.add(leg);
+          const pan = new THREE.Mesh(new THREE.BoxGeometry(3.4,0.1,2.2), MAT.deptSolar);
+          pan.position.set(px, RY+0.7, pz); pan.rotation.x = -0.4; g.add(pan);
+        }
+      }
+    }
+
+    // U-plan (mesh+X = u≈39 m, mesh+Z = v≈46 m; front courtyard at -Z)
+    addBlock(-14.5, 3, 15, 46, H, FLOORS, ['-x', '-z', '+z'], true);   // LEFT wing
+    addBlock(  9.5, 3, 13, 46, H, FLOORS, ['+x', '-z', '+z'], true);   // RIGHT wing
+    addBlock( -2.5, 18, 11, 16, H, FLOORS, ['+z'], false);             // BACK spine
+    addBlock( -2.5, 0, 11, 18, HC, 2, ['-z'], false);                  // CENTRE entrance bay (lower)
+
+    // White pergola portico at the centre front (-Z)
+    {
+      const cx = -2.5, ez = 0 - 18/2, colH = 5;   // centre front face Z=-9
+      [-4, 4].forEach((dx) => {
+        const c = new THREE.Mesh(new THREE.BoxGeometry(0.6, colH, 0.6), MAT.portalWhite);
+        c.position.set(cx+dx, colH/2, ez-2.5); g.add(c);
+      });
+      for (let i = 0; i < 5; i++) {
+        const s = new THREE.Mesh(new THREE.BoxGeometry(9, 0.35, 0.35), MAT.portalWhite);
+        s.position.set(cx, colH+0.2, ez - 0.6 - i*0.9); g.add(s);
+      }
+      const beam = new THREE.Mesh(new THREE.BoxGeometry(9.5, 0.4, 0.5), MAT.portalWhite);
+      beam.position.set(cx, colH+0.2, ez-0.3); g.add(beam);
+      const door = new THREE.Mesh(new THREE.BoxGeometry(4, 3.4, 0.4), dark);
+      door.position.set(cx, 1.7, ez+0.1); g.add(door);
+      for (let i = 0; i < 3; i++) {
+        const st = new THREE.Mesh(new THREE.BoxGeometry(6-i*0.6, 0.2, 0.7), lite);
+        st.position.set(cx, 0.1+i*0.2, ez - 0.6 - (2-i)*0.7); g.add(st);
+      }
+    }
+
+    // Water tanks on the back-spine roof
+    [[-4, 18, 0], [1, 20, 1]].forEach(([tx, tz, grn]) => {
+      const t = new THREE.Mesh(new THREE.CylinderGeometry(0.7,0.7,1.3,12), grn ? MAT.gTankGrn : MAT.gTank);
+      t.position.set(tx, H+0.6, tz); g.add(t);
+    });
+
+    return g;
+  }
+
+  // ─────────────────────────────────────────────────────────────────────
+  // AAKASH SPORTS COMPLEX — long tall indoor sports hall
+  // ─────────────────────────────────────────────────────────────────────
+  // Reference photos: one large rectangular hall (~85 × 38 m, ~13 m tall),
+  // salmon-PINK plaster walls divided into tall bays by pink pilasters,
+  // each bay carrying horizontal REDDISH-BRICK bands; a brick plinth at the
+  // base; a flat WHITE roof that overhangs the long sides, carried on a
+  // dark-BLUE steel fascia with regularly-spaced ANGLED BRACKETS projecting
+  // from the wall head. A white portal entrance with battered side walls
+  // and steps sits at one gable end.
+  //
+  // Mesh-local: +X = long axis, +Z = depth. bearingOffset aligns to the
+  // Akaash Complex polygon (long axis bearing 47.5°).
+  function buildAakashComplex() {
+    const g = new THREE.Group();
+    const L = 85, D = 38, H = 13;   // hall length, depth, wall height
+
+    // ── Main hall volume (pink plaster)
+    const hall = new THREE.Mesh(new THREE.BoxGeometry(L, H, D), MAT.akPink);
+    hall.position.y = H / 2;
+    g.add(hall);
+
+    // ── Brick plinth
+    const plinth = new THREE.Mesh(new THREE.BoxGeometry(L + 0.3, 1.6, D + 0.3), MAT.akBrick);
+    plinth.position.y = 0.8;
+    g.add(plinth);
+
+    // ── Horizontal reddish-brick bands wrapping the hall (3 courses)
+    [0.32, 0.55, 0.78].forEach((fr) => {
+      const band = new THREE.Mesh(new THREE.BoxGeometry(L + 0.18, 0.5, D + 0.18), MAT.akBrick);
+      band.position.y = H * fr;
+      g.add(band);
+    });
+
+    // ── Pink pilasters dividing the long (±Z) walls into bays
+    const nBays = 10;
+    const bayW = L / nBays;
+    const longFaces = [D / 2, -D / 2];
+    for (let s = 0; s < 2; s++) {
+      const fz = longFaces[s];
+      const os = s === 0 ? 1 : -1;
+      for (let i = 0; i <= nBays; i++) {
+        const x = -L / 2 + i * bayW;
+        const pil = new THREE.Mesh(new THREE.BoxGeometry(1.0, H, 0.5), MAT.akPinkD);
+        pil.position.set(x, H / 2, fz + os * 0.2);
+        g.add(pil);
+      }
+    }
+    // Pilasters on the gable (±X) ends too
+    const endFaces = [L / 2, -L / 2];
+    const nEnd = 4, endBay = D / nEnd;
+    for (let s = 0; s < 2; s++) {
+      const fx = endFaces[s];
+      const os = s === 0 ? 1 : -1;
+      for (let i = 0; i <= nEnd; i++) {
+        const z = -D / 2 + i * endBay;
+        const pil = new THREE.Mesh(new THREE.BoxGeometry(0.5, H, 1.0), MAT.akPinkD);
+        pil.position.set(fx + os * 0.2, H / 2, z);
+        g.add(pil);
+      }
+    }
+
+    // ── Dark-blue steel fascia band running along the top of the long walls
+    [D / 2, -D / 2].forEach((fz, s) => {
+      const os = s === 0 ? 1 : -1;
+      const fascia = new THREE.Mesh(new THREE.BoxGeometry(L + 1.0, 0.6, 0.4), MAT.akBlue);
+      fascia.position.set(0, H + 0.3, fz + os * 0.6);
+      g.add(fascia);
+      // Angled brackets projecting out + up to the roof edge, at each bay line
+      for (let i = 0; i <= nBays; i++) {
+        const x = -L / 2 + i * bayW;
+        const br = new THREE.Mesh(new THREE.BoxGeometry(0.35, 2.2, 0.35), MAT.akBlue);
+        br.position.set(x, H - 0.4, fz + os * 0.75);
+        br.rotation.x = os * 0.7;   // lean outward toward the eave
+        g.add(br);
+      }
+    });
+
+    // ── Flat white roof, overhanging the long sides (on the brackets)
+    const roof = new THREE.Mesh(new THREE.BoxGeometry(L + 1.2, 0.5, D + 3.0), MAT.akRoof);
+    roof.position.y = H + 0.85;
+    g.add(roof);
+    // Thin blue trim along the roof's long edges
+    [D / 2, -D / 2].forEach((fz, s) => {
+      const os = s === 0 ? 1 : -1;
+      const trim = new THREE.Mesh(new THREE.BoxGeometry(L + 1.2, 0.18, 0.3), MAT.akBlue);
+      trim.position.set(0, H + 0.62, fz + os * 1.5);
+      g.add(trim);
+    });
+
+    // ── The gable ends are plain pink + brick walls (NO grand entrance).
+    //    The only public gate is a SMALL RED GATE on the FRONT long side
+    //    (facing the sports ground), near the SW end, with a small low
+    //    structure (utility annex) adjacent to it — per the reference photo.
+    {
+      const redMat = new THREE.MeshStandardMaterial({ color: 0xb5201e, metalness: 0.2, roughness: 0.55 });
+      const FZ = D / 2;             // front (ground-facing) long face (+Z)
+      const gx = -L / 2 + 14;       // near the SW end
+
+      // Small low annex structure next to the gate
+      const aw = 8, ad = 6, ah = 4.5;
+      const az = FZ + ad / 2 - 0.4;
+      const annex = new THREE.Mesh(new THREE.BoxGeometry(aw, ah, ad), MAT.akPink);
+      annex.position.set(gx - 6.5, ah / 2, az);
+      g.add(annex);
+      const aband = new THREE.Mesh(new THREE.BoxGeometry(aw + 0.1, 0.4, ad + 0.1), MAT.akBrick);
+      aband.position.set(gx - 6.5, ah * 0.55, az);
+      g.add(aband);
+      const acap = new THREE.Mesh(new THREE.BoxGeometry(aw + 0.3, 0.3, ad + 0.3), MAT.gStoneLite);
+      acap.position.set(gx - 6.5, ah + 0.15, az);
+      g.add(acap);
+
+      // Small red gate (door) on the main hall front wall
+      const gateFrame = new THREE.Mesh(new THREE.BoxGeometry(3.0, 3.4, 0.2), MAT.gStoneLite);
+      gateFrame.position.set(gx, 1.7, FZ + 0.06);
+      g.add(gateFrame);
+      const gate = new THREE.Mesh(new THREE.BoxGeometry(2.4, 2.9, 0.2), redMat);
+      gate.position.set(gx, 1.45, FZ + 0.16);
+      g.add(gate);
+      // A couple of entry steps in front of the gate
+      for (let i = 0; i < 2; i++) {
+        const stp = new THREE.Mesh(new THREE.BoxGeometry(3.4, 0.18, 0.6), MAT.gStoneLite);
+        stp.position.set(gx, 0.09 + i * 0.18, FZ + 0.3 + (1 - i) * 0.6);
+        g.add(stp);
+      }
+    }
+
+    // ── A few small roof vents
+    [[-25, 0], [0, 5], [25, -4]].forEach(([vx, vz]) => {
+      const v = new THREE.Mesh(new THREE.BoxGeometry(2.5, 1.0, 2.5), MAT.akRoof);
+      v.position.set(vx, H + 1.6, vz);
+      g.add(v);
+    });
+
+    return g;
+  }
+
+  // ─────────────────────────────────────────────────────────────────────
   // COMPUTER CENTRE — sandstone block with white portal frame entrance
   // ─────────────────────────────────────────────────────────────────────
   // Footprint ~39 × 42 m. 3 floors (~13 m). Symmetric stepped massing
@@ -702,6 +2216,368 @@ var Landmarks3D = (() => {
     const door = new THREE.Mesh(new THREE.BoxGeometry(4, 4, 0.4), MAT.entrance);
     door.position.set(0, 2, D / 2 - 3.2);
     g.add(door);
+
+    return g;
+  }
+
+  // ─────────────────────────────────────────────────────────────────────
+  // JODHPUR CLUB — H-plan two-storey club block with sunken courtyard
+  // ─────────────────────────────────────────────────────────────────────
+  // From drone photographs: two parallel 2-storey wings (reddish Jodhpur
+  // sandstone-brick walls + salmon-PINK plastered floor bands, pilasters and
+  // top cornice) joined by a slightly lower FRONT bar at the south, with a
+  // central SUNKEN COURTYARD between them carrying tiered amphitheatre steps.
+  // A wide WHITE concrete pergola (slab on slim columns) shelters the south
+  // entrance. The flat white roofs carry small solar arrays and a row of
+  // mounted AC condensers along the west wall.
+  //
+  // Mesh-local: +X = long axis (wings separated), +Z = depth (front=+Z).
+  function buildJodhpurClub() {
+    const g = new THREE.Group();
+    const brick = MAT.messBrick, brickD = MAT.messBrickD;
+    const pink  = MAT.akPink,    pinkD  = MAT.akPinkD;
+    const white = MAT.portalWhite;
+    const roof  = MAT.akRoof;
+    const dark  = MAT.entrance;
+    const ahu   = MAT.ahuTeal;
+    const solar = MAT.solarPanel;
+
+    const W = 75, D = 56, H = 9;          // overall + storey height
+    const wingW = 23, bridgeD = 16;
+    const courtW = W - 2*wingW;
+
+    // ── Ground apron + plinth so the building reads as sitting ON the ground
+    //    (not clipping into it). The pink plinth wraps the whole footprint.
+    const apron = new THREE.Mesh(new THREE.BoxGeometry(W + 6, 0.3, D + 6), brickD);
+    apron.position.set(0, 0.15, 0); g.add(apron);
+    const plinth = new THREE.Mesh(new THREE.BoxGeometry(W + 1.2, 1.0, D + 1.2), pink);
+    plinth.position.set(0, 0.8, 0); g.add(plinth);
+    const plinthTop = new THREE.Mesh(new THREE.BoxGeometry(W + 1.4, 0.15, D + 1.4), pinkD);
+    plinthTop.position.set(0, 1.375, 0); g.add(plinthTop);
+    // All building elements go into a sub-group lifted onto the plinth top.
+    const bg = new THREE.Group();
+    bg.position.y = 1.45;
+    g.add(bg);
+
+    // ── Wing factory (left at cx=-W/2+wingW/2, right at +W/2-wingW/2) ──
+    function buildWing(cx) {
+      const wg = new THREE.Group();
+      // 2-storey brick volume
+      const wall = new THREE.Mesh(new THREE.BoxGeometry(wingW, H, D), brick);
+      wall.position.set(cx, H/2, 0); wg.add(wall);
+      // Pink mid-floor band + top cornice
+      [[H/2 + 0.05, 0.4], [H - 0.3, 0.6]].forEach(([y, t]) => {
+        const b = new THREE.Mesh(new THREE.BoxGeometry(wingW + 0.25, t, D + 0.25), pink);
+        b.position.set(cx, y, 0); wg.add(b);
+      });
+      // White roof slab
+      const rs = new THREE.Mesh(new THREE.BoxGeometry(wingW + 0.35, 0.45, D + 0.35), roof);
+      rs.position.set(cx, H + 0.225, 0); wg.add(rs);
+      // Pink parapet ring (4 thin walls on the roof edge)
+      const ph = 0.95, pt = 0.22;
+      const rings = [
+        [pt, ph, D + 0.4, cx - wingW/2 - pt/2, 0],
+        [pt, ph, D + 0.4, cx + wingW/2 + pt/2, 0],
+        [wingW + 0.5, ph, pt, cx, D/2 + pt/2],
+        [wingW + 0.5, ph, pt, cx, -D/2 - pt/2],
+      ];
+      for (const [w, h, d, x, z] of rings) {
+        const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), pink);
+        m.position.set(x, H + 0.5 + h/2, z); wg.add(m);
+      }
+      // Vertical pink pilasters on the long faces (south + north)
+      const cols = 7;
+      for (let i = 0; i <= cols; i++) {
+        const z = -D/2 + (D * i / cols);
+        // West face pilaster (cx - wingW/2)
+        // East face pilaster (cx + wingW/2)
+        // Skip — only do front/back (south +Z and north -Z) for now
+      }
+      return wg;
+    }
+    bg.add(buildWing(-W/2 + wingW/2));
+    bg.add(buildWing(+W/2 - wingW/2));
+
+    // ── Front bridge (south, connects wings; slightly lower than wings) ──
+    const bH = H * 0.72;
+    const bridge = new THREE.Mesh(new THREE.BoxGeometry(W, bH, bridgeD), brick);
+    bridge.position.set(0, bH/2, D/2 - bridgeD/2); bg.add(bridge);
+    [[bH/2 + 0.05, 0.4], [bH - 0.3, 0.55]].forEach(([y, t]) => {
+      const b = new THREE.Mesh(new THREE.BoxGeometry(W + 0.2, t, bridgeD + 0.2), pink);
+      b.position.set(0, y, D/2 - bridgeD/2); bg.add(b);
+    });
+    const bRoof = new THREE.Mesh(new THREE.BoxGeometry(W + 0.3, 0.4, bridgeD + 0.3), roof);
+    bRoof.position.set(0, bH + 0.2, D/2 - bridgeD/2); bg.add(bRoof);
+
+    // ── White concrete entrance pergola (south, projecting +Z) ──
+    const pW = 16, pD = 5.5, pH = 4.6;
+    const pZ = D/2 + pD/2;
+    // Top slab
+    const pTop = new THREE.Mesh(new THREE.BoxGeometry(pW + 0.8, 0.5, pD + 0.4), white);
+    pTop.position.set(0, pH + 0.25, pZ); bg.add(pTop);
+    // Two rows of slim columns
+    for (let i = 0; i < 5; i++) {
+      const x = -pW/2 + (i * pW / 4);
+      [0, pD - 0.1].forEach(zo => {
+        const post = new THREE.Mesh(new THREE.BoxGeometry(0.42, pH, 0.42), white);
+        post.position.set(x, pH/2, D/2 + zo); bg.add(post);
+      });
+    }
+    // Stepped entry plaza (3 risers ON the plinth)
+    for (let i = 0; i < 3; i++) {
+      const s = new THREE.Mesh(new THREE.BoxGeometry(pW - 2 - i*1.4, 0.22, 1.2 + i*0.6), brickD);
+      s.position.set(0, 0.11 + i*0.22, D/2 + pD + 0.5 + i*0.8); bg.add(s);
+    }
+
+    // ── Sunken central courtyard plaza ──
+    const courtCZ = (-(D/2 - bridgeD) + (-D/2 + 11)) / 2;   // centre between bridge and rear pad
+    const courtCD = (D/2 - bridgeD) - (-D/2 + 11);
+    const plaza = new THREE.Mesh(new THREE.BoxGeometry(courtW - 1, 0.25, courtCD), brickD);
+    plaza.position.set(0, 0.125, courtCZ); bg.add(plaza);
+    // Amphitheatre steps (rising from plaza toward south bridge)
+    for (let i = 0; i < 5; i++) {
+      const sw = courtW - 3 - i*0.4, sh = 0.32, sd = 1.4;
+      const s = new THREE.Mesh(new THREE.BoxGeometry(sw, sh, sd), brick);
+      s.position.set(0, sh/2 + i*sh, D/2 - bridgeD - 0.7 - i*sd); bg.add(s);
+    }
+
+    // ── Rear (north) plaza pad ──
+    const np = new THREE.Mesh(new THREE.BoxGeometry(courtW + 4, 0.55, 11), brickD);
+    np.position.set(0, 0.275, -D/2 + 5.5); bg.add(np);
+
+    // ── AC condenser units on the west wall of left wing ──
+    for (let i = 0; i < 7; i++) {
+      const ac = new THREE.Mesh(new THREE.BoxGeometry(1.45, 1.15, 0.7), ahu);
+      ac.position.set(-W/2 - 0.4, H * 0.55 + 0.2, -10 + i * 2.6); bg.add(ac);
+      // Mounting bracket
+      const br = new THREE.Mesh(new THREE.BoxGeometry(0.15, 1.2, 0.85), pinkD);
+      br.position.set(-W/2 - 0.1, H * 0.55 + 0.2, -10 + i * 2.6); bg.add(br);
+    }
+
+    // ── Solar arrays on the wing roofs ──
+    function addSolar(cx) {
+      for (let i = 0; i < 3; i++) for (let j = 0; j < 2; j++) {
+        const p = new THREE.Mesh(new THREE.BoxGeometry(3.4, 0.12, 1.95), solar);
+        p.position.set(cx + (i - 1) * 5, H + 0.95, -10 + j * 5.5);
+        p.rotation.x = -Math.PI / 14; bg.add(p);
+      }
+    }
+    addSolar(-W/2 + wingW/2); addSolar(+W/2 - wingW/2);
+    // Roof-top water tank + small stair box on left wing
+    const tank = new THREE.Mesh(new THREE.CylinderGeometry(0.9, 0.9, 1.4, 10), MAT.tankYellow);
+    tank.position.set(-W/2 + wingW - 3, H + 1.2, D/2 - 5); bg.add(tank);
+    const stairBox = new THREE.Mesh(new THREE.BoxGeometry(2.2, 1.6, 2.2), brickD);
+    stairBox.position.set(-W/2 + 4, H + 0.8 + 0.8, -D/2 + 4); bg.add(stairBox);
+
+    // ── Window grids on facades (jali rhythm) ──
+    function addWindows(cx, fz, count, sign) {
+      for (let r = 0; r < 2; r++) for (let c = 0; c < count; c++) {
+        const winW = 1.35, winH = 1.55;
+        const x = cx + (c - (count-1)/2) * 2.7;
+        const y = 1.6 + r * 4.0;
+        // Pink reveal frame
+        const fr = new THREE.Mesh(new THREE.BoxGeometry(winW + 0.4, winH + 0.4, 0.05), pinkD);
+        fr.position.set(x, y, fz); bg.add(fr);
+        // Dark glazing
+        const win = new THREE.Mesh(new THREE.BoxGeometry(winW, winH, 0.05), dark);
+        win.position.set(x, y, fz + sign*0.03); bg.add(win);
+      }
+    }
+    addWindows(-W/2 + wingW/2, D/2 + 0.05, 7, +1);
+    addWindows(+W/2 - wingW/2, D/2 + 0.05, 7, +1);
+    addWindows(-W/2 + wingW/2, -D/2 - 0.05, 7, -1);
+    addWindows(+W/2 - wingW/2, -D/2 - 0.05, 7, -1);
+    // Front bridge inner (courtyard-facing) windows
+    addWindows(0, D/2 - bridgeD - 0.05, 5, -1);
+
+    // ── Pink vertical pilasters on south wing faces (front) ──
+    [-W/2 + wingW/2, +W/2 - wingW/2].forEach(cx => {
+      for (let i = -3; i <= 3; i++) {
+        const pil = new THREE.Mesh(new THREE.BoxGeometry(0.4, H, 0.25), pink);
+        pil.position.set(cx + i*3.3, H/2, D/2 + 0.13); bg.add(pil);
+      }
+    });
+
+    // ── Ground-level entrance steps (descending from plinth to ground) ──
+    // These sit at the GROUND (not lifted with bg), and rise UP to the plinth.
+    for (let i = 0; i < 4; i++) {
+      const sw = pW + 2 + i*0.8, sh = 0.36, sd = 0.9;
+      const s = new THREE.Mesh(new THREE.BoxGeometry(sw, sh, sd), brickD);
+      s.position.set(0, sh/2 + i*sh, D/2 + pD + 2.5 + i*sd); g.add(s);
+    }
+
+    return g;
+  }
+
+  // ─────────────────────────────────────────────────────────────────────
+  // PHC (Primary Health Centre) — E-plan single-storey solar-clad clinic
+  // ─────────────────────────────────────────────────────────────────────
+  // From drone photographs: an E-shape footprint with three horizontal
+  // wings (top + middle + bottom, running east-west) connected by a
+  // vertical spine on the east side. The middle wing is SHORTER (extends
+  // less far west) so two open landscaped courtyards sit on the west side.
+  // Reddish Jodhpur sandstone-brick walls with pink plaster cornice and
+  // jali window bays. EVERY roof is densely covered with tilted solar PV
+  // arrays — the defining visual feature. The south (front) wall of the
+  // bottom wing carries a long white concrete pergola entrance with a
+  // "HEALTH CENTER" sign over the central bay.
+  //
+  // Mesh-local: +X = east-west long axis, +Z = south (front), +Y = up.
+  function buildPHC() {
+    const g = new THREE.Group();
+    const brick = MAT.messBrick, brickD = MAT.messBrickD;
+    const pink  = MAT.akPink,    pinkD  = MAT.akPinkD;
+    const white = MAT.portalWhite;
+    const roof  = MAT.akRoof;
+    const dark  = MAT.entrance;
+    const solar = MAT.solarPanel;
+
+    const W = 62, D = 50, H = 5.2;     // single storey, high ceilings
+    const barD = 11;                    // each wing depth (N-S)
+    const spineW = 6;                   // east-side vertical spine width
+    const midLen = W - 18;              // middle wing is shorter
+
+    // ── Apron + plinth so the building sits ON the ground ──
+    const apron = new THREE.Mesh(new THREE.BoxGeometry(W + 6, 0.3, D + 6), brickD);
+    apron.position.set(0, 0.15, 0); g.add(apron);
+    const plinth = new THREE.Mesh(new THREE.BoxGeometry(W + 1.2, 0.8, D + 1.2), pink);
+    plinth.position.set(0, 0.55, 0); g.add(plinth);
+    const plinthTop = new THREE.Mesh(new THREE.BoxGeometry(W + 1.4, 0.12, D + 1.4), pinkD);
+    plinthTop.position.set(0, 1.01, 0); g.add(plinthTop);
+    const bg = new THREE.Group(); bg.position.y = 1.07; g.add(bg);
+
+    // ── Wing factory: a horizontal bar (E-W) of given length, centered at cx ──
+    function buildWing(cz, len, cx) {
+      // Brick volume
+      const wall = new THREE.Mesh(new THREE.BoxGeometry(len, H, barD), brick);
+      wall.position.set(cx, H/2, cz); bg.add(wall);
+      // Pink top cornice
+      const cor = new THREE.Mesh(new THREE.BoxGeometry(len + 0.25, 0.4, barD + 0.25), pink);
+      cor.position.set(cx, H - 0.2, cz); bg.add(cor);
+      // White flat roof slab
+      const rs = new THREE.Mesh(new THREE.BoxGeometry(len + 0.35, 0.35, barD + 0.35), roof);
+      rs.position.set(cx, H + 0.175, cz); bg.add(rs);
+      // Parapet ring (4 thin pink walls)
+      const ph = 0.55, pt = 0.18;
+      [[pt, ph, barD + 0.4, cx - len/2 - pt/2, cz],
+       [pt, ph, barD + 0.4, cx + len/2 + pt/2, cz],
+       [len + 0.5, ph, pt, cx, cz + barD/2 + pt/2],
+       [len + 0.5, ph, pt, cx, cz - barD/2 - pt/2]].forEach(([w,h,d,x,z]) => {
+        const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), pink);
+        m.position.set(x, H + 0.35 + h/2, z); bg.add(m);
+      });
+    }
+
+    // Three wings (TOP=back/-Z, MIDDLE, BOTTOM=front/+Z). Middle is shorter
+    // and shifted east so the open courtyards sit on the WEST side.
+    const topZ  = -D/2 + barD/2;
+    const midZ  = 0;
+    const botZ  = +D/2 - barD/2;
+    buildWing(topZ, W,      0);                   // back wing — full length
+    buildWing(midZ, midLen, (W - midLen)/2);      // middle wing — shorter, east-aligned
+    buildWing(botZ, W,      0);                   // front wing — full length
+
+    // ── East-side vertical spine (closes the E-shape on the east) ──
+    const spine = new THREE.Mesh(new THREE.BoxGeometry(spineW, H, D), brick);
+    spine.position.set(W/2 - spineW/2, H/2, 0); bg.add(spine);
+    const spineCor = new THREE.Mesh(new THREE.BoxGeometry(spineW + 0.25, 0.4, D + 0.25), pink);
+    spineCor.position.set(W/2 - spineW/2, H - 0.2, 0); bg.add(spineCor);
+    const spineRoof = new THREE.Mesh(new THREE.BoxGeometry(spineW + 0.35, 0.35, D + 0.35), roof);
+    spineRoof.position.set(W/2 - spineW/2, H + 0.175, 0); bg.add(spineRoof);
+    // Spine parapet (east face only — others share with wings)
+    const sePara = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.55, D + 0.5), pink);
+    sePara.position.set(W/2 + 0.1, H + 0.625, 0); bg.add(sePara);
+
+    // ── Dense solar PV arrays on every roof (the building's signature) ──
+    // Helper: lay out a grid of tilted panels over a roof area.
+    function addSolarGrid(cx, cz, lenX, lenZ, rows, panelsPerRow) {
+      const pW = lenX / panelsPerRow * 0.96;
+      const pD = (lenZ / rows) * 0.7;
+      for (let r = 0; r < rows; r++) {
+        const z = cz - lenZ/2 + (r + 0.5) * (lenZ/rows);
+        for (let i = 0; i < panelsPerRow; i++) {
+          const x = cx - lenX/2 + (i + 0.5) * (lenX/panelsPerRow);
+          const p = new THREE.Mesh(new THREE.BoxGeometry(pW, 0.08, pD), solar);
+          p.position.set(x, H + 0.6, z);
+          p.rotation.x = -Math.PI / 9;    // tilt south
+          bg.add(p);
+        }
+      }
+    }
+    // Top wing: 2 rows × 14 panels
+    addSolarGrid(0, topZ, W - 6, barD - 2, 2, 14);
+    // Middle wing: 2 rows × 8 panels (shorter)
+    addSolarGrid((W - midLen)/2, midZ, midLen - 4, barD - 2, 2, 8);
+    // Bottom wing: 2 rows × 14 panels
+    addSolarGrid(0, botZ, W - 6, barD - 2, 2, 14);
+    // East spine: 1 row of small panels (much narrower)
+    addSolarGrid(W/2 - spineW/2, 0, spineW - 1.5, D - barD*1.5, 1, 8);
+
+    // ── White concrete pergola entrance (front of bottom wing) ──
+    const pgW = 18, pgD = 4.5, pgH = 4.4;
+    const pgZ = D/2 + pgD/2;
+    // Top slab
+    const pgTop = new THREE.Mesh(new THREE.BoxGeometry(pgW + 0.8, 0.45, pgD + 0.3), white);
+    pgTop.position.set(0, pgH + 0.225, pgZ); bg.add(pgTop);
+    // Horizontal beam pattern visible from below
+    for (let i = 0; i < 5; i++) {
+      const beam = new THREE.Mesh(new THREE.BoxGeometry(pgW * 0.85, 0.15, 0.5), white);
+      beam.position.set(0, pgH + 0.05, D/2 + 0.4 + i * 0.95); bg.add(beam);
+    }
+    // Vertical columns (2 rows × 6 cols)
+    for (let i = 0; i < 6; i++) {
+      const x = -pgW/2 + i * pgW/5;
+      [0, pgD - 0.1].forEach(zo => {
+        const col = new THREE.Mesh(new THREE.BoxGeometry(0.45, pgH, 0.45), white);
+        col.position.set(x, pgH/2, D/2 + zo); bg.add(col);
+      });
+    }
+    // "HEALTH CENTER" sign band (cream on dark)
+    const signBg = new THREE.Mesh(new THREE.BoxGeometry(pgW * 0.4, 0.5, 0.05), dark);
+    signBg.position.set(0, pgH - 0.5, D/2 + 0.06); bg.add(signBg);
+    const signTrim = new THREE.Mesh(new THREE.BoxGeometry(pgW * 0.4 + 0.2, 0.6, 0.03), white);
+    signTrim.position.set(0, pgH - 0.5, D/2 + 0.03); bg.add(signTrim);
+
+    // ── Window grids on south wing face (front) ──
+    function addWindows(cx, cz, len, faceSide, count) {
+      // faceSide: +1 = +Z side, -1 = -Z side
+      const fz = cz + faceSide * (barD/2 + 0.05);
+      for (let c = 0; c < count; c++) {
+        const x = cx - len/2 + (c + 0.5) * (len/count);
+        const winW = 1.1, winH = 1.8;
+        const fr = new THREE.Mesh(new THREE.BoxGeometry(winW + 0.3, winH + 0.3, 0.05), pinkD);
+        fr.position.set(x, H/2 + 0.3, fz); bg.add(fr);
+        const win = new THREE.Mesh(new THREE.BoxGeometry(winW, winH, 0.05), dark);
+        win.position.set(x, H/2 + 0.3, fz + faceSide * 0.03); bg.add(win);
+      }
+    }
+    // Front face of bottom wing (south, +Z)
+    addWindows(-12, botZ, 28, +1, 9);
+    addWindows(+18, botZ, 12, +1, 4);
+    // Back face of top wing (north, -Z)
+    addWindows(0, topZ, 50, -1, 14);
+    // Courtyard faces of all wings (facing each other across the gardens)
+    addWindows(-6, topZ, W - 14, +1, 12);   // top wing facing south (into courtyard)
+    addWindows(0, midZ, midLen - 4, +1, 8);  // mid wing facing south
+    addWindows(0, midZ, midLen - 4, -1, 8);  // mid wing facing north
+    addWindows(-6, botZ, W - 14, -1, 12);    // bottom wing facing north (into courtyard)
+
+    // ── Landscape courtyards (between wings on the west side) ──
+    [topZ + barD/2, midZ + barD/2].forEach((zFrom) => {
+      const zTo = zFrom + (D - 3*barD)/2;
+      const cyCZ = (zFrom + zTo) / 2;
+      const cyD = zTo - zFrom;
+      // Courtyard floor (paved)
+      const floor = new THREE.Mesh(new THREE.BoxGeometry(W - midLen - 4, 0.15, cyD), brickD);
+      floor.position.set(-(W - midLen)/2 - 2, 0.075, cyCZ); bg.add(floor);
+    });
+
+    // ── Ground-level approach steps in front of pergola ──
+    for (let i = 0; i < 3; i++) {
+      const sw = pgW + 2 + i*0.6, sh = 0.34, sd = 0.9;
+      const s = new THREE.Mesh(new THREE.BoxGeometry(sw, sh, sd), brickD);
+      s.position.set(0, sh/2 + i*sh, D/2 + pgD + 1.5 + i*sd); g.add(s);
+    }
 
     return g;
   }
@@ -2414,6 +4290,91 @@ var Landmarks3D = (() => {
       bearingOffset: 78.2 * Math.PI / 180, replacesOsmBuildings: ['1266941057'],
     },
 
+    // ── SME & MBA — School of Management cream blocks with white corrugated
+    //    gable roofs. SME: long single-storey block (footprint long-edge
+    //    bearing 104.4° → off −14.4°). MBA: L of two single-storey wings (long-wing bearing
+    //    11.7° → off 78.3°). lng/lat are each footprint's centre.
+    {
+      id: 'sme-3d', label: 'SME', labelOffsetY: -0.5, labelOffsetY3d: -1.8,
+      format: 'procedural',
+      build: buildSME,
+      lng: 73.1171948, lat: 26.4801232, heightMeters: null, rotateMeshToUp: Y_UP_TO_Z_UP,
+      bearingOffset: -14.4 * Math.PI / 180, replacesOsmBuildings: ['1266941052'],
+    },
+    {
+      id: 'mba-3d', label: 'MBA', labelOffsetY: -0.5, labelOffsetY3d: -1.8,
+      format: 'procedural',
+      build: buildMBA,
+      lng: 73.1175866, lat: 26.4800307, heightMeters: null, rotateMeshToUp: Y_UP_TO_Z_UP,
+      bearingOffset: 78.3 * Math.PI / 180, replacesOsmBuildings: ['1266941053'],
+    },
+
+    // ── Basic Lab — L-shaped G+3 sandstone academic block with jali
+    //    screens, pergola entrance, and a solar-covered roof.
+    {
+      id: 'basic-lab-3d', label: 'Basic Lab', labelOffsetY: -0.5, labelOffsetY3d: -2.0,
+      format: 'procedural',
+      build: buildBasicLab,
+      // Positioned to keep all blocks clear of surrounding roads
+      lng: 73.1149353, lat: 26.4748987, heightMeters: null, rotateMeshToUp: Y_UP_TO_Z_UP,
+      bearingOffset: (78.9 + 180) * Math.PI / 180, replacesOsmBuildings: ['773587413'],
+    },
+
+    // ── LHC 1 — Lecture Hall Complex
+    {
+      id: 'lhc1-3d', label: 'LHC', labelOffsetY: -0.5, labelOffsetY3d: -2.0,
+      format: 'procedural',
+      build: buildLHC1,
+      lng: 73.1139452, lat: 26.4728443, heightMeters: null, rotateMeshToUp: Y_UP_TO_Z_UP,
+      // Long axis bearing 3.1° (almost N-S) → off = 86.9°
+      bearingOffset: 86.9 * Math.PI / 180, replacesOsmBuildings: ['603120869'],
+    },
+
+    // ── Aakash Sports Complex — indoor sports hall (no OSM building footprint;
+    //    placed inside the "Akaash Complex" area polygon, long axis bearing 47.5°)
+    {
+      id: 'aakash-complex-3d', label: 'Aakash Sports Complex', labelOffsetY: -0.5, labelOffsetY3d: -2.0,
+      format: 'procedural',
+      build: buildAakashComplex,
+      lng: 73.1195842, lat: 26.4768753, heightMeters: null, rotateMeshToUp: Y_UP_TO_Z_UP,
+      bearingOffset: 42.5 * Math.PI / 180,
+    },
+
+    // ── Centre for Advance Scientific Equipment (U-plan academic block)
+    {
+      id: 'case-3d', label: 'Center for Advance Scientific Equipment', labelOffsetY: -0.5, labelOffsetY3d: -2.0,
+      format: 'procedural',
+      build: buildCASE,
+      lng: 73.1141547, lat: 26.4762987, heightMeters: null, rotateMeshToUp: Y_UP_TO_Z_UP,
+      // Footprint long-edge bearing 103.69° (OSM 1412504069); rotated 90° → 13.69° → off = 76.31°
+      bearingOffset: 76.31 * Math.PI / 180, replacesOsmBuildings: ['1412504069'],
+    },
+
+
+    // ── Jodhpur Club — H-plan two-storey club with sunken courtyard.
+    //    OSM footprint longest edge bearing 42.4°; mesh +X must align with
+    //    that, so bearingOffset = 90° − 42.4° = 47.6°.
+    {
+      id: 'jodhpur-club-3d', label: 'Jodhpur Club', labelOffsetY: -0.5, labelOffsetY3d: -1.8,
+      format: 'procedural',
+      build: buildJodhpurClub,
+      lng: 73.111111, lat: 26.478194, heightMeters: null, rotateMeshToUp: Y_UP_TO_Z_UP,
+      bearingOffset: 47.6 * Math.PI / 180,
+      replacesOsmBuildings: ['1266941055'],
+    },
+
+    // ── PHC (Primary Health Centre) — E-plan single storey, solar-clad.
+    //    OSM footprint longest edge bearing 280.6°. Mesh +X = E-W long axis;
+    //    mesh +Z = pergola/front (should face SOUTH). Use -10.6° so the
+    //    pergola faces south and the E opens WEST (matches reference photos).
+    {
+      id: 'phc-3d', label: 'PHC', labelOffsetY: -0.5, labelOffsetY3d: -1.4,
+      format: 'procedural',
+      build: buildPHC,
+      lng: 73.119624, lat: 26.481219, heightMeters: null, rotateMeshToUp: Y_UP_TO_Z_UP,
+      bearingOffset: -10.6 * Math.PI / 180,
+      replacesOsmBuildings: ['1266941054'],
+    },
 
     // Computer Centre — square footprint, longest edge bearing 4° (N-S)
     {
@@ -2664,6 +4625,119 @@ var Landmarks3D = (() => {
         '1524213395', // Patiala Chicken
       ],
     },
+
+    // ── Type B Quarters (22 Faculty Housing blocks) + Guest House (Visitor)
+    //    Each entry carries an osm_id; the builder pulls the matching
+    //    polygon from IITJData at build time and extrudes its true H/cross
+    //    footprint, so each block aligns exactly with the OSM polygon
+    //    (no PCA bearing needed — the geometry already encodes orientation).
+    //    The lng/lat anchor is the polygon's centroid so MapLibre places
+    //    the mesh-local origin (also the polygon centroid in metres) at the
+    //    correct world position.
+    ...[
+      ['773839450', 73.1113527, 26.4732187],
+      ['773839451', 73.1107727, 26.4732305],
+      ['773839452', 73.1107618, 26.4735386],
+      ['773839453', 73.1113313, 26.4735014],
+      ['773839454', 73.1114514, 26.4737832],
+      ['773839455', 73.1108300, 26.4741639],
+      ['773839456', 73.1114986, 26.4740987],
+      ['773839457', 73.1108658, 26.4744771],
+      ['773839458', 73.1114771, 26.4744216],
+      ['773839459', 73.1107483, 26.4738201],
+      ['773839460', 73.1123238, 26.4671374],
+      ['773839461', 73.1126338, 26.4671152],
+      ['773839462', 73.1120684, 26.4668497],
+      ['773839463', 73.1123695, 26.4667915],
+      ['773839464', 73.1127087, 26.4667771],
+      ['773839465', 73.1119142, 26.4665752],
+      ['773839466', 73.1121986, 26.4665093],
+      ['1412677770', 73.1113483, 26.4669522],
+      ['1412677771', 73.1112651, 26.4667309],
+      ['1412677772', 73.1111992, 26.4673852],
+      ['1412677773', 73.1115712, 26.4673192],
+      ['1412677774', 73.1107858, 26.4674374],
+    ].map(([osmId, lng, lat]) => ({
+      id: `type-b-quarter-${osmId}-3d`,
+      label: null,                                // covered by the area label
+      format: 'procedural',
+      build: () => buildTypeBQuarter({ osm_id: osmId, floors: 3 }),
+      lng, lat,
+      heightMeters: null,
+      rotateMeshToUp: Y_UP_TO_Z_UP,
+      bearingOffset: 0,                           // polygon is world-aligned
+      replacesOsmBuildings: [osmId],
+    })),
+
+    {
+      id: 'guest-house-visitor-3d',
+      label: 'Guest House (Visitor)',
+      labelOffsetY: -0.5,
+      labelOffsetY3d: -2.0,
+      format: 'procedural',
+      build: () => buildTypeBQuarter({ osm_id: '773563532', floors: 3, tankYellow: false }),
+      lng: 73.1110476, lat: 26.4729162,
+      heightMeters: null,
+      rotateMeshToUp: Y_UP_TO_Z_UP,
+      bearingOffset: 0,
+      replacesOsmBuildings: ['773563532'],
+    },
+
+    // ── General Quarters (9 apartment blocks: 3 rectangular "General
+    //    Quarters" + 6 pinwheel/Z-shaped "General Quaters"). Salmon-pink
+    //    cement plaster, G+4, cane-railed balconies, white flat roofs with
+    //    dark Sintex tanks + stair-tower headhouse. Reuses the polygon-
+    //    extrude quarter builder with the pink palette and balconies on.
+    //    Labels come from the buildings-labels layer (kept), so label:null.
+    ...[
+      ['1412404070', 73.1122015, 26.4772912],
+      ['1412404071', 73.1124801, 26.4772336],
+      ['1412404073', 73.1131707, 26.4771155],
+      ['1419313443', 73.1118154, 26.4753336],
+      ['1419313444', 73.1112555, 26.4753925],
+      ['1419313445', 73.1107498, 26.4754013],
+      ['1419313446', 73.1112595, 26.4756856],
+      ['1419313447', 73.1118298, 26.4756470],
+      ['1419313448', 73.1123654, 26.4755741],
+    ].map(([osmId, lng, lat]) => ({
+      id: `general-quarter-${osmId}-3d`,
+      label: null,
+      format: 'procedural',
+      build: () => buildTypeBQuarter({
+        osm_id: osmId, floors: 5, floorH: 3.2,
+        wallMat: MAT.gqWall, tankMat: MAT.gqTank, balconies: true,
+      }),
+      lng, lat,
+      heightMeters: null,
+      rotateMeshToUp: Y_UP_TO_Z_UP,
+      bearingOffset: 0,
+      replacesOsmBuildings: [osmId],
+    })),
+
+    // ── Dept. Maths & SOLA — single-storey red-sandstone courtyard halls
+    //    with hipped light-grey metal roofs. Built from their real OSM
+    //    polygons (centroids = vertex-mean incl. closing node, matching the
+    //    builder), so bearingOffset stays 0.
+    {
+      id: 'dept-maths-3d',
+      label: 'Dept. Maths',
+      labelOffsetY: -0.5, labelOffsetY3d: -1.8,
+      format: 'procedural',
+      build: () => buildCourtyardHall({ osm_id: '1266941051' }),
+      lng: 73.1159136, lat: 26.4804674,
+      heightMeters: null, rotateMeshToUp: Y_UP_TO_Z_UP, bearingOffset: 0,
+      replacesOsmBuildings: ['1266941051'],
+    },
+    {
+      id: 'sola-3d',
+      label: 'SOLA',
+      labelOffsetY: -0.5, labelOffsetY3d: -1.8,
+      format: 'procedural',
+      build: () => buildCourtyardHall({ osm_id: '1266941056' }),
+      lng: 73.1165013, lat: 26.4803206,
+      heightMeters: null, rotateMeshToUp: Y_UP_TO_Z_UP, bearingOffset: 0,
+      replacesOsmBuildings: ['1266941056'],
+    },
   ];
 
   // ─────────────────────────────────────────────────────────────────────
@@ -2747,6 +4821,9 @@ var Landmarks3D = (() => {
     // fetch in init() will call _buildVegetation() when it resolves).
     _buildVegetation();
 
+    // Perimeter berms — hardcoded geometry, always built immediately.
+    _buildBerms();
+
     // If setOpacity was called before the scene existed, apply it now.
     if (_targetOpacity < 0.999) _applyOpacity(_targetOpacity, _targetIds);
   }
@@ -2766,6 +4843,649 @@ var Landmarks3D = (() => {
   function _lngLatToLocal(lng, lat) {
     const mc = maplibregl.MercatorCoordinate.fromLngLat([lng, lat], 0);
     return [(mc.x - _originMcX) / _mercPerMeter, (mc.y - _originMcY) / _mercPerMeter];
+  }
+
+  // ─────────────────────────────────────────────────────────────────────
+  // PERIMETER BERM SYSTEM  (data-driven from the OSM "Berms" footprints)
+  //
+  // IIT-Jodhpur's perimeter berms are long, sculptural earth-wall ribbons
+  // that ring the campus. From the drone references they read as:
+  //   • a scalloped / wavy top silhouette — a row of shallow barrel-vault
+  //     humps, roughly one per 8 m module;
+  //   • near-vertical faces with slim vertical ribs at every module joint;
+  //   • the EXTERIOR (road-facing) face painted with blue/white murals;
+  //   • the INTERIOR (campus-facing) face in plain Jodhpur sandstone.
+  //
+  // Rather than guess placement, every segment is reconstructed from the
+  // actual OSM footprint polygons tagged name="Berms" (8 ribbons across the
+  // east + west perimeter). For each thin ribbon we derive a centre-line and
+  // a local width (PCA long-axis + two-sided pairing), then sweep the berm
+  // cross-section along it. Geometry is emitted as a few merged
+  // BufferGeometry strips per segment (≈4 draw calls) so the whole system
+  // stays lightweight. Materials are shared and double-sided.
+  // ─────────────────────────────────────────────────────────────────────
+
+  // Raw OSM footprints (closed lng,lat rings), name="Berms" from
+  // buildings.geojson. East cluster: 743/744/745. West cluster: 746-750.
+  const BERM_IDS = ['1412399743','1412399744','1412399745','1412399746',
+                    '1412399747','1412399748','1412399749','1412399750'];
+  const BERM_RINGS = {
+    '1412399743': [[73.117733,26.4727959],[73.1178463,26.4727654],[73.1177744,26.4724535],[73.1176562,26.4721503],[73.1175188,26.4718615],[73.1172994,26.4715234],[73.1170802,26.4712965],[73.1169912,26.471402],[73.1170366,26.4714546],[73.1171465,26.4715819],[73.1172265,26.4716826],[73.1173085,26.4717857],[73.1173776,26.4719096],[73.1174429,26.4720267],[73.1175339,26.4722111],[73.1175838,26.4723123],[73.1176505,26.4725056],[73.1176792,26.4725889],[73.117733,26.4727959]],
+    '1412399744': [[73.1179478,26.474843],[73.1180613,26.4748463],[73.1180082,26.4740353],[73.1179024,26.4732503],[73.1178203,26.4732742],[73.1179022,26.4739014],[73.1179517,26.4746114],[73.1179484,26.4748081],[73.1179478,26.474843]],
+    '1412399745': [[73.1178945,26.4767757],[73.1179645,26.4767812],[73.1180186,26.4759883],[73.118021,26.4751844],[73.1179529,26.4751885],[73.1178945,26.4767757]],
+    '1412399746': [[73.1116091,26.4708164],[73.1126945,26.4703236],[73.112598,26.4701985],[73.1125679,26.4701577],[73.1123051,26.4702554],[73.1120644,26.4703543],[73.1117632,26.4705091],[73.111571,26.4706248],[73.1114776,26.4706763],[73.1116091,26.4708164]],
+    '1412399747': [[73.1097023,26.4734068],[73.1098739,26.4734332],[73.1099403,26.473175],[73.1100196,26.4728522],[73.1100912,26.4725725],[73.1102595,26.4722394],[73.1104473,26.4719164],[73.1102701,26.4718617],[73.1101139,26.4720856],[73.1099781,26.4724125],[73.1098461,26.4727336],[73.1097671,26.4730857],[73.1097023,26.4734068]],
+    '1412399748': [[73.1101124,26.4754538],[73.1102332,26.4754159],[73.109961,26.4746136],[73.1098391,26.4736512],[73.1096974,26.4736895],[73.1097645,26.4742996],[73.1099837,26.4750886],[73.1101124,26.4754538]],
+    '1412399749': [[73.1113913,26.4769578],[73.1113187,26.4770228],[73.1110057,26.4767499],[73.110748,26.4764467],[73.1106143,26.4762576],[73.1104756,26.4760705],[73.110272,26.4756992],[73.110378,26.4756517],[73.11056,26.4759775],[73.1107758,26.4762772],[73.1110001,26.4765252],[73.1111476,26.4766884],[73.1113094,26.4768672],[73.1113913,26.4769578]],
+    '1412399750': [[73.1123273,26.4779731],[73.1124156,26.4779137],[73.1120658,26.477542],[73.1116396,26.477188],[73.1115727,26.4772691],[73.1119737,26.477645],[73.1123273,26.4779731]],
+  };
+
+  // Approx campus centroid — used only to decide which face is exterior.
+  const _CAMPUS_CENTER = [73.1150, 26.4700];
+
+  // Resample a metric [x,y] polyline to K points spaced equally by arc length.
+  function _resampleXY(chain, K) {
+    if (chain.length === 1) return new Array(K).fill(chain[0]);
+    const arc = [0];
+    for (let i = 1; i < chain.length; i++) {
+      arc.push(arc[i-1] + Math.hypot(chain[i][0]-chain[i-1][0], chain[i][1]-chain[i-1][1]));
+    }
+    const total = arc[arc.length-1] || 1;
+    const out = [];
+    for (let k = 0; k < K; k++) {
+      const s = (k/(K-1)) * total;
+      let seg = 0;
+      while (seg < arc.length-2 && arc[seg+1] <= s) seg++;
+      const sl = arc[seg+1]-arc[seg] || 1, t = (s-arc[seg])/sl;
+      out.push([chain[seg][0] + t*(chain[seg+1][0]-chain[seg][0]),
+                chain[seg][1] + t*(chain[seg+1][1]-chain[seg][1])]);
+    }
+    return out;
+  }
+
+  // Solve a 3×3 linear system by Gaussian elimination with partial pivoting.
+  function _solve3(M, r) {
+    const a = M.map((row, i) => row.concat(r[i]));
+    for (let c = 0; c < 3; c++) {
+      let p = c;
+      for (let i = c+1; i < 3; i++) if (Math.abs(a[i][c]) > Math.abs(a[p][c])) p = i;
+      [a[c], a[p]] = [a[p], a[c]];
+      const piv = a[c][c] || 1e-9;
+      for (let j = c; j < 4; j++) a[c][j] /= piv;
+      for (let i = 0; i < 3; i++) if (i !== c) { const f = a[i][c]; for (let j = c; j < 4; j++) a[i][j] -= f*a[c][j]; }
+    }
+    return [a[0][3], a[1][3], a[2][3]];
+  }
+
+  // Least-squares quadratic  w = A·t² + B·t + C  through (T[i], W[i]).
+  function _quadFit(T, W) {
+    let s0 = T.length, s1 = 0, s2 = 0, s3 = 0, s4 = 0, b0 = 0, b1 = 0, b2 = 0;
+    for (let i = 0; i < T.length; i++) {
+      const t = T[i], w = W[i], t2 = t*t;
+      s1 += t; s2 += t2; s3 += t2*t; s4 += t2*t2;
+      b0 += w; b1 += w*t; b2 += w*t2;
+    }
+    const [A, B, C] = _solve3([[s4,s3,s2],[s3,s2,s1],[s2,s1,s0]], [b2,b1,b0]);
+    return { A, B, C };
+  }
+
+  // Derive { center:[[lng,lat]...], width:metres } from a thin ribbon ring.
+  // Works in a local metric frame (corrects lng/lat aspect): finds the long
+  // axis by PCA, splits the ring into its two long sides, averages matched
+  // samples into a centre-line, then fits a QUADRATIC (parabolic) arc in the
+  // PCA frame. A parabola has constant-sign curvature, so the result is a
+  // single smooth CONCAVE arc that follows the perimeter — never an S-curve.
+  function _ribbonCenterline(ring, K) {
+    K = K || 22;
+    const pts = ring.slice(0, ring.length-1);   // drop closing duplicate
+    const n = pts.length;
+    let cx = 0, cy = 0;
+    pts.forEach(p => { cx += p[0]; cy += p[1]; }); cx /= n; cy /= n;
+    const mLng = 111320 * Math.cos(cy * Math.PI/180), mLat = 111320;
+    const P = pts.map(p => [(p[0]-cx)*mLng, (p[1]-cy)*mLat]);
+    // PCA principal axis (long) + perpendicular (across)
+    let sxx = 0, sxy = 0, syy = 0;
+    P.forEach(([x,y]) => { sxx += x*x; sxy += x*y; syy += y*y; });
+    const theta = 0.5 * Math.atan2(2*sxy, sxx - syy);
+    const ax = Math.cos(theta), ay = Math.sin(theta);
+    const bx = -ay, by = ax;
+    const t = P.map(([x,y]) => x*ax + y*ay);
+    let iMin = 0, iMax = 0;
+    t.forEach((v,i) => { if (v < t[iMin]) iMin = i; if (v > t[iMax]) iMax = i; });
+    const chain = (from, to) => { const c = []; let i = from; for (;;) { c.push(P[i]); if (i === to) break; i = (i+1)%n; } return c; };
+    const ra = _resampleXY(chain(iMin, iMax), K);
+    const rb = _resampleXY(chain(iMax, iMin).reverse(), K);
+    // midpoints expressed in PCA coords (T = along axis, W = across)
+    const T = [], W = []; let widthSum = 0;
+    for (let i = 0; i < K; i++) {
+      const mx = (ra[i][0]+rb[i][0])/2, my = (ra[i][1]+rb[i][1])/2;
+      T.push(mx*ax + my*ay); W.push(mx*bx + my*by);
+      widthSum += Math.hypot(ra[i][0]-rb[i][0], ra[i][1]-rb[i][1]);
+    }
+    // Fit a parabola w(t) → guaranteed single-curvature (concave) arc.
+    const f = _quadFit(T, W);
+    const tMin = Math.min(...T), tMax = Math.max(...T);
+    const center = [];
+    for (let i = 0; i < K; i++) {
+      const tt = tMin + (tMax - tMin) * i/(K-1);
+      const ww = f.A*tt*tt + f.B*tt + f.C;
+      const mx = tt*ax + ww*bx, my = tt*ay + ww*by;
+      center.push([cx + mx/mLng, cy + my/mLat]);
+    }
+    return { center, width: widthSum / K };
+  }
+
+  // Fit a single parabolic (concave) arc through a set of lng/lat points and
+  // return K points sampled along it.
+  function _parabolicArc(pts, K) {
+    K = K || 26;
+    let cx = 0, cy = 0;
+    pts.forEach(p => { cx += p[0]; cy += p[1]; }); cx /= pts.length; cy /= pts.length;
+    const mLng = 111320 * Math.cos(cy * Math.PI/180), mLat = 111320;
+    const P = pts.map(p => [(p[0]-cx)*mLng, (p[1]-cy)*mLat]);
+    let sxx = 0, sxy = 0, syy = 0;
+    P.forEach(([x,y]) => { sxx += x*x; sxy += x*y; syy += y*y; });
+    const th = 0.5 * Math.atan2(2*sxy, sxx - syy);
+    const ax = Math.cos(th), ay = Math.sin(th), bx = -ay, by = ax;
+    const T = P.map(([x,y]) => x*ax + y*ay), W = P.map(([x,y]) => x*bx + y*by);
+    const f = _quadFit(T, W);
+    const tMin = Math.min(...T), tMax = Math.max(...T), out = [];
+    for (let i = 0; i < K; i++) {
+      const tt = tMin + (tMax - tMin) * i/(K-1);
+      const ww = f.A*tt*tt + f.B*tt + f.C;
+      out.push([cx + (tt*ax + ww*bx)/mLng, cy + (tt*ay + ww*by)/mLat]);
+    }
+    return out;
+  }
+
+  // Combined smooth outer arc through a group of berm footprints — used to
+  // route the green landscape berm that runs alongside a blue-berm cluster.
+  function _clusterCenterline(ids, K) {
+    let pts = [];
+    for (const id of ids) {
+      const ring = BERM_RINGS[id];
+      if (ring) pts = pts.concat(_ribbonCenterline(ring).center);
+    }
+    return _parabolicArc(pts, K || 28);
+  }
+
+  // ── Module geometry helpers (module-local frame) ─────────────────────
+  //   +x = along the berm length (one module spans this)
+  //   +z = OUTWARD toward the road (blue mural side)   -z = campus side
+  //   +y = up.
+  //
+  // The real berms read as a SOLID structure (no open passages):
+  //   • Campus face  : a tall pink-sandstone arcade wall, fully closed,
+  //                    with a recessed blind-arch motif (arched window bays).
+  //   • Road face    : light-blue painted shells — a scalloped mural wall
+  //                    whose top edge dips between modules.
+  //   • Roof         : blue barrel-vault strip linking the two top edges,
+  //                    rising just above the sandstone parapet.
+  //   • Ribs         : white buttresses at every module joint on the road
+  //                    side, ground to roof.
+
+  // Translated box (its local origin recentred to (cx,cy,cz)).
+  function _boxAt(w, h, d, cx, cy, cz) {
+    const g = new THREE.BoxGeometry(w, h, d);
+    g.translate(cx, cy, cz);
+    return g;
+  }
+
+  // Recessed blind-arch panel on the campus face (flat, in x-y at z=zc).
+  function _archPanelGeo(w, baseY, topMax, zc, cols) {
+    const a = w/2, pos = [], idx = [];
+    for (let c = 0; c <= cols; c++) {
+      const x = -a + (2*a)*c/cols;
+      const r = Math.max(0, 1 - (x/a)*(x/a));
+      const top = baseY + (topMax-baseY)*Math.sqrt(r);
+      pos.push(x, baseY, zc,  x, top, zc);
+      if (c < cols) { const b = c*2; idx.push(b, b+2, b+1,  b+1, b+2, b+3); }
+    }
+    const g = new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+    g.setIndex(idx); g.computeVertexNormals();
+    return g;
+  }
+
+  // Blue road front: solid wall whose top edge is a scallop (high at module
+  // centre = peakY, dipping to dipY at the module edges).
+  function _scallopWallGeo(w, dipY, peakY, zc, cols) {
+    const a = w/2, pos = [], idx = [];
+    for (let c = 0; c <= cols; c++) {
+      const x = -a + (2*a)*c/cols;
+      const f = Math.cos(Math.PI * x / w);            // 1 at centre → 0 at edges
+      const top = dipY + (peakY-dipY)*Math.max(0, f);
+      pos.push(x, 0, zc,  x, top, zc);
+      if (c < cols) { const b = c*2; idx.push(b, b+2, b+1,  b+1, b+2, b+3); }
+    }
+    const g = new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+    g.setIndex(idx); g.computeVertexNormals();
+    return g;
+  }
+
+  // Roof strip linking the road scallop top edge (+z) to the straight
+  // sandstone parapet (-z), bowing up into a shallow vault.
+  function _roofStripGeo(w, zRoad, zCampus, parapetY, dipY, peakY, vault, cols) {
+    const a = w/2, pos = [], nor = [], idx = [];
+    for (let c = 0; c <= cols; c++) {
+      const x = -a + (2*a)*c/cols;
+      const f = Math.max(0, Math.cos(Math.PI * x / w));
+      const roadTop = dipY + (peakY-dipY)*f;
+      // mid control point bows above the chord by `vault`
+      // emit 3 rows: road edge, crown, campus edge
+      const crownY = Math.max(roadTop, parapetY) + vault*f;
+      const zc0 = zRoad, zc1 = (zRoad+zCampus)/2, zc2 = zCampus;
+      pos.push(x, roadTop, zc0,  x, crownY, zc1,  x, parapetY, zc2);
+      nor.push(0,1,0, 0,1,0, 0,1,0);
+      if (c < cols) {
+        const b = c*3, nb = (c+1)*3;
+        idx.push(b, nb, b+1,    b+1, nb, nb+1);     // road→crown
+        idx.push(b+1, nb+1, b+2, b+2, nb+1, nb+2);  // crown→campus
+      }
+    }
+    const g = new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+    g.setIndex(idx); g.computeVertexNormals();
+    return g;
+  }
+
+  // Walk a metric polyline: returns sampler(s) → {px,pz,tx,tz} (unit tangent)
+  // plus the total length.
+  function _polyWalker(local) {
+    const arc = [0];
+    for (let i = 1; i < local.length; i++)
+      arc.push(arc[i-1] + Math.hypot(local[i][0]-local[i-1][0], local[i][1]-local[i-1][1]));
+    const total = arc[arc.length-1];
+    const at = (s) => {
+      s = Math.max(0, Math.min(total, s));
+      let seg = 0;
+      while (seg < arc.length-2 && arc[seg+1] <= s) seg++;
+      const a = local[seg], b = local[Math.min(seg+1, local.length-1)];
+      const sl = arc[seg+1]-arc[seg] || 1, t = (s-arc[seg])/sl;
+      let tx = b[0]-a[0], tz = b[1]-a[1];
+      const tl = Math.hypot(tx, tz) || 1; tx /= tl; tz /= tl;
+      return { px: a[0]+t*(b[0]-a[0]), pz: a[1]+t*(b[1]-a[1]), tx, tz };
+    };
+    return { at, total };
+  }
+
+  /**
+   * Build one berm segment as a row of solid sandstone/blue modules swept
+   * along the (gently curved) centre-line. InstancedMesh per component, with
+   * a per-module basis that follows the curve → a few draw calls/segment.
+   */
+  function _buildBermSegment(centerPath, widthM, opts) {
+    opts = opts || {};
+    const wallH   = opts.wallH   ?? 7.5;     // sandstone parapet height
+    const vault   = opts.vault   ?? 1.7;     // blue roof rise above parapet
+    const peak    = opts.peak    ?? 1.2;     // road scallop peak above parapet
+    const dip     = opts.dip     ?? 2.2;     // road scallop dip below parapet
+    const moduleW = opts.moduleW ?? 7.5;
+    const cols    = 12;
+    const g = new THREE.Group();
+
+    const local = centerPath.map(([lng,lat]) => _lngLatToLocal(lng, lat));
+    if (local.length < 2) return g;
+    const { at, total } = _polyWalker(local);
+    if (total < 2) return g;
+
+    const depth = Math.max(5.0, Math.min(8.5, widthM));   // road↔campus span
+    const zRoad = depth/2, zCampus = -depth/2;
+    const parapetY = wallH, peakY = wallH + peak, dipY = wallH - dip;
+    const cc = _lngLatToLocal(_CAMPUS_CENTER[0], _CAMPUS_CENTER[1]);
+
+    const n = Math.max(1, Math.round(total / moduleW));
+    const stepW = total / n;
+    const mw = stepW * 0.995;
+
+    // ── per-module component geometries (instanced) ──
+    const campusWall = _boxAt(mw, wallH, 0.55, 0, wallH/2, zCampus + 0.275);
+    // Blind-arch applique sits just proud of the campus face (z = zCampus)
+    // so the arcade motif reads; two stacked bays per module.
+    const archPanel  = _archPanelGeo(mw*0.72, wallH*0.40, wallH*0.86, zCampus - 0.04, cols);
+    const archPanel2 = _archPanelGeo(mw*0.72, wallH*0.06, wallH*0.34, zCampus - 0.04, cols);
+    const roadWall   = _scallopWallGeo(mw, dipY, peakY, zRoad - 0.05, cols);
+    const roofStrip  = _roofStripGeo(mw, zRoad - 0.05, zCampus + 0.05, parapetY, dipY, peakY, vault, cols);
+    const ribGeo     = _boxAt(0.7, wallH + peak + 0.3, 1.1, 0, (wallH+peak+0.3)/2, zRoad - 0.2);
+
+    const mCampus = new THREE.InstancedMesh(campusWall, BMAT.waveInt,  n);
+    const mArch   = new THREE.InstancedMesh(archPanel,  BMAT.waveArch, n);
+    const mArch2  = new THREE.InstancedMesh(archPanel2, BMAT.waveArch, n);
+    const mRoad   = new THREE.InstancedMesh(roadWall,   BMAT.waveExt,  n);
+    const mRoof   = new THREE.InstancedMesh(roofStrip,  BMAT.waveExt,  n);
+    const mRib    = new THREE.InstancedMesh(ribGeo,     BMAT.waveRib,  n + 1);
+    const all = [mCampus, mArch, mArch2, mRoad, mRoof, mRib];
+    all.forEach(m => { m.frustumCulled = false; });
+
+    const M = new THREE.Matrix4();
+    const X = new THREE.Vector3(), Y = new THREE.Vector3(0, 1, 0), Z = new THREE.Vector3();
+    // Per-station basis following the curve. +z (Z) = outward (toward road).
+    const setBasis = (st) => {
+      let ox = st.tz, oz = -st.tx;
+      if (ox*(st.px-cc[0]) + oz*(st.pz-cc[1]) < 0) { ox = -ox; oz = -oz; }
+      Z.set(ox, 0, oz); X.set(oz, 0, -ox);
+      M.makeBasis(X, Y, Z); M.setPosition(st.px, 0, st.pz);
+      return M;
+    };
+
+    for (let k = 0; k < n; k++) {
+      setBasis(at((k + 0.5) * stepW));
+      mCampus.setMatrixAt(k, M);
+      mArch.setMatrixAt(k, M);
+      mArch2.setMatrixAt(k, M);
+      mRoad.setMatrixAt(k, M);
+      mRoof.setMatrixAt(k, M);
+    }
+    for (let k = 0; k <= n; k++) {            // ribs on the module JOINTS
+      setBasis(at(k * stepW));
+      mRib.setMatrixAt(k, M);
+    }
+    all.forEach(m => { m.instanceMatrix.needsUpdate = true; });
+
+    // ── sandstone end caps (close the open cross-section at both ends) ──
+    const capGeo = _boxAt(0.5, wallH, depth, 0, wallH/2, 0);
+    [0, total].forEach((s) => {
+      const cap = new THREE.Mesh(capGeo, BMAT.waveInt);
+      cap.matrixAutoUpdate = false;
+      cap.matrix.copy(setBasis(at(s)));
+      g.add(cap);
+    });
+
+    g.add(mCampus, mArch, mArch2, mRoad, mRoof, mRib);
+    return g;
+  }
+
+  // ── ADMINISTRATION / LANDSCAPE BERMS (Family 1) ──────────────────────
+  // Around the Brain-Tree entry / Director-Lawn precinct the campus uses big
+  // sweeping landscape berms: a near-vertical pink-sandstone RETAINING WALL
+  // on the outer face holding back a TERRACED, planted earth embankment on
+  // the campus face. Modelled by sweeping a cross-section profile along a
+  // smoothed spline path anchored on real campus landmarks.
+
+  // Densify + Laplacian-smooth a sparse lng/lat path into a gentle spline.
+  function _smoothLngLatPath(path, density, passes) {
+    density = density || 8; passes = passes ?? 8;
+    let d = [];
+    for (let i = 0; i < path.length-1; i++)
+      for (let k = 0; k < density; k++) {
+        const t = k/density;
+        d.push([path[i][0] + t*(path[i+1][0]-path[i][0]),
+                path[i][1] + t*(path[i+1][1]-path[i][1])]);
+      }
+    d.push(path[path.length-1]);
+    for (let p = 0; p < passes; p++) {
+      const e = d.map(q => q.slice());
+      for (let i = 1; i < d.length-1; i++) {
+        e[i][0] = (d[i-1][0] + 2*d[i][0] + d[i+1][0]) / 4;
+        e[i][1] = (d[i-1][1] + 2*d[i][1] + d[i+1][1]) / 4;
+      }
+      d = e;
+    }
+    return d;
+  }
+
+  // Sweep an open cross-section profile [[z,y]...] (z = signed offset along
+  // the outward normal, y = height) along a centre-line. `offset` shifts the
+  // whole profile outward (away from campus) so the berm can sit alongside a
+  // road rather than straddling it. One material.
+  function _sweepProfile(localPath, profile, material, flipOut, offset, ref) {
+    const { at, total } = _polyWalker(localPath);
+    const cc = ref || _lngLatToLocal(_CAMPUS_CENTER[0], _CAMPUS_CENTER[1]);
+    const off = offset || 0;
+    const step = 2.5, M = Math.max(2, Math.ceil(total/step) + 1), NP = profile.length;
+    const pos = [], idx = [];
+    for (let i = 0; i < M; i++) {
+      const st = at(Math.min(i*step, total));
+      let ox = st.tz, oz = -st.tx;
+      if (ox*(st.px-cc[0]) + oz*(st.pz-cc[1]) < 0) { ox = -ox; oz = -oz; }
+      if (flipOut) { ox = -ox; oz = -oz; }
+      for (let j = 0; j < NP; j++) {
+        const pz = profile[j][0] + off, py = profile[j][1];
+        pos.push(st.px + ox*pz, py, st.pz + oz*pz);
+      }
+      if (i < M-1) for (let j = 0; j < NP-1; j++) {
+        const a = i*NP+j, b = i*NP+j+1, c = (i+1)*NP+j, d = (i+1)*NP+j+1;
+        idx.push(a, c, b,  b, c, d);
+      }
+    }
+    const g = new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+    g.setIndex(idx); g.computeVertexNormals();
+    return new THREE.Mesh(g, material);
+  }
+
+  // Densely plant the terraced slope with trees + flowering shrubs that SIT on
+  // the terraces. yAtZ(z) gives the slope height at cross-section offset z, so
+  // plants follow the contours. zMin..zMax is the planted band (signed offsets
+  // along the outward normal, already including any profile offset).
+  function _bermPlanting(localPath, yAtZ, zMin, zMax, density, flipOut, ref) {
+    const g = new THREE.Group();
+    const { at, total } = _polyWalker(localPath);
+    const cc = ref || _lngLatToLocal(_CAMPUS_CENTER[0], _CAMPUS_CENTER[1]);
+    const nTree  = Math.max(6, Math.round(total / (density || 7)));
+    const nShrub = nTree * 5;
+    let seed = 0x51ab3c7d;
+    const rnd = () => { seed = (seed*1664525 + 1013904223) >>> 0; return seed/4294967296; };
+    const M = new THREE.Matrix4(), q = new THREE.Quaternion(), up = new THREE.Vector3(0,1,0);
+    const sv = new THREE.Vector3(), pv = new THREE.Vector3();
+    // world position of a plant at along-length s and cross-offset z
+    const place = (s, z) => {
+      const st = at(s);
+      let ox = st.tz, oz = -st.tx;
+      if (ox*(st.px-cc[0]) + oz*(st.pz-cc[1]) < 0) { ox = -ox; oz = -oz; }
+      if (flipOut) { ox = -ox; oz = -oz; }
+      pv.set(st.px + ox*z, yAtZ(z), st.pz + oz*z);
+    };
+    // ── Trees ──
+    const trunkGeo = new THREE.CylinderGeometry(0.13, 0.2, 1.3, 5); trunkGeo.translate(0, 0.65, 0);
+    const canopyGeo = new THREE.IcosahedronGeometry(1.25, 0);       canopyGeo.translate(0, 1.95, 0);
+    const trunk = new THREE.InstancedMesh(trunkGeo, MAT.treeTrunk, nTree);
+    const canopy = new THREE.InstancedMesh(canopyGeo, MAT.canopy, nTree);
+    trunk.frustumCulled = canopy.frustumCulled = false;
+    const tg = [new THREE.Color(0x5f8a3e), new THREE.Color(0x6f9447), new THREE.Color(0x4f7a36)];
+    for (let i = 0; i < nTree; i++) {
+      place(rnd()*total, zMin + rnd()*(zMax-zMin));
+      const s = 0.8 + rnd()*0.7;
+      q.setFromAxisAngle(up, rnd()*6.283); sv.set(s, s*(0.9+rnd()*0.4), s);
+      M.compose(pv, q, sv); trunk.setMatrixAt(i, M); canopy.setMatrixAt(i, M);
+      canopy.setColorAt(i, tg[(rnd()*tg.length)|0]);
+    }
+    trunk.instanceMatrix.needsUpdate = canopy.instanceMatrix.needsUpdate = true;
+    if (canopy.instanceColor) canopy.instanceColor.needsUpdate = true;
+    g.add(trunk, canopy);
+    // ── Flowering shrubs (denser, lower, blossom colours) ──
+    const shrubGeo = new THREE.IcosahedronGeometry(0.75, 0); shrubGeo.translate(0, 0.5, 0);
+    const shrub = new THREE.InstancedMesh(shrubGeo, MAT.canopy, nShrub);
+    shrub.frustumCulled = false;
+    const sc = [new THREE.Color(0x6f9447), new THREE.Color(0x567d3a), new THREE.Color(0xcf6f8c),
+                new THREE.Color(0xe9e2d2), new THREE.Color(0xb8536f), new THREE.Color(0xd99a4e)];
+    for (let i = 0; i < nShrub; i++) {
+      place(rnd()*total, zMin + rnd()*(zMax-zMin));
+      const s = 0.55 + rnd()*0.8;
+      q.setFromAxisAngle(up, rnd()*6.283); sv.set(s, s*0.7, s);
+      M.compose(pv, q, sv); shrub.setMatrixAt(i, M);
+      shrub.setColorAt(i, sc[(rnd()*sc.length)|0]);
+    }
+    shrub.instanceMatrix.needsUpdate = true;
+    if (shrub.instanceColor) shrub.instanceColor.needsUpdate = true;
+    g.add(shrub);
+    return g;
+  }
+
+  // Blind-arch ARCADE (two tiers of gates) applied to the sandstone retaining
+  // wall — the same campus-facing arched-bay motif used on the blue berms.
+  // faceZ is the wall-face offset in profile coords; panels are placed proud
+  // of the wall, oriented toward the wall's outward (campus) side.
+  function _bermArcade(localPath, faceZ, H, offset, flipOut, ref) {
+    const g = new THREE.Group();
+    const { at, total } = _polyWalker(localPath);
+    const cc = ref || _lngLatToLocal(_CAMPUS_CENTER[0], _CAMPUS_CENTER[1]);
+    const moduleW = 7.5;
+    const n = Math.max(1, Math.round(total / moduleW));
+    const stepW = total / n;
+    const upper = _archPanelGeo(stepW*0.72, H*0.42, H*0.88, 0, 12);
+    const lower = _archPanelGeo(stepW*0.72, H*0.06, H*0.34, 0, 12);
+    const mU = new THREE.InstancedMesh(upper, BMAT.waveArch, n);
+    const mL = new THREE.InstancedMesh(lower, BMAT.waveArch, n);
+    mU.frustumCulled = mL.frustumCulled = false;
+    const M = new THREE.Matrix4(), X = new THREE.Vector3(), Y = new THREE.Vector3(0,1,0), Z = new THREE.Vector3();
+    for (let k = 0; k < n; k++) {
+      const st = at((k + 0.5) * stepW);
+      let ox = st.tz, oz = -st.tx;
+      if (ox*(st.px-cc[0]) + oz*(st.pz-cc[1]) < 0) { ox = -ox; oz = -oz; }
+      if (flipOut) { ox = -ox; oz = -oz; }
+      const z = faceZ + offset;
+      Z.set(ox, 0, oz); X.set(oz, 0, -ox);
+      M.makeBasis(X, Y, Z); M.setPosition(st.px + ox*z, 0, st.pz + oz*z);
+      mU.setMatrixAt(k, M); mL.setMatrixAt(k, M);
+    }
+    mU.instanceMatrix.needsUpdate = mL.instanceMatrix.needsUpdate = true;
+    g.add(mU, mL);
+    return g;
+  }
+
+  /**
+   * Landscape berm: a TALL, uplifted terraced earthwork (mountain-slope) — a
+   * battered sandstone retaining wall on the outer face holding back a high,
+   * densely-planted terraced embankment that steps down toward campus.
+   * centerPath is lng/lat, swept along a smoothed (optionally concave) spline.
+   */
+  function _buildRetainingBerm(centerPath, opts) {
+    opts = opts || {};
+    const H       = opts.height    ?? 9.0;     // crest height (mountain slope)
+    const halfW   = (opts.baseWidth ?? 30) / 2;
+    const steps   = opts.steps     ?? 5;
+    const batter  = opts.batter    ?? 2.4;     // battered wall lean
+    const flipOut = opts.flipOut   ?? false;
+    // Offset the whole berm outward so it sits beside the road, not on it.
+    const offset  = opts.offset    ?? (halfW * 0.95);
+    // Optional explicit "outward" reference (a point on the campus-core side);
+    // the wall faces away from it. Falls back to the global campus centre.
+    const ref = opts.outwardRef ? _lngLatToLocal(opts.outwardRef[0], opts.outwardRef[1]) : null;
+    const g = new THREE.Group();
+    // opts.concave fits a single parabolic arc so the berm bows like the
+    // blue wave berms (no straight/angular runs); otherwise just smooth.
+    const base = opts.concave ? _parabolicArc(centerPath, 24) : centerPath;
+    const local = _smoothLngLatPath(base, 6, 5).map(([lng,lat]) => _lngLatToLocal(lng, lat));
+    if (local.length < 2) return g;
+
+    // Outer retaining wall (battered) — base → crest.
+    const wall = [[halfW, 0], [halfW - batter, H]];
+    // Terraced embankment: crest then stepped slope down to inner ground.
+    const outerZ = halfW - batter, innerZ = -halfW, span = outerZ - innerZ;
+    const terr = [[outerZ, H]];
+    for (let s = 0; s < steps; s++) {
+      const z0 = outerZ - span*(s/steps);
+      const z1 = outerZ - span*((s + 0.55)/steps);
+      const y0 = H*(1 - s/steps), y1 = H*(1 - (s+1)/steps);
+      terr.push([z0, y0], [z1, y0], [z1, y1]);
+    }
+    terr.push([innerZ, 0]);
+
+    g.add(_sweepProfile(local, wall, BMAT.bermStone, flipOut, offset, ref));
+    g.add(_sweepProfile(local, terr, BMAT.bermGreen, flipOut, offset, ref));
+    // Coping along the crest for a crisp parapet line.
+    g.add(_sweepProfile(local, [[halfW + 0.15, H], [outerZ, H + 0.3]], BMAT.bermStoneTop, flipOut, offset, ref));
+    // Arcade of arched gates on the (campus-facing) wall, like the blue berms.
+    if (opts.arcade) g.add(_bermArcade(local, halfW + 0.05, H, offset, flipOut, ref));
+
+    // Plant the terraced slope: height at offset z (profile is in z-descending
+    // order from the crest down to the inner toe). Account for the profile
+    // offset so plants land on the terraces.
+    if (opts.trees) {
+      const yAtZ = (z) => {
+        const zp = z - offset;
+        for (let i = 0; i < terr.length-1; i++) {
+          const a = terr[i], b = terr[i+1];
+          if ((zp <= a[0] && zp >= b[0]) || (zp >= a[0] && zp <= b[0])) {
+            const t = (zp - a[0]) / ((b[0]-a[0]) || 1); return a[1] + t*(b[1]-a[1]);
+          }
+        }
+        return 0;
+      };
+      g.add(_bermPlanting(local, yAtZ, innerZ + offset + 1.0, outerZ + offset - 1.5,
+                          opts.treeSpacing, flipOut, ref));
+    }
+    return g;
+  }
+
+  // GREEN LANDSCAPE BERMS — tall, uplifted, densely-planted terraced earthworks
+  // (mountain-slope) along the SOUTH edge only. Every south berm (these three
+  // PLUS the blue berm 746) is routed off the SAME perimeter-road centre-line,
+  // offset a consistent ~6 m to the outer side, so their campus-facing walls
+  // all ALIGN in one continuous band and none overlaps the road. The sandstone
+  // wall + arcade faces campus (flipOut); terraces step down to the outer side.
+  // Band order W→E: West · 746(blue) · Central, then a gap (entry avenue),
+  // then East (one connected run).
+  const _SOUTH_REF = [73.1140, 26.4730];
+  // offset=-halfW keeps the sandstone wall on the path line. baseWidth tuned
+  // so the terraced slope stays clear of southern roads.
+  const _GB = { height: 9.0, baseWidth: 18, steps: 5, batter: 1.4, offset: -9,
+                trees: true, treeSpacing: 7, concave: false, flipOut: true,
+                arcade: true, outwardRef: _SOUTH_REF };
+  const GREEN_BERMS = [
+    // West part — sandstone wall ends at (73.1114714, 26.4710141) on the
+    // green-wall line. Blue 746's CAMPUS WALL (which sits 4.25 m inward from
+    // its own centre-line) aligns to this same line via its D=10 offset.
+    Object.assign({}, _GB, { path: [[73.1103929,26.4719782],[73.1105293,26.4717748],
+      [73.1107213,26.4715824],[73.1111318,26.4712421],[73.1114714,26.4710141]] }),
+    // Central part — STRAIGHT extension along the road tangent to the marker
+    // longitude (73.113711). The last segment is parallel to the road's flow,
+    // so the perpendicular endcap reads as a clean east-facing wall (no south
+    // curve, just a smooth continuation).
+    Object.assign({}, _GB, { path: [[73.1127372,26.4703936],[73.1131187,26.4702720],
+      [73.1132827,26.4702256],[73.1134767,26.4701882],
+      [73.1137100,26.4701600]] }),
+    // East part — STRAIGHT extension backward from road-aligned v1 to the
+    // marker longitude (73.113958). Same flow: perpendicular endcap, no kink.
+    // Narrower so the slope toe clears the south service road.
+    Object.assign({}, _GB, { baseWidth: 14, offset: -7,
+      path: [[73.1139592,26.4701471],[73.1141907,26.4701516],
+        [73.1147332,26.4702038],[73.1152486,26.4703093],[73.1157409,26.4704867],
+        [73.1161642,26.4707136],[73.1165918,26.4710085],[73.1168349,26.4712561]] }),
+  ];
+
+  // Blue wave-berm centre-line overrides. Each override is a SMOOTH cubic
+  // Bezier whose endpoints are placed so blue's campus-facing wall (at
+  // -depth/2 from the path) lands EXACTLY on the adjacent green-wall point,
+  // AND whose tangents at start/end match the adjacent green's tangent (so
+  // the wall direction is continuous across each junction).
+  const BERM_CL_OVERRIDE = {
+    // 746 — south end of West green (SE) ↔ start of Central green
+    '1412399746': [[73.1114458,26.4709836],[73.1115934,26.4708878],
+                   [73.1117448,26.4707963],[73.1118999,26.4707094],
+                   [73.1120585,26.4706275],[73.1122202,26.4705510],
+                   [73.1123850,26.4704803],[73.1125527,26.4704157],
+                   [73.1127229,26.4703576]],
+    // 747 — extended to its FULL OSM-polygon natural length at the north end
+    // (NW endpoint = midpoint of v0+v1 = (73.1097881, 26.4734200)), so the
+    // berm reaches its designated layout. South end is offset perpendicular
+    // from West green's start so 747's campus wall lands EXACTLY on West
+    // green's wall, with the tangent matched (smooth continuous wall line).
+    '1412399747': [[73.1097881,26.4734200],[73.1098133,26.4733116],
+                   [73.1098401,26.4732031],[73.1098685,26.4730947],
+                   [73.1098989,26.4729866],[73.1099315,26.4728789],
+                   [73.1099664,26.4727718],[73.1100039,26.4726656],
+                   [73.1100442,26.4725603],[73.1100875,26.4724561],
+                   [73.1101340,26.4723533],[73.1101839,26.4722519],
+                   [73.1102375,26.4721522],[73.1102949,26.4720544],
+                   [73.1103563,26.4719586]],
+  };
+
+  // Build every campus berm: 8 hostel wave berms (real footprints) + the three
+  // south-edge green landscape berms.
+  function _buildBerms() {
+    if (!_root) return;
+    for (const id of BERM_IDS) {
+      const ring = BERM_RINGS[id];
+      if (!ring) continue;
+      const { center, width } = _ribbonCenterline(ring);
+      _root.add(_buildBermSegment(BERM_CL_OVERRIDE[id] || center, width, {
+        wallH: 7.5, vault: 1.7, peak: 1.2, dip: 2.2, moduleW: 7.5,
+      }));
+    }
+    for (const gb of GREEN_BERMS) _root.add(_buildRetainingBerm(gb.path, gb));
   }
 
   function _buildVegetation() {
@@ -3049,6 +5769,14 @@ var Landmarks3D = (() => {
   function _raise() {
     if (!_map) return;
     if (_map.getLayer(LAYER_ID)) try { _map.moveLayer(LAYER_ID); } catch (_) {}
+    // In 3D, the place markers + labels (e.g. the perimeter W/E unit codes)
+    // would otherwise be drawn under the 3D building meshes. Lift them above
+    // the mesh — same treatment the landmark labels get below.
+    if (_labelOpts.is3D) {
+      for (const id of ['places-circles', 'places-labels']) {
+        if (_map.getLayer(id)) try { _map.moveLayer(id); } catch (_) {}
+      }
+    }
     try {
       if (_map.getLayer(LABEL_LAYER_ID)) _map.moveLayer(LABEL_LAYER_ID);
     } catch (_) {}
@@ -3192,6 +5920,8 @@ var Landmarks3D = (() => {
     for (const l of LANDMARKS) {
       if (Array.isArray(l.replacesOsmBuildings)) ids.push(...l.replacesOsmBuildings);
     }
+    // The 3D berm sweeps stand in for the flat OSM "Berms" footprint polygons.
+    ids.push(...BERM_IDS);
     return ids;
   }
 
