@@ -808,8 +808,14 @@ function snapPerimeterCodes(places) {
 
   // 3. For each candidate compute distance to its nearest gate. Only
   //    candidates whose nearest gate is ≤ ELIGIBILITY_M qualify as berm POIs.
-  //    Build pairs from those candidates to every gate within OVERFLOW_M so
-  //    over-clustered ones can spill to neighbouring gates.
+  //    Build pairs from those candidates to every gate within OVERFLOW_M — but
+  //    ONLY to gates on the SAME berm ribbon the candidate actually fronts
+  //    (its nearest gate's ribbon). Without this, a cluster sitting at the very
+  //    end of one berm (e.g. Designing Club / Inventory Room at the north tip
+  //    of ribbon 744) can spill across the gap onto the adjacent berm (745)
+  //    once its own berm's nearby arches are taken. Confining overflow to the
+  //    home ribbon keeps every POI on the berm it belongs to while still
+  //    spreading an over-clustered group 1-per-arch along that berm.
   const cosLat = Math.cos(26.473 * Math.PI/180);
   const pairs = [];
   for (const cand of candidates) {
@@ -821,8 +827,9 @@ function snapPerimeterCodes(places) {
     });
     const nearest = dists.reduce((a, b) => a.d < b.d ? a : b);
     if (nearest.d > ELIGIBILITY_M) continue;     // off-berm POI, skip
+    const homeRibbon = gates[nearest.gi].ribbonId;
     for (const { gi, d } of dists) {
-      if (d <= OVERFLOW_M) pairs.push({ cand, gi, d });
+      if (d <= OVERFLOW_M && gates[gi].ribbonId === homeRibbon) pairs.push({ cand, gi, d });
     }
   }
 
@@ -871,10 +878,15 @@ function main() {
   // 4. Merge & deduplicate places (OSM first, then KML, then curated as fallback)
   const mergedPlaces = deduplicatePlaces([...allPlaces, ...kmlFeatures, ...curatedPlaces]);
 
-  // 4b. Snap perimeter W/E unit codes to their sandstone-gate module centers
-  //     so each dot anchors precisely to its respective arched bay on the 3D
-  //     berm (instead of drifting based on raw OSM placement).
-  snapPerimeterCodes(mergedPlaces);
+  // 4b. Perimeter-berm gate snap is DISABLED: OSM now places every perimeter
+  //     POI (W-codes, E-codes, the E-block societies) at distinct, accurate
+  //     coordinates along the berm (verified: 0 named POIs within 2 m of each
+  //     other), so each dot already sits at its true location. Snapping to
+  //     arch centers would move POIs off their real OSM coordinates and reorder
+  //     them. We therefore keep raw OSM coordinates — an exact match to OSM.
+  //     (Re-enable snapPerimeterCodes() only if OSM regresses to clustered
+  //     near-identical coords for these codes.)
+  // snapPerimeterCodes(mergedPlaces);
 
   // 5. Build road graph and save
   const { graph, nodeCoords } = RoadClassifier.buildRoadGraph(roads);
