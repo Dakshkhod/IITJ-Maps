@@ -1,4 +1,292 @@
 {
+  "Hostel B1": {
+    "lat": 26.4725609,
+    "lng": 73.1152976,
+    "osm_id": "12980134796",
+    "gate_name": "B-1 gate"
+  },
+  "Hostel B2": {
+    "lat": 26.4725024,
+    "lng": 73.1162509,
+    "osm_id": "12980134797",
+    "gate_name": "B-2 gate"
+  },
+  "Hostel G5": {
+    "lat": 26.4733145,
+    "lng": 73.1163995,
+    "osm_id": "12981437709",
+    "gate_name": "G-5 gate"
+  },
+  "Hostel G6": {
+    "lat": 26.4733978,
+    "lng": 73.1155144,
+    "osm_id": "12980144652",
+    "gate_name": "G-6 gate"
+  },
+  "Hostel B5": {
+    "lat": 26.472436,
+    "lng": 73.1152908,
+    "osm_id": "12980134795",
+    "gate_name": "B-5 gate"
+  },
+  "Fresh and Green": {
+    "lat": 26.4662749,
+    "lng": 73.1117964,
+    "osm_id": "13904518589",
+    "gate_name": "Fresh and green gate"
+  },
+  "Hostel G1": {
+    "lat": 26.4735242,
+    "lng": 73.1156048,
+    "osm_id": "12980144655",
+    "gate_name": "G-1 gate"
+  },
+  "Hostel G2": {
+    "lat": 26.4734426,
+    "lng": 73.1164477,
+    "osm_id": "12980144654",
+    "gate_name": "G-2 gate"
+  },
+  "Akaash Complex": {
+    "lat": 26.4764512,
+    "lng": 73.1194166,
+    "osm_id": "13878739744",
+    "gate_name": "Akaash Complex gate"
+  },
+  "Hostel I2": {
+    "lat": 26.4715779,
+    "lng": 73.1151545,
+    "osm_id": "7220643470",
+    "gate_name": "I-2 gate"
+  },
+  "Hostel G3": {
+    "lat": 26.4733243,
+    "lng": 73.1172154,
+    "osm_id": "12980144648",
+    "gate_name": "G-3 gate"
+  },
+  "Hostel G4": {
+    "lat": 26.4732575,
+    "lng": 73.1170384,
+    "osm_id": "12981437711",
+    "gate_name": "G-4 gate"
+  },
+  "Jodhpur Club": {
+    "lat": 26.4779873,
+    "lng": 73.1113401,
+    "osm_id": "12980144916",
+    "gate_name": "Jodhpur Club gate"
+  },
+  "Hostel I3": {
+    "lat": 26.4715313,
+    "lng": 73.116139,
+    "osm_id": "12979131715",
+    "gate_name": "I-3 gate"
+  },
+  "Hostel B4": {
+    "lat": 26.4723935,
+    "lng": 73.1162479,
+    "osm_id": "12980134799",
+    "gate_name": "B-4 gate"
+  },
+  "Hostel Y4": {
+    "lat": 26.4742003,
+    "lng": 73.1169083,
+    "osm_id": "12980144870",
+    "gate_name": "Y-4 gate"
+  },
+  "Hostel Y3": {
+    "lat": 26.4743326,
+    "lng": 73.1172181,
+    "osm_id": "12980144872",
+    "gate_name": "Y-3 gate"
+  },
+  "Hostel O4": {
+    "lat": 26.4751827,
+    "lng": 73.116969,
+    "osm_id": "13885088516",
+    "gate_name": "O-4 gate"
+  },
+  "Hostel O3": {
+    "lat": 26.4752664,
+    "lng": 73.1173086,
+    "osm_id": "13885088517",
+    "gate_name": "O-3 gate"
+  },
+  "LHC": {
+    "lat": 26.4729559,
+    "lng": 73.1137925,
+    "osm_id": "13930640138",
+    "gate_name": "LHC entrance"
+  },
+  "Old Mess/Cant.": {
+    "lat": 26.4721079,
+    "lng": 73.1168203,
+    "osm_id": "12980144605",
+    "gate_name": "Old Mess/Cant. entrance"
+  },
+  "Hostel B3": {
+    "lat": 26.472375,
+    "lng": 73.1171818,
+    "osm_id": "13942425549",
+    "gate_name": "Hostel B3 entrance"
+  },
+  "Library and Computer Centre": {
+    "lat": 26.4713527,
+    "lng": 73.1134793,
+    "osm_id": "13930640145",
+    "gate_name": "Library and Computer Centre entrance"
+  },
+  "Office Of Students": {
+    "lat": 26.4710938,
+    "lng": 73.1137826,
+    "osm_id": "13930640146",
+    "gate_name": "Office Of Students entrance"
+  },
+  "Office of Administration": {
+    "lat": 26.4711025,
+    "lng": 73.1133517,
+    "osm_id": "13930640147",
+    "gate_name": "Office of Administration entrance"
+  },
+  "Guest House (Visitor)": {
+    "lat": 26.4728131,
+    "lng": 73.1110319,
+    "osm_id": "13942425529",
+    "gate_name": "Guest House (Visitor) entrance"
+  },
+  "Department of Mechanical Engineering": {
+    "lat": 26.4791296,
+    "lng": 73.1165339,
+    "osm_id": "13930470831",
+    "gate_name": "Department of Mechanical Engineering entrance"
+  },
+  "Department of Chemistry": {
+    "lat": 26.4754581,
+    "lng": 73.1149522,
+    "osm_id": "13930640131",
+    "gate_name": "Department of Chemistry entrance"
+  },
+  "Basic Lab": {
+    "lat": 26.47492,
+    "lng": 73.1148135,
+    "osm_id": "12980144846",
+    "gate_name": "Basic Lab entrance"
+  },
+  "Dept. CSE": {
+    "lat": 26.4750308,
+    "lng": 73.1144613,
+    "osm_id": "12980144848",
+    "gate_name": "Dept. CSE entrance"
+  },
+  "Computer Centre": {
+    "lat": 26.4715756,
+    "lng": 73.1137188,
+    "osm_id": "12980144939",
+    "gate_name": "Computer Centre entrance"
+  },
+  "Faculty Housing": {
+    "lat": 26.4733039,
+    "lng": 73.1112864,
+    "osm_id": "13942425530",
+    "gate_name": "Faculty Housing entrance"
+  },
+  "Department of Metallurgical and Materials Engineering": {
+    "lat": 26.4796724,
+    "lng": 73.1168443,
+    "osm_id": "13930470835",
+    "gate_name": "Department of Metallurgical and Materials Engineering entrance"
+  },
+  "Dept. BB": {
+    "lat": 26.4755479,
+    "lng": 73.1145896,
+    "osm_id": "13930640132",
+    "gate_name": "Dept. BB entrance"
+  },
+  "Physics Dept": {
+    "lat": 26.4797409,
+    "lng": 73.116371,
+    "osm_id": "13930470832",
+    "gate_name": "Physics Dept entrance"
+  },
+  "Dept. Maths": {
+    "lat": 26.4803095,
+    "lng": 73.1158806,
+    "osm_id": "13930500561",
+    "gate_name": "Dept. Maths entrance"
+  },
+  "SME": {
+    "lat": 26.4801728,
+    "lng": 73.117019,
+    "osm_id": "13930500557",
+    "gate_name": "SME entrance"
+  },
+  "PHC": {
+    "lat": 26.4809785,
+    "lng": 73.1195418,
+    "osm_id": "13930562051",
+    "gate_name": "PHC entrance"
+  },
+  "SOLA": {
+    "lat": 26.4801651,
+    "lng": 73.1164716,
+    "osm_id": "13930500559",
+    "gate_name": "SOLA entrance"
+  },
+  "New Mess": {
+    "lat": 26.473011,
+    "lng": 73.1172666,
+    "osm_id": "13942425550",
+    "gate_name": "New Mess entrance"
+  },
+  "School of AI&DS": {
+    "lat": 26.4611429,
+    "lng": 73.1108724,
+    "osm_id": "13905508756",
+    "gate_name": "School of AI&DS entrance"
+  },
+  "Center for Advance Scientific Equipment": {
+    "lat": 26.4763,
+    "lng": 73.1139008,
+    "osm_id": "13930640133",
+    "gate_name": "Center for Advance Scientific Equipment entrance"
+  },
+  "Ess 09 Sub Station": {
+    "lat": 26.4766176,
+    "lng": 73.1181989,
+    "osm_id": "13930640137",
+    "gate_name": "Ess 09 Sub Station entrance"
+  },
+  "LHC 2": {
+    "lat": 26.4801254,
+    "lng": 73.1157271,
+    "osm_id": "13930500563",
+    "gate_name": "LHC 2 entrance"
+  },
+  "General Quaters": {
+    "lat": 26.4754236,
+    "lng": 73.111845,
+    "osm_id": "13942299808",
+    "gate_name": "General Quaters entrance"
+  },
+  "Dept. Civil": {
+    "lat": 26.4801033,
+    "lng": 73.115076,
+    "osm_id": "13930500573",
+    "gate_name": "Dept. Civil entrance"
+  },
+  "Academic Building": {
+    "lat": 26.4760491,
+    "lng": 73.1149711,
+    "osm_id": "13930640134",
+    "gate_name": "Academic Building entrance"
+  },
+  "Neem Cafe": {
+    "lat": 26.4661472,
+    "lng": 73.1118363,
+    "osm_id": "13892687325",
+    "gate_name": "Neem Cafe entrance"
+  },
   "Gate 1 (Main Gate - NH62)": {
     "lat": 26.4587,
     "lng": 73.1103,
@@ -8,113 +296,5 @@
     "lat": 26.4666,
     "lng": 73.1078,
     "gate_name": "Gate 2 (South Gate)"
-  },
-  "Hostel I2": {
-    "lat": 26.4715779,
-    "lng": 73.1151545,
-    "osm_id": "7220643470",
-    "gate_name": "Hostel I2 Gate"
-  },
-  "Hostel I3": {
-    "lat": 26.4714967,
-    "lng": 73.1161287,
-    "osm_id": "12979131715",
-    "gate_name": "Hostel I3 Gate"
-  },
-  "Hostel B5": {
-    "lat": 26.472436,
-    "lng": 73.1152908,
-    "osm_id": "12980134795",
-    "gate_name": "Hostel B5 Gate"
-  },
-  "Hostel B1": {
-    "lat": 26.4725379,
-    "lng": 73.1152956,
-    "osm_id": "12980134796",
-    "gate_name": "Hostel B1 Gate"
-  },
-  "Hostel B2": {
-    "lat": 26.4724512,
-    "lng": 73.1162576,
-    "osm_id": "12980134797",
-    "gate_name": "Hostel B2 Gate"
-  },
-  "Hostel B4": {
-    "lat": 26.4723935,
-    "lng": 73.1162479,
-    "osm_id": "12980134799",
-    "gate_name": "Hostel B4 Gate"
-  },
-  "Hostel G3": {
-    "lat": 26.4733416,
-    "lng": 73.1172199,
-    "osm_id": "12980144648",
-    "gate_name": "Hostel G3 Gate"
-  },
-  "Hostel G6": {
-    "lat": 26.4733978,
-    "lng": 73.1155144,
-    "osm_id": "12980144652",
-    "gate_name": "Hostel G6 Gate"
-  },
-  "Hostel G2": {
-    "lat": 26.4734278,
-    "lng": 73.1164229,
-    "osm_id": "12980144654",
-    "gate_name": "Hostel G2 Gate"
-  },
-  "Hostel G1": {
-    "lat": 26.4734938,
-    "lng": 73.1155989,
-    "osm_id": "12980144655",
-    "gate_name": "Hostel G1 Gate"
-  },
-  "Hostel Y4": {
-    "lat": 26.4741948,
-    "lng": 73.1169261,
-    "osm_id": "12980144870",
-    "gate_name": "Hostel Y4 Gate"
-  },
-  "Hostel Y3": {
-    "lat": 26.4742427,
-    "lng": 73.1170959,
-    "osm_id": "12980144872",
-    "gate_name": "Hostel Y3 Gate"
-  },
-  "Hostel G5": {
-    "lat": 26.4733145,
-    "lng": 73.1163995,
-    "osm_id": "12981437709",
-    "gate_name": "Hostel G5 Gate"
-  },
-  "Hostel G4": {
-    "lat": 26.4732575,
-    "lng": 73.1170384,
-    "osm_id": "12981437711",
-    "gate_name": "Hostel G4 Gate"
-  },
-  "Aakash Sports Complex": {
-    "lat": 26.4764512,
-    "lng": 73.1194166,
-    "osm_id": "13878739744",
-    "gate_name": "Aakash Sports Complex Gate"
-  },
-  "Hostel O4": {
-    "lat": 26.4751209,
-    "lng": 73.1171937,
-    "osm_id": "13885088516",
-    "gate_name": "Hostel O4 Gate"
-  },
-  "Hostel O3": {
-    "lat": 26.4752205,
-    "lng": 73.1173121,
-    "osm_id": "13885088517",
-    "gate_name": "Hostel O3 Gate"
-  },
-  "Akaash Complex": {
-    "lat": 26.4764512,
-    "lng": 73.1194166,
-    "osm_id": "13878739744",
-    "gate_name": "Aakash Sports Complex Gate"
   }
 }

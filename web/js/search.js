@@ -21,13 +21,13 @@ const IITJData = (() => {
   async function init() {
     const base = '/data';
     const [places, buildings, roads, areas, searchIndex, categories, entrances, greens] = await Promise.all([
-      fetch(`${base}/places.geojson`).then(r => r.json()),
-      fetch(`${base}/buildings.geojson`).then(r => r.json()),
-      fetch(`${base}/roads.geojson?v=26`).then(r => r.json()),
-      fetch(`${base}/areas.geojson`).then(r => r.json()),
-      fetch(`${base}/search-index.json`).then(r => r.json()),
+      fetch(`${base}/places.geojson?v=27`).then(r => r.json()),
+      fetch(`${base}/buildings.geojson?v=27`).then(r => r.json()),
+      fetch(`${base}/roads.geojson?v=27`).then(r => r.json()),
+      fetch(`${base}/areas.geojson?v=27`).then(r => r.json()),
+      fetch(`${base}/search-index.json?v=27`).then(r => r.json()),
       fetch(`${base}/categories.json`).then(r => r.json()),
-      fetch(`${base}/entrances.json`).then(r => r.ok ? r.json() : {}).catch(() => ({})),
+      fetch(`${base}/entrances.json?v=27`).then(r => r.ok ? r.json() : {}).catch(() => ({})),
       fetch(`${base}/greens.geojson`).then(r => r.ok ? r.json() : null).catch(() => null),
     ]);
 

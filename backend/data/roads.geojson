@@ -9,7 +9,6 @@
         "highway_type": "unclassified",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -20,6 +19,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 2583,
         "walk_access": "yes",
@@ -315,7 +315,6 @@
         "highway_type": "primary",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -326,6 +325,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 1330,
         "walk_access": "yes",
@@ -457,7 +457,6 @@
         "highway_type": "service",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": "1",
         "oneway": null,
         "service": null,
@@ -468,6 +467,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 16,
         "walk_access": "yes",
@@ -503,7 +503,6 @@
         "highway_type": "service",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": "1",
         "oneway": null,
         "service": null,
@@ -514,6 +513,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 30,
         "walk_access": "yes",
@@ -549,7 +549,6 @@
         "highway_type": "service",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": "1",
         "oneway": null,
         "service": null,
@@ -560,6 +559,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 87,
         "walk_access": "yes",
@@ -611,7 +611,6 @@
         "highway_type": "service",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": "2",
         "oneway": null,
         "service": null,
@@ -622,6 +621,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 1527,
         "walk_access": "yes",
@@ -665,6 +665,10 @@
           [
             73.1146664,
             26.4738281
+          ],
+          [
+            73.1146994,
+            26.4738805
           ],
           [
             73.1149064,
@@ -905,7 +909,6 @@
         "highway_type": "service",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": "1",
         "oneway": null,
         "service": null,
@@ -916,6 +919,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 752,
         "walk_access": "yes",
@@ -951,6 +955,10 @@
           [
             73.1138959,
             26.4695504
+          ],
+          [
+            73.113887,
+            26.4696456
           ],
           [
             73.1138421,
@@ -1001,6 +1009,10 @@
             26.4712763
           ],
           [
+            73.1142337,
+            26.4717694
+          ],
+          [
             73.1142351,
             26.4718264
           ],
@@ -1045,6 +1057,10 @@
             26.4724736
           ],
           [
+            73.1158803,
+            26.4724693
+          ],
+          [
             73.1162526,
             26.4724306
           ],
@@ -1079,7 +1095,6 @@
         "highway_type": "service",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": "2",
         "oneway": null,
         "service": null,
@@ -1090,6 +1105,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 774,
         "walk_access": "yes",
@@ -1171,6 +1187,10 @@
             26.4735537
           ],
           [
+            73.109602,
+            26.4735506
+          ],
+          [
             73.1096539,
             26.4735489
           ]
@@ -1185,7 +1205,6 @@
         "highway_type": "service",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -1196,6 +1215,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 83,
         "walk_access": "yes",
@@ -1231,7 +1251,6 @@
         "highway_type": "service",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": "2",
         "oneway": null,
         "service": null,
@@ -1242,6 +1261,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 366,
         "walk_access": "yes",
@@ -1357,7 +1377,6 @@
         "highway_type": "service",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": "2",
         "oneway": null,
         "service": null,
@@ -1368,6 +1387,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 979,
         "walk_access": "yes",
@@ -1503,7 +1523,6 @@
         "highway_type": "service",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": "2",
         "oneway": null,
         "service": null,
@@ -1514,6 +1533,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 67,
         "walk_access": "yes",
@@ -1561,7 +1581,6 @@
         "highway_type": "service",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -1572,6 +1591,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 713,
         "walk_access": "yes",
@@ -1663,7 +1683,6 @@
         "highway_type": "service",
         "surface": "paved",
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -1674,6 +1693,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 414,
         "walk_access": "yes",
@@ -1757,7 +1777,6 @@
         "highway_type": "service",
         "surface": "unpaved",
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -1768,6 +1787,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 328,
         "walk_access": "yes",
@@ -1821,6 +1841,10 @@
             26.4742903
           ],
           [
+            73.1145151,
+            26.4745128
+          ],
+          [
             73.1145882,
             26.4746061
           ],
@@ -1839,7 +1863,6 @@
         "highway_type": "service",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -1850,6 +1873,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 295,
         "walk_access": "yes",
@@ -1907,9 +1931,8 @@
         "osm_id": "773563496",
         "name": "service",
         "highway_type": "service",
-        "surface": "unpaved",
+        "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -1920,14 +1943,15 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
-        "length_m": 322,
+        "length_m": 323,
         "walk_access": "yes",
-        "vehicle_access": "no",
-        "navigation_class": "unpaved_service",
-        "drive_confidence": 0.25,
-        "drive_penalty": null,
-        "drive_note": "Unpaved service road; excluded from vehicle routing."
+        "vehicle_access": "yes",
+        "navigation_class": "campus_service_connector",
+        "drive_confidence": 0.68,
+        "drive_penalty": 2.5,
+        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
       },
       "geometry": {
         "type": "LineString",
@@ -1941,36 +1965,48 @@
             26.4769011
           ],
           [
-            73.11529,
-            26.4772755
+            73.1152082,
+            26.4772472
           ],
           [
-            73.1153869,
-            26.4775319
+            73.1152287,
+            26.477301
           ],
           [
-            73.1157662,
-            26.4781498
+            73.1152677,
+            26.4774043
           ],
           [
-            73.1160859,
-            26.4786589
+            73.1153051,
+            26.4775036
           ],
           [
-            73.1162402,
-            26.4789045
+            73.1156875,
+            26.47812
           ],
           [
-            73.1163544,
-            26.4791468
+            73.1160052,
+            26.4786301
           ],
           [
-            73.1163695,
-            26.4791745
+            73.1160777,
+            26.4787278
           ],
           [
-            73.1165151,
-            26.4794414
+            73.1161837,
+            26.4789042
+          ],
+          [
+            73.1162954,
+            26.4790851
+          ],
+          [
+            73.1163405,
+            26.4791838
+          ],
+          [
+            73.116482,
+            26.4794488
           ]
         ]
       }
@@ -1983,7 +2019,6 @@
         "highway_type": "service",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -1994,6 +2029,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 118,
         "walk_access": "yes",
@@ -2031,9 +2067,8 @@
         "osm_id": "773563503",
         "name": "service",
         "highway_type": "service",
-        "surface": "unpaved",
+        "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -2044,14 +2079,15 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 211,
         "walk_access": "yes",
-        "vehicle_access": "no",
-        "navigation_class": "unpaved_service",
-        "drive_confidence": 0.25,
-        "drive_penalty": null,
-        "drive_note": "Unpaved service road; excluded from vehicle routing."
+        "vehicle_access": "yes",
+        "navigation_class": "campus_service_connector",
+        "drive_confidence": 0.68,
+        "drive_penalty": 2.5,
+        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
       },
       "geometry": {
         "type": "LineString",
@@ -2091,7 +2127,6 @@
         "highway_type": "service",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -2102,8 +2137,9 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
-        "length_m": 697,
+        "length_m": 698,
         "walk_access": "yes",
         "vehicle_access": "yes",
         "navigation_class": "campus_service_connector",
@@ -2123,8 +2159,8 @@
             26.4709876
           ],
           [
-            73.1170557,
-            26.471043
+            73.1170592,
+            26.4710397
           ],
           [
             73.1167918,
@@ -2151,32 +2187,32 @@
             26.4724962
           ],
           [
-            73.1175969,
+            73.1176177,
             26.472713
           ],
           [
-            73.1176243,
-            26.4727987
+            73.1176593,
+            26.4728385
           ],
           [
-            73.1176887,
-            26.4731583
+            73.1177165,
+            26.4731558
           ],
           [
-            73.1177476,
-            26.4737399
+            73.1177837,
+            26.4736616
           ],
           [
-            73.1177829,
-            26.4740979
+            73.1178287,
+            26.4741029
           ],
           [
-            73.1178174,
-            26.4744473
+            73.1178616,
+            26.4746172
           ],
           [
-            73.11782,
-            26.4745936
+            73.1178316,
+            26.4751246
           ],
           [
             73.1178301,
@@ -2211,9 +2247,8 @@
         "osm_id": "773563514",
         "name": "service",
         "highway_type": "service",
-        "surface": "unpaved",
+        "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -2224,14 +2259,15 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 360,
         "walk_access": "yes",
-        "vehicle_access": "no",
-        "navigation_class": "unpaved_service",
-        "drive_confidence": 0.25,
-        "drive_penalty": null,
-        "drive_note": "Unpaved service road; excluded from vehicle routing."
+        "vehicle_access": "yes",
+        "navigation_class": "campus_service_connector",
+        "drive_confidence": 0.68,
+        "drive_penalty": 2.5,
+        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
       },
       "geometry": {
         "type": "LineString",
@@ -2261,8 +2297,8 @@
             26.473021
           ],
           [
-            73.1110488,
-            26.4730772
+            73.1110179,
+            26.4730841
           ],
           [
             73.1107096,
@@ -2283,7 +2319,6 @@
         "highway_type": "service",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -2294,6 +2329,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 38,
         "walk_access": "yes",
@@ -2325,7 +2361,6 @@
         "highway_type": "service",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -2336,6 +2371,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 38,
         "walk_access": "yes",
@@ -2371,7 +2407,6 @@
         "highway_type": "service",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -2382,6 +2417,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 146,
         "walk_access": "yes",
@@ -2433,7 +2469,6 @@
         "highway_type": "service",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -2444,6 +2479,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 1008,
         "walk_access": "yes",
@@ -2531,7 +2567,6 @@
         "highway_type": "service",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -2542,6 +2577,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 26,
         "walk_access": "yes",
@@ -2573,7 +2609,6 @@
         "highway_type": "service",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -2584,6 +2619,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 173,
         "walk_access": "yes",
@@ -2631,7 +2667,6 @@
         "highway_type": "service",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -2642,6 +2677,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 86,
         "walk_access": "yes",
@@ -2675,9 +2711,8 @@
         "osm_id": "773587416",
         "name": "service",
         "highway_type": "service",
-        "surface": "unpaved",
+        "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -2688,14 +2723,15 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 201,
         "walk_access": "yes",
-        "vehicle_access": "no",
-        "navigation_class": "unpaved_service",
-        "drive_confidence": 0.25,
-        "drive_penalty": null,
-        "drive_note": "Unpaved service road; excluded from vehicle routing."
+        "vehicle_access": "yes",
+        "navigation_class": "campus_service_connector",
+        "drive_confidence": 0.68,
+        "drive_penalty": 2.5,
+        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
       },
       "geometry": {
         "type": "LineString",
@@ -2705,8 +2741,8 @@
             26.4732936
           ],
           [
-            73.1110717,
-            26.4733896
+            73.1110427,
+            26.4733861
           ],
           [
             73.1113459,
@@ -2735,7 +2771,6 @@
         "highway_type": "service",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -2746,6 +2781,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 35,
         "walk_access": "yes",
@@ -2777,7 +2813,6 @@
         "highway_type": "service",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -2788,6 +2823,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 33,
         "walk_access": "yes",
@@ -2831,7 +2867,6 @@
         "highway_type": "unclassified",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -2842,6 +2877,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 1485,
         "walk_access": "yes",
@@ -3005,7 +3041,6 @@
         "highway_type": "trunk",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": "yes",
         "service": null,
@@ -3016,6 +3051,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 1868,
         "walk_access": "yes",
@@ -3107,7 +3143,6 @@
         "highway_type": "service",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -3118,6 +3153,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 1418,
         "walk_access": "yes",
@@ -3249,7 +3285,6 @@
         "highway_type": "service",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": "1",
         "oneway": null,
         "service": null,
@@ -3260,6 +3295,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 36,
         "walk_access": "yes",
@@ -3299,7 +3335,6 @@
         "highway_type": "trunk_link",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": "yes",
         "service": null,
@@ -3310,6 +3345,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 1130,
         "walk_access": "yes",
@@ -3373,7 +3409,6 @@
         "highway_type": "trunk_link",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": "yes",
         "service": null,
@@ -3384,6 +3419,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 1140,
         "walk_access": "yes",
@@ -3439,7 +3475,6 @@
         "highway_type": "service",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -3450,6 +3485,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 35,
         "walk_access": "yes",
@@ -3493,7 +3529,6 @@
         "highway_type": "footway",
         "surface": "unpaved",
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -3504,8 +3539,9 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
-        "length_m": 69,
+        "length_m": 68,
         "walk_access": "yes",
         "vehicle_access": "no",
         "navigation_class": "pedestrian_path",
@@ -3517,16 +3553,16 @@
         "type": "LineString",
         "coordinates": [
           [
-            73.1110488,
-            26.4730772
+            73.1110179,
+            26.4730841
           ],
           [
-            73.1110823,
-            26.4733225
+            73.1110591,
+            26.4733104
           ],
           [
-            73.1110717,
-            26.4733896
+            73.1110427,
+            26.4733861
           ],
           [
             73.1110526,
@@ -3547,7 +3583,6 @@
         "highway_type": "residential",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -3558,6 +3593,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 103,
         "walk_access": "yes",
@@ -3589,7 +3625,6 @@
         "highway_type": "residential",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -3600,6 +3635,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 79,
         "walk_access": "yes",
@@ -3635,7 +3671,6 @@
         "highway_type": "residential",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -3646,6 +3681,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 192,
         "walk_access": "yes",
@@ -3689,7 +3725,6 @@
         "highway_type": "residential",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -3700,6 +3735,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 190,
         "walk_access": "yes",
@@ -3743,7 +3779,6 @@
         "highway_type": "residential",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -3754,6 +3789,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 183,
         "walk_access": "yes",
@@ -3789,7 +3825,6 @@
         "highway_type": "residential",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -3800,6 +3835,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 178,
         "walk_access": "yes",
@@ -3831,7 +3867,6 @@
         "highway_type": "residential",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -3842,6 +3877,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 59,
         "walk_access": "yes",
@@ -3873,7 +3909,6 @@
         "highway_type": "residential",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -3884,6 +3919,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 172,
         "walk_access": "yes",
@@ -3919,7 +3955,6 @@
         "highway_type": "residential",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -3930,6 +3965,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 501,
         "walk_access": "yes",
@@ -4009,7 +4045,6 @@
         "highway_type": "residential",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -4020,6 +4055,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 193,
         "walk_access": "yes",
@@ -4055,7 +4091,6 @@
         "highway_type": "residential",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -4066,6 +4101,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 189,
         "walk_access": "yes",
@@ -4105,7 +4141,6 @@
         "highway_type": "residential",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -4116,6 +4151,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 34,
         "walk_access": "yes",
@@ -4147,7 +4183,6 @@
         "highway_type": "residential",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -4158,6 +4193,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 39,
         "walk_access": "yes",
@@ -4189,7 +4225,6 @@
         "highway_type": "residential",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -4200,6 +4235,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 202,
         "walk_access": "yes",
@@ -4239,7 +4275,6 @@
         "highway_type": "residential",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -4250,6 +4285,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 206,
         "walk_access": "yes",
@@ -4289,7 +4325,6 @@
         "highway_type": "residential",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -4300,6 +4335,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 205,
         "walk_access": "yes",
@@ -4331,7 +4367,6 @@
         "highway_type": "residential",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -4342,6 +4377,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 201,
         "walk_access": "yes",
@@ -4381,7 +4417,6 @@
         "highway_type": "residential",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -4392,6 +4427,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 198,
         "walk_access": "yes",
@@ -4431,7 +4467,6 @@
         "highway_type": "residential",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -4442,6 +4477,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 193,
         "walk_access": "yes",
@@ -4473,7 +4509,6 @@
         "highway_type": "service",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -4484,6 +4519,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 91,
         "walk_access": "yes",
@@ -4515,7 +4551,6 @@
         "highway_type": "service",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -4526,6 +4561,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 82,
         "walk_access": "yes",
@@ -4569,7 +4605,6 @@
         "highway_type": "residential",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -4580,6 +4615,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 76,
         "walk_access": "yes",
@@ -4627,7 +4663,6 @@
         "highway_type": "residential",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -4638,6 +4673,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 105,
         "walk_access": "yes",
@@ -4685,7 +4721,6 @@
         "highway_type": "service",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -4696,6 +4731,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 70,
         "walk_access": "yes",
@@ -4727,7 +4763,6 @@
         "highway_type": "residential",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -4738,6 +4773,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 67,
         "walk_access": "yes",
@@ -4781,7 +4817,6 @@
         "highway_type": "service",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -4792,6 +4827,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 720,
         "walk_access": "yes",
@@ -4858,54 +4894,11 @@
     {
       "type": "Feature",
       "properties": {
-        "osm_id": "914901004",
-        "name": "service",
-        "highway_type": "service",
-        "surface": null,
-        "lit": null,
-        "source": "osm",
-        "lanes": null,
-        "oneway": null,
-        "service": null,
-        "access": null,
-        "vehicle": null,
-        "motor_vehicle": null,
-        "motorcar": null,
-        "foot": null,
-        "bicycle": null,
-        "width": null,
-        "is_campus": true,
-        "length_m": 4,
-        "walk_access": "yes",
-        "vehicle_access": "destination",
-        "navigation_class": "service_access",
-        "drive_confidence": 0.58,
-        "drive_penalty": 4,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
-      },
-      "geometry": {
-        "type": "LineString",
-        "coordinates": [
-          [
-            73.1160154,
-            26.4701125
-          ],
-          [
-            73.1160344,
-            26.4700774
-          ]
-        ]
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
         "osm_id": "914901005",
         "name": "service",
         "highway_type": "service",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -4916,6 +4909,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 25,
         "walk_access": "yes",
@@ -4963,7 +4957,6 @@
         "highway_type": "service",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -4974,8 +4967,9 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
-        "length_m": 116,
+        "length_m": 111,
         "walk_access": "yes",
         "vehicle_access": "yes",
         "navigation_class": "campus_service_connector",
@@ -4987,12 +4981,8 @@
         "type": "LineString",
         "coordinates": [
           [
-            73.1160986,
-            26.4699724
-          ],
-          [
-            73.1161445,
-            26.469887
+            73.1160747,
+            26.4698741
           ],
           [
             73.116157,
@@ -5044,54 +5034,11 @@
     {
       "type": "Feature",
       "properties": {
-        "osm_id": "914901007",
-        "name": "service",
-        "highway_type": "service",
-        "surface": null,
-        "lit": null,
-        "source": "osm",
-        "lanes": null,
-        "oneway": null,
-        "service": null,
-        "access": null,
-        "vehicle": null,
-        "motor_vehicle": null,
-        "motorcar": null,
-        "foot": null,
-        "bicycle": null,
-        "width": null,
-        "is_campus": true,
-        "length_m": 13,
-        "walk_access": "yes",
-        "vehicle_access": "destination",
-        "navigation_class": "service_access",
-        "drive_confidence": 0.58,
-        "drive_penalty": 4,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
-      },
-      "geometry": {
-        "type": "LineString",
-        "coordinates": [
-          [
-            73.1160344,
-            26.4700774
-          ],
-          [
-            73.1160986,
-            26.4699724
-          ]
-        ]
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
         "osm_id": "914901008",
         "name": "service",
         "highway_type": "service",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -5102,6 +5049,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 4037,
         "walk_access": "yes",
@@ -5449,7 +5397,6 @@
         "highway_type": "service",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -5460,6 +5407,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 368,
         "walk_access": "yes",
@@ -5547,7 +5495,6 @@
         "highway_type": "service",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": "2",
         "oneway": null,
         "service": null,
@@ -5558,6 +5505,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 704,
         "walk_access": "yes",
@@ -5649,7 +5597,6 @@
         "highway_type": "service",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": "2",
         "oneway": null,
         "service": null,
@@ -5660,6 +5607,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 17,
         "walk_access": "yes",
@@ -5691,7 +5639,6 @@
         "highway_type": "service",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -5702,8 +5649,9 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
-        "length_m": 314,
+        "length_m": 317,
         "walk_access": "yes",
         "vehicle_access": "yes",
         "navigation_class": "campus_service_connector",
@@ -5715,8 +5663,8 @@
         "type": "LineString",
         "coordinates": [
           [
-            73.1176887,
-            26.4731583
+            73.1177165,
+            26.4731558
           ],
           [
             73.1174097,
@@ -5757,6 +5705,10 @@
           [
             73.1161535,
             26.4733769
+          ],
+          [
+            73.1159988,
+            26.4733854
           ],
           [
             73.1159452,
@@ -5801,7 +5753,6 @@
         "highway_type": "service",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -5812,6 +5763,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 847,
         "walk_access": "yes",
@@ -5999,7 +5951,6 @@
         "highway_type": "residential",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -6010,6 +5961,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 1108,
         "walk_access": "yes",
@@ -6165,7 +6117,6 @@
         "highway_type": "service",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -6176,6 +6127,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 1985,
         "walk_access": "yes",
@@ -6321,6 +6273,10 @@
             26.4775412
           ],
           [
+            73.1114545,
+            26.4772903
+          ],
+          [
             73.1113905,
             26.4772371
           ],
@@ -6403,7 +6359,6 @@
         "highway_type": "service",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -6414,6 +6369,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 478,
         "walk_access": "yes",
@@ -6497,7 +6453,6 @@
         "highway_type": "service",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -6508,6 +6463,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 60,
         "walk_access": "yes",
@@ -6547,7 +6503,6 @@
         "highway_type": "service",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -6558,6 +6513,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 104,
         "walk_access": "yes",
@@ -6593,7 +6549,6 @@
         "highway_type": "service",
         "surface": "paved",
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -6604,6 +6559,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 26,
         "walk_access": "yes",
@@ -6635,7 +6591,6 @@
         "highway_type": "service",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -6646,6 +6601,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 61,
         "walk_access": "yes",
@@ -6677,7 +6633,6 @@
         "highway_type": "service",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -6688,6 +6643,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 384,
         "walk_access": "yes",
@@ -6719,6 +6675,10 @@
           [
             73.11529,
             26.4772755
+          ],
+          [
+            73.1152287,
+            26.477301
           ],
           [
             73.115029,
@@ -6753,6 +6713,10 @@
             26.4782001
           ],
           [
+            73.1126763,
+            26.4782497
+          ],
+          [
             73.1126189,
             26.4782645
           ]
@@ -6767,7 +6731,6 @@
         "highway_type": "service",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -6778,6 +6741,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 610,
         "walk_access": "yes",
@@ -6851,6 +6815,10 @@
             26.4775732
           ],
           [
+            73.1171934,
+            26.4771655
+          ],
+          [
             73.1171417,
             26.4770654
           ]
@@ -6865,7 +6833,6 @@
         "highway_type": "service",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -6876,6 +6843,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 329,
         "walk_access": "yes",
@@ -6909,8 +6877,8 @@
             26.4787241
           ],
           [
-            73.1162402,
-            26.4789045
+            73.1161837,
+            26.4789042
           ],
           [
             73.1159626,
@@ -6939,7 +6907,6 @@
         "highway_type": "service",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -6950,6 +6917,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 385,
         "walk_access": "yes",
@@ -6965,6 +6933,10 @@
           [
             73.117974,
             26.4818234
+          ],
+          [
+            73.1179654,
+            26.4817793
           ],
           [
             73.1178271,
@@ -7029,7 +7001,6 @@
         "highway_type": "service",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -7040,6 +7011,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 417,
         "walk_access": "yes",
@@ -7133,6 +7105,10 @@
             26.4774982
           ],
           [
+            73.1154559,
+            26.477355
+          ],
+          [
             73.1153989,
             26.477259
           ]
@@ -7147,7 +7123,6 @@
         "highway_type": "service",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -7158,8 +7133,9 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
-        "length_m": 523,
+        "length_m": 519,
         "walk_access": "yes",
         "vehicle_access": "yes",
         "navigation_class": "campus_service_connector",
@@ -7171,8 +7147,8 @@
         "type": "LineString",
         "coordinates": [
           [
-            73.1157662,
-            26.4781498
+            73.1156875,
+            26.47812
           ],
           [
             73.1153615,
@@ -7252,6 +7228,10 @@
           ],
           [
             73.1162163,
+            26.4819172
+          ],
+          [
+            73.1162163,
             26.4819627
           ]
         ]
@@ -7265,7 +7245,6 @@
         "highway_type": "service",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -7276,6 +7255,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 316,
         "walk_access": "yes",
@@ -7309,8 +7289,8 @@
             26.4795598
           ],
           [
-            73.1165151,
-            26.4794414
+            73.116482,
+            26.4794488
           ],
           [
             73.1171589,
@@ -7339,7 +7319,6 @@
         "highway_type": "service",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -7350,6 +7329,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 341,
         "walk_access": "yes",
@@ -7373,10 +7353,6 @@
           [
             73.1168614,
             26.4798928
-          ],
-          [
-            73.1167851,
-            26.4799056
           ],
           [
             73.1167615,
@@ -7449,7 +7425,6 @@
         "highway_type": "service",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -7460,6 +7435,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 245,
         "walk_access": "yes",
@@ -7477,8 +7453,8 @@
             26.4816465
           ],
           [
-            73.1192876,
-            26.4816167
+            73.1192839,
+            26.4816069
           ],
           [
             73.1191614,
@@ -7535,7 +7511,6 @@
         "highway_type": "service",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -7546,6 +7521,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 390,
         "walk_access": "yes",
@@ -7629,7 +7605,6 @@
         "highway_type": "service",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -7640,6 +7615,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 268,
         "walk_access": "yes",
@@ -7735,7 +7711,6 @@
         "highway_type": "service",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -7746,6 +7721,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 1230,
         "walk_access": "yes",
@@ -7901,7 +7877,6 @@
         "highway_type": "service",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": "2",
         "oneway": null,
         "service": null,
@@ -7912,6 +7887,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 18,
         "walk_access": "yes",
@@ -7943,7 +7919,6 @@
         "highway_type": "service",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": "2",
         "oneway": null,
         "service": null,
@@ -7954,6 +7929,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 491,
         "walk_access": "yes",
@@ -8053,7 +8029,6 @@
         "highway_type": "service",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -8064,6 +8039,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 344,
         "walk_access": "yes",
@@ -8147,7 +8123,6 @@
         "highway_type": "service",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -8158,6 +8133,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 219,
         "walk_access": "yes",
@@ -8217,7 +8193,6 @@
         "highway_type": "footway",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -8228,8 +8203,9 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
-        "length_m": 75,
+        "length_m": 78,
         "walk_access": "yes",
         "vehicle_access": "no",
         "navigation_class": "pedestrian_path",
@@ -8241,20 +8217,24 @@
         "type": "LineString",
         "coordinates": [
           [
-            73.1112495,
-            26.4742978
+            73.1112019,
+            26.4743052
           ],
           [
-            73.1112237,
-            26.4741086
+            73.1111754,
+            26.4741121
           ],
           [
-            73.1111974,
-            26.474006
+            73.1111491,
+            26.4740095
           ],
           [
-            73.111115,
-            26.4739839
+            73.1110682,
+            26.473989
+          ],
+          [
+            73.1111001,
+            26.4739848
           ],
           [
             73.1110633,
@@ -8271,7 +8251,6 @@
         "highway_type": "service",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -8282,6 +8261,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 123,
         "walk_access": "yes",
@@ -8313,7 +8293,6 @@
         "highway_type": "residential",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -8324,6 +8303,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 289,
         "walk_access": "yes",
@@ -8407,7 +8387,6 @@
         "highway_type": "residential",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -8418,6 +8397,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 52,
         "walk_access": "yes",
@@ -8453,7 +8433,6 @@
         "highway_type": "residential",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -8464,6 +8443,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 108,
         "walk_access": "yes",
@@ -8499,7 +8479,6 @@
         "highway_type": "residential",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -8510,6 +8489,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 214,
         "walk_access": "yes",
@@ -8601,7 +8581,6 @@
         "highway_type": "residential",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -8612,6 +8591,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 184,
         "walk_access": "yes",
@@ -8691,7 +8671,6 @@
         "highway_type": "residential",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -8702,6 +8681,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 190,
         "walk_access": "yes",
@@ -8781,7 +8761,6 @@
         "highway_type": "residential",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -8792,6 +8771,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 73,
         "walk_access": "yes",
@@ -8843,7 +8823,6 @@
         "highway_type": "residential",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -8854,6 +8833,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 402,
         "walk_access": "yes",
@@ -9037,7 +9017,6 @@
         "highway_type": "residential",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -9048,6 +9027,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 85,
         "walk_access": "yes",
@@ -9079,7 +9059,6 @@
         "highway_type": "residential",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -9090,6 +9069,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 74,
         "walk_access": "yes",
@@ -9121,7 +9101,6 @@
         "highway_type": "residential",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -9132,6 +9111,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 68,
         "walk_access": "yes",
@@ -9183,7 +9163,6 @@
         "highway_type": "service",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -9194,6 +9173,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 54,
         "walk_access": "yes",
@@ -9241,7 +9221,6 @@
         "highway_type": "residential",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -9252,6 +9231,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 122,
         "walk_access": "yes",
@@ -9311,7 +9291,6 @@
         "highway_type": "service",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -9322,6 +9301,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 224,
         "walk_access": "yes",
@@ -9381,7 +9361,6 @@
         "highway_type": "residential",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -9392,6 +9371,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 3682,
         "walk_access": "yes",
@@ -9831,7 +9811,6 @@
         "highway_type": "service",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -9842,6 +9821,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 438,
         "walk_access": "yes",
@@ -9921,7 +9901,6 @@
         "highway_type": "service",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -9932,6 +9911,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 85,
         "walk_access": "yes",
@@ -9979,7 +9959,6 @@
         "highway_type": "service",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -9990,6 +9969,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 80,
         "walk_access": "yes",
@@ -10033,7 +10013,6 @@
         "highway_type": "residential",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -10044,6 +10023,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 182,
         "walk_access": "yes",
@@ -10151,7 +10131,6 @@
         "highway_type": "service",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -10162,6 +10141,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 59,
         "walk_access": "yes",
@@ -10193,7 +10173,6 @@
         "highway_type": "service",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -10204,6 +10183,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 55,
         "walk_access": "yes",
@@ -10235,7 +10215,6 @@
         "highway_type": "residential",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -10246,6 +10225,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 89,
         "walk_access": "yes",
@@ -10309,7 +10289,6 @@
         "highway_type": "trunk",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": "yes",
         "service": null,
@@ -10320,6 +10299,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 700,
         "walk_access": "yes",
@@ -10355,7 +10335,6 @@
         "highway_type": "trunk",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": "yes",
         "service": null,
@@ -10366,6 +10345,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 737,
         "walk_access": "yes",
@@ -10425,7 +10405,6 @@
         "highway_type": "trunk",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": "yes",
         "service": null,
@@ -10436,6 +10415,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 1869,
         "walk_access": "yes",
@@ -10515,7 +10495,6 @@
         "highway_type": "trunk",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": "yes",
         "service": null,
@@ -10526,6 +10505,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 702,
         "walk_access": "yes",
@@ -10561,7 +10541,6 @@
         "highway_type": "service",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -10572,6 +10551,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 195,
         "walk_access": "yes",
@@ -10603,7 +10583,6 @@
         "highway_type": "service",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -10614,6 +10593,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 245,
         "walk_access": "yes",
@@ -10697,7 +10677,6 @@
         "highway_type": "service",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -10708,6 +10687,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 894,
         "walk_access": "yes",
@@ -10839,7 +10819,6 @@
         "highway_type": "service",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -10850,6 +10829,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 196,
         "walk_access": "yes",
@@ -10905,7 +10885,6 @@
         "highway_type": "service",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -10916,6 +10895,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 145,
         "walk_access": "yes",
@@ -10947,7 +10927,6 @@
         "highway_type": "service",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -10958,6 +10937,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 216,
         "walk_access": "yes",
@@ -10997,7 +10977,6 @@
         "highway_type": "service",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -11008,6 +10987,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 107,
         "walk_access": "yes",
@@ -11051,7 +11031,6 @@
         "highway_type": "service",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -11062,6 +11041,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 86,
         "walk_access": "yes",
@@ -11097,7 +11077,6 @@
         "highway_type": "service",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -11108,6 +11087,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 103,
         "walk_access": "yes",
@@ -11175,7 +11155,6 @@
         "highway_type": "service",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -11186,6 +11165,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 89,
         "walk_access": "yes",
@@ -11233,7 +11213,6 @@
         "highway_type": "service",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -11244,6 +11223,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 57,
         "walk_access": "yes",
@@ -11275,7 +11255,6 @@
         "highway_type": "service",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -11286,6 +11265,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 101,
         "walk_access": "yes",
@@ -11329,7 +11309,6 @@
         "highway_type": "residential",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -11340,6 +11319,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 160,
         "walk_access": "yes",
@@ -11395,7 +11375,6 @@
         "highway_type": "service",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -11406,6 +11385,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 62,
         "walk_access": "yes",
@@ -11449,7 +11429,6 @@
         "highway_type": "service",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -11460,6 +11439,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 77,
         "walk_access": "yes",
@@ -11507,7 +11487,6 @@
         "highway_type": "track",
         "surface": "unpaved",
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -11518,6 +11497,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 872,
         "walk_access": "yes",
@@ -11701,7 +11681,6 @@
         "highway_type": "unclassified",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -11712,6 +11691,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 2049,
         "walk_access": "yes",
@@ -11927,7 +11907,6 @@
         "highway_type": "service",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": "yes",
         "service": null,
@@ -11938,6 +11917,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 74,
         "walk_access": "yes",
@@ -11973,7 +11953,6 @@
         "highway_type": "service",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": "yes",
         "service": null,
@@ -11984,6 +11963,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 73,
         "walk_access": "yes",
@@ -12023,7 +12003,6 @@
         "highway_type": "service",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -12034,6 +12013,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 115,
         "walk_access": "yes",
@@ -12069,7 +12049,6 @@
         "highway_type": "service",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -12080,6 +12059,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 120,
         "walk_access": "yes",
@@ -12115,7 +12095,6 @@
         "highway_type": "service",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -12126,6 +12105,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 74,
         "walk_access": "yes",
@@ -12165,7 +12145,6 @@
         "highway_type": "path",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -12176,6 +12155,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 224,
         "walk_access": "yes",
@@ -12219,7 +12199,6 @@
         "highway_type": "service",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -12230,6 +12209,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 90,
         "walk_access": "yes",
@@ -12269,7 +12249,6 @@
         "highway_type": "service",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -12280,8 +12259,9 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
-        "length_m": 6,
+        "length_m": 10,
         "walk_access": "yes",
         "vehicle_access": "destination",
         "navigation_class": "service_access",
@@ -12293,8 +12273,8 @@
         "type": "LineString",
         "coordinates": [
           [
-            73.1161287,
-            26.4714967
+            73.116139,
+            26.4715313
           ],
           [
             73.1161265,
@@ -12311,7 +12291,6 @@
         "highway_type": "service",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -12322,6 +12301,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 99,
         "walk_access": "yes",
@@ -12369,7 +12349,6 @@
         "highway_type": "service",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -12380,6 +12359,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 119,
         "walk_access": "yes",
@@ -12423,7 +12403,6 @@
         "highway_type": "service",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -12434,6 +12413,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 117,
         "walk_access": "yes",
@@ -12469,7 +12449,6 @@
         "highway_type": "service",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -12480,6 +12459,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 232,
         "walk_access": "yes",
@@ -12505,6 +12485,10 @@
             26.4718925
           ],
           [
+            73.1166021,
+            26.4718579
+          ],
+          [
             73.1171307,
             26.4716559
           ]
@@ -12519,7 +12503,6 @@
         "highway_type": "service",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -12530,8 +12513,9 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
-        "length_m": 268,
+        "length_m": 270,
         "walk_access": "yes",
         "vehicle_access": "yes",
         "navigation_class": "campus_service_connector",
@@ -12552,6 +12536,10 @@
           ],
           [
             73.1159057,
+            26.4729317
+          ],
+          [
+            73.1159456,
             26.4729317
           ],
           [
@@ -12579,7 +12567,7 @@
             26.4727879
           ],
           [
-            73.1175969,
+            73.1176177,
             26.472713
           ]
         ]
@@ -12593,7 +12581,6 @@
         "highway_type": "service",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -12604,6 +12591,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 50,
         "walk_access": "yes",
@@ -12639,7 +12627,6 @@
         "highway_type": "path",
         "surface": "concrete",
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -12650,6 +12637,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 53,
         "walk_access": "yes",
@@ -12681,7 +12669,6 @@
         "highway_type": "service",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -12692,8 +12679,9 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
-        "length_m": 346,
+        "length_m": 350,
         "walk_access": "yes",
         "vehicle_access": "yes",
         "navigation_class": "campus_service_connector",
@@ -12705,8 +12693,8 @@
         "type": "LineString",
         "coordinates": [
           [
-            73.1177476,
-            26.4737399
+            73.1177837,
+            26.4736616
           ],
           [
             73.1169126,
@@ -12739,7 +12727,6 @@
         "highway_type": "service",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -12750,6 +12737,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 54,
         "walk_access": "yes",
@@ -12785,7 +12773,6 @@
         "highway_type": "service",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -12796,6 +12783,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 68,
         "walk_access": "yes",
@@ -12817,6 +12805,10 @@
             26.4734206
           ],
           [
+            73.1144731,
+            26.4732885
+          ],
+          [
             73.1143889,
             26.4730418
           ]
@@ -12831,7 +12823,6 @@
         "highway_type": "service",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -12842,6 +12833,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 47,
         "walk_access": "yes",
@@ -12877,7 +12869,6 @@
         "highway_type": "service",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -12888,6 +12879,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 214,
         "walk_access": "yes",
@@ -12943,7 +12935,6 @@
         "highway_type": "service",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -12954,8 +12945,9 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
-        "length_m": 265,
+        "length_m": 270,
         "walk_access": "yes",
         "vehicle_access": "yes",
         "navigation_class": "campus_service_connector",
@@ -12979,12 +12971,12 @@
             26.4742699
           ],
           [
-            73.1169308,
+            73.1169212,
             26.4742348
           ],
           [
-            73.1170922,
-            26.4742143
+            73.1171828,
+            26.4742039
           ],
           [
             73.1172145,
@@ -12995,8 +12987,8 @@
             26.4741483
           ],
           [
-            73.1177829,
-            26.4740979
+            73.1178287,
+            26.4741029
           ]
         ]
       }
@@ -13009,7 +13001,6 @@
         "highway_type": "service",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -13020,8 +13011,9 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
-        "length_m": 245,
+        "length_m": 248,
         "walk_access": "yes",
         "vehicle_access": "yes",
         "navigation_class": "campus_service_connector",
@@ -13041,8 +13033,8 @@
             26.4747988
           ],
           [
-            73.11782,
-            26.4745936
+            73.1178616,
+            26.4746172
           ]
         ]
       }
@@ -13055,7 +13047,6 @@
         "highway_type": "service",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -13066,6 +13057,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 233,
         "walk_access": "yes",
@@ -13087,8 +13079,8 @@
             26.4752099
           ],
           [
-            73.117204,
-            26.4752206
+            73.1169798,
+            26.4752436
           ],
           [
             73.1165525,
@@ -13109,7 +13101,6 @@
         "highway_type": "service",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -13120,6 +13111,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 226,
         "walk_access": "yes",
@@ -13155,7 +13147,6 @@
         "highway_type": "path",
         "surface": "concrete",
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -13166,6 +13157,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 54,
         "walk_access": "yes",
@@ -13201,7 +13193,6 @@
         "highway_type": "path",
         "surface": "concrete",
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -13212,6 +13203,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 106,
         "walk_access": "yes",
@@ -13251,7 +13243,6 @@
         "highway_type": "path",
         "surface": "concrete",
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -13262,8 +13253,9 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
-        "length_m": 31,
+        "length_m": 29,
         "walk_access": "yes",
         "vehicle_access": "no",
         "navigation_class": "pedestrian_path",
@@ -13275,8 +13267,8 @@
         "type": "LineString",
         "coordinates": [
           [
-            73.1176887,
-            26.4731583
+            73.1177165,
+            26.4731558
           ],
           [
             73.1180017,
@@ -13293,7 +13285,6 @@
         "highway_type": "service",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -13304,6 +13295,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 331,
         "walk_access": "yes",
@@ -13333,8 +13325,8 @@
             26.4703612
           ],
           [
-            73.1157165,
-            26.470536
+            73.1157088,
+            26.4705421
           ],
           [
             73.1161327,
@@ -13359,7 +13351,6 @@
         "highway_type": "service",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -13370,6 +13361,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 307,
         "walk_access": "yes",
@@ -13417,7 +13409,6 @@
         "highway_type": "footway",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -13428,6 +13419,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 650,
         "walk_access": "yes",
@@ -13441,8 +13433,12 @@
         "type": "LineString",
         "coordinates": [
           [
-            73.1170557,
-            26.471043
+            73.1170592,
+            26.4710397
+          ],
+          [
+            73.117096,
+            26.4710863
           ],
           [
             73.1171779,
@@ -13481,6 +13477,10 @@
             26.474714
           ],
           [
+            73.1181211,
+            26.4751236
+          ],
+          [
             73.1181219,
             26.4752381
           ],
@@ -13507,7 +13507,6 @@
         "highway_type": "service",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -13518,8 +13517,9 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
-        "length_m": 52,
+        "length_m": 58,
         "walk_access": "yes",
         "vehicle_access": "destination",
         "navigation_class": "service_access",
@@ -13531,8 +13531,8 @@
         "type": "LineString",
         "coordinates": [
           [
-            73.1200719,
-            26.4768438
+            73.1200394,
+            26.4768831
           ],
           [
             73.1204165,
@@ -13549,7 +13549,6 @@
         "highway_type": "cycleway",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -13560,6 +13559,7 @@
         "foot": "designated",
         "bicycle": "designated",
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 429,
         "walk_access": "yes",
@@ -13687,7 +13687,6 @@
         "highway_type": "cycleway",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -13698,6 +13697,7 @@
         "foot": "designated",
         "bicycle": "designated",
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 144,
         "walk_access": "yes",
@@ -13761,7 +13761,6 @@
         "highway_type": "cycleway",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -13772,6 +13771,7 @@
         "foot": "designated",
         "bicycle": "designated",
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 159,
         "walk_access": "yes",
@@ -13827,7 +13827,6 @@
         "highway_type": "cycleway",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -13838,6 +13837,7 @@
         "foot": "designated",
         "bicycle": "designated",
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 106,
         "walk_access": "yes",
@@ -13869,7 +13869,6 @@
         "highway_type": "cycleway",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -13880,6 +13879,7 @@
         "foot": "designated",
         "bicycle": "designated",
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 119,
         "walk_access": "yes",
@@ -13911,7 +13911,6 @@
         "highway_type": "cycleway",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -13922,6 +13921,7 @@
         "foot": "designated",
         "bicycle": "designated",
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 117,
         "walk_access": "yes",
@@ -13953,7 +13953,6 @@
         "highway_type": "cycleway",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -13964,6 +13963,7 @@
         "foot": "designated",
         "bicycle": "designated",
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 108,
         "walk_access": "yes",
@@ -13995,7 +13995,6 @@
         "highway_type": "cycleway",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -14006,6 +14005,7 @@
         "foot": "designated",
         "bicycle": "designated",
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 25,
         "walk_access": "yes",
@@ -14037,7 +14037,6 @@
         "highway_type": "cycleway",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -14048,6 +14047,7 @@
         "foot": "designated",
         "bicycle": "designated",
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 23,
         "walk_access": "yes",
@@ -14079,7 +14079,6 @@
         "highway_type": "cycleway",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -14090,6 +14089,7 @@
         "foot": "designated",
         "bicycle": "designated",
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 55,
         "walk_access": "yes",
@@ -14129,7 +14129,6 @@
         "highway_type": "footway",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -14140,6 +14139,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 607,
         "walk_access": "yes",
@@ -14243,7 +14243,6 @@
         "highway_type": "service",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -14254,6 +14253,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 13,
         "walk_access": "yes",
@@ -14285,7 +14285,6 @@
         "highway_type": "path",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -14296,6 +14295,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 25,
         "walk_access": "yes",
@@ -14327,7 +14327,6 @@
         "highway_type": "path",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -14338,6 +14337,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 24,
         "walk_access": "yes",
@@ -14373,7 +14373,6 @@
         "highway_type": "path",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -14384,6 +14383,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 20,
         "walk_access": "yes",
@@ -14415,7 +14415,6 @@
         "highway_type": "cycleway",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -14426,6 +14425,7 @@
         "foot": "designated",
         "bicycle": "designated",
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 117,
         "walk_access": "yes",
@@ -14473,7 +14473,6 @@
         "highway_type": "cycleway",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -14484,6 +14483,7 @@
         "foot": "designated",
         "bicycle": "designated",
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 227,
         "walk_access": "yes",
@@ -14539,7 +14539,6 @@
         "highway_type": "service",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -14550,6 +14549,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 63,
         "walk_access": "yes",
@@ -14597,7 +14597,6 @@
         "highway_type": "service",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -14608,6 +14607,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 26,
         "walk_access": "yes",
@@ -14647,7 +14647,6 @@
         "highway_type": "service",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -14658,6 +14657,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 125,
         "walk_access": "yes",
@@ -14713,7 +14713,6 @@
         "highway_type": "service",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -14724,6 +14723,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 206,
         "walk_access": "yes",
@@ -14749,8 +14749,12 @@
             26.4740021
           ],
           [
-            73.111115,
-            26.4739839
+            73.1110682,
+            26.473989
+          ],
+          [
+            73.1111001,
+            26.4739848
           ],
           [
             73.1113131,
@@ -14771,7 +14775,6 @@
         "highway_type": "service",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -14782,6 +14785,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 221,
         "walk_access": "yes",
@@ -14811,8 +14815,8 @@
             26.4743204
           ],
           [
-            73.1112495,
-            26.4742978
+            73.1112019,
+            26.4743052
           ],
           [
             73.111794,
@@ -14829,7 +14833,6 @@
         "highway_type": "service",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -14840,6 +14843,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 138,
         "walk_access": "yes",
@@ -14883,7 +14887,6 @@
         "highway_type": "service",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -14894,6 +14897,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 72,
         "walk_access": "yes",
@@ -14941,7 +14945,6 @@
         "highway_type": "cycleway",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -14952,6 +14955,7 @@
         "foot": "designated",
         "bicycle": "designated",
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 627,
         "walk_access": "yes",
@@ -15009,8 +15013,8 @@
             26.4767058
           ],
           [
-            73.1139446,
-            26.4769697
+            73.1138389,
+            26.4768207
           ],
           [
             73.1140425,
@@ -15055,7 +15059,6 @@
         "highway_type": "service",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -15066,6 +15069,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 190,
         "walk_access": "yes",
@@ -15117,7 +15121,6 @@
         "highway_type": "service",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -15128,8 +15131,9 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
-        "length_m": 171,
+        "length_m": 172,
         "walk_access": "yes",
         "vehicle_access": "yes",
         "navigation_class": "campus_service_connector",
@@ -15165,8 +15169,8 @@
             26.4712699
           ],
           [
-            73.1135379,
-            26.4712656
+            73.113512,
+            26.4712721
           ],
           [
             73.1136218,
@@ -15187,7 +15191,6 @@
         "highway_type": "service",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -15198,6 +15201,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 7,
         "walk_access": "yes",
@@ -15229,7 +15233,6 @@
         "highway_type": "service",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -15240,8 +15243,9 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
-        "length_m": 4,
+        "length_m": 7,
         "walk_access": "yes",
         "vehicle_access": "destination",
         "navigation_class": "service_access",
@@ -15257,8 +15261,8 @@
             26.4725014
           ],
           [
-            73.1152956,
-            26.4725379
+            73.1152976,
+            26.4725609
           ]
         ]
       }
@@ -15271,7 +15275,6 @@
         "highway_type": "service",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -15282,8 +15285,9 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
-        "length_m": 6,
+        "length_m": 12,
         "walk_access": "yes",
         "vehicle_access": "destination",
         "navigation_class": "service_access",
@@ -15295,8 +15299,8 @@
         "type": "LineString",
         "coordinates": [
           [
-            73.1162576,
-            26.4724512
+            73.1162509,
+            26.4725024
           ],
           [
             73.1162526,
@@ -15317,7 +15321,6 @@
         "highway_type": "service",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -15328,6 +15331,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 5,
         "walk_access": "yes",
@@ -15359,7 +15363,6 @@
         "highway_type": "footway",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -15370,8 +15373,9 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
-        "length_m": 30,
+        "length_m": 32,
         "walk_access": "yes",
         "vehicle_access": "no",
         "navigation_class": "pedestrian_path",
@@ -15399,8 +15403,8 @@
             26.4721194
           ],
           [
-            73.1168049,
-            26.4721097
+            73.1168203,
+            26.4721079
           ]
         ]
       }
@@ -15413,7 +15417,6 @@
         "highway_type": "service",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -15424,6 +15427,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 2,
         "walk_access": "yes",
@@ -15455,7 +15459,6 @@
         "highway_type": "footway",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -15466,8 +15469,9 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
-        "length_m": 11,
+        "length_m": 9,
         "walk_access": "yes",
         "vehicle_access": "no",
         "navigation_class": "pedestrian_path",
@@ -15479,8 +15483,8 @@
         "type": "LineString",
         "coordinates": [
           [
-            73.1172199,
-            26.4733416
+            73.1172154,
+            26.4733243
           ],
           [
             73.1172028,
@@ -15497,7 +15501,6 @@
         "highway_type": "footway",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -15508,6 +15511,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 3,
         "walk_access": "yes",
@@ -15539,7 +15543,6 @@
         "highway_type": "footway",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -15550,6 +15553,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 4,
         "walk_access": "yes",
@@ -15581,7 +15585,6 @@
         "highway_type": "footway",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -15592,6 +15595,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 4,
         "walk_access": "yes",
@@ -15623,7 +15627,6 @@
         "highway_type": "footway",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -15634,8 +15637,9 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
-        "length_m": 4,
+        "length_m": 7,
         "walk_access": "yes",
         "vehicle_access": "no",
         "navigation_class": "pedestrian_path",
@@ -15647,8 +15651,8 @@
         "type": "LineString",
         "coordinates": [
           [
-            73.1164229,
-            26.4734278
+            73.1164477,
+            26.4734426
           ],
           [
             73.1164148,
@@ -15665,7 +15669,6 @@
         "highway_type": "footway",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -15676,8 +15679,9 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
-        "length_m": 4,
+        "length_m": 7,
         "walk_access": "yes",
         "vehicle_access": "no",
         "navigation_class": "pedestrian_path",
@@ -15689,8 +15693,8 @@
         "type": "LineString",
         "coordinates": [
           [
-            73.1155989,
-            26.4734938
+            73.1156048,
+            26.4735242
           ],
           [
             73.1155951,
@@ -15707,7 +15711,6 @@
         "highway_type": "service",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -15718,6 +15721,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 13,
         "walk_access": "yes",
@@ -15749,7 +15753,6 @@
         "highway_type": "service",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -15760,6 +15763,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 17,
         "walk_access": "yes",
@@ -15791,7 +15795,6 @@
         "highway_type": "service",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -15802,6 +15805,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 15,
         "walk_access": "yes",
@@ -15833,7 +15837,6 @@
         "highway_type": "service",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -15844,6 +15847,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 12,
         "walk_access": "yes",
@@ -15875,7 +15879,6 @@
         "highway_type": "service",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -15886,6 +15889,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 4,
         "walk_access": "yes",
@@ -15917,7 +15921,6 @@
         "highway_type": "service",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -15928,6 +15931,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 4,
         "walk_access": "yes",
@@ -15941,12 +15945,12 @@
         "type": "LineString",
         "coordinates": [
           [
-            73.1169308,
+            73.1169212,
             26.4742348
           ],
           [
-            73.1169261,
-            26.4741948
+            73.1169083,
+            26.4742003
           ]
         ]
       }
@@ -15959,7 +15963,6 @@
         "highway_type": "service",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -15970,8 +15973,9 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
-        "length_m": 3,
+        "length_m": 15,
         "walk_access": "yes",
         "vehicle_access": "destination",
         "navigation_class": "service_access",
@@ -15983,12 +15987,12 @@
         "type": "LineString",
         "coordinates": [
           [
-            73.1170959,
-            26.4742427
+            73.1172181,
+            26.4743326
           ],
           [
-            73.1170922,
-            26.4742143
+            73.1171828,
+            26.4742039
           ]
         ]
       }
@@ -16001,7 +16005,6 @@
         "highway_type": "service",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -16012,6 +16015,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 10,
         "walk_access": "yes",
@@ -16043,7 +16047,6 @@
         "highway_type": "service",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -16054,6 +16057,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 536,
         "walk_access": "yes",
@@ -16111,6 +16115,10 @@
             26.4768192
           ],
           [
+            73.1116544,
+            26.4770871
+          ],
+          [
             73.1117171,
             26.477147
           ],
@@ -16145,7 +16153,6 @@
         "highway_type": "service",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -16156,6 +16163,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 9,
         "walk_access": "yes",
@@ -16187,7 +16195,6 @@
         "highway_type": "service",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -16198,8 +16205,9 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
-        "length_m": 239,
+        "length_m": 211,
         "walk_access": "yes",
         "vehicle_access": "yes",
         "navigation_class": "campus_service_connector",
@@ -16235,24 +16243,12 @@
             26.476916
           ],
           [
-            73.1135329,
-            26.476862
+            73.1135936,
+            26.4768821
           ],
           [
-            73.1135949,
-            26.4770565
-          ],
-          [
-            73.113682,
-            26.4770694
-          ],
-          [
-            73.1137652,
-            26.4770511
-          ],
-          [
-            73.1139446,
-            26.4769697
+            73.1138389,
+            26.4768207
           ]
         ]
       }
@@ -16265,7 +16261,6 @@
         "highway_type": "service",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -16276,6 +16271,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 5,
         "walk_access": "yes",
@@ -16289,12 +16285,12 @@
         "type": "LineString",
         "coordinates": [
           [
-            73.1135389,
-            26.4713064
+            73.1135119,
+            26.4713205
           ],
           [
-            73.1135379,
-            26.4712656
+            73.113512,
+            26.4712721
           ]
         ]
       }
@@ -16307,7 +16303,6 @@
         "highway_type": "service",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -16318,8 +16313,9 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
-        "length_m": 14,
+        "length_m": 8,
         "walk_access": "yes",
         "vehicle_access": "destination",
         "navigation_class": "service_access",
@@ -16331,8 +16327,8 @@
         "type": "LineString",
         "coordinates": [
           [
-            73.1137779,
-            26.4715671
+            73.1137188,
+            26.4715756
           ],
           [
             73.1136392,
@@ -16349,7 +16345,6 @@
         "highway_type": "footway",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -16360,6 +16355,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 6,
         "walk_access": "yes",
@@ -16391,7 +16387,6 @@
         "highway_type": "footway",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -16402,6 +16397,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 6,
         "walk_access": "yes",
@@ -16433,7 +16429,6 @@
         "highway_type": "service",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -16444,6 +16439,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 61,
         "walk_access": "yes",
@@ -16487,7 +16483,6 @@
         "highway_type": "footway",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -16498,6 +16493,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 104,
         "walk_access": "yes",
@@ -16545,7 +16541,6 @@
         "highway_type": "service",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -16556,8 +16551,9 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
-        "length_m": 104,
+        "length_m": 105,
         "walk_access": "yes",
         "vehicle_access": "yes",
         "navigation_class": "campus_service_connector",
@@ -16569,20 +16565,20 @@
         "type": "LineString",
         "coordinates": [
           [
-            73.1165151,
-            26.4794414
+            73.116482,
+            26.4794488
           ],
           [
-            73.116643,
-            26.4796612
+            73.1166244,
+            26.4796631
           ],
           [
-            73.1166848,
-            26.4797332
+            73.1166744,
+            26.4797388
           ],
           [
-            73.1167851,
-            26.4799056
+            73.1167615,
+            26.4799119
           ],
           [
             73.1169392,
@@ -16603,7 +16599,6 @@
         "highway_type": "service",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -16614,6 +16609,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 221,
         "walk_access": "yes",
@@ -16653,7 +16649,6 @@
         "highway_type": "service",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -16664,6 +16659,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 197,
         "walk_access": "yes",
@@ -16703,7 +16699,6 @@
         "highway_type": "footway",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -16714,6 +16709,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 131,
         "walk_access": "yes",
@@ -16797,7 +16793,6 @@
         "highway_type": "service",
         "surface": "paved",
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -16808,6 +16803,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 24,
         "walk_access": "yes",
@@ -16839,7 +16835,6 @@
         "highway_type": "service",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -16850,6 +16845,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 132,
         "walk_access": "yes",
@@ -16869,6 +16865,10 @@
           [
             73.1136608,
             26.4718835
+          ],
+          [
+            73.1136554,
+            26.4717987
           ],
           [
             73.1136392,
@@ -16893,7 +16893,6 @@
         "highway_type": "trunk",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": "yes",
         "service": null,
@@ -16904,6 +16903,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 1416,
         "walk_access": "yes",
@@ -16999,7 +16999,6 @@
         "highway_type": "trunk",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": "yes",
         "service": null,
@@ -17010,6 +17009,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 1468,
         "walk_access": "yes",
@@ -17117,7 +17117,6 @@
         "highway_type": "unclassified",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": "yes",
         "service": null,
@@ -17128,6 +17127,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 543,
         "walk_access": "yes",
@@ -17183,7 +17183,6 @@
         "highway_type": "unclassified",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": "yes",
         "service": null,
@@ -17194,6 +17193,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 601,
         "walk_access": "yes",
@@ -17253,7 +17253,6 @@
         "highway_type": "trunk",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": "yes",
         "service": null,
@@ -17264,6 +17263,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 735,
         "walk_access": "yes",
@@ -17307,7 +17307,6 @@
         "highway_type": "trunk",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": "yes",
         "service": null,
@@ -17318,6 +17317,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 295,
         "walk_access": "yes",
@@ -17357,7 +17357,6 @@
         "highway_type": "trunk",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": "yes",
         "service": null,
@@ -17368,6 +17367,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 296,
         "walk_access": "yes",
@@ -17407,7 +17407,6 @@
         "highway_type": "trunk",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": "yes",
         "service": null,
@@ -17418,6 +17417,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 415,
         "walk_access": "yes",
@@ -17469,11 +17469,10 @@
       "type": "Feature",
       "properties": {
         "osm_id": "1521877037",
-        "name": "path",
-        "highway_type": "path",
+        "name": "footway",
+        "highway_type": "footway",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -17484,14 +17483,15 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
-        "length_m": 79,
+        "length_m": 33,
         "walk_access": "yes",
         "vehicle_access": "no",
         "navigation_class": "pedestrian_path",
         "drive_confidence": 0,
         "drive_penalty": null,
-        "drive_note": "path is excluded from vehicle routing."
+        "drive_note": "footway is excluded from vehicle routing."
       },
       "geometry": {
         "type": "LineString",
@@ -17505,16 +17505,8 @@
             26.4764061
           ],
           [
-            73.1196122,
-            26.4765708
-          ],
-          [
-            73.1195991,
-            26.4765775
-          ],
-          [
-            73.1194226,
-            26.4764429
+            73.1194328,
+            26.4764396
           ],
           [
             73.1194166,
@@ -17531,7 +17523,6 @@
         "highway_type": "path",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -17542,8 +17533,9 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
-        "length_m": 11,
+        "length_m": 7,
         "walk_access": "yes",
         "vehicle_access": "no",
         "navigation_class": "pedestrian_path",
@@ -17555,12 +17547,12 @@
         "type": "LineString",
         "coordinates": [
           [
-            73.1171937,
-            26.4751209
+            73.116969,
+            26.4751827
           ],
           [
-            73.117204,
-            26.4752206
+            73.1169798,
+            26.4752436
           ]
         ]
       }
@@ -17573,7 +17565,6 @@
         "highway_type": "path",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -17584,8 +17575,9 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
-        "length_m": 5,
+        "length_m": 6,
         "walk_access": "yes",
         "vehicle_access": "no",
         "navigation_class": "pedestrian_path",
@@ -17597,8 +17589,8 @@
         "type": "LineString",
         "coordinates": [
           [
-            73.1173217,
-            26.4752547
+            73.1173086,
+            26.4752664
           ],
           [
             73.1172993,
@@ -17615,7 +17607,6 @@
         "highway_type": "footway",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -17626,6 +17617,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 85,
         "walk_access": "yes",
@@ -17681,7 +17673,6 @@
         "highway_type": "footway",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -17692,6 +17683,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 20,
         "walk_access": "yes",
@@ -17727,7 +17719,6 @@
         "highway_type": "footway",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -17738,6 +17729,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 13,
         "walk_access": "yes",
@@ -17773,7 +17765,6 @@
         "highway_type": "footway",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -17784,6 +17775,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 41,
         "walk_access": "yes",
@@ -17827,7 +17819,6 @@
         "highway_type": "footway",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -17838,6 +17829,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 30,
         "walk_access": "yes",
@@ -17873,7 +17865,6 @@
         "highway_type": "footway",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -17884,6 +17875,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 8,
         "walk_access": "yes",
@@ -17915,7 +17907,6 @@
         "highway_type": "footway",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -17926,6 +17917,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 30,
         "walk_access": "yes",
@@ -17957,7 +17949,6 @@
         "highway_type": "path",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -17968,6 +17959,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 18,
         "walk_access": "yes",
@@ -18003,7 +17995,6 @@
         "highway_type": "service",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -18014,8 +18005,9 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
-        "length_m": 79,
+        "length_m": 88,
         "walk_access": "yes",
         "vehicle_access": "destination",
         "navigation_class": "service_access",
@@ -18043,12 +18035,12 @@
             26.4783714
           ],
           [
-            73.1106972,
-            26.4784128
+            73.110732,
+            26.4784511
           ],
           [
-            73.1108454,
-            26.4783472
+            73.1109016,
+            26.4783544
           ]
         ]
       }
@@ -18061,7 +18053,6 @@
         "highway_type": "path",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -18072,6 +18063,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 36,
         "walk_access": "yes",
@@ -18103,7 +18095,6 @@
         "highway_type": "service",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -18114,6 +18105,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 413,
         "walk_access": "yes",
@@ -18169,7 +18161,6 @@
         "highway_type": "service",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -18180,6 +18171,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 46,
         "walk_access": "yes",
@@ -18215,7 +18207,6 @@
         "highway_type": "service",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -18226,8 +18217,9 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
-        "length_m": 161,
+        "length_m": 156,
         "walk_access": "yes",
         "vehicle_access": "yes",
         "navigation_class": "campus_service_connector",
@@ -18243,8 +18235,8 @@
             26.4697005
           ],
           [
-            73.1161445,
-            26.469887
+            73.1160747,
+            26.4698741
           ],
           [
             73.1163719,
@@ -18269,7 +18261,6 @@
         "highway_type": "path",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -18280,6 +18271,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 8,
         "walk_access": "yes",
@@ -18311,7 +18303,6 @@
         "highway_type": "service",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -18322,6 +18313,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 102,
         "walk_access": "yes",
@@ -18369,7 +18361,6 @@
         "highway_type": "track",
         "surface": "unpaved",
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -18380,6 +18371,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 48,
         "walk_access": "yes",
@@ -18419,7 +18411,6 @@
         "highway_type": "track",
         "surface": "unpaved",
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -18430,6 +18421,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 39,
         "walk_access": "yes",
@@ -18461,7 +18453,6 @@
         "highway_type": "trunk",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": "yes",
         "service": null,
@@ -18472,6 +18463,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 427,
         "walk_access": "yes",
@@ -18543,7 +18535,6 @@
         "highway_type": "cycleway",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -18554,6 +18545,7 @@
         "foot": "designated",
         "bicycle": "designated",
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 17,
         "walk_access": "yes",
@@ -18585,7 +18577,6 @@
         "highway_type": "service",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -18596,6 +18587,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 137,
         "walk_access": "yes",
@@ -18655,7 +18647,6 @@
         "highway_type": "path",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -18666,8 +18657,9 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
-        "length_m": 27,
+        "length_m": 24,
         "walk_access": "yes",
         "vehicle_access": "no",
         "navigation_class": "pedestrian_path",
@@ -18691,8 +18683,8 @@
             26.4792047
           ],
           [
-            73.1163695,
-            26.4791745
+            73.1163405,
+            26.4791838
           ]
         ]
       }
@@ -18705,7 +18697,6 @@
         "highway_type": "path",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -18716,8 +18707,9 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
-        "length_m": 17,
+        "length_m": 20,
         "walk_access": "yes",
         "vehicle_access": "no",
         "navigation_class": "pedestrian_path",
@@ -18729,8 +18721,8 @@
         "type": "LineString",
         "coordinates": [
           [
-            73.1163695,
-            26.4791745
+            73.1163405,
+            26.4791838
           ],
           [
             73.1164149,
@@ -18751,7 +18743,6 @@
         "highway_type": "path",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -18762,8 +18753,9 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
-        "length_m": 28,
+        "length_m": 27,
         "walk_access": "yes",
         "vehicle_access": "no",
         "navigation_class": "pedestrian_path",
@@ -18779,8 +18771,8 @@
             26.4797409
           ],
           [
-            73.116643,
-            26.4796612
+            73.1166244,
+            26.4796631
           ]
         ]
       }
@@ -18793,7 +18785,6 @@
         "highway_type": "path",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -18804,8 +18795,9 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
-        "length_m": 17,
+        "length_m": 18,
         "walk_access": "yes",
         "vehicle_access": "no",
         "navigation_class": "pedestrian_path",
@@ -18817,8 +18809,8 @@
         "type": "LineString",
         "coordinates": [
           [
-            73.1166848,
-            26.4797332
+            73.1166744,
+            26.4797388
           ],
           [
             73.1168443,
@@ -18835,7 +18827,6 @@
         "highway_type": "path",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -18846,8 +18837,9 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
-        "length_m": 8,
+        "length_m": 15,
         "walk_access": "yes",
         "vehicle_access": "no",
         "navigation_class": "pedestrian_path",
@@ -18863,8 +18855,8 @@
             26.4786345
           ],
           [
-            73.1160859,
-            26.4786589
+            73.1160052,
+            26.4786301
           ]
         ]
       }
@@ -18877,7 +18869,6 @@
         "highway_type": "path",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -18888,6 +18879,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 8,
         "walk_access": "yes",
@@ -18919,7 +18911,6 @@
         "highway_type": "path",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -18930,6 +18921,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 19,
         "walk_access": "yes",
@@ -18961,7 +18953,6 @@
         "highway_type": "path",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -18972,6 +18963,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 18,
         "walk_access": "yes",
@@ -19003,7 +18995,6 @@
         "highway_type": "path",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -19014,6 +19005,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 7,
         "walk_access": "yes",
@@ -19045,7 +19037,6 @@
         "highway_type": "path",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -19056,6 +19047,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 11,
         "walk_access": "yes",
@@ -19087,7 +19079,6 @@
         "highway_type": "path",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -19098,6 +19089,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 10,
         "walk_access": "yes",
@@ -19129,7 +19121,6 @@
         "highway_type": "cycleway",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -19140,6 +19131,7 @@
         "foot": "designated",
         "bicycle": "designated",
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 1601,
         "walk_access": "yes",
@@ -19153,8 +19145,8 @@
         "type": "LineString",
         "coordinates": [
           [
-            73.1192876,
-            26.4816167
+            73.1192839,
+            26.4816069
           ],
           [
             73.1194888,
@@ -19375,7 +19367,6 @@
         "highway_type": "service",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -19386,6 +19377,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 706,
         "walk_access": "yes",
@@ -19429,7 +19421,6 @@
         "highway_type": "path",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -19440,6 +19431,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 4,
         "walk_access": "yes",
@@ -19471,7 +19463,6 @@
         "highway_type": "path",
         "surface": null,
         "lit": null,
-        "source": "osm",
         "lanes": null,
         "oneway": null,
         "service": null,
@@ -19482,6 +19473,7 @@
         "foot": null,
         "bicycle": null,
         "width": null,
+        "source": "osm",
         "is_campus": true,
         "length_m": 9,
         "walk_access": "yes",
@@ -19501,6 +19493,880 @@
           [
             73.1137925,
             26.4729559
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "osm_id": "1529641601",
+        "name": "path",
+        "highway_type": "path",
+        "surface": "sand",
+        "lit": null,
+        "lanes": null,
+        "oneway": null,
+        "service": null,
+        "access": null,
+        "vehicle": null,
+        "motor_vehicle": null,
+        "motorcar": null,
+        "foot": null,
+        "bicycle": null,
+        "width": null,
+        "source": "osm",
+        "is_campus": true,
+        "length_m": 59,
+        "walk_access": "yes",
+        "vehicle_access": "no",
+        "navigation_class": "pedestrian_path",
+        "drive_confidence": 0,
+        "drive_penalty": null,
+        "drive_note": "path is excluded from vehicle routing."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            73.1150297,
+            26.4734688
+          ],
+          [
+            73.1148467,
+            26.4734153
+          ],
+          [
+            73.1146784,
+            26.4733695
+          ],
+          [
+            73.1144731,
+            26.4732885
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "osm_id": "1529641602",
+        "name": "cycleway",
+        "highway_type": "cycleway",
+        "surface": null,
+        "lit": null,
+        "lanes": null,
+        "oneway": null,
+        "service": null,
+        "access": null,
+        "vehicle": null,
+        "motor_vehicle": null,
+        "motorcar": null,
+        "foot": "designated",
+        "bicycle": "designated",
+        "width": null,
+        "source": "osm",
+        "is_campus": true,
+        "length_m": 1309,
+        "walk_access": "yes",
+        "vehicle_access": "no",
+        "navigation_class": "cycle_pedestrian",
+        "drive_confidence": 0,
+        "drive_penalty": null,
+        "drive_note": "cycleway is excluded from vehicle routing."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            73.1192839,
+            26.4816069
+          ],
+          [
+            73.1179654,
+            26.4817793
+          ],
+          [
+            73.1166454,
+            26.4819399
+          ],
+          [
+            73.1163125,
+            26.4819319
+          ],
+          [
+            73.1162163,
+            26.4819172
+          ],
+          [
+            73.1161011,
+            26.4818996
+          ],
+          [
+            73.1156332,
+            26.4817104
+          ],
+          [
+            73.1151473,
+            26.4813359
+          ],
+          [
+            73.1144815,
+            26.4804782
+          ],
+          [
+            73.1141865,
+            26.4798088
+          ],
+          [
+            73.1137122,
+            26.4791573
+          ],
+          [
+            73.1133163,
+            26.4787385
+          ],
+          [
+            73.1128529,
+            26.4783519
+          ],
+          [
+            73.1128849,
+            26.4783039
+          ],
+          [
+            73.1134818,
+            26.4781292
+          ],
+          [
+            73.1140606,
+            26.4779835
+          ],
+          [
+            73.1144236,
+            26.4778864
+          ],
+          [
+            73.1147298,
+            26.4777256
+          ],
+          [
+            73.115014,
+            26.4775209
+          ],
+          [
+            73.1151704,
+            26.47744
+          ],
+          [
+            73.1152375,
+            26.4774122
+          ],
+          [
+            73.1152677,
+            26.4774043
+          ],
+          [
+            73.1154559,
+            26.477355
+          ],
+          [
+            73.1162892,
+            26.4773001
+          ],
+          [
+            73.116691,
+            26.4772584
+          ],
+          [
+            73.1171277,
+            26.4771809
+          ],
+          [
+            73.1171934,
+            26.4771655
+          ],
+          [
+            73.1172659,
+            26.4771485
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "osm_id": "1529641603",
+        "name": "path",
+        "highway_type": "path",
+        "surface": null,
+        "lit": null,
+        "lanes": null,
+        "oneway": null,
+        "service": null,
+        "access": null,
+        "vehicle": null,
+        "motor_vehicle": null,
+        "motorcar": null,
+        "foot": null,
+        "bicycle": null,
+        "width": null,
+        "source": "osm",
+        "is_campus": true,
+        "length_m": 29,
+        "walk_access": "yes",
+        "vehicle_access": "no",
+        "navigation_class": "pedestrian_path",
+        "drive_confidence": 0,
+        "drive_penalty": null,
+        "drive_note": "path is excluded from vehicle routing."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            73.1178316,
+            26.4751246
+          ],
+          [
+            73.1181211,
+            26.4751236
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "osm_id": "1529641604",
+        "name": "service",
+        "highway_type": "service",
+        "surface": null,
+        "lit": null,
+        "lanes": null,
+        "oneway": null,
+        "service": null,
+        "access": null,
+        "vehicle": null,
+        "motor_vehicle": null,
+        "motorcar": null,
+        "foot": null,
+        "bicycle": null,
+        "width": null,
+        "source": "osm",
+        "is_campus": true,
+        "length_m": 58,
+        "walk_access": "yes",
+        "vehicle_access": "destination",
+        "navigation_class": "service_access",
+        "drive_confidence": 0.58,
+        "drive_penalty": 4,
+        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            73.1136554,
+            26.4717987
+          ],
+          [
+            73.1142337,
+            26.4717694
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "osm_id": "1529641605",
+        "name": "path",
+        "highway_type": "path",
+        "surface": null,
+        "lit": null,
+        "lanes": null,
+        "oneway": null,
+        "service": null,
+        "access": null,
+        "vehicle": null,
+        "motor_vehicle": null,
+        "motorcar": null,
+        "foot": null,
+        "bicycle": null,
+        "width": null,
+        "source": "osm",
+        "is_campus": true,
+        "length_m": 74,
+        "walk_access": "yes",
+        "vehicle_access": "no",
+        "navigation_class": "pedestrian_path",
+        "drive_confidence": 0,
+        "drive_penalty": null,
+        "drive_note": "path is excluded from vehicle routing."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            73.1146994,
+            26.4738805
+          ],
+          [
+            73.1146725,
+            26.4740113
+          ],
+          [
+            73.1146702,
+            26.4742549
+          ],
+          [
+            73.1145151,
+            26.4745128
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "osm_id": "1529657254",
+        "name": "service",
+        "highway_type": "service",
+        "surface": null,
+        "lit": null,
+        "lanes": null,
+        "oneway": null,
+        "service": null,
+        "access": null,
+        "vehicle": null,
+        "motor_vehicle": null,
+        "motorcar": null,
+        "foot": null,
+        "bicycle": null,
+        "width": null,
+        "source": "osm",
+        "is_campus": true,
+        "length_m": 192,
+        "walk_access": "yes",
+        "vehicle_access": "yes",
+        "navigation_class": "campus_service_connector",
+        "drive_confidence": 0.68,
+        "drive_penalty": 2.5,
+        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            73.1100552,
+            26.4745213
+          ],
+          [
+            73.1105361,
+            26.474574
+          ],
+          [
+            73.1109893,
+            26.4746026
+          ],
+          [
+            73.1114585,
+            26.4745565
+          ],
+          [
+            73.1119701,
+            26.4744934
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "osm_id": "1529657256",
+        "name": "path",
+        "highway_type": "path",
+        "surface": null,
+        "lit": null,
+        "lanes": null,
+        "oneway": null,
+        "service": null,
+        "access": null,
+        "vehicle": null,
+        "motor_vehicle": null,
+        "motorcar": null,
+        "foot": null,
+        "bicycle": null,
+        "width": null,
+        "source": "osm",
+        "is_campus": true,
+        "length_m": 98,
+        "walk_access": "yes",
+        "vehicle_access": "no",
+        "navigation_class": "pedestrian_path",
+        "drive_confidence": 0,
+        "drive_penalty": null,
+        "drive_note": "path is excluded from vehicle routing."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            73.1167735,
+            26.4721194
+          ],
+          [
+            73.1166957,
+            26.4719949
+          ],
+          [
+            73.1166021,
+            26.4718579
+          ],
+          [
+            73.1165115,
+            26.4718925
+          ],
+          [
+            73.1164741,
+            26.4714676
+          ],
+          [
+            73.1164352,
+            26.4714125
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "osm_id": "1529657257",
+        "name": "path",
+        "highway_type": "path",
+        "surface": null,
+        "lit": null,
+        "lanes": null,
+        "oneway": null,
+        "service": null,
+        "access": null,
+        "vehicle": null,
+        "motor_vehicle": null,
+        "motorcar": null,
+        "foot": null,
+        "bicycle": null,
+        "width": null,
+        "source": "osm",
+        "is_campus": true,
+        "length_m": 103,
+        "walk_access": "yes",
+        "vehicle_access": "no",
+        "navigation_class": "pedestrian_path",
+        "drive_confidence": 0,
+        "drive_penalty": null,
+        "drive_note": "path is excluded from vehicle routing."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            73.1159988,
+            26.4733854
+          ],
+          [
+            73.1159456,
+            26.4729317
+          ],
+          [
+            73.1158803,
+            26.4724693
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "osm_id": "1529657258",
+        "name": "path",
+        "highway_type": "path",
+        "surface": null,
+        "lit": null,
+        "lanes": null,
+        "oneway": null,
+        "service": null,
+        "access": null,
+        "vehicle": null,
+        "motor_vehicle": null,
+        "motorcar": null,
+        "foot": null,
+        "bicycle": null,
+        "width": null,
+        "source": "osm",
+        "is_campus": true,
+        "length_m": 22,
+        "walk_access": "yes",
+        "vehicle_access": "no",
+        "navigation_class": "pedestrian_path",
+        "drive_confidence": 0,
+        "drive_penalty": null,
+        "drive_note": "path is excluded from vehicle routing."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            73.1116544,
+            26.4770871
+          ],
+          [
+            73.1115034,
+            26.4772342
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "osm_id": "1529657259",
+        "name": "cycleway",
+        "highway_type": "cycleway",
+        "surface": null,
+        "lit": null,
+        "lanes": null,
+        "oneway": null,
+        "service": null,
+        "access": null,
+        "vehicle": null,
+        "motor_vehicle": null,
+        "motorcar": null,
+        "foot": "designated",
+        "bicycle": "designated",
+        "width": null,
+        "source": "osm",
+        "is_campus": true,
+        "length_m": 1307,
+        "walk_access": "yes",
+        "vehicle_access": "no",
+        "navigation_class": "cycle_pedestrian",
+        "drive_confidence": 0,
+        "drive_penalty": null,
+        "drive_note": "cycleway is excluded from vehicle routing."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            73.1126763,
+            26.4782497
+          ],
+          [
+            73.1121102,
+            26.4777912
+          ],
+          [
+            73.1116671,
+            26.477375
+          ],
+          [
+            73.1115034,
+            26.4772342
+          ],
+          [
+            73.1112102,
+            26.4769821
+          ],
+          [
+            73.1109049,
+            26.4766542
+          ],
+          [
+            73.1106454,
+            26.476324
+          ],
+          [
+            73.1103859,
+            26.4759482
+          ],
+          [
+            73.1101035,
+            26.4754746
+          ],
+          [
+            73.1099763,
+            26.4752104
+          ],
+          [
+            73.1097485,
+            26.4745961
+          ],
+          [
+            73.1096024,
+            26.4737317
+          ],
+          [
+            73.1096068,
+            26.4736445
+          ],
+          [
+            73.109602,
+            26.4735506
+          ],
+          [
+            73.1095979,
+            26.47347
+          ],
+          [
+            73.1096821,
+            26.472911
+          ],
+          [
+            73.1098549,
+            26.4723519
+          ],
+          [
+            73.1101472,
+            26.4717413
+          ],
+          [
+            73.1108825,
+            26.4708214
+          ],
+          [
+            73.1113564,
+            26.4704645
+          ],
+          [
+            73.1123531,
+            26.4698896
+          ],
+          [
+            73.1131459,
+            26.4695565
+          ],
+          [
+            73.1133851,
+            26.4694931
+          ],
+          [
+            73.1135977,
+            26.4695089
+          ],
+          [
+            73.1137812,
+            26.4696162
+          ],
+          [
+            73.113887,
+            26.4696456
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "osm_id": "1529657260",
+        "name": "footway",
+        "highway_type": "footway",
+        "surface": null,
+        "lit": null,
+        "lanes": null,
+        "oneway": null,
+        "service": null,
+        "access": null,
+        "vehicle": null,
+        "motor_vehicle": null,
+        "motorcar": null,
+        "foot": null,
+        "bicycle": null,
+        "width": null,
+        "source": "osm",
+        "is_campus": true,
+        "length_m": 379,
+        "walk_access": "yes",
+        "vehicle_access": "no",
+        "navigation_class": "pedestrian_path",
+        "drive_confidence": 0,
+        "drive_penalty": null,
+        "drive_note": "footway is excluded from vehicle routing."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            73.113887,
+            26.4696456
+          ],
+          [
+            73.1140365,
+            26.4696846
+          ],
+          [
+            73.1141467,
+            26.469708
+          ],
+          [
+            73.1142588,
+            26.469728
+          ],
+          [
+            73.1144829,
+            26.4696929
+          ],
+          [
+            73.1146025,
+            26.4696394
+          ],
+          [
+            73.1146735,
+            26.469616
+          ],
+          [
+            73.1147482,
+            26.4696026
+          ],
+          [
+            73.1148117,
+            26.4696093
+          ],
+          [
+            73.1151181,
+            26.4697548
+          ],
+          [
+            73.1156075,
+            26.4699856
+          ],
+          [
+            73.1161398,
+            26.4702782
+          ],
+          [
+            73.1165191,
+            26.4705574
+          ],
+          [
+            73.116986,
+            26.4709471
+          ],
+          [
+            73.1170592,
+            26.4710397
+          ],
+          [
+            73.117096,
+            26.4710863
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "osm_id": "1529657262",
+        "name": "footway",
+        "highway_type": "footway",
+        "surface": null,
+        "lit": null,
+        "lanes": null,
+        "oneway": null,
+        "service": null,
+        "access": null,
+        "vehicle": null,
+        "motor_vehicle": null,
+        "motorcar": null,
+        "foot": null,
+        "bicycle": null,
+        "width": null,
+        "source": "osm",
+        "is_campus": true,
+        "length_m": 78,
+        "walk_access": "yes",
+        "vehicle_access": "no",
+        "navigation_class": "pedestrian_path",
+        "drive_confidence": 0,
+        "drive_penalty": null,
+        "drive_note": "footway is excluded from vehicle routing."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            73.1194328,
+            26.4764396
+          ],
+          [
+            73.1197152,
+            26.4766558
+          ],
+          [
+            73.1198739,
+            26.4767773
+          ],
+          [
+            73.1200394,
+            26.4768831
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "osm_id": "1529657263",
+        "name": "footway",
+        "highway_type": "footway",
+        "surface": null,
+        "lit": null,
+        "lanes": null,
+        "oneway": null,
+        "service": null,
+        "access": null,
+        "vehicle": null,
+        "motor_vehicle": null,
+        "motorcar": null,
+        "foot": null,
+        "bicycle": null,
+        "width": null,
+        "source": "osm",
+        "is_campus": true,
+        "length_m": 35,
+        "walk_access": "yes",
+        "vehicle_access": "no",
+        "navigation_class": "pedestrian_path",
+        "drive_confidence": 0,
+        "drive_penalty": null,
+        "drive_note": "footway is excluded from vehicle routing."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            73.1197152,
+            26.4766558
+          ],
+          [
+            73.1197745,
+            26.4766014
+          ],
+          [
+            73.1198085,
+            26.4766242
+          ],
+          [
+            73.1198736,
+            26.4765672
+          ],
+          [
+            73.1198438,
+            26.4765355
+          ],
+          [
+            73.1198962,
+            26.4764785
           ]
         ]
       }

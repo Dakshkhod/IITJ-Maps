@@ -1,18 +1,18 @@
 {
-  "generated_at": "2026-06-14T09:37:34.243Z",
+  "generated_at": "2026-06-15T16:08:11.422Z",
   "summary": {
     "campus_main_road": 5,
     "major_vehicle_road": 24,
     "narrow_service_road": 5,
     "campus_service_road": 12,
-    "service_access": 79,
-    "campus_service_connector": 114,
-    "unpaved_service": 5,
+    "service_access": 78,
+    "campus_service_connector": 119,
+    "unpaved_service": 1,
     "vehicle_connector": 4,
-    "pedestrian_path": 49,
+    "pedestrian_path": 58,
     "campus_standard_road": 39,
     "maintenance_track": 13,
-    "cycle_pedestrian": 15,
+    "cycle_pedestrian": 17,
     "local_street": 133,
     "local_through_road": 13
   },
@@ -86,6 +86,16 @@
       "drive_confidence": 0.58,
       "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized.",
       "length_m": 89
+    },
+    {
+      "osm_id": "1525594978",
+      "name": "service",
+      "highway_type": "service",
+      "navigation_class": "service_access",
+      "vehicle_access": "destination",
+      "drive_confidence": 0.58,
+      "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized.",
+      "length_m": 88
     },
     {
       "osm_id": "773563531",
@@ -176,16 +186,6 @@
       "drive_confidence": 0.58,
       "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized.",
       "length_m": 80
-    },
-    {
-      "osm_id": "1525594978",
-      "name": "service",
-      "highway_type": "service",
-      "navigation_class": "service_access",
-      "vehicle_access": "destination",
-      "drive_confidence": 0.58,
-      "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized.",
-      "length_m": 79
     },
     {
       "osm_id": "915027371",
@@ -398,6 +398,26 @@
       "length_m": 59
     },
     {
+      "osm_id": "1412392566",
+      "name": "service",
+      "highway_type": "service",
+      "navigation_class": "service_access",
+      "vehicle_access": "destination",
+      "drive_confidence": 0.58,
+      "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized.",
+      "length_m": 58
+    },
+    {
+      "osm_id": "1529641604",
+      "name": "service",
+      "highway_type": "service",
+      "navigation_class": "service_access",
+      "vehicle_access": "destination",
+      "drive_confidence": 0.58,
+      "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized.",
+      "length_m": 58
+    },
+    {
       "osm_id": "914918533",
       "name": "service",
       "highway_type": "service",
@@ -466,16 +486,6 @@
       "drive_confidence": 0.58,
       "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized.",
       "length_m": 53
-    },
-    {
-      "osm_id": "1412392566",
-      "name": "service",
-      "highway_type": "service",
-      "navigation_class": "service_access",
-      "vehicle_access": "destination",
-      "drive_confidence": 0.58,
-      "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized.",
-      "length_m": 52
     },
     {
       "osm_id": "915021732",
@@ -678,24 +688,14 @@
       "length_m": 15
     },
     {
-      "osm_id": "1412504088",
+      "osm_id": "1412504078",
       "name": "service",
       "highway_type": "service",
       "navigation_class": "service_access",
       "vehicle_access": "destination",
       "drive_confidence": 0.58,
       "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized.",
-      "length_m": 14
-    },
-    {
-      "osm_id": "914901007",
-      "name": "service",
-      "highway_type": "service",
-      "navigation_class": "service_access",
-      "vehicle_access": "destination",
-      "drive_confidence": 0.58,
-      "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized.",
-      "length_m": 13
+      "length_m": 15
     },
     {
       "osm_id": "1412392597",
@@ -718,6 +718,16 @@
       "length_m": 13
     },
     {
+      "osm_id": "1412504046",
+      "name": "service",
+      "highway_type": "service",
+      "navigation_class": "service_access",
+      "vehicle_access": "destination",
+      "drive_confidence": 0.58,
+      "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized.",
+      "length_m": 12
+    },
+    {
       "osm_id": "1412504075",
       "name": "service",
       "highway_type": "service",
@@ -726,6 +736,16 @@
       "drive_confidence": 0.58,
       "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized.",
       "length_m": 12
+    },
+    {
+      "osm_id": "1412392538",
+      "name": "service",
+      "highway_type": "service",
+      "navigation_class": "service_access",
+      "vehicle_access": "destination",
+      "drive_confidence": 0.58,
+      "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized.",
+      "length_m": 10
     },
     {
       "osm_id": "1412504081",
@@ -748,6 +768,16 @@
       "length_m": 9
     },
     {
+      "osm_id": "1412504088",
+      "name": "service",
+      "highway_type": "service",
+      "navigation_class": "service_access",
+      "vehicle_access": "destination",
+      "drive_confidence": 0.58,
+      "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized.",
+      "length_m": 8
+    },
+    {
       "osm_id": "1412504044",
       "name": "service",
       "highway_type": "service",
@@ -758,24 +788,14 @@
       "length_m": 7
     },
     {
-      "osm_id": "1412392538",
+      "osm_id": "1412504045",
       "name": "service",
       "highway_type": "service",
       "navigation_class": "service_access",
       "vehicle_access": "destination",
       "drive_confidence": 0.58,
       "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized.",
-      "length_m": 6
-    },
-    {
-      "osm_id": "1412504046",
-      "name": "service",
-      "highway_type": "service",
-      "navigation_class": "service_access",
-      "vehicle_access": "destination",
-      "drive_confidence": 0.58,
-      "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized.",
-      "length_m": 6
+      "length_m": 7
     },
     {
       "osm_id": "1412504047",
@@ -798,26 +818,6 @@
       "length_m": 5
     },
     {
-      "osm_id": "914901004",
-      "name": "service",
-      "highway_type": "service",
-      "navigation_class": "service_access",
-      "vehicle_access": "destination",
-      "drive_confidence": 0.58,
-      "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized.",
-      "length_m": 4
-    },
-    {
-      "osm_id": "1412504045",
-      "name": "service",
-      "highway_type": "service",
-      "navigation_class": "service_access",
-      "vehicle_access": "destination",
-      "drive_confidence": 0.58,
-      "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized.",
-      "length_m": 4
-    },
-    {
       "osm_id": "1412504076",
       "name": "service",
       "highway_type": "service",
@@ -836,16 +836,6 @@
       "drive_confidence": 0.58,
       "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized.",
       "length_m": 4
-    },
-    {
-      "osm_id": "1412504078",
-      "name": "service",
-      "highway_type": "service",
-      "navigation_class": "service_access",
-      "vehicle_access": "destination",
-      "drive_confidence": 0.58,
-      "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized.",
-      "length_m": 3
     },
     {
       "osm_id": "1412504049",
@@ -975,7 +965,7 @@
       "vehicle_access": "yes",
       "drive_confidence": 0.68,
       "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized.",
-      "length_m": 697
+      "length_m": 698
     },
     {
       "osm_id": "914997310",
@@ -1045,7 +1035,7 @@
       "vehicle_access": "yes",
       "drive_confidence": 0.68,
       "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized.",
-      "length_m": 523
+      "length_m": 519
     },
     {
       "osm_id": "915002208",
@@ -1168,6 +1158,16 @@
       "length_m": 368
     },
     {
+      "osm_id": "773563514",
+      "name": "service",
+      "highway_type": "service",
+      "navigation_class": "campus_service_connector",
+      "vehicle_access": "yes",
+      "drive_confidence": 0.68,
+      "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized.",
+      "length_m": 360
+    },
+    {
       "osm_id": "1412392548",
       "name": "service",
       "highway_type": "service",
@@ -1175,7 +1175,7 @@
       "vehicle_access": "yes",
       "drive_confidence": 0.68,
       "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized.",
-      "length_m": 346
+      "length_m": 350
     },
     {
       "osm_id": "914918544",
@@ -1238,14 +1238,14 @@
       "length_m": 325
     },
     {
-      "osm_id": "914910787",
+      "osm_id": "773563496",
       "name": "service",
       "highway_type": "service",
       "navigation_class": "campus_service_connector",
       "vehicle_access": "yes",
       "drive_confidence": 0.68,
       "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized.",
-      "length_m": 316
+      "length_m": 323
     },
     {
       "osm_id": "914905127",
@@ -1255,7 +1255,17 @@
       "vehicle_access": "yes",
       "drive_confidence": 0.68,
       "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized.",
-      "length_m": 314
+      "length_m": 317
+    },
+    {
+      "osm_id": "914910787",
+      "name": "service",
+      "highway_type": "service",
+      "navigation_class": "campus_service_connector",
+      "vehicle_access": "yes",
+      "drive_confidence": 0.68,
+      "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized.",
+      "length_m": 316
     },
     {
       "osm_id": "1412392564",
@@ -1308,6 +1318,26 @@
       "length_m": 280
     },
     {
+      "osm_id": "1412392543",
+      "name": "service",
+      "highway_type": "service",
+      "navigation_class": "campus_service_connector",
+      "vehicle_access": "yes",
+      "drive_confidence": 0.68,
+      "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized.",
+      "length_m": 270
+    },
+    {
+      "osm_id": "1412392555",
+      "name": "service",
+      "highway_type": "service",
+      "navigation_class": "campus_service_connector",
+      "vehicle_access": "yes",
+      "drive_confidence": 0.68,
+      "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized.",
+      "length_m": 270
+    },
+    {
       "osm_id": "914990773",
       "name": "service",
       "highway_type": "service",
@@ -1328,26 +1358,6 @@
       "length_m": 268
     },
     {
-      "osm_id": "1412392543",
-      "name": "service",
-      "highway_type": "service",
-      "navigation_class": "campus_service_connector",
-      "vehicle_access": "yes",
-      "drive_confidence": 0.68,
-      "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized.",
-      "length_m": 268
-    },
-    {
-      "osm_id": "1412392555",
-      "name": "service",
-      "highway_type": "service",
-      "navigation_class": "campus_service_connector",
-      "vehicle_access": "yes",
-      "drive_confidence": 0.68,
-      "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized.",
-      "length_m": 265
-    },
-    {
       "osm_id": "914918531",
       "name": "service",
       "highway_type": "service",
@@ -1356,6 +1366,16 @@
       "drive_confidence": 0.68,
       "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized.",
       "length_m": 258
+    },
+    {
+      "osm_id": "1412392556",
+      "name": "service",
+      "highway_type": "service",
+      "navigation_class": "campus_service_connector",
+      "vehicle_access": "yes",
+      "drive_confidence": 0.68,
+      "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized.",
+      "length_m": 248
     },
     {
       "osm_id": "914910789",
@@ -1376,26 +1396,6 @@
       "drive_confidence": 0.68,
       "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized.",
       "length_m": 245
-    },
-    {
-      "osm_id": "1412392556",
-      "name": "service",
-      "highway_type": "service",
-      "navigation_class": "campus_service_connector",
-      "vehicle_access": "yes",
-      "drive_confidence": 0.68,
-      "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized.",
-      "length_m": 245
-    },
-    {
-      "osm_id": "1412504084",
-      "name": "service",
-      "highway_type": "service",
-      "navigation_class": "campus_service_connector",
-      "vehicle_access": "yes",
-      "drive_confidence": 0.68,
-      "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized.",
-      "length_m": 239
     },
     {
       "osm_id": "1412392557",
@@ -1498,6 +1498,26 @@
       "length_m": 214
     },
     {
+      "osm_id": "773563503",
+      "name": "service",
+      "highway_type": "service",
+      "navigation_class": "campus_service_connector",
+      "vehicle_access": "yes",
+      "drive_confidence": 0.68,
+      "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized.",
+      "length_m": 211
+    },
+    {
+      "osm_id": "1412504084",
+      "name": "service",
+      "highway_type": "service",
+      "navigation_class": "campus_service_connector",
+      "vehicle_access": "yes",
+      "drive_confidence": 0.68,
+      "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized.",
+      "length_m": 211
+    },
+    {
       "osm_id": "1412399732",
       "name": "service",
       "highway_type": "service",
@@ -1528,6 +1548,16 @@
       "length_m": 205
     },
     {
+      "osm_id": "773587416",
+      "name": "service",
+      "highway_type": "service",
+      "navigation_class": "campus_service_connector",
+      "vehicle_access": "yes",
+      "drive_confidence": 0.68,
+      "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized.",
+      "length_m": 201
+    },
+    {
       "osm_id": "1419313451",
       "name": "service",
       "highway_type": "service",
@@ -1556,6 +1586,16 @@
       "drive_confidence": 0.68,
       "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized.",
       "length_m": 195
+    },
+    {
+      "osm_id": "1529657254",
+      "name": "service",
+      "highway_type": "service",
+      "navigation_class": "campus_service_connector",
+      "vehicle_access": "yes",
+      "drive_confidence": 0.68,
+      "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized.",
+      "length_m": 192
     },
     {
       "osm_id": "1412399741",
@@ -1615,7 +1655,7 @@
       "vehicle_access": "yes",
       "drive_confidence": 0.68,
       "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized.",
-      "length_m": 171
+      "length_m": 172
     },
     {
       "osm_id": "1525670465",
@@ -1625,7 +1665,7 @@
       "vehicle_access": "yes",
       "drive_confidence": 0.68,
       "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized.",
-      "length_m": 161
+      "length_m": 156
     },
     {
       "osm_id": "915332302",
@@ -1848,16 +1888,6 @@
       "length_m": 117
     },
     {
-      "osm_id": "914901006",
-      "name": "service",
-      "highway_type": "service",
-      "navigation_class": "campus_service_connector",
-      "vehicle_access": "yes",
-      "drive_confidence": 0.68,
-      "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized.",
-      "length_m": 116
-    },
-    {
       "osm_id": "1412392531",
       "name": "service",
       "highway_type": "service",
@@ -1868,6 +1898,16 @@
       "length_m": 115
     },
     {
+      "osm_id": "914901006",
+      "name": "service",
+      "highway_type": "service",
+      "navigation_class": "campus_service_connector",
+      "vehicle_access": "yes",
+      "drive_confidence": 0.68,
+      "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized.",
+      "length_m": 111
+    },
+    {
       "osm_id": "914988032",
       "name": "service",
       "highway_type": "service",
@@ -1876,6 +1916,16 @@
       "drive_confidence": 0.68,
       "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized.",
       "length_m": 107
+    },
+    {
+      "osm_id": "1417522081",
+      "name": "service",
+      "highway_type": "service",
+      "navigation_class": "campus_service_connector",
+      "vehicle_access": "yes",
+      "drive_confidence": 0.68,
+      "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized.",
+      "length_m": 105
     },
     {
       "osm_id": "915027370",
@@ -1889,16 +1939,6 @@
     },
     {
       "osm_id": "914908601",
-      "name": "service",
-      "highway_type": "service",
-      "navigation_class": "campus_service_connector",
-      "vehicle_access": "yes",
-      "drive_confidence": 0.68,
-      "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized.",
-      "length_m": 104
-    },
-    {
-      "osm_id": "1417522081",
       "name": "service",
       "highway_type": "service",
       "navigation_class": "campus_service_connector",
@@ -2008,6 +2048,26 @@
       "drive_confidence": 0,
       "drive_note": "cycleway is excluded from vehicle routing.",
       "length_m": 1601
+    },
+    {
+      "osm_id": "1529641602",
+      "name": "cycleway",
+      "highway_type": "cycleway",
+      "navigation_class": "cycle_pedestrian",
+      "vehicle_access": "no",
+      "drive_confidence": 0,
+      "drive_note": "cycleway is excluded from vehicle routing.",
+      "length_m": 1309
+    },
+    {
+      "osm_id": "1529657259",
+      "name": "cycleway",
+      "highway_type": "cycleway",
+      "navigation_class": "cycle_pedestrian",
+      "vehicle_access": "no",
+      "drive_confidence": 0,
+      "drive_note": "cycleway is excluded from vehicle routing.",
+      "length_m": 1307
     },
     {
       "osm_id": "1412399736",
@@ -2170,6 +2230,16 @@
       "length_m": 607
     },
     {
+      "osm_id": "1529657260",
+      "name": "footway",
+      "highway_type": "footway",
+      "navigation_class": "pedestrian_path",
+      "vehicle_access": "no",
+      "drive_confidence": 0,
+      "drive_note": "footway is excluded from vehicle routing.",
+      "length_m": 379
+    },
+    {
       "osm_id": "1421117916",
       "name": "footway",
       "highway_type": "footway",
@@ -2207,7 +2277,17 @@
       "vehicle_access": "no",
       "drive_confidence": 0,
       "drive_note": "footway is excluded from vehicle routing.",
-      "length_m": 75
+      "length_m": 78
+    },
+    {
+      "osm_id": "1529657262",
+      "name": "footway",
+      "highway_type": "footway",
+      "navigation_class": "pedestrian_path",
+      "vehicle_access": "no",
+      "drive_confidence": 0,
+      "drive_note": "footway is excluded from vehicle routing.",
+      "length_m": 78
     },
     {
       "osm_id": "795434513",
@@ -2217,7 +2297,7 @@
       "vehicle_access": "no",
       "drive_confidence": 0,
       "drive_note": "footway is excluded from vehicle routing.",
-      "length_m": 69
+      "length_m": 68
     },
     {
       "osm_id": "1524508015",
@@ -2230,6 +2310,26 @@
       "length_m": 41
     },
     {
+      "osm_id": "1529657263",
+      "name": "footway",
+      "highway_type": "footway",
+      "navigation_class": "pedestrian_path",
+      "vehicle_access": "no",
+      "drive_confidence": 0,
+      "drive_note": "footway is excluded from vehicle routing.",
+      "length_m": 35
+    },
+    {
+      "osm_id": "1521877037",
+      "name": "footway",
+      "highway_type": "footway",
+      "navigation_class": "pedestrian_path",
+      "vehicle_access": "no",
+      "drive_confidence": 0,
+      "drive_note": "footway is excluded from vehicle routing.",
+      "length_m": 33
+    },
+    {
       "osm_id": "1412504048",
       "name": "footpath mess.",
       "highway_type": "footway",
@@ -2237,7 +2337,7 @@
       "vehicle_access": "no",
       "drive_confidence": 0,
       "drive_note": "footway is excluded from vehicle routing.",
-      "length_m": 30
+      "length_m": 32
     },
     {
       "osm_id": "1524508016",
@@ -2287,7 +2387,7 @@
       "vehicle_access": "no",
       "drive_confidence": 0,
       "drive_note": "footway is excluded from vehicle routing.",
-      "length_m": 11
+      "length_m": 9
     },
     {
       "osm_id": "1524508017",
@@ -2298,6 +2398,26 @@
       "drive_confidence": 0,
       "drive_note": "footway is excluded from vehicle routing.",
       "length_m": 8
+    },
+    {
+      "osm_id": "1412504055",
+      "name": "footway",
+      "highway_type": "footway",
+      "navigation_class": "pedestrian_path",
+      "vehicle_access": "no",
+      "drive_confidence": 0,
+      "drive_note": "footway is excluded from vehicle routing.",
+      "length_m": 7
+    },
+    {
+      "osm_id": "1412504056",
+      "name": "footway",
+      "highway_type": "footway",
+      "navigation_class": "pedestrian_path",
+      "vehicle_access": "no",
+      "drive_confidence": 0,
+      "drive_note": "footway is excluded from vehicle routing.",
+      "length_m": 7
     },
     {
       "osm_id": "1412632024",
@@ -2340,26 +2460,6 @@
       "length_m": 4
     },
     {
-      "osm_id": "1412504055",
-      "name": "footway",
-      "highway_type": "footway",
-      "navigation_class": "pedestrian_path",
-      "vehicle_access": "no",
-      "drive_confidence": 0,
-      "drive_note": "footway is excluded from vehicle routing.",
-      "length_m": 4
-    },
-    {
-      "osm_id": "1412504056",
-      "name": "footway",
-      "highway_type": "footway",
-      "navigation_class": "pedestrian_path",
-      "vehicle_access": "no",
-      "drive_confidence": 0,
-      "drive_note": "footway is excluded from vehicle routing.",
-      "length_m": 4
-    },
-    {
       "osm_id": "1412504052",
       "name": "footway",
       "highway_type": "footway",
@@ -2390,14 +2490,44 @@
       "length_m": 106
     },
     {
-      "osm_id": "1521877037",
+      "osm_id": "1529657257",
       "name": "path",
       "highway_type": "path",
       "navigation_class": "pedestrian_path",
       "vehicle_access": "no",
       "drive_confidence": 0,
       "drive_note": "path is excluded from vehicle routing.",
-      "length_m": 79
+      "length_m": 103
+    },
+    {
+      "osm_id": "1529657256",
+      "name": "path",
+      "highway_type": "path",
+      "navigation_class": "pedestrian_path",
+      "vehicle_access": "no",
+      "drive_confidence": 0,
+      "drive_note": "path is excluded from vehicle routing.",
+      "length_m": 98
+    },
+    {
+      "osm_id": "1529641605",
+      "name": "path",
+      "highway_type": "path",
+      "navigation_class": "pedestrian_path",
+      "vehicle_access": "no",
+      "drive_confidence": 0,
+      "drive_note": "path is excluded from vehicle routing.",
+      "length_m": 74
+    },
+    {
+      "osm_id": "1529641601",
+      "name": "path",
+      "highway_type": "path",
+      "navigation_class": "pedestrian_path",
+      "vehicle_access": "no",
+      "drive_confidence": 0,
+      "drive_note": "path is excluded from vehicle routing.",
+      "length_m": 59
     },
     {
       "osm_id": "1412392560",
@@ -2437,20 +2567,20 @@
       "vehicle_access": "no",
       "drive_confidence": 0,
       "drive_note": "path is excluded from vehicle routing.",
-      "length_m": 31
+      "length_m": 29
     },
     {
-      "osm_id": "1528690899",
+      "osm_id": "1529641603",
       "name": "path",
       "highway_type": "path",
       "navigation_class": "pedestrian_path",
       "vehicle_access": "no",
       "drive_confidence": 0,
       "drive_note": "path is excluded from vehicle routing.",
-      "length_m": 28
+      "length_m": 29
     },
     {
-      "osm_id": "1528690897",
+      "osm_id": "1528690899",
       "name": "path",
       "highway_type": "path",
       "navigation_class": "pedestrian_path",
@@ -2480,7 +2610,37 @@
       "length_m": 24
     },
     {
+      "osm_id": "1528690897",
+      "name": "path",
+      "highway_type": "path",
+      "navigation_class": "pedestrian_path",
+      "vehicle_access": "no",
+      "drive_confidence": 0,
+      "drive_note": "path is excluded from vehicle routing.",
+      "length_m": 24
+    },
+    {
+      "osm_id": "1529657258",
+      "name": "path",
+      "highway_type": "path",
+      "navigation_class": "pedestrian_path",
+      "vehicle_access": "no",
+      "drive_confidence": 0,
+      "drive_note": "path is excluded from vehicle routing.",
+      "length_m": 22
+    },
+    {
       "osm_id": "1412392600",
+      "name": "path",
+      "highway_type": "path",
+      "navigation_class": "pedestrian_path",
+      "vehicle_access": "no",
+      "drive_confidence": 0,
+      "drive_note": "path is excluded from vehicle routing.",
+      "length_m": 20
+    },
+    {
+      "osm_id": "1528690898",
       "name": "path",
       "highway_type": "path",
       "navigation_class": "pedestrian_path",
@@ -2510,6 +2670,16 @@
       "length_m": 18
     },
     {
+      "osm_id": "1528690900",
+      "name": "path",
+      "highway_type": "path",
+      "navigation_class": "pedestrian_path",
+      "vehicle_access": "no",
+      "drive_confidence": 0,
+      "drive_note": "path is excluded from vehicle routing.",
+      "length_m": 18
+    },
+    {
       "osm_id": "1528702862",
       "name": "path",
       "highway_type": "path",
@@ -2520,34 +2690,14 @@
       "length_m": 18
     },
     {
-      "osm_id": "1528690898",
+      "osm_id": "1528702859",
       "name": "path",
       "highway_type": "path",
       "navigation_class": "pedestrian_path",
       "vehicle_access": "no",
       "drive_confidence": 0,
       "drive_note": "path is excluded from vehicle routing.",
-      "length_m": 17
-    },
-    {
-      "osm_id": "1528690900",
-      "name": "path",
-      "highway_type": "path",
-      "navigation_class": "pedestrian_path",
-      "vehicle_access": "no",
-      "drive_confidence": 0,
-      "drive_note": "path is excluded from vehicle routing.",
-      "length_m": 17
-    },
-    {
-      "osm_id": "1523013293",
-      "name": "path",
-      "highway_type": "path",
-      "navigation_class": "pedestrian_path",
-      "vehicle_access": "no",
-      "drive_confidence": 0,
-      "drive_note": "path is excluded from vehicle routing.",
-      "length_m": 11
+      "length_m": 15
     },
     {
       "osm_id": "1528702864",
@@ -2590,7 +2740,7 @@
       "length_m": 8
     },
     {
-      "osm_id": "1528702859",
+      "osm_id": "1528702860",
       "name": "path",
       "highway_type": "path",
       "navigation_class": "pedestrian_path",
@@ -2600,14 +2750,14 @@
       "length_m": 8
     },
     {
-      "osm_id": "1528702860",
+      "osm_id": "1523013293",
       "name": "path",
       "highway_type": "path",
       "navigation_class": "pedestrian_path",
       "vehicle_access": "no",
       "drive_confidence": 0,
       "drive_note": "path is excluded from vehicle routing.",
-      "length_m": 8
+      "length_m": 7
     },
     {
       "osm_id": "1528702863",
@@ -2627,7 +2777,7 @@
       "vehicle_access": "no",
       "drive_confidence": 0,
       "drive_note": "path is excluded from vehicle routing.",
-      "length_m": 5
+      "length_m": 6
     },
     {
       "osm_id": "1528715813",
@@ -2640,16 +2790,6 @@
       "length_m": 4
     },
     {
-      "osm_id": "773563514",
-      "name": "service",
-      "highway_type": "service",
-      "navigation_class": "unpaved_service",
-      "vehicle_access": "no",
-      "drive_confidence": 0.25,
-      "drive_note": "Unpaved service road; excluded from vehicle routing.",
-      "length_m": 360
-    },
-    {
       "osm_id": "773563494",
       "name": "service",
       "highway_type": "service",
@@ -2658,36 +2798,6 @@
       "drive_confidence": 0.25,
       "drive_note": "Unpaved service road; excluded from vehicle routing.",
       "length_m": 328
-    },
-    {
-      "osm_id": "773563496",
-      "name": "service",
-      "highway_type": "service",
-      "navigation_class": "unpaved_service",
-      "vehicle_access": "no",
-      "drive_confidence": 0.25,
-      "drive_note": "Unpaved service road; excluded from vehicle routing.",
-      "length_m": 322
-    },
-    {
-      "osm_id": "773563503",
-      "name": "service",
-      "highway_type": "service",
-      "navigation_class": "unpaved_service",
-      "vehicle_access": "no",
-      "drive_confidence": 0.25,
-      "drive_note": "Unpaved service road; excluded from vehicle routing.",
-      "length_m": 211
-    },
-    {
-      "osm_id": "773587416",
-      "name": "service",
-      "highway_type": "service",
-      "navigation_class": "unpaved_service",
-      "vehicle_access": "no",
-      "drive_confidence": 0.25,
-      "drive_note": "Unpaved service road; excluded from vehicle routing.",
-      "length_m": 201
     },
     {
       "osm_id": "914984205",
