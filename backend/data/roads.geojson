@@ -471,11 +471,11 @@
         "is_campus": true,
         "length_m": 16,
         "walk_access": "yes",
-        "vehicle_access": "destination",
-        "navigation_class": "narrow_service_road",
-        "drive_confidence": 0.55,
-        "drive_penalty": 4,
-        "drive_note": "Single-lane service road; only used if no reliable alternative exists."
+        "vehicle_access": "yes",
+        "navigation_class": "campus_service_connector",
+        "drive_confidence": 0.64,
+        "drive_penalty": 3,
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -517,11 +517,11 @@
         "is_campus": true,
         "length_m": 30,
         "walk_access": "yes",
-        "vehicle_access": "destination",
-        "navigation_class": "narrow_service_road",
-        "drive_confidence": 0.55,
-        "drive_penalty": 4,
-        "drive_note": "Single-lane service road; only used if no reliable alternative exists."
+        "vehicle_access": "yes",
+        "navigation_class": "campus_service_connector",
+        "drive_confidence": 0.64,
+        "drive_penalty": 3,
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -563,11 +563,11 @@
         "is_campus": true,
         "length_m": 87,
         "walk_access": "yes",
-        "vehicle_access": "destination",
-        "navigation_class": "narrow_service_road",
-        "drive_confidence": 0.55,
-        "drive_penalty": 4,
-        "drive_note": "Single-lane service road; only used if no reliable alternative exists."
+        "vehicle_access": "yes",
+        "navigation_class": "campus_service_connector",
+        "drive_confidence": 0.64,
+        "drive_penalty": 3,
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -627,9 +627,9 @@
         "walk_access": "yes",
         "vehicle_access": "yes",
         "navigation_class": "campus_service_road",
-        "drive_confidence": 0.78,
+        "drive_confidence": 0.8,
         "drive_penalty": 1.8,
-        "drive_note": "Likely drivable campus service road; penalized below main roads."
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -923,11 +923,11 @@
         "is_campus": true,
         "length_m": 752,
         "walk_access": "yes",
-        "vehicle_access": "destination",
-        "navigation_class": "narrow_service_road",
-        "drive_confidence": 0.55,
-        "drive_penalty": 4,
-        "drive_note": "Single-lane service road; only used if no reliable alternative exists."
+        "vehicle_access": "yes",
+        "navigation_class": "campus_service_connector",
+        "drive_confidence": 0.64,
+        "drive_penalty": 3,
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -1111,9 +1111,9 @@
         "walk_access": "yes",
         "vehicle_access": "yes",
         "navigation_class": "campus_service_road",
-        "drive_confidence": 0.78,
+        "drive_confidence": 0.8,
         "drive_penalty": 1.8,
-        "drive_note": "Likely drivable campus service road; penalized below main roads."
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -1219,11 +1219,11 @@
         "is_campus": true,
         "length_m": 83,
         "walk_access": "yes",
-        "vehicle_access": "destination",
-        "navigation_class": "service_access",
-        "drive_confidence": 0.58,
-        "drive_penalty": 4,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "vehicle_access": "yes",
+        "navigation_class": "campus_service_connector",
+        "drive_confidence": 0.7,
+        "drive_penalty": 2.5,
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -1267,9 +1267,9 @@
         "walk_access": "yes",
         "vehicle_access": "yes",
         "navigation_class": "campus_service_road",
-        "drive_confidence": 0.78,
+        "drive_confidence": 0.8,
         "drive_penalty": 1.8,
-        "drive_note": "Likely drivable campus service road; penalized below main roads."
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -1397,9 +1397,9 @@
         "walk_access": "yes",
         "vehicle_access": "yes",
         "navigation_class": "campus_service_road",
-        "drive_confidence": 0.78,
+        "drive_confidence": 0.8,
         "drive_penalty": 1.8,
-        "drive_note": "Likely drivable campus service road; penalized below main roads."
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -1543,9 +1543,9 @@
         "walk_access": "yes",
         "vehicle_access": "yes",
         "navigation_class": "campus_service_road",
-        "drive_confidence": 0.78,
+        "drive_confidence": 0.8,
         "drive_penalty": 1.8,
-        "drive_note": "Likely drivable campus service road; penalized below main roads."
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -1601,9 +1601,9 @@
         "walk_access": "yes",
         "vehicle_access": "yes",
         "navigation_class": "campus_service_connector",
-        "drive_confidence": 0.68,
+        "drive_confidence": 0.7,
         "drive_penalty": 2.5,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -1707,9 +1707,9 @@
         "walk_access": "yes",
         "vehicle_access": "yes",
         "navigation_class": "campus_service_road",
-        "drive_confidence": 0.74,
+        "drive_confidence": 0.76,
         "drive_penalty": 2,
-        "drive_note": "Likely drivable campus service road; penalized below main roads."
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -1801,9 +1801,9 @@
         "walk_access": "yes",
         "vehicle_access": "yes",
         "navigation_class": "campus_service_connector",
-        "drive_confidence": 0.68,
+        "drive_confidence": 0.7,
         "drive_penalty": 2.5,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -1887,9 +1887,9 @@
         "walk_access": "yes",
         "vehicle_access": "yes",
         "navigation_class": "campus_service_connector",
-        "drive_confidence": 0.68,
+        "drive_confidence": 0.7,
         "drive_penalty": 2.5,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -1957,9 +1957,9 @@
         "walk_access": "yes",
         "vehicle_access": "yes",
         "navigation_class": "campus_service_connector",
-        "drive_confidence": 0.68,
+        "drive_confidence": 0.7,
         "drive_penalty": 2.5,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -2043,9 +2043,9 @@
         "walk_access": "yes",
         "vehicle_access": "yes",
         "navigation_class": "campus_service_connector",
-        "drive_confidence": 0.68,
+        "drive_confidence": 0.7,
         "drive_penalty": 2.5,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -2093,9 +2093,9 @@
         "walk_access": "yes",
         "vehicle_access": "yes",
         "navigation_class": "campus_service_connector",
-        "drive_confidence": 0.68,
+        "drive_confidence": 0.7,
         "drive_penalty": 2.5,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -2151,9 +2151,9 @@
         "walk_access": "yes",
         "vehicle_access": "yes",
         "navigation_class": "campus_service_connector",
-        "drive_confidence": 0.68,
+        "drive_confidence": 0.7,
         "drive_penalty": 2.5,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -2273,9 +2273,9 @@
         "walk_access": "yes",
         "vehicle_access": "yes",
         "navigation_class": "campus_service_connector",
-        "drive_confidence": 0.68,
+        "drive_confidence": 0.7,
         "drive_penalty": 2.5,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -2341,11 +2341,11 @@
         "is_campus": true,
         "length_m": 38,
         "walk_access": "yes",
-        "vehicle_access": "destination",
-        "navigation_class": "service_access",
-        "drive_confidence": 0.58,
-        "drive_penalty": 4,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "vehicle_access": "yes",
+        "navigation_class": "campus_service_connector",
+        "drive_confidence": 0.7,
+        "drive_penalty": 2.5,
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -2383,11 +2383,11 @@
         "is_campus": true,
         "length_m": 38,
         "walk_access": "yes",
-        "vehicle_access": "destination",
-        "navigation_class": "service_access",
-        "drive_confidence": 0.58,
-        "drive_penalty": 4,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "vehicle_access": "yes",
+        "navigation_class": "campus_service_connector",
+        "drive_confidence": 0.7,
+        "drive_penalty": 2.5,
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -2431,9 +2431,9 @@
         "walk_access": "yes",
         "vehicle_access": "yes",
         "navigation_class": "campus_service_connector",
-        "drive_confidence": 0.68,
+        "drive_confidence": 0.7,
         "drive_penalty": 2.5,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -2493,9 +2493,9 @@
         "walk_access": "yes",
         "vehicle_access": "yes",
         "navigation_class": "campus_service_connector",
-        "drive_confidence": 0.68,
+        "drive_confidence": 0.7,
         "drive_penalty": 2.5,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -2605,11 +2605,11 @@
         "is_campus": true,
         "length_m": 26,
         "walk_access": "yes",
-        "vehicle_access": "destination",
-        "navigation_class": "service_access",
-        "drive_confidence": 0.58,
-        "drive_penalty": 4,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "vehicle_access": "yes",
+        "navigation_class": "campus_service_connector",
+        "drive_confidence": 0.7,
+        "drive_penalty": 2.5,
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -2649,9 +2649,9 @@
         "walk_access": "yes",
         "vehicle_access": "yes",
         "navigation_class": "campus_service_connector",
-        "drive_confidence": 0.68,
+        "drive_confidence": 0.7,
         "drive_penalty": 2.5,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -2705,11 +2705,11 @@
         "is_campus": true,
         "length_m": 86,
         "walk_access": "yes",
-        "vehicle_access": "destination",
-        "navigation_class": "service_access",
-        "drive_confidence": 0.58,
-        "drive_penalty": 4,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "vehicle_access": "yes",
+        "navigation_class": "campus_service_connector",
+        "drive_confidence": 0.7,
+        "drive_penalty": 2.5,
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -2753,9 +2753,9 @@
         "walk_access": "yes",
         "vehicle_access": "yes",
         "navigation_class": "campus_service_connector",
-        "drive_confidence": 0.68,
+        "drive_confidence": 0.7,
         "drive_penalty": 2.5,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -2809,11 +2809,11 @@
         "is_campus": true,
         "length_m": 35,
         "walk_access": "yes",
-        "vehicle_access": "destination",
-        "navigation_class": "service_access",
-        "drive_confidence": 0.58,
-        "drive_penalty": 4,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "vehicle_access": "yes",
+        "navigation_class": "campus_service_connector",
+        "drive_confidence": 0.7,
+        "drive_penalty": 2.5,
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -2851,11 +2851,11 @@
         "is_campus": true,
         "length_m": 33,
         "walk_access": "yes",
-        "vehicle_access": "destination",
-        "navigation_class": "service_access",
-        "drive_confidence": 0.58,
-        "drive_penalty": 4,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "vehicle_access": "yes",
+        "navigation_class": "campus_service_connector",
+        "drive_confidence": 0.7,
+        "drive_penalty": 2.5,
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -3183,9 +3183,9 @@
         "walk_access": "yes",
         "vehicle_access": "yes",
         "navigation_class": "campus_service_connector",
-        "drive_confidence": 0.68,
+        "drive_confidence": 0.7,
         "drive_penalty": 2.5,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -3323,11 +3323,11 @@
         "is_campus": true,
         "length_m": 36,
         "walk_access": "yes",
-        "vehicle_access": "destination",
-        "navigation_class": "narrow_service_road",
-        "drive_confidence": 0.55,
-        "drive_penalty": 4,
-        "drive_note": "Single-lane service road; only used if no reliable alternative exists."
+        "vehicle_access": "yes",
+        "navigation_class": "campus_service_connector",
+        "drive_confidence": 0.64,
+        "drive_penalty": 3,
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -3513,11 +3513,11 @@
         "is_campus": true,
         "length_m": 35,
         "walk_access": "yes",
-        "vehicle_access": "destination",
-        "navigation_class": "service_access",
-        "drive_confidence": 0.58,
-        "drive_penalty": 4,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "vehicle_access": "yes",
+        "navigation_class": "campus_service_connector",
+        "drive_confidence": 0.7,
+        "drive_penalty": 2.5,
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -4549,9 +4549,9 @@
         "walk_access": "yes",
         "vehicle_access": "yes",
         "navigation_class": "campus_service_connector",
-        "drive_confidence": 0.68,
+        "drive_confidence": 0.7,
         "drive_penalty": 2.5,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -4589,11 +4589,11 @@
         "is_campus": true,
         "length_m": 82,
         "walk_access": "yes",
-        "vehicle_access": "destination",
-        "navigation_class": "service_access",
-        "drive_confidence": 0.58,
-        "drive_penalty": 4,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "vehicle_access": "yes",
+        "navigation_class": "campus_service_connector",
+        "drive_confidence": 0.7,
+        "drive_penalty": 2.5,
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -4759,11 +4759,11 @@
         "is_campus": true,
         "length_m": 70,
         "walk_access": "yes",
-        "vehicle_access": "destination",
-        "navigation_class": "service_access",
-        "drive_confidence": 0.58,
-        "drive_penalty": 4,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "vehicle_access": "yes",
+        "navigation_class": "campus_service_connector",
+        "drive_confidence": 0.7,
+        "drive_penalty": 2.5,
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -4857,9 +4857,9 @@
         "walk_access": "yes",
         "vehicle_access": "yes",
         "navigation_class": "campus_service_connector",
-        "drive_confidence": 0.68,
+        "drive_confidence": 0.7,
         "drive_penalty": 2.5,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -4937,11 +4937,11 @@
         "is_campus": true,
         "length_m": 25,
         "walk_access": "yes",
-        "vehicle_access": "destination",
-        "navigation_class": "service_access",
-        "drive_confidence": 0.58,
-        "drive_penalty": 4,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "vehicle_access": "yes",
+        "navigation_class": "campus_service_connector",
+        "drive_confidence": 0.7,
+        "drive_penalty": 2.5,
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -4997,9 +4997,9 @@
         "walk_access": "yes",
         "vehicle_access": "yes",
         "navigation_class": "campus_service_connector",
-        "drive_confidence": 0.68,
+        "drive_confidence": 0.7,
         "drive_penalty": 2.5,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -5079,9 +5079,9 @@
         "walk_access": "yes",
         "vehicle_access": "yes",
         "navigation_class": "campus_service_connector",
-        "drive_confidence": 0.68,
+        "drive_confidence": 0.7,
         "drive_penalty": 2.5,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -5437,9 +5437,9 @@
         "walk_access": "yes",
         "vehicle_access": "yes",
         "navigation_class": "campus_service_connector",
-        "drive_confidence": 0.68,
+        "drive_confidence": 0.7,
         "drive_penalty": 2.5,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -5535,9 +5535,9 @@
         "walk_access": "yes",
         "vehicle_access": "yes",
         "navigation_class": "campus_service_road",
-        "drive_confidence": 0.78,
+        "drive_confidence": 0.8,
         "drive_penalty": 1.8,
-        "drive_note": "Likely drivable campus service road; penalized below main roads."
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -5637,9 +5637,9 @@
         "walk_access": "yes",
         "vehicle_access": "yes",
         "navigation_class": "campus_service_road",
-        "drive_confidence": 0.78,
+        "drive_confidence": 0.8,
         "drive_penalty": 1.8,
-        "drive_note": "Likely drivable campus service road; penalized below main roads."
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -5679,9 +5679,9 @@
         "walk_access": "yes",
         "vehicle_access": "yes",
         "navigation_class": "campus_service_connector",
-        "drive_confidence": 0.68,
+        "drive_confidence": 0.7,
         "drive_penalty": 2.5,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -5793,9 +5793,9 @@
         "walk_access": "yes",
         "vehicle_access": "yes",
         "navigation_class": "campus_service_connector",
-        "drive_confidence": 0.68,
+        "drive_confidence": 0.7,
         "drive_penalty": 2.5,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -6157,9 +6157,9 @@
         "walk_access": "yes",
         "vehicle_access": "yes",
         "navigation_class": "campus_service_connector",
-        "drive_confidence": 0.68,
+        "drive_confidence": 0.7,
         "drive_penalty": 2.5,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -6399,9 +6399,9 @@
         "walk_access": "yes",
         "vehicle_access": "yes",
         "navigation_class": "campus_service_connector",
-        "drive_confidence": 0.68,
+        "drive_confidence": 0.7,
         "drive_penalty": 2.5,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -6491,11 +6491,11 @@
         "is_campus": true,
         "length_m": 60,
         "walk_access": "yes",
-        "vehicle_access": "destination",
-        "navigation_class": "service_access",
-        "drive_confidence": 0.58,
-        "drive_penalty": 4,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "vehicle_access": "yes",
+        "navigation_class": "campus_service_connector",
+        "drive_confidence": 0.7,
+        "drive_penalty": 2.5,
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -6543,9 +6543,9 @@
         "walk_access": "yes",
         "vehicle_access": "yes",
         "navigation_class": "campus_service_connector",
-        "drive_confidence": 0.68,
+        "drive_confidence": 0.7,
         "drive_penalty": 2.5,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -6589,9 +6589,9 @@
         "walk_access": "yes",
         "vehicle_access": "yes",
         "navigation_class": "campus_service_road",
-        "drive_confidence": 0.74,
+        "drive_confidence": 0.76,
         "drive_penalty": 2,
-        "drive_note": "Likely drivable campus service road; penalized below main roads."
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -6629,11 +6629,11 @@
         "is_campus": true,
         "length_m": 61,
         "walk_access": "yes",
-        "vehicle_access": "destination",
-        "navigation_class": "service_access",
-        "drive_confidence": 0.58,
-        "drive_penalty": 4,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "vehicle_access": "yes",
+        "navigation_class": "campus_service_connector",
+        "drive_confidence": 0.7,
+        "drive_penalty": 2.5,
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -6673,9 +6673,9 @@
         "walk_access": "yes",
         "vehicle_access": "yes",
         "navigation_class": "campus_service_connector",
-        "drive_confidence": 0.68,
+        "drive_confidence": 0.7,
         "drive_penalty": 2.5,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -6771,9 +6771,9 @@
         "walk_access": "yes",
         "vehicle_access": "yes",
         "navigation_class": "campus_service_connector",
-        "drive_confidence": 0.68,
+        "drive_confidence": 0.7,
         "drive_penalty": 2.5,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -6873,9 +6873,9 @@
         "walk_access": "yes",
         "vehicle_access": "yes",
         "navigation_class": "campus_service_connector",
-        "drive_confidence": 0.68,
+        "drive_confidence": 0.7,
         "drive_penalty": 2.5,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -6947,9 +6947,9 @@
         "walk_access": "yes",
         "vehicle_access": "yes",
         "navigation_class": "campus_service_connector",
-        "drive_confidence": 0.68,
+        "drive_confidence": 0.7,
         "drive_penalty": 2.5,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -7041,9 +7041,9 @@
         "walk_access": "yes",
         "vehicle_access": "yes",
         "navigation_class": "campus_service_connector",
-        "drive_confidence": 0.68,
+        "drive_confidence": 0.7,
         "drive_penalty": 2.5,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -7163,9 +7163,9 @@
         "walk_access": "yes",
         "vehicle_access": "yes",
         "navigation_class": "campus_service_connector",
-        "drive_confidence": 0.68,
+        "drive_confidence": 0.7,
         "drive_penalty": 2.5,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -7285,9 +7285,9 @@
         "walk_access": "yes",
         "vehicle_access": "yes",
         "navigation_class": "campus_service_connector",
-        "drive_confidence": 0.68,
+        "drive_confidence": 0.7,
         "drive_penalty": 2.5,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -7359,9 +7359,9 @@
         "walk_access": "yes",
         "vehicle_access": "yes",
         "navigation_class": "campus_service_connector",
-        "drive_confidence": 0.68,
+        "drive_confidence": 0.7,
         "drive_penalty": 2.5,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -7465,9 +7465,9 @@
         "walk_access": "yes",
         "vehicle_access": "yes",
         "navigation_class": "campus_service_connector",
-        "drive_confidence": 0.68,
+        "drive_confidence": 0.7,
         "drive_penalty": 2.5,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -7551,9 +7551,9 @@
         "walk_access": "yes",
         "vehicle_access": "yes",
         "navigation_class": "campus_service_connector",
-        "drive_confidence": 0.68,
+        "drive_confidence": 0.7,
         "drive_penalty": 2.5,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -7645,9 +7645,9 @@
         "walk_access": "yes",
         "vehicle_access": "yes",
         "navigation_class": "campus_service_connector",
-        "drive_confidence": 0.68,
+        "drive_confidence": 0.7,
         "drive_penalty": 2.5,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -7751,9 +7751,9 @@
         "walk_access": "yes",
         "vehicle_access": "yes",
         "navigation_class": "campus_service_connector",
-        "drive_confidence": 0.68,
+        "drive_confidence": 0.7,
         "drive_penalty": 2.5,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -7917,9 +7917,9 @@
         "walk_access": "yes",
         "vehicle_access": "yes",
         "navigation_class": "campus_service_road",
-        "drive_confidence": 0.78,
+        "drive_confidence": 0.8,
         "drive_penalty": 1.8,
-        "drive_note": "Likely drivable campus service road; penalized below main roads."
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -7959,9 +7959,9 @@
         "walk_access": "yes",
         "vehicle_access": "yes",
         "navigation_class": "campus_service_road",
-        "drive_confidence": 0.78,
+        "drive_confidence": 0.8,
         "drive_penalty": 1.8,
-        "drive_note": "Likely drivable campus service road; penalized below main roads."
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -8069,9 +8069,9 @@
         "walk_access": "yes",
         "vehicle_access": "yes",
         "navigation_class": "campus_service_connector",
-        "drive_confidence": 0.68,
+        "drive_confidence": 0.7,
         "drive_penalty": 2.5,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -8163,9 +8163,9 @@
         "walk_access": "yes",
         "vehicle_access": "yes",
         "navigation_class": "campus_service_connector",
-        "drive_confidence": 0.68,
+        "drive_confidence": 0.7,
         "drive_penalty": 2.5,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -8291,9 +8291,9 @@
         "walk_access": "yes",
         "vehicle_access": "yes",
         "navigation_class": "campus_service_connector",
-        "drive_confidence": 0.68,
+        "drive_confidence": 0.7,
         "drive_penalty": 2.5,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -9201,11 +9201,11 @@
         "is_campus": true,
         "length_m": 54,
         "walk_access": "yes",
-        "vehicle_access": "destination",
-        "navigation_class": "service_access",
-        "drive_confidence": 0.58,
-        "drive_penalty": 4,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "vehicle_access": "yes",
+        "navigation_class": "campus_service_connector",
+        "drive_confidence": 0.7,
+        "drive_penalty": 2.5,
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -9331,9 +9331,9 @@
         "walk_access": "yes",
         "vehicle_access": "yes",
         "navigation_class": "campus_service_connector",
-        "drive_confidence": 0.68,
+        "drive_confidence": 0.7,
         "drive_penalty": 2.5,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -9851,9 +9851,9 @@
         "walk_access": "yes",
         "vehicle_access": "yes",
         "navigation_class": "campus_service_connector",
-        "drive_confidence": 0.68,
+        "drive_confidence": 0.7,
         "drive_penalty": 2.5,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -9939,11 +9939,11 @@
         "is_campus": true,
         "length_m": 85,
         "walk_access": "yes",
-        "vehicle_access": "destination",
-        "navigation_class": "service_access",
-        "drive_confidence": 0.58,
-        "drive_penalty": 4,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "vehicle_access": "yes",
+        "navigation_class": "campus_service_connector",
+        "drive_confidence": 0.7,
+        "drive_penalty": 2.5,
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -10115,11 +10115,11 @@
         "is_campus": true,
         "length_m": 59,
         "walk_access": "yes",
-        "vehicle_access": "destination",
-        "navigation_class": "service_access",
-        "drive_confidence": 0.58,
-        "drive_penalty": 4,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "vehicle_access": "yes",
+        "navigation_class": "campus_service_connector",
+        "drive_confidence": 0.7,
+        "drive_penalty": 2.5,
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -10157,11 +10157,11 @@
         "is_campus": true,
         "length_m": 55,
         "walk_access": "yes",
-        "vehicle_access": "destination",
-        "navigation_class": "service_access",
-        "drive_confidence": 0.58,
-        "drive_penalty": 4,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "vehicle_access": "yes",
+        "navigation_class": "campus_service_connector",
+        "drive_confidence": 0.7,
+        "drive_penalty": 2.5,
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -10527,9 +10527,9 @@
         "walk_access": "yes",
         "vehicle_access": "yes",
         "navigation_class": "campus_service_connector",
-        "drive_confidence": 0.68,
+        "drive_confidence": 0.7,
         "drive_penalty": 2.5,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -10569,9 +10569,9 @@
         "walk_access": "yes",
         "vehicle_access": "yes",
         "navigation_class": "campus_service_connector",
-        "drive_confidence": 0.68,
+        "drive_confidence": 0.7,
         "drive_penalty": 2.5,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -10663,9 +10663,9 @@
         "walk_access": "yes",
         "vehicle_access": "yes",
         "navigation_class": "campus_service_connector",
-        "drive_confidence": 0.68,
+        "drive_confidence": 0.7,
         "drive_penalty": 2.5,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -10805,9 +10805,9 @@
         "walk_access": "yes",
         "vehicle_access": "yes",
         "navigation_class": "campus_service_connector",
-        "drive_confidence": 0.68,
+        "drive_confidence": 0.7,
         "drive_penalty": 2.5,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -10871,9 +10871,9 @@
         "walk_access": "yes",
         "vehicle_access": "yes",
         "navigation_class": "campus_service_connector",
-        "drive_confidence": 0.68,
+        "drive_confidence": 0.7,
         "drive_penalty": 2.5,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -10913,9 +10913,9 @@
         "walk_access": "yes",
         "vehicle_access": "yes",
         "navigation_class": "campus_service_connector",
-        "drive_confidence": 0.68,
+        "drive_confidence": 0.7,
         "drive_penalty": 2.5,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -10963,9 +10963,9 @@
         "walk_access": "yes",
         "vehicle_access": "yes",
         "navigation_class": "campus_service_connector",
-        "drive_confidence": 0.68,
+        "drive_confidence": 0.7,
         "drive_penalty": 2.5,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -11015,11 +11015,11 @@
         "is_campus": true,
         "length_m": 86,
         "walk_access": "yes",
-        "vehicle_access": "destination",
-        "navigation_class": "service_access",
-        "drive_confidence": 0.58,
-        "drive_penalty": 4,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "vehicle_access": "yes",
+        "navigation_class": "campus_service_connector",
+        "drive_confidence": 0.7,
+        "drive_penalty": 2.5,
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -11063,9 +11063,9 @@
         "walk_access": "yes",
         "vehicle_access": "yes",
         "navigation_class": "campus_service_connector",
-        "drive_confidence": 0.68,
+        "drive_confidence": 0.7,
         "drive_penalty": 2.5,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -11139,11 +11139,11 @@
         "is_campus": true,
         "length_m": 89,
         "walk_access": "yes",
-        "vehicle_access": "destination",
-        "navigation_class": "service_access",
-        "drive_confidence": 0.58,
-        "drive_penalty": 4,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "vehicle_access": "yes",
+        "navigation_class": "campus_service_connector",
+        "drive_confidence": 0.7,
+        "drive_penalty": 2.5,
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -11197,11 +11197,11 @@
         "is_campus": true,
         "length_m": 57,
         "walk_access": "yes",
-        "vehicle_access": "destination",
-        "navigation_class": "service_access",
-        "drive_confidence": 0.58,
-        "drive_penalty": 4,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "vehicle_access": "yes",
+        "navigation_class": "campus_service_connector",
+        "drive_confidence": 0.7,
+        "drive_penalty": 2.5,
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -11241,9 +11241,9 @@
         "walk_access": "yes",
         "vehicle_access": "yes",
         "navigation_class": "campus_service_connector",
-        "drive_confidence": 0.68,
+        "drive_confidence": 0.7,
         "drive_penalty": 2.5,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -11359,11 +11359,11 @@
         "is_campus": true,
         "length_m": 62,
         "walk_access": "yes",
-        "vehicle_access": "destination",
-        "navigation_class": "service_access",
-        "drive_confidence": 0.58,
-        "drive_penalty": 4,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "vehicle_access": "yes",
+        "navigation_class": "campus_service_connector",
+        "drive_confidence": 0.7,
+        "drive_penalty": 2.5,
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -11413,11 +11413,11 @@
         "is_campus": true,
         "length_m": 77,
         "walk_access": "yes",
-        "vehicle_access": "destination",
-        "navigation_class": "service_access",
-        "drive_confidence": 0.58,
-        "drive_penalty": 4,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "vehicle_access": "yes",
+        "navigation_class": "campus_service_connector",
+        "drive_confidence": 0.7,
+        "drive_penalty": 2.5,
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -11891,11 +11891,11 @@
         "is_campus": true,
         "length_m": 74,
         "walk_access": "yes",
-        "vehicle_access": "destination",
-        "navigation_class": "service_access",
-        "drive_confidence": 0.58,
-        "drive_penalty": 4,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "vehicle_access": "yes",
+        "navigation_class": "campus_service_connector",
+        "drive_confidence": 0.7,
+        "drive_penalty": 2.5,
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -11937,11 +11937,11 @@
         "is_campus": true,
         "length_m": 73,
         "walk_access": "yes",
-        "vehicle_access": "destination",
-        "navigation_class": "service_access",
-        "drive_confidence": 0.58,
-        "drive_penalty": 4,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "vehicle_access": "yes",
+        "navigation_class": "campus_service_connector",
+        "drive_confidence": 0.7,
+        "drive_penalty": 2.5,
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -11989,9 +11989,9 @@
         "walk_access": "yes",
         "vehicle_access": "yes",
         "navigation_class": "campus_service_connector",
-        "drive_confidence": 0.68,
+        "drive_confidence": 0.7,
         "drive_penalty": 2.5,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -12035,9 +12035,9 @@
         "walk_access": "yes",
         "vehicle_access": "yes",
         "navigation_class": "campus_service_connector",
-        "drive_confidence": 0.68,
+        "drive_confidence": 0.7,
         "drive_penalty": 2.5,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -12079,11 +12079,11 @@
         "is_campus": true,
         "length_m": 74,
         "walk_access": "yes",
-        "vehicle_access": "destination",
-        "navigation_class": "service_access",
-        "drive_confidence": 0.58,
-        "drive_penalty": 4,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "vehicle_access": "yes",
+        "navigation_class": "campus_service_connector",
+        "drive_confidence": 0.7,
+        "drive_penalty": 2.5,
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -12183,11 +12183,11 @@
         "is_campus": true,
         "length_m": 90,
         "walk_access": "yes",
-        "vehicle_access": "destination",
-        "navigation_class": "service_access",
-        "drive_confidence": 0.58,
-        "drive_penalty": 4,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "vehicle_access": "yes",
+        "navigation_class": "campus_service_connector",
+        "drive_confidence": 0.7,
+        "drive_penalty": 2.5,
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -12233,11 +12233,11 @@
         "is_campus": true,
         "length_m": 10,
         "walk_access": "yes",
-        "vehicle_access": "destination",
-        "navigation_class": "service_access",
-        "drive_confidence": 0.58,
-        "drive_penalty": 4,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "vehicle_access": "yes",
+        "navigation_class": "campus_service_connector",
+        "drive_confidence": 0.7,
+        "drive_penalty": 2.5,
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -12277,9 +12277,9 @@
         "walk_access": "yes",
         "vehicle_access": "yes",
         "navigation_class": "campus_service_connector",
-        "drive_confidence": 0.68,
+        "drive_confidence": 0.7,
         "drive_penalty": 2.5,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -12335,9 +12335,9 @@
         "walk_access": "yes",
         "vehicle_access": "yes",
         "navigation_class": "campus_service_connector",
-        "drive_confidence": 0.68,
+        "drive_confidence": 0.7,
         "drive_penalty": 2.5,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -12389,9 +12389,9 @@
         "walk_access": "yes",
         "vehicle_access": "yes",
         "navigation_class": "campus_service_connector",
-        "drive_confidence": 0.68,
+        "drive_confidence": 0.7,
         "drive_penalty": 2.5,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -12435,9 +12435,9 @@
         "walk_access": "yes",
         "vehicle_access": "yes",
         "navigation_class": "campus_service_connector",
-        "drive_confidence": 0.68,
+        "drive_confidence": 0.7,
         "drive_penalty": 2.5,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -12489,9 +12489,9 @@
         "walk_access": "yes",
         "vehicle_access": "yes",
         "navigation_class": "campus_service_connector",
-        "drive_confidence": 0.68,
+        "drive_confidence": 0.7,
         "drive_penalty": 2.5,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -12565,11 +12565,11 @@
         "is_campus": true,
         "length_m": 50,
         "walk_access": "yes",
-        "vehicle_access": "destination",
-        "navigation_class": "service_access",
-        "drive_confidence": 0.58,
-        "drive_penalty": 4,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "vehicle_access": "yes",
+        "navigation_class": "campus_service_connector",
+        "drive_confidence": 0.7,
+        "drive_penalty": 2.5,
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -12655,9 +12655,9 @@
         "walk_access": "yes",
         "vehicle_access": "yes",
         "navigation_class": "campus_service_connector",
-        "drive_confidence": 0.68,
+        "drive_confidence": 0.7,
         "drive_penalty": 2.5,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -12711,11 +12711,11 @@
         "is_campus": true,
         "length_m": 54,
         "walk_access": "yes",
-        "vehicle_access": "destination",
-        "navigation_class": "service_access",
-        "drive_confidence": 0.58,
-        "drive_penalty": 4,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "vehicle_access": "yes",
+        "navigation_class": "campus_service_connector",
+        "drive_confidence": 0.7,
+        "drive_penalty": 2.5,
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -12757,11 +12757,11 @@
         "is_campus": true,
         "length_m": 68,
         "walk_access": "yes",
-        "vehicle_access": "destination",
-        "navigation_class": "service_access",
-        "drive_confidence": 0.58,
-        "drive_penalty": 4,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "vehicle_access": "yes",
+        "navigation_class": "campus_service_connector",
+        "drive_confidence": 0.7,
+        "drive_penalty": 2.5,
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -12807,11 +12807,11 @@
         "is_campus": true,
         "length_m": 47,
         "walk_access": "yes",
-        "vehicle_access": "destination",
-        "navigation_class": "service_access",
-        "drive_confidence": 0.58,
-        "drive_penalty": 4,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "vehicle_access": "yes",
+        "navigation_class": "campus_service_connector",
+        "drive_confidence": 0.7,
+        "drive_penalty": 2.5,
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -12855,9 +12855,9 @@
         "walk_access": "yes",
         "vehicle_access": "yes",
         "navigation_class": "campus_service_connector",
-        "drive_confidence": 0.68,
+        "drive_confidence": 0.7,
         "drive_penalty": 2.5,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -12921,9 +12921,9 @@
         "walk_access": "yes",
         "vehicle_access": "yes",
         "navigation_class": "campus_service_connector",
-        "drive_confidence": 0.68,
+        "drive_confidence": 0.7,
         "drive_penalty": 2.5,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -12987,9 +12987,9 @@
         "walk_access": "yes",
         "vehicle_access": "yes",
         "navigation_class": "campus_service_connector",
-        "drive_confidence": 0.68,
+        "drive_confidence": 0.7,
         "drive_penalty": 2.5,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -13033,9 +13033,9 @@
         "walk_access": "yes",
         "vehicle_access": "yes",
         "navigation_class": "campus_service_connector",
-        "drive_confidence": 0.68,
+        "drive_confidence": 0.7,
         "drive_penalty": 2.5,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -13087,9 +13087,9 @@
         "walk_access": "yes",
         "vehicle_access": "yes",
         "navigation_class": "campus_service_connector",
-        "drive_confidence": 0.68,
+        "drive_confidence": 0.7,
         "drive_penalty": 2.5,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -13271,9 +13271,9 @@
         "walk_access": "yes",
         "vehicle_access": "yes",
         "navigation_class": "campus_service_connector",
-        "drive_confidence": 0.68,
+        "drive_confidence": 0.7,
         "drive_penalty": 2.5,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -13337,9 +13337,9 @@
         "walk_access": "yes",
         "vehicle_access": "yes",
         "navigation_class": "campus_service_connector",
-        "drive_confidence": 0.68,
+        "drive_confidence": 0.7,
         "drive_penalty": 2.5,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -13491,11 +13491,11 @@
         "is_campus": true,
         "length_m": 58,
         "walk_access": "yes",
-        "vehicle_access": "destination",
-        "navigation_class": "service_access",
-        "drive_confidence": 0.58,
-        "drive_penalty": 4,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "vehicle_access": "yes",
+        "navigation_class": "campus_service_connector",
+        "drive_confidence": 0.7,
+        "drive_penalty": 2.5,
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -14227,11 +14227,11 @@
         "is_campus": true,
         "length_m": 13,
         "walk_access": "yes",
-        "vehicle_access": "destination",
-        "navigation_class": "service_access",
-        "drive_confidence": 0.58,
-        "drive_penalty": 4,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "vehicle_access": "yes",
+        "navigation_class": "campus_service_connector",
+        "drive_confidence": 0.7,
+        "drive_penalty": 2.5,
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -14523,11 +14523,11 @@
         "is_campus": true,
         "length_m": 63,
         "walk_access": "yes",
-        "vehicle_access": "destination",
-        "navigation_class": "service_access",
-        "drive_confidence": 0.58,
-        "drive_penalty": 4,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "vehicle_access": "yes",
+        "navigation_class": "campus_service_connector",
+        "drive_confidence": 0.7,
+        "drive_penalty": 2.5,
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -14581,11 +14581,11 @@
         "is_campus": true,
         "length_m": 26,
         "walk_access": "yes",
-        "vehicle_access": "destination",
-        "navigation_class": "service_access",
-        "drive_confidence": 0.58,
-        "drive_penalty": 4,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "vehicle_access": "yes",
+        "navigation_class": "campus_service_connector",
+        "drive_confidence": 0.7,
+        "drive_penalty": 2.5,
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -14633,9 +14633,9 @@
         "walk_access": "yes",
         "vehicle_access": "yes",
         "navigation_class": "campus_service_connector",
-        "drive_confidence": 0.68,
+        "drive_confidence": 0.7,
         "drive_penalty": 2.5,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -14699,9 +14699,9 @@
         "walk_access": "yes",
         "vehicle_access": "yes",
         "navigation_class": "campus_service_connector",
-        "drive_confidence": 0.68,
+        "drive_confidence": 0.7,
         "drive_penalty": 2.5,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -14761,9 +14761,9 @@
         "walk_access": "yes",
         "vehicle_access": "yes",
         "navigation_class": "campus_service_connector",
-        "drive_confidence": 0.68,
+        "drive_confidence": 0.7,
         "drive_penalty": 2.5,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -14819,9 +14819,9 @@
         "walk_access": "yes",
         "vehicle_access": "yes",
         "navigation_class": "campus_service_connector",
-        "drive_confidence": 0.68,
+        "drive_confidence": 0.7,
         "drive_penalty": 2.5,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -14871,11 +14871,11 @@
         "is_campus": true,
         "length_m": 72,
         "walk_access": "yes",
-        "vehicle_access": "destination",
-        "navigation_class": "service_access",
-        "drive_confidence": 0.58,
-        "drive_penalty": 4,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "vehicle_access": "yes",
+        "navigation_class": "campus_service_connector",
+        "drive_confidence": 0.7,
+        "drive_penalty": 2.5,
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -15045,9 +15045,9 @@
         "walk_access": "yes",
         "vehicle_access": "yes",
         "navigation_class": "campus_service_connector",
-        "drive_confidence": 0.68,
+        "drive_confidence": 0.7,
         "drive_penalty": 2.5,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -15107,9 +15107,9 @@
         "walk_access": "yes",
         "vehicle_access": "yes",
         "navigation_class": "campus_service_connector",
-        "drive_confidence": 0.68,
+        "drive_confidence": 0.7,
         "drive_penalty": 2.5,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -15175,11 +15175,11 @@
         "is_campus": true,
         "length_m": 7,
         "walk_access": "yes",
-        "vehicle_access": "destination",
-        "navigation_class": "service_access",
-        "drive_confidence": 0.58,
-        "drive_penalty": 4,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "vehicle_access": "yes",
+        "navigation_class": "campus_service_connector",
+        "drive_confidence": 0.7,
+        "drive_penalty": 2.5,
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -15217,11 +15217,11 @@
         "is_campus": true,
         "length_m": 7,
         "walk_access": "yes",
-        "vehicle_access": "destination",
-        "navigation_class": "service_access",
-        "drive_confidence": 0.58,
-        "drive_penalty": 4,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "vehicle_access": "yes",
+        "navigation_class": "campus_service_connector",
+        "drive_confidence": 0.7,
+        "drive_penalty": 2.5,
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -15259,11 +15259,11 @@
         "is_campus": true,
         "length_m": 12,
         "walk_access": "yes",
-        "vehicle_access": "destination",
-        "navigation_class": "service_access",
-        "drive_confidence": 0.58,
-        "drive_penalty": 4,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "vehicle_access": "yes",
+        "navigation_class": "campus_service_connector",
+        "drive_confidence": 0.7,
+        "drive_penalty": 2.5,
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -15305,11 +15305,11 @@
         "is_campus": true,
         "length_m": 5,
         "walk_access": "yes",
-        "vehicle_access": "destination",
-        "navigation_class": "service_access",
-        "drive_confidence": 0.58,
-        "drive_penalty": 4,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "vehicle_access": "yes",
+        "navigation_class": "campus_service_connector",
+        "drive_confidence": 0.7,
+        "drive_penalty": 2.5,
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -15401,11 +15401,11 @@
         "is_campus": true,
         "length_m": 2,
         "walk_access": "yes",
-        "vehicle_access": "destination",
-        "navigation_class": "service_access",
-        "drive_confidence": 0.58,
-        "drive_penalty": 4,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "vehicle_access": "yes",
+        "navigation_class": "campus_service_connector",
+        "drive_confidence": 0.7,
+        "drive_penalty": 2.5,
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -15695,11 +15695,11 @@
         "is_campus": true,
         "length_m": 13,
         "walk_access": "yes",
-        "vehicle_access": "destination",
-        "navigation_class": "service_access",
-        "drive_confidence": 0.58,
-        "drive_penalty": 4,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "vehicle_access": "yes",
+        "navigation_class": "campus_service_connector",
+        "drive_confidence": 0.7,
+        "drive_penalty": 2.5,
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -15737,11 +15737,11 @@
         "is_campus": true,
         "length_m": 17,
         "walk_access": "yes",
-        "vehicle_access": "destination",
-        "navigation_class": "service_access",
-        "drive_confidence": 0.58,
-        "drive_penalty": 4,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "vehicle_access": "yes",
+        "navigation_class": "campus_service_connector",
+        "drive_confidence": 0.7,
+        "drive_penalty": 2.5,
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -15779,11 +15779,11 @@
         "is_campus": true,
         "length_m": 15,
         "walk_access": "yes",
-        "vehicle_access": "destination",
-        "navigation_class": "service_access",
-        "drive_confidence": 0.58,
-        "drive_penalty": 4,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "vehicle_access": "yes",
+        "navigation_class": "campus_service_connector",
+        "drive_confidence": 0.7,
+        "drive_penalty": 2.5,
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -15821,11 +15821,11 @@
         "is_campus": true,
         "length_m": 12,
         "walk_access": "yes",
-        "vehicle_access": "destination",
-        "navigation_class": "service_access",
-        "drive_confidence": 0.58,
-        "drive_penalty": 4,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "vehicle_access": "yes",
+        "navigation_class": "campus_service_connector",
+        "drive_confidence": 0.7,
+        "drive_penalty": 2.5,
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -15863,11 +15863,11 @@
         "is_campus": true,
         "length_m": 4,
         "walk_access": "yes",
-        "vehicle_access": "destination",
-        "navigation_class": "service_access",
-        "drive_confidence": 0.58,
-        "drive_penalty": 4,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "vehicle_access": "yes",
+        "navigation_class": "campus_service_connector",
+        "drive_confidence": 0.7,
+        "drive_penalty": 2.5,
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -15905,11 +15905,11 @@
         "is_campus": true,
         "length_m": 4,
         "walk_access": "yes",
-        "vehicle_access": "destination",
-        "navigation_class": "service_access",
-        "drive_confidence": 0.58,
-        "drive_penalty": 4,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "vehicle_access": "yes",
+        "navigation_class": "campus_service_connector",
+        "drive_confidence": 0.7,
+        "drive_penalty": 2.5,
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -15947,11 +15947,11 @@
         "is_campus": true,
         "length_m": 15,
         "walk_access": "yes",
-        "vehicle_access": "destination",
-        "navigation_class": "service_access",
-        "drive_confidence": 0.58,
-        "drive_penalty": 4,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "vehicle_access": "yes",
+        "navigation_class": "campus_service_connector",
+        "drive_confidence": 0.7,
+        "drive_penalty": 2.5,
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -15989,11 +15989,11 @@
         "is_campus": true,
         "length_m": 10,
         "walk_access": "yes",
-        "vehicle_access": "destination",
-        "navigation_class": "service_access",
-        "drive_confidence": 0.58,
-        "drive_penalty": 4,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "vehicle_access": "yes",
+        "navigation_class": "campus_service_connector",
+        "drive_confidence": 0.7,
+        "drive_penalty": 2.5,
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -16033,9 +16033,9 @@
         "walk_access": "yes",
         "vehicle_access": "yes",
         "navigation_class": "campus_service_connector",
-        "drive_confidence": 0.68,
+        "drive_confidence": 0.7,
         "drive_penalty": 2.5,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -16137,11 +16137,11 @@
         "is_campus": true,
         "length_m": 14,
         "walk_access": "yes",
-        "vehicle_access": "destination",
-        "navigation_class": "service_access",
-        "drive_confidence": 0.58,
-        "drive_penalty": 4,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "vehicle_access": "yes",
+        "navigation_class": "campus_service_connector",
+        "drive_confidence": 0.7,
+        "drive_penalty": 2.5,
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -16181,9 +16181,9 @@
         "walk_access": "yes",
         "vehicle_access": "yes",
         "navigation_class": "campus_service_connector",
-        "drive_confidence": 0.68,
+        "drive_confidence": 0.7,
         "drive_penalty": 2.5,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -16245,11 +16245,11 @@
         "is_campus": true,
         "length_m": 5,
         "walk_access": "yes",
-        "vehicle_access": "destination",
-        "navigation_class": "service_access",
-        "drive_confidence": 0.58,
-        "drive_penalty": 4,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "vehicle_access": "yes",
+        "navigation_class": "campus_service_connector",
+        "drive_confidence": 0.7,
+        "drive_penalty": 2.5,
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -16287,11 +16287,11 @@
         "is_campus": true,
         "length_m": 8,
         "walk_access": "yes",
-        "vehicle_access": "destination",
-        "navigation_class": "service_access",
-        "drive_confidence": 0.58,
-        "drive_penalty": 4,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "vehicle_access": "yes",
+        "navigation_class": "campus_service_connector",
+        "drive_confidence": 0.7,
+        "drive_penalty": 2.5,
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -16413,11 +16413,11 @@
         "is_campus": true,
         "length_m": 61,
         "walk_access": "yes",
-        "vehicle_access": "destination",
-        "navigation_class": "service_access",
-        "drive_confidence": 0.58,
-        "drive_penalty": 4,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "vehicle_access": "yes",
+        "navigation_class": "campus_service_connector",
+        "drive_confidence": 0.7,
+        "drive_penalty": 2.5,
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -16527,9 +16527,9 @@
         "walk_access": "yes",
         "vehicle_access": "yes",
         "navigation_class": "campus_service_connector",
-        "drive_confidence": 0.68,
+        "drive_confidence": 0.7,
         "drive_penalty": 2.5,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -16585,9 +16585,9 @@
         "walk_access": "yes",
         "vehicle_access": "yes",
         "navigation_class": "campus_service_connector",
-        "drive_confidence": 0.68,
+        "drive_confidence": 0.7,
         "drive_penalty": 2.5,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -16635,9 +16635,9 @@
         "walk_access": "yes",
         "vehicle_access": "yes",
         "navigation_class": "campus_service_connector",
-        "drive_confidence": 0.68,
+        "drive_confidence": 0.7,
         "drive_penalty": 2.5,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -16779,9 +16779,9 @@
         "walk_access": "yes",
         "vehicle_access": "yes",
         "navigation_class": "campus_service_road",
-        "drive_confidence": 0.74,
+        "drive_confidence": 0.76,
         "drive_penalty": 2,
-        "drive_note": "Likely drivable campus service road; penalized below main roads."
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -16821,9 +16821,9 @@
         "walk_access": "yes",
         "vehicle_access": "yes",
         "navigation_class": "campus_service_connector",
-        "drive_confidence": 0.68,
+        "drive_confidence": 0.7,
         "drive_penalty": 2.5,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -17979,11 +17979,11 @@
         "is_campus": true,
         "length_m": 88,
         "walk_access": "yes",
-        "vehicle_access": "destination",
-        "navigation_class": "service_access",
-        "drive_confidence": 0.58,
-        "drive_penalty": 4,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "vehicle_access": "yes",
+        "navigation_class": "campus_service_connector",
+        "drive_confidence": 0.7,
+        "drive_penalty": 2.5,
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -18081,9 +18081,9 @@
         "walk_access": "yes",
         "vehicle_access": "yes",
         "navigation_class": "campus_service_connector",
-        "drive_confidence": 0.68,
+        "drive_confidence": 0.7,
         "drive_penalty": 2.5,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -18145,11 +18145,11 @@
         "is_campus": true,
         "length_m": 46,
         "walk_access": "yes",
-        "vehicle_access": "destination",
-        "navigation_class": "service_access",
-        "drive_confidence": 0.58,
-        "drive_penalty": 4,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "vehicle_access": "yes",
+        "navigation_class": "campus_service_connector",
+        "drive_confidence": 0.7,
+        "drive_penalty": 2.5,
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -18193,9 +18193,9 @@
         "walk_access": "yes",
         "vehicle_access": "yes",
         "navigation_class": "campus_service_connector",
-        "drive_confidence": 0.68,
+        "drive_confidence": 0.7,
         "drive_penalty": 2.5,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -18289,9 +18289,9 @@
         "walk_access": "yes",
         "vehicle_access": "yes",
         "navigation_class": "campus_service_connector",
-        "drive_confidence": 0.68,
+        "drive_confidence": 0.7,
         "drive_penalty": 2.5,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -18563,9 +18563,9 @@
         "walk_access": "yes",
         "vehicle_access": "yes",
         "navigation_class": "campus_service_connector",
-        "drive_confidence": 0.68,
+        "drive_confidence": 0.7,
         "drive_penalty": 2.5,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -19353,9 +19353,9 @@
         "walk_access": "yes",
         "vehicle_access": "yes",
         "navigation_class": "campus_service_connector",
-        "drive_confidence": 0.68,
+        "drive_confidence": 0.7,
         "drive_penalty": 2.5,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -19727,11 +19727,11 @@
         "is_campus": true,
         "length_m": 58,
         "walk_access": "yes",
-        "vehicle_access": "destination",
-        "navigation_class": "service_access",
-        "drive_confidence": 0.58,
-        "drive_penalty": 4,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "vehicle_access": "yes",
+        "navigation_class": "campus_service_connector",
+        "drive_confidence": 0.7,
+        "drive_penalty": 2.5,
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -19821,9 +19821,9 @@
         "walk_access": "yes",
         "vehicle_access": "yes",
         "navigation_class": "campus_service_connector",
-        "drive_confidence": 0.68,
+        "drive_confidence": 0.7,
         "drive_penalty": 2.5,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -20455,11 +20455,11 @@
         "is_campus": true,
         "length_m": 34,
         "walk_access": "yes",
-        "vehicle_access": "destination",
-        "navigation_class": "service_access",
-        "drive_confidence": 0.58,
-        "drive_penalty": 4,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "vehicle_access": "yes",
+        "navigation_class": "campus_service_connector",
+        "drive_confidence": 0.7,
+        "drive_penalty": 2.5,
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -20501,11 +20501,11 @@
         "is_campus": true,
         "length_m": 60,
         "walk_access": "yes",
-        "vehicle_access": "destination",
-        "navigation_class": "service_access",
-        "drive_confidence": 0.58,
-        "drive_penalty": 4,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "vehicle_access": "yes",
+        "navigation_class": "campus_service_connector",
+        "drive_confidence": 0.7,
+        "drive_penalty": 2.5,
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -23355,9 +23355,9 @@
         "walk_access": "yes",
         "vehicle_access": "yes",
         "navigation_class": "campus_service_connector",
-        "drive_confidence": 0.68,
+        "drive_confidence": 0.7,
         "drive_penalty": 2.5,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -23387,9 +23387,9 @@
         "walk_access": "yes",
         "vehicle_access": "yes",
         "navigation_class": "campus_service_connector",
-        "drive_confidence": 0.68,
+        "drive_confidence": 0.7,
         "drive_penalty": 2.5,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -26819,9 +26819,9 @@
         "walk_access": "yes",
         "vehicle_access": "yes",
         "navigation_class": "campus_service_connector",
-        "drive_confidence": 0.68,
+        "drive_confidence": 0.7,
         "drive_penalty": 2.5,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -28711,9 +28711,9 @@
         "walk_access": "yes",
         "vehicle_access": "yes",
         "navigation_class": "campus_service_connector",
-        "drive_confidence": 0.68,
+        "drive_confidence": 0.7,
         "drive_penalty": 2.5,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -29137,11 +29137,11 @@
         "is_campus": false,
         "length_m": 34,
         "walk_access": "yes",
-        "vehicle_access": "destination",
-        "navigation_class": "service_access",
-        "drive_confidence": 0.58,
-        "drive_penalty": 4,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "vehicle_access": "yes",
+        "navigation_class": "campus_service_connector",
+        "drive_confidence": 0.7,
+        "drive_penalty": 2.5,
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -29255,9 +29255,9 @@
         "walk_access": "yes",
         "vehicle_access": "yes",
         "navigation_class": "campus_service_connector",
-        "drive_confidence": 0.68,
+        "drive_confidence": 0.7,
         "drive_penalty": 2.5,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -30187,9 +30187,9 @@
         "walk_access": "yes",
         "vehicle_access": "yes",
         "navigation_class": "campus_service_connector",
-        "drive_confidence": 0.68,
+        "drive_confidence": 0.7,
         "drive_penalty": 2.5,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -30241,11 +30241,11 @@
         "is_campus": false,
         "length_m": 59,
         "walk_access": "yes",
-        "vehicle_access": "destination",
-        "navigation_class": "service_access",
-        "drive_confidence": 0.58,
-        "drive_penalty": 4,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "vehicle_access": "yes",
+        "navigation_class": "campus_service_connector",
+        "drive_confidence": 0.7,
+        "drive_penalty": 2.5,
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -30273,11 +30273,11 @@
         "is_campus": false,
         "length_m": 58,
         "walk_access": "yes",
-        "vehicle_access": "destination",
-        "navigation_class": "service_access",
-        "drive_confidence": 0.58,
-        "drive_penalty": 4,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "vehicle_access": "yes",
+        "navigation_class": "campus_service_connector",
+        "drive_confidence": 0.7,
+        "drive_penalty": 2.5,
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -30305,11 +30305,11 @@
         "is_campus": false,
         "length_m": 61,
         "walk_access": "yes",
-        "vehicle_access": "destination",
-        "navigation_class": "service_access",
-        "drive_confidence": 0.58,
-        "drive_penalty": 4,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "vehicle_access": "yes",
+        "navigation_class": "campus_service_connector",
+        "drive_confidence": 0.7,
+        "drive_penalty": 2.5,
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -30337,11 +30337,11 @@
         "is_campus": false,
         "length_m": 63,
         "walk_access": "yes",
-        "vehicle_access": "destination",
-        "navigation_class": "service_access",
-        "drive_confidence": 0.58,
-        "drive_penalty": 4,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "vehicle_access": "yes",
+        "navigation_class": "campus_service_connector",
+        "drive_confidence": 0.7,
+        "drive_penalty": 2.5,
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -30369,11 +30369,11 @@
         "is_campus": false,
         "length_m": 62,
         "walk_access": "yes",
-        "vehicle_access": "destination",
-        "navigation_class": "service_access",
-        "drive_confidence": 0.58,
-        "drive_penalty": 4,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "vehicle_access": "yes",
+        "navigation_class": "campus_service_connector",
+        "drive_confidence": 0.7,
+        "drive_penalty": 2.5,
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -30401,11 +30401,11 @@
         "is_campus": false,
         "length_m": 61,
         "walk_access": "yes",
-        "vehicle_access": "destination",
-        "navigation_class": "service_access",
-        "drive_confidence": 0.58,
-        "drive_penalty": 4,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "vehicle_access": "yes",
+        "navigation_class": "campus_service_connector",
+        "drive_confidence": 0.7,
+        "drive_penalty": 2.5,
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -30437,11 +30437,11 @@
         "is_campus": false,
         "length_m": 53,
         "walk_access": "yes",
-        "vehicle_access": "destination",
-        "navigation_class": "service_access",
-        "drive_confidence": 0.58,
-        "drive_penalty": 4,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "vehicle_access": "yes",
+        "navigation_class": "campus_service_connector",
+        "drive_confidence": 0.7,
+        "drive_penalty": 2.5,
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -30967,9 +30967,9 @@
         "walk_access": "yes",
         "vehicle_access": "yes",
         "navigation_class": "campus_service_connector",
-        "drive_confidence": 0.68,
+        "drive_confidence": 0.7,
         "drive_penalty": 2.5,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -31035,9 +31035,9 @@
         "walk_access": "yes",
         "vehicle_access": "yes",
         "navigation_class": "campus_service_connector",
-        "drive_confidence": 0.68,
+        "drive_confidence": 0.7,
         "drive_penalty": 2.5,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -31079,9 +31079,9 @@
         "walk_access": "yes",
         "vehicle_access": "yes",
         "navigation_class": "campus_service_connector",
-        "drive_confidence": 0.68,
+        "drive_confidence": 0.7,
         "drive_penalty": 2.5,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -31179,9 +31179,9 @@
         "walk_access": "yes",
         "vehicle_access": "yes",
         "navigation_class": "campus_service_connector",
-        "drive_confidence": 0.68,
+        "drive_confidence": 0.7,
         "drive_penalty": 2.5,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -31227,9 +31227,9 @@
         "walk_access": "yes",
         "vehicle_access": "yes",
         "navigation_class": "campus_service_connector",
-        "drive_confidence": 0.68,
+        "drive_confidence": 0.7,
         "drive_penalty": 2.5,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -31263,9 +31263,9 @@
         "walk_access": "yes",
         "vehicle_access": "yes",
         "navigation_class": "campus_service_connector",
-        "drive_confidence": 0.68,
+        "drive_confidence": 0.7,
         "drive_penalty": 2.5,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -31297,11 +31297,11 @@
         "is_campus": false,
         "length_m": 54,
         "walk_access": "yes",
-        "vehicle_access": "destination",
-        "navigation_class": "service_access",
-        "drive_confidence": 0.58,
-        "drive_penalty": 4,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "vehicle_access": "yes",
+        "navigation_class": "campus_service_connector",
+        "drive_confidence": 0.7,
+        "drive_penalty": 2.5,
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -31329,11 +31329,11 @@
         "is_campus": false,
         "length_m": 39,
         "walk_access": "yes",
-        "vehicle_access": "destination",
-        "navigation_class": "service_access",
-        "drive_confidence": 0.58,
-        "drive_penalty": 4,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "vehicle_access": "yes",
+        "navigation_class": "campus_service_connector",
+        "drive_confidence": 0.7,
+        "drive_penalty": 2.5,
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -31363,9 +31363,9 @@
         "walk_access": "yes",
         "vehicle_access": "yes",
         "navigation_class": "campus_service_connector",
-        "drive_confidence": 0.68,
+        "drive_confidence": 0.7,
         "drive_penalty": 2.5,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -31503,9 +31503,9 @@
         "walk_access": "yes",
         "vehicle_access": "yes",
         "navigation_class": "campus_service_connector",
-        "drive_confidence": 0.68,
+        "drive_confidence": 0.7,
         "drive_penalty": 2.5,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -31949,11 +31949,11 @@
         "is_campus": false,
         "length_m": 63,
         "walk_access": "yes",
-        "vehicle_access": "destination",
-        "navigation_class": "service_access",
-        "drive_confidence": 0.58,
-        "drive_penalty": 4,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "vehicle_access": "yes",
+        "navigation_class": "campus_service_connector",
+        "drive_confidence": 0.7,
+        "drive_penalty": 2.5,
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -31987,9 +31987,9 @@
         "walk_access": "yes",
         "vehicle_access": "yes",
         "navigation_class": "campus_service_connector",
-        "drive_confidence": 0.68,
+        "drive_confidence": 0.7,
         "drive_penalty": 2.5,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -32047,9 +32047,9 @@
         "walk_access": "yes",
         "vehicle_access": "yes",
         "navigation_class": "campus_service_connector",
-        "drive_confidence": 0.68,
+        "drive_confidence": 0.7,
         "drive_penalty": 2.5,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -32079,9 +32079,9 @@
         "walk_access": "yes",
         "vehicle_access": "yes",
         "navigation_class": "campus_service_connector",
-        "drive_confidence": 0.68,
+        "drive_confidence": 0.7,
         "drive_penalty": 2.5,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -32145,11 +32145,11 @@
         "is_campus": false,
         "length_m": 29,
         "walk_access": "yes",
-        "vehicle_access": "destination",
-        "navigation_class": "service_access",
-        "drive_confidence": 0.58,
-        "drive_penalty": 4,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "vehicle_access": "yes",
+        "navigation_class": "campus_service_connector",
+        "drive_confidence": 0.7,
+        "drive_penalty": 2.5,
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -32177,11 +32177,11 @@
         "is_campus": false,
         "length_m": 29,
         "walk_access": "yes",
-        "vehicle_access": "destination",
-        "navigation_class": "service_access",
-        "drive_confidence": 0.58,
-        "drive_penalty": 4,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "vehicle_access": "yes",
+        "navigation_class": "campus_service_connector",
+        "drive_confidence": 0.7,
+        "drive_penalty": 2.5,
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -32209,11 +32209,11 @@
         "is_campus": false,
         "length_m": 32,
         "walk_access": "yes",
-        "vehicle_access": "destination",
-        "navigation_class": "service_access",
-        "drive_confidence": 0.58,
-        "drive_penalty": 4,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "vehicle_access": "yes",
+        "navigation_class": "campus_service_connector",
+        "drive_confidence": 0.7,
+        "drive_penalty": 2.5,
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -32241,11 +32241,11 @@
         "is_campus": false,
         "length_m": 35,
         "walk_access": "yes",
-        "vehicle_access": "destination",
-        "navigation_class": "service_access",
-        "drive_confidence": 0.58,
-        "drive_penalty": 4,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "vehicle_access": "yes",
+        "navigation_class": "campus_service_connector",
+        "drive_confidence": 0.7,
+        "drive_penalty": 2.5,
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -33103,9 +33103,9 @@
         "walk_access": "yes",
         "vehicle_access": "yes",
         "navigation_class": "campus_service_connector",
-        "drive_confidence": 0.68,
+        "drive_confidence": 0.7,
         "drive_penalty": 2.5,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -33137,11 +33137,11 @@
         "is_campus": false,
         "length_m": 85,
         "walk_access": "yes",
-        "vehicle_access": "destination",
-        "navigation_class": "service_access",
-        "drive_confidence": 0.58,
-        "drive_penalty": 4,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "vehicle_access": "yes",
+        "navigation_class": "campus_service_connector",
+        "drive_confidence": 0.7,
+        "drive_penalty": 2.5,
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -33175,9 +33175,9 @@
         "walk_access": "yes",
         "vehicle_access": "yes",
         "navigation_class": "campus_service_connector",
-        "drive_confidence": 0.68,
+        "drive_confidence": 0.7,
         "drive_penalty": 2.5,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -33243,9 +33243,9 @@
         "walk_access": "yes",
         "vehicle_access": "yes",
         "navigation_class": "campus_service_connector",
-        "drive_confidence": 0.68,
+        "drive_confidence": 0.7,
         "drive_penalty": 2.5,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -33355,9 +33355,9 @@
         "walk_access": "yes",
         "vehicle_access": "yes",
         "navigation_class": "campus_service_connector",
-        "drive_confidence": 0.68,
+        "drive_confidence": 0.7,
         "drive_penalty": 2.5,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -33403,9 +33403,9 @@
         "walk_access": "yes",
         "vehicle_access": "yes",
         "navigation_class": "campus_service_connector",
-        "drive_confidence": 0.68,
+        "drive_confidence": 0.7,
         "drive_penalty": 2.5,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -33441,11 +33441,11 @@
         "is_campus": false,
         "length_m": 83,
         "walk_access": "yes",
-        "vehicle_access": "destination",
-        "navigation_class": "service_access",
-        "drive_confidence": 0.58,
-        "drive_penalty": 4,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "vehicle_access": "yes",
+        "navigation_class": "campus_service_connector",
+        "drive_confidence": 0.7,
+        "drive_penalty": 2.5,
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -33475,9 +33475,9 @@
         "walk_access": "yes",
         "vehicle_access": "yes",
         "navigation_class": "campus_service_connector",
-        "drive_confidence": 0.68,
+        "drive_confidence": 0.7,
         "drive_penalty": 2.5,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -33507,9 +33507,9 @@
         "walk_access": "yes",
         "vehicle_access": "yes",
         "navigation_class": "campus_service_connector",
-        "drive_confidence": 0.68,
+        "drive_confidence": 0.7,
         "drive_penalty": 2.5,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -33539,9 +33539,9 @@
         "walk_access": "yes",
         "vehicle_access": "yes",
         "navigation_class": "campus_service_connector",
-        "drive_confidence": 0.68,
+        "drive_confidence": 0.7,
         "drive_penalty": 2.5,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -33695,9 +33695,9 @@
         "walk_access": "yes",
         "vehicle_access": "yes",
         "navigation_class": "campus_service_connector",
-        "drive_confidence": 0.68,
+        "drive_confidence": 0.7,
         "drive_penalty": 2.5,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -33811,9 +33811,9 @@
         "walk_access": "yes",
         "vehicle_access": "yes",
         "navigation_class": "campus_service_connector",
-        "drive_confidence": 0.68,
+        "drive_confidence": 0.7,
         "drive_penalty": 2.5,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -33875,9 +33875,9 @@
         "walk_access": "yes",
         "vehicle_access": "yes",
         "navigation_class": "campus_service_connector",
-        "drive_confidence": 0.68,
+        "drive_confidence": 0.7,
         "drive_penalty": 2.5,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -33963,9 +33963,9 @@
         "walk_access": "yes",
         "vehicle_access": "yes",
         "navigation_class": "campus_service_connector",
-        "drive_confidence": 0.68,
+        "drive_confidence": 0.7,
         "drive_penalty": 2.5,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -34005,11 +34005,11 @@
         "is_campus": false,
         "length_m": 86,
         "walk_access": "yes",
-        "vehicle_access": "destination",
-        "navigation_class": "service_access",
-        "drive_confidence": 0.58,
-        "drive_penalty": 4,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "vehicle_access": "yes",
+        "navigation_class": "campus_service_connector",
+        "drive_confidence": 0.7,
+        "drive_penalty": 2.5,
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -34047,9 +34047,9 @@
         "walk_access": "yes",
         "vehicle_access": "yes",
         "navigation_class": "campus_service_connector",
-        "drive_confidence": 0.68,
+        "drive_confidence": 0.7,
         "drive_penalty": 2.5,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -34143,9 +34143,9 @@
         "walk_access": "yes",
         "vehicle_access": "yes",
         "navigation_class": "campus_service_connector",
-        "drive_confidence": 0.68,
+        "drive_confidence": 0.7,
         "drive_penalty": 2.5,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -34303,9 +34303,9 @@
         "walk_access": "yes",
         "vehicle_access": "yes",
         "navigation_class": "campus_service_connector",
-        "drive_confidence": 0.68,
+        "drive_confidence": 0.7,
         "drive_penalty": 2.5,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -34435,9 +34435,9 @@
         "walk_access": "yes",
         "vehicle_access": "yes",
         "navigation_class": "campus_service_connector",
-        "drive_confidence": 0.68,
+        "drive_confidence": 0.7,
         "drive_penalty": 2.5,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -34501,11 +34501,11 @@
         "is_campus": false,
         "length_m": 74,
         "walk_access": "yes",
-        "vehicle_access": "destination",
-        "navigation_class": "service_access",
-        "drive_confidence": 0.58,
-        "drive_penalty": 4,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "vehicle_access": "yes",
+        "navigation_class": "campus_service_connector",
+        "drive_confidence": 0.7,
+        "drive_penalty": 2.5,
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -34535,9 +34535,9 @@
         "walk_access": "yes",
         "vehicle_access": "yes",
         "navigation_class": "campus_service_connector",
-        "drive_confidence": 0.68,
+        "drive_confidence": 0.7,
         "drive_penalty": 2.5,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -34579,9 +34579,9 @@
         "walk_access": "yes",
         "vehicle_access": "yes",
         "navigation_class": "campus_service_connector",
-        "drive_confidence": 0.68,
+        "drive_confidence": 0.7,
         "drive_penalty": 2.5,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -34651,9 +34651,9 @@
         "walk_access": "yes",
         "vehicle_access": "yes",
         "navigation_class": "campus_service_connector",
-        "drive_confidence": 0.68,
+        "drive_confidence": 0.7,
         "drive_penalty": 2.5,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -34701,11 +34701,11 @@
         "is_campus": false,
         "length_m": 51,
         "walk_access": "yes",
-        "vehicle_access": "destination",
-        "navigation_class": "service_access",
-        "drive_confidence": 0.58,
-        "drive_penalty": 4,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "vehicle_access": "yes",
+        "navigation_class": "campus_service_connector",
+        "drive_confidence": 0.7,
+        "drive_penalty": 2.5,
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -34735,9 +34735,9 @@
         "walk_access": "yes",
         "vehicle_access": "yes",
         "navigation_class": "campus_service_connector",
-        "drive_confidence": 0.68,
+        "drive_confidence": 0.7,
         "drive_penalty": 2.5,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -34793,11 +34793,11 @@
         "is_campus": false,
         "length_m": 79,
         "walk_access": "yes",
-        "vehicle_access": "destination",
-        "navigation_class": "service_access",
-        "drive_confidence": 0.58,
-        "drive_penalty": 4,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "vehicle_access": "yes",
+        "navigation_class": "campus_service_connector",
+        "drive_confidence": 0.7,
+        "drive_penalty": 2.5,
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",
@@ -34971,9 +34971,9 @@
         "walk_access": "yes",
         "vehicle_access": "yes",
         "navigation_class": "campus_service_connector",
-        "drive_confidence": 0.68,
+        "drive_confidence": 0.7,
         "drive_penalty": 2.5,
-        "drive_note": "Service road with limited tags; flagged medium/low confidence and penalized."
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
       },
       "geometry": {
         "type": "LineString",

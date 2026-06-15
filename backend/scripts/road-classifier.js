@@ -174,15 +174,10 @@ function classifyRoadFeature(feature) {
   }
 
   if (type === 'service') {
-    if (UNPAVED_SURFACES.has(surface)) {
-      return {
-        ...base,
-        navigation_class: 'unpaved_service',
-        drive_confidence: 0.25,
-        drive_note: 'Unpaved service road; excluded from vehicle routing.',
-      };
-    }
-
+    // Genuine access-only spurs: only when OSM explicitly says so via a
+    // driveway / parking-aisle / alley subtype. These dead-end at a building
+    // or lot, so keep them destination-access (used only when the route's
+    // endpoint is on them) and heavily penalized.
     if (service === 'parking_aisle' || service === 'driveway' || service === 'alley') {
       return {
         ...base,
@@ -190,39 +185,34 @@ function classifyRoadFeature(feature) {
         navigation_class: 'service_access',
         drive_confidence: 0.58,
         drive_penalty: 4.2,
-        drive_note: 'Short access/parking/service segment; heavily penalized for drive routing.',
+        drive_note: 'Parking aisle / driveway / alley; access-only spur.',
       };
     }
 
-    if (lanes >= 2 || PAVED_SURFACES.has(surface)) {
-      return {
-        ...base,
-        vehicle_access: 'yes',
-        navigation_class: 'campus_service_road',
-        drive_confidence: lanes >= 2 ? 0.78 : 0.74,
-        drive_penalty: lanes >= 2 ? 1.8 : 2.0,
-        drive_note: 'Likely drivable campus service road; penalized below main roads.',
-      };
-    }
+    // Everything else tagged highway=service inside the campus is a real,
+    // drivable internal road. OSM splits the continuous campus road network
+    // into many short ways at junctions and gates, so SEGMENT LENGTH IS NOT a
+    // driveway signal — a 40 m stretch between two gates is still a through
+    // road. Classify all as drivable (vehicle_access=yes) and rely on the
+    // drive_penalty to keep cars on main/residential roads where one exists.
+    // access=private/no is already handled by explicitVehicleBlocked() above.
+    const paved   = PAVED_SURFACES.has(surface);
+    const unpaved = UNPAVED_SURFACES.has(surface);
+    const twoLane = Number.isFinite(lanes) && lanes >= 2;
 
-    if (lanes === 1) {
-      return {
-        ...base,
-        vehicle_access: 'destination',
-        navigation_class: 'narrow_service_road',
-        drive_confidence: 0.55,
-        drive_penalty: 4.0,
-        drive_note: 'Single-lane service road; only used if no reliable alternative exists.',
-      };
-    }
+    let confidence, penalty;
+    if (twoLane || paved) { confidence = twoLane ? 0.80 : 0.76; penalty = twoLane ? 1.8 : 2.0; }
+    else if (lanes === 1) { confidence = 0.64;                  penalty = 3.0; }
+    else                  { confidence = 0.70;                  penalty = 2.5; }
+    if (unpaved) { confidence = Math.min(confidence, 0.60); penalty += 0.7; }
 
     return {
       ...base,
-      vehicle_access: lengthM >= 90 ? 'yes' : 'destination',
-      navigation_class: lengthM >= 90 ? 'campus_service_connector' : 'service_access',
-      drive_confidence: lengthM >= 90 ? 0.68 : 0.58,
-      drive_penalty: lengthM >= 90 ? 2.5 : 4.0,
-      drive_note: 'Service road with limited tags; flagged medium/low confidence and penalized.',
+      vehicle_access: 'yes',
+      navigation_class: (twoLane || paved) ? 'campus_service_road' : 'campus_service_connector',
+      drive_confidence: confidence,
+      drive_penalty: penalty,
+      drive_note: 'Drivable campus service road; penalized below main/residential roads.',
     };
   }
 
