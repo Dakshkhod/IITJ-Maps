@@ -878,15 +878,13 @@ function main() {
   // 4. Merge & deduplicate places (OSM first, then KML, then curated as fallback)
   const mergedPlaces = deduplicatePlaces([...allPlaces, ...kmlFeatures, ...curatedPlaces]);
 
-  // 4b. Perimeter-berm gate snap is DISABLED: OSM now places every perimeter
-  //     POI (W-codes, E-codes, the E-block societies) at distinct, accurate
-  //     coordinates along the berm (verified: 0 named POIs within 2 m of each
-  //     other), so each dot already sits at its true location. Snapping to
-  //     arch centers would move POIs off their real OSM coordinates and reorder
-  //     them. We therefore keep raw OSM coordinates — an exact match to OSM.
-  //     (Re-enable snapPerimeterCodes() only if OSM regresses to clustered
-  //     near-identical coords for these codes.)
-  // snapPerimeterCodes(mergedPlaces);
+  // 4b. Snap perimeter POIs (W-codes, E-codes, berm societies) to the nearest
+  //     sandstone-gate arch center. OSM places these nodes on the access road
+  //     next to the berm, not at the actual gate openings, so without this snap
+  //     their dots appear on the flat ground rather than on the berm structure.
+  //     homeRibbon constraint prevents cross-berm overflow (e.g. Designing Club
+  //     staying on berm 744 instead of spilling onto 745).
+  snapPerimeterCodes(mergedPlaces);
 
   // 5. Build road graph and save
   const { graph, nodeCoords } = RoadClassifier.buildRoadGraph(roads);
