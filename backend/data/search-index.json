@@ -16,8 +16,8 @@
     "category": "academic",
     "description": "",
     "keywords": [],
-    "lat": 26.47299469142857,
-    "lng": 73.11405375142857,
+    "lat": 26.47299200285714,
+    "lng": 73.11405371428572,
     "source": "osm",
     "is_proposed": false
   },
@@ -1085,6 +1085,17 @@
     "is_proposed": false
   },
   {
+    "id": "1529899558",
+    "name": "Animal House",
+    "category": "building",
+    "description": "",
+    "keywords": [],
+    "lat": 26.47154638,
+    "lng": 73.11836384,
+    "source": "osm",
+    "is_proposed": false
+  },
+  {
     "id": "13906909082",
     "name": "Quiz Society",
     "category": "recreation",
@@ -1092,6 +1103,17 @@
     "keywords": [],
     "lat": 26.473860272924295,
     "lng": 73.11789763501463,
+    "source": "osm",
+    "is_proposed": false
+  },
+  {
+    "id": "773587402",
+    "name": "Akash Complex",
+    "category": "sports",
+    "description": "",
+    "keywords": [],
+    "lat": 26.476767600000002,
+    "lng": 73.11944601666666,
     "source": "osm",
     "is_proposed": false
   },
@@ -1169,17 +1191,6 @@
     "keywords": [],
     "lat": 26.472094466666665,
     "lng": 73.11694215,
-    "source": "osm",
-    "is_proposed": false
-  },
-  {
-    "id": "773587402",
-    "name": "Akaash Complex",
-    "category": "sports",
-    "description": "",
-    "keywords": [],
-    "lat": 26.476767600000002,
-    "lng": 73.11944601666666,
     "source": "osm",
     "is_proposed": false
   },
@@ -1351,8 +1362,8 @@
     "category": "residential",
     "description": "",
     "keywords": [],
-    "lat": 26.47729116,
-    "lng": 73.11220154,
+    "lat": 26.477274949999998,
+    "lng": 73.11220141666668,
     "source": "osm",
     "is_proposed": false
   },
@@ -1432,8 +1443,8 @@
     "category": "residential",
     "description": "",
     "keywords": [],
-    "lat": 26.471149500000003,
-    "lng": 73.11205996666666,
+    "lat": 26.471161400000003,
+    "lng": 73.11201826666667,
     "source": "osm",
     "is_proposed": false
   },
@@ -1443,8 +1454,8 @@
     "category": "academic",
     "description": "",
     "keywords": [],
-    "lat": 26.47863779285714,
-    "lng": 73.11624377857143,
+    "lat": 26.47863349285714,
+    "lng": 73.11621017857144,
     "source": "osm",
     "is_proposed": false
   },
@@ -1859,6 +1870,17 @@
     "is_proposed": false
   },
   {
+    "id": "1529899555",
+    "name": "Clean  Room & Service Block",
+    "category": "building",
+    "description": "",
+    "keywords": [],
+    "lat": 26.465720977777778,
+    "lng": 73.12186668888889,
+    "source": "osm",
+    "is_proposed": false
+  },
+  {
     "id": "Skating ring and open stage",
     "name": "Skating ring and open stage",
     "category": "recreation",
@@ -2001,8 +2023,8 @@
     "category": "academic",
     "description": "college",
     "keywords": [],
-    "lat": 26.47100914615385,
-    "lng": 73.11461381538462,
+    "lat": 26.471010184615388,
+    "lng": 73.11461546923077,
     "source": "osm",
     "is_proposed": false
   },
@@ -2012,8 +2034,8 @@
     "category": "residential",
     "description": "residential",
     "keywords": [],
-    "lat": 26.466709255555557,
-    "lng": 73.1122888,
+    "lat": 26.46671656666667,
+    "lng": 73.11226533333333,
     "source": "osm",
     "is_proposed": false
   },
@@ -2161,6 +2183,17 @@
     "is_proposed": false
   },
   {
+    "id": "1412404069",
+    "name": "TRANSIT ACCOMMODATION",
+    "category": "residential",
+    "description": "residential",
+    "keywords": [],
+    "lat": 26.477216485714287,
+    "lng": 73.11249171428572,
+    "source": "osm",
+    "is_proposed": false
+  },
+  {
     "id": "1412439400",
     "name": "Runnign Tracks",
     "category": "sports",
@@ -2201,6 +2234,28 @@
     "keywords": [],
     "lat": 26.46504407575758,
     "lng": 73.10939518181819,
+    "source": "osm",
+    "is_proposed": false
+  },
+  {
+    "id": "1529899554",
+    "name": "Type - ( C- )",
+    "category": "residential",
+    "description": "residential",
+    "keywords": [],
+    "lat": 26.467090062500006,
+    "lng": 73.111098875,
+    "source": "osm",
+    "is_proposed": false
+  },
+  {
+    "id": "1529899560",
+    "name": "Type - (B-)",
+    "category": "residential",
+    "description": "residential",
+    "keywords": [],
+    "lat": 26.475566325,
+    "lng": 73.1113933875,
     "source": "osm",
     "is_proposed": false
   }

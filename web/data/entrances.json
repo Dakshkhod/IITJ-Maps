@@ -47,12 +47,6 @@
     "osm_id": "12980144654",
     "gate_name": "G-2 gate"
   },
-  "Akaash Complex": {
-    "lat": 26.4764512,
-    "lng": 73.1194166,
-    "osm_id": "13878739744",
-    "gate_name": "Akaash Complex gate"
-  },
   "Hostel I2": {
     "lat": 26.4715779,
     "lng": 73.1151545,
@@ -72,8 +66,8 @@
     "gate_name": "G-4 gate"
   },
   "Jodhpur Club": {
-    "lat": 26.4779873,
-    "lng": 73.1113401,
+    "lat": 26.4780238,
+    "lng": 73.1112968,
     "osm_id": "12980144916",
     "gate_name": "Jodhpur Club gate"
   },
@@ -114,8 +108,8 @@
     "gate_name": "O-3 gate"
   },
   "LHC": {
-    "lat": 26.4729559,
-    "lng": 73.1137925,
+    "lat": 26.4728618,
+    "lng": 73.1137912,
     "osm_id": "13930640138",
     "gate_name": "LHC entrance"
   },
@@ -244,6 +238,12 @@
     "lng": 73.1108724,
     "osm_id": "13905508756",
     "gate_name": "School of AI&DS entrance"
+  },
+  "General Quarters": {
+    "lat": 26.4771939,
+    "lng": 73.1122008,
+    "osm_id": "13943787979",
+    "gate_name": "General Quarters entrance"
   },
   "Center for Advance Scientific Equipment": {
     "lat": 26.4763,

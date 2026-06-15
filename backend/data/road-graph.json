@@ -4427,11 +4427,11 @@
         "type": "service",
         "highway_type": "service",
         "name": "service",
-        "navigation_class": "unpaved_service",
-        "vehicle_access": "no",
+        "navigation_class": "campus_service_connector",
+        "vehicle_access": "yes",
         "walk_access": "yes",
-        "drive_confidence": 0.25,
-        "drive_penalty": null,
+        "drive_confidence": 0.68,
+        "drive_penalty": 2.5,
         "oneway": false,
         "oneway_reverse": false
       },
@@ -8734,10 +8734,10 @@
         "oneway_reverse": false
       }
     ],
-    "26.476095,73.119367": [
+    "26.476078,73.119398": [
       {
-        "id": "26.476136,73.119460",
-        "dist": 10.242028108649203,
+        "id": "26.476122,73.119429",
+        "dist": 5.845007071740099,
         "osm_id": "603603492",
         "type": "service",
         "highway_type": "service",
@@ -8752,7 +8752,7 @@
       },
       {
         "id": "26.476550,73.118584",
-        "dist": 92.90275193662909,
+        "dist": 96.51089119417814,
         "osm_id": "603603498",
         "type": "service",
         "highway_type": "service",
@@ -8767,7 +8767,7 @@
       },
       {
         "id": "26.476013,73.119367",
-        "dist": 9.17358144832261,
+        "dist": 7.853432713084318,
         "osm_id": "603603498",
         "type": "service",
         "highway_type": "service",
@@ -8782,7 +8782,7 @@
       },
       {
         "id": "26.476039,73.119491",
-        "dist": 13.773374352078607,
+        "dist": 10.18925683742481,
         "osm_id": "1412392595",
         "type": "footway",
         "highway_type": "footway",
@@ -8796,10 +8796,57 @@
         "oneway_reverse": false
       }
     ],
+    "26.476122,73.119429": [
+      {
+        "id": "26.476078,73.119398",
+        "dist": 5.845007071740099,
+        "osm_id": "603603492",
+        "type": "service",
+        "highway_type": "service",
+        "name": "service",
+        "navigation_class": "campus_service_road",
+        "vehicle_access": "yes",
+        "walk_access": "yes",
+        "drive_confidence": 0.78,
+        "drive_penalty": 1.8,
+        "oneway": false,
+        "oneway_reverse": false
+      },
+      {
+        "id": "26.476136,73.119460",
+        "dist": 3.4093909744493733,
+        "osm_id": "603603492",
+        "type": "service",
+        "highway_type": "service",
+        "name": "service",
+        "navigation_class": "campus_service_road",
+        "vehicle_access": "yes",
+        "walk_access": "yes",
+        "drive_confidence": 0.78,
+        "drive_penalty": 1.8,
+        "oneway": false,
+        "oneway_reverse": false
+      },
+      {
+        "id": "26.476630,73.118659",
+        "dist": 95.19726273507281,
+        "osm_id": "1529899552",
+        "type": "cycleway",
+        "highway_type": "cycleway",
+        "name": "cycleway",
+        "navigation_class": "cycle_pedestrian",
+        "vehicle_access": "no",
+        "walk_access": "yes",
+        "drive_confidence": 0,
+        "drive_penalty": null,
+        "oneway": false,
+        "oneway_reverse": false
+      }
+    ],
     "26.476136,73.119460": [
       {
-        "id": "26.476095,73.119367",
-        "dist": 10.242028108649203,
+        "id": "26.476122,73.119429",
+        "dist": 3.4093909744493733,
         "osm_id": "603603492",
         "type": "service",
         "highway_type": "service",
@@ -9946,8 +9993,8 @@
         "oneway_reverse": false
       },
       {
-        "id": "26.476095,73.119367",
-        "dist": 92.90275193662909,
+        "id": "26.476078,73.119398",
+        "dist": 96.51089119417814,
         "osm_id": "603603498",
         "type": "service",
         "highway_type": "service",
@@ -9961,8 +10008,8 @@
         "oneway_reverse": false
       },
       {
-        "id": "26.476892,73.118901",
-        "dist": 49.471191195751096,
+        "id": "26.476630,73.118659",
+        "dist": 11.6150579046735,
         "osm_id": "767907669",
         "type": "service",
         "highway_type": "service",
@@ -9993,8 +10040,8 @@
     ],
     "26.476013,73.119367": [
       {
-        "id": "26.476095,73.119367",
-        "dist": 9.17358144832261,
+        "id": "26.476078,73.119398",
+        "dist": 7.853432713084318,
         "osm_id": "603603498",
         "type": "service",
         "highway_type": "service",
@@ -10642,10 +10689,57 @@
         "oneway_reverse": false
       }
     ],
-    "26.476892,73.118901": [
+    "26.476630,73.118659": [
       {
         "id": "26.476550,73.118584",
-        "dist": 49.471191195751096,
+        "dist": 11.6150579046735,
+        "osm_id": "767907669",
+        "type": "service",
+        "highway_type": "service",
+        "name": "service",
+        "navigation_class": "campus_service_connector",
+        "vehicle_access": "yes",
+        "walk_access": "yes",
+        "drive_confidence": 0.68,
+        "drive_penalty": 2.5,
+        "oneway": false,
+        "oneway_reverse": false
+      },
+      {
+        "id": "26.476892,73.118901",
+        "dist": 37.85613564882834,
+        "osm_id": "767907669",
+        "type": "service",
+        "highway_type": "service",
+        "name": "service",
+        "navigation_class": "campus_service_connector",
+        "vehicle_access": "yes",
+        "walk_access": "yes",
+        "drive_confidence": 0.68,
+        "drive_penalty": 2.5,
+        "oneway": false,
+        "oneway_reverse": false
+      },
+      {
+        "id": "26.476122,73.119429",
+        "dist": 95.19726273507281,
+        "osm_id": "1529899552",
+        "type": "cycleway",
+        "highway_type": "cycleway",
+        "name": "cycleway",
+        "navigation_class": "cycle_pedestrian",
+        "vehicle_access": "no",
+        "walk_access": "yes",
+        "drive_confidence": 0,
+        "drive_penalty": null,
+        "oneway": false,
+        "oneway_reverse": false
+      }
+    ],
+    "26.476892,73.118901": [
+      {
+        "id": "26.476630,73.118659",
+        "dist": 37.85613564882834,
         "osm_id": "767907669",
         "type": "service",
         "highway_type": "service",
@@ -11737,17 +11831,17 @@
     ],
     "26.472352,73.113695": [
       {
-        "id": "26.472960,73.113704",
-        "dist": 67.60081580709522,
+        "id": "26.472866,73.113702",
+        "dist": 57.13657369653784,
         "osm_id": "773563494",
         "type": "service",
         "highway_type": "service",
         "name": "service",
-        "navigation_class": "unpaved_service",
-        "vehicle_access": "no",
+        "navigation_class": "campus_service_connector",
+        "vehicle_access": "yes",
         "walk_access": "yes",
-        "drive_confidence": 0.25,
-        "drive_penalty": null,
+        "drive_confidence": 0.68,
+        "drive_penalty": 2.5,
         "oneway": false,
         "oneway_reverse": false
       },
@@ -11797,40 +11891,40 @@
         "oneway_reverse": false
       }
     ],
-    "26.472960,73.113704": [
+    "26.472866,73.113702": [
       {
         "id": "26.472352,73.113695",
-        "dist": 67.60081580709522,
+        "dist": 57.13657369653784,
         "osm_id": "773563494",
         "type": "service",
         "highway_type": "service",
         "name": "service",
-        "navigation_class": "unpaved_service",
-        "vehicle_access": "no",
+        "navigation_class": "campus_service_connector",
+        "vehicle_access": "yes",
         "walk_access": "yes",
-        "drive_confidence": 0.25,
-        "drive_penalty": null,
+        "drive_confidence": 0.68,
+        "drive_penalty": 2.5,
         "oneway": false,
         "oneway_reverse": false
       },
       {
         "id": "26.473225,73.113708",
-        "dist": 29.480201552896435,
+        "dist": 39.9444433767141,
         "osm_id": "773563494",
         "type": "service",
         "highway_type": "service",
         "name": "service",
-        "navigation_class": "unpaved_service",
-        "vehicle_access": "no",
+        "navigation_class": "campus_service_connector",
+        "vehicle_access": "yes",
         "walk_access": "yes",
-        "drive_confidence": 0.25,
-        "drive_penalty": null,
+        "drive_confidence": 0.68,
+        "drive_penalty": 2.5,
         "oneway": false,
         "oneway_reverse": false
       },
       {
-        "id": "26.472956,73.113793",
-        "dist": 8.850508034350273,
+        "id": "26.472862,73.113791",
+        "dist": 8.85051525376723,
         "osm_id": "1528715815",
         "type": "path",
         "highway_type": "path",
@@ -11846,17 +11940,17 @@
     ],
     "26.473225,73.113708": [
       {
-        "id": "26.472960,73.113704",
-        "dist": 29.480201552896435,
+        "id": "26.472866,73.113702",
+        "dist": 39.9444433767141,
         "osm_id": "773563494",
         "type": "service",
         "highway_type": "service",
         "name": "service",
-        "navigation_class": "unpaved_service",
-        "vehicle_access": "no",
+        "navigation_class": "campus_service_connector",
+        "vehicle_access": "yes",
         "walk_access": "yes",
-        "drive_confidence": 0.25,
-        "drive_penalty": null,
+        "drive_confidence": 0.68,
+        "drive_penalty": 2.5,
         "oneway": false,
         "oneway_reverse": false
       },
@@ -11867,11 +11961,11 @@
         "type": "service",
         "highway_type": "service",
         "name": "service",
-        "navigation_class": "unpaved_service",
-        "vehicle_access": "no",
+        "navigation_class": "campus_service_connector",
+        "vehicle_access": "yes",
         "walk_access": "yes",
-        "drive_confidence": 0.25,
-        "drive_penalty": null,
+        "drive_confidence": 0.68,
+        "drive_penalty": 2.5,
         "oneway": false,
         "oneway_reverse": false
       }
@@ -11884,11 +11978,11 @@
         "type": "service",
         "highway_type": "service",
         "name": "service",
-        "navigation_class": "unpaved_service",
-        "vehicle_access": "no",
+        "navigation_class": "campus_service_connector",
+        "vehicle_access": "yes",
         "walk_access": "yes",
-        "drive_confidence": 0.25,
-        "drive_penalty": null,
+        "drive_confidence": 0.68,
+        "drive_penalty": 2.5,
         "oneway": false,
         "oneway_reverse": false
       },
@@ -11899,11 +11993,11 @@
         "type": "service",
         "highway_type": "service",
         "name": "service",
-        "navigation_class": "unpaved_service",
-        "vehicle_access": "no",
+        "navigation_class": "campus_service_connector",
+        "vehicle_access": "yes",
         "walk_access": "yes",
-        "drive_confidence": 0.25,
-        "drive_penalty": null,
+        "drive_confidence": 0.68,
+        "drive_penalty": 2.5,
         "oneway": false,
         "oneway_reverse": false
       }
@@ -11916,11 +12010,11 @@
         "type": "service",
         "highway_type": "service",
         "name": "service",
-        "navigation_class": "unpaved_service",
-        "vehicle_access": "no",
+        "navigation_class": "campus_service_connector",
+        "vehicle_access": "yes",
         "walk_access": "yes",
-        "drive_confidence": 0.25,
-        "drive_penalty": null,
+        "drive_confidence": 0.68,
+        "drive_penalty": 2.5,
         "oneway": false,
         "oneway_reverse": false
       },
@@ -11931,11 +12025,11 @@
         "type": "service",
         "highway_type": "service",
         "name": "service",
-        "navigation_class": "unpaved_service",
-        "vehicle_access": "no",
+        "navigation_class": "campus_service_connector",
+        "vehicle_access": "yes",
         "walk_access": "yes",
-        "drive_confidence": 0.25,
-        "drive_penalty": null,
+        "drive_confidence": 0.68,
+        "drive_penalty": 2.5,
         "oneway": false,
         "oneway_reverse": false
       },
@@ -11963,11 +12057,11 @@
         "type": "service",
         "highway_type": "service",
         "name": "service",
-        "navigation_class": "unpaved_service",
-        "vehicle_access": "no",
+        "navigation_class": "campus_service_connector",
+        "vehicle_access": "yes",
         "walk_access": "yes",
-        "drive_confidence": 0.25,
-        "drive_penalty": null,
+        "drive_confidence": 0.68,
+        "drive_penalty": 2.5,
         "oneway": false,
         "oneway_reverse": false
       },
@@ -11978,11 +12072,11 @@
         "type": "service",
         "highway_type": "service",
         "name": "service",
-        "navigation_class": "unpaved_service",
-        "vehicle_access": "no",
+        "navigation_class": "campus_service_connector",
+        "vehicle_access": "yes",
         "walk_access": "yes",
-        "drive_confidence": 0.25,
-        "drive_penalty": null,
+        "drive_confidence": 0.68,
+        "drive_penalty": 2.5,
         "oneway": false,
         "oneway_reverse": false
       }
@@ -11995,11 +12089,11 @@
         "type": "service",
         "highway_type": "service",
         "name": "service",
-        "navigation_class": "unpaved_service",
-        "vehicle_access": "no",
+        "navigation_class": "campus_service_connector",
+        "vehicle_access": "yes",
         "walk_access": "yes",
-        "drive_confidence": 0.25,
-        "drive_penalty": null,
+        "drive_confidence": 0.68,
+        "drive_penalty": 2.5,
         "oneway": false,
         "oneway_reverse": false
       },
@@ -12010,11 +12104,11 @@
         "type": "service",
         "highway_type": "service",
         "name": "service",
-        "navigation_class": "unpaved_service",
-        "vehicle_access": "no",
+        "navigation_class": "campus_service_connector",
+        "vehicle_access": "yes",
         "walk_access": "yes",
-        "drive_confidence": 0.25,
-        "drive_penalty": null,
+        "drive_confidence": 0.68,
+        "drive_penalty": 2.5,
         "oneway": false,
         "oneway_reverse": false
       }
@@ -12027,128 +12121,128 @@
         "type": "service",
         "highway_type": "service",
         "name": "service",
-        "navigation_class": "unpaved_service",
-        "vehicle_access": "no",
+        "navigation_class": "campus_service_connector",
+        "vehicle_access": "yes",
         "walk_access": "yes",
-        "drive_confidence": 0.25,
-        "drive_penalty": null,
+        "drive_confidence": 0.68,
+        "drive_penalty": 2.5,
         "oneway": false,
         "oneway_reverse": false
       },
       {
-        "id": "26.474107,73.114213",
-        "dist": 72.62153357730558,
+        "id": "26.474107,73.114251",
+        "dist": 73.92503185140639,
         "osm_id": "773563494",
         "type": "service",
         "highway_type": "service",
         "name": "service",
-        "navigation_class": "unpaved_service",
-        "vehicle_access": "no",
+        "navigation_class": "campus_service_connector",
+        "vehicle_access": "yes",
         "walk_access": "yes",
-        "drive_confidence": 0.25,
-        "drive_penalty": null,
+        "drive_confidence": 0.68,
+        "drive_penalty": 2.5,
         "oneway": false,
         "oneway_reverse": false
       }
     ],
-    "26.474107,73.114213": [
+    "26.474107,73.114251": [
       {
         "id": "26.473489,73.113975",
-        "dist": 72.62153357730558,
+        "dist": 73.92503185140639,
         "osm_id": "773563494",
         "type": "service",
         "highway_type": "service",
         "name": "service",
-        "navigation_class": "unpaved_service",
-        "vehicle_access": "no",
+        "navigation_class": "campus_service_connector",
+        "vehicle_access": "yes",
         "walk_access": "yes",
-        "drive_confidence": 0.25,
-        "drive_penalty": null,
+        "drive_confidence": 0.68,
+        "drive_penalty": 2.5,
         "oneway": false,
         "oneway_reverse": false
       },
       {
-        "id": "26.474290,73.114341",
-        "dist": 24.043572182118936,
+        "id": "26.474293,73.114360",
+        "dist": 23.385303002045756,
         "osm_id": "773563494",
         "type": "service",
         "highway_type": "service",
         "name": "service",
-        "navigation_class": "unpaved_service",
-        "vehicle_access": "no",
+        "navigation_class": "campus_service_connector",
+        "vehicle_access": "yes",
         "walk_access": "yes",
-        "drive_confidence": 0.25,
-        "drive_penalty": null,
+        "drive_confidence": 0.68,
+        "drive_penalty": 2.5,
         "oneway": false,
         "oneway_reverse": false
       }
     ],
-    "26.474290,73.114341": [
+    "26.474293,73.114360": [
       {
-        "id": "26.474107,73.114213",
-        "dist": 24.043572182118936,
+        "id": "26.474107,73.114251",
+        "dist": 23.385303002045756,
         "osm_id": "773563494",
         "type": "service",
         "highway_type": "service",
         "name": "service",
-        "navigation_class": "unpaved_service",
-        "vehicle_access": "no",
+        "navigation_class": "campus_service_connector",
+        "vehicle_access": "yes",
         "walk_access": "yes",
-        "drive_confidence": 0.25,
-        "drive_penalty": null,
+        "drive_confidence": 0.68,
+        "drive_penalty": 2.5,
         "oneway": false,
         "oneway_reverse": false
       },
       {
-        "id": "26.474513,73.114515",
-        "dist": 30.223138865341046,
+        "id": "26.474525,73.114537",
+        "dist": 31.287525469325526,
         "osm_id": "773563494",
         "type": "service",
         "highway_type": "service",
         "name": "service",
-        "navigation_class": "unpaved_service",
-        "vehicle_access": "no",
+        "navigation_class": "campus_service_connector",
+        "vehicle_access": "yes",
         "walk_access": "yes",
-        "drive_confidence": 0.25,
-        "drive_penalty": null,
+        "drive_confidence": 0.68,
+        "drive_penalty": 2.5,
         "oneway": false,
         "oneway_reverse": false
       }
     ],
-    "26.474513,73.114515": [
+    "26.474525,73.114537": [
       {
-        "id": "26.474290,73.114341",
-        "dist": 30.223138865341046,
+        "id": "26.474293,73.114360",
+        "dist": 31.287525469325526,
         "osm_id": "773563494",
         "type": "service",
         "highway_type": "service",
         "name": "service",
-        "navigation_class": "unpaved_service",
-        "vehicle_access": "no",
+        "navigation_class": "campus_service_connector",
+        "vehicle_access": "yes",
         "walk_access": "yes",
-        "drive_confidence": 0.25,
-        "drive_penalty": null,
+        "drive_confidence": 0.68,
+        "drive_penalty": 2.5,
         "oneway": false,
         "oneway_reverse": false
       },
       {
         "id": "26.474606,73.114588",
-        "dist": 12.671598234462179,
+        "dist": 10.329100322854071,
         "osm_id": "773563494",
         "type": "service",
         "highway_type": "service",
         "name": "service",
-        "navigation_class": "unpaved_service",
-        "vehicle_access": "no",
+        "navigation_class": "campus_service_connector",
+        "vehicle_access": "yes",
         "walk_access": "yes",
-        "drive_confidence": 0.25,
-        "drive_penalty": null,
+        "drive_confidence": 0.68,
+        "drive_penalty": 2.5,
         "oneway": false,
         "oneway_reverse": false
       },
       {
-        "id": "26.474255,73.114670",
-        "dist": 32.56846738585261,
+        "id": "26.474233,73.114662",
+        "dist": 34.82274589801976,
         "osm_id": "1529641605",
         "type": "path",
         "highway_type": "path",
@@ -12164,17 +12258,17 @@
     ],
     "26.474606,73.114588": [
       {
-        "id": "26.474513,73.114515",
-        "dist": 12.671598234462179,
+        "id": "26.474525,73.114537",
+        "dist": 10.329100322854071,
         "osm_id": "773563494",
         "type": "service",
         "highway_type": "service",
         "name": "service",
-        "navigation_class": "unpaved_service",
-        "vehicle_access": "no",
+        "navigation_class": "campus_service_connector",
+        "vehicle_access": "yes",
         "walk_access": "yes",
-        "drive_confidence": 0.25,
-        "drive_penalty": null,
+        "drive_confidence": 0.68,
+        "drive_penalty": 2.5,
         "oneway": false,
         "oneway_reverse": false
       },
@@ -12185,11 +12279,11 @@
         "type": "service",
         "highway_type": "service",
         "name": "service",
-        "navigation_class": "unpaved_service",
-        "vehicle_access": "no",
+        "navigation_class": "campus_service_connector",
+        "vehicle_access": "yes",
         "walk_access": "yes",
-        "drive_confidence": 0.25,
-        "drive_penalty": null,
+        "drive_confidence": 0.68,
+        "drive_penalty": 2.5,
         "oneway": false,
         "oneway_reverse": false
       },
@@ -12882,8 +12976,8 @@
         "oneway_reverse": false
       },
       {
-        "id": "26.478634,73.116161",
-        "dist": 15.49469651047154,
+        "id": "26.478630,73.116127",
+        "dist": 12.142745471220353,
         "osm_id": "1528702859",
         "type": "path",
         "highway_type": "path",
@@ -15129,8 +15223,8 @@
         "oneway_reverse": false
       },
       {
-        "id": "26.467848,73.115797",
-        "dist": 49.045693610259924,
+        "id": "26.467862,73.115772",
+        "dist": 48.876747966396884,
         "osm_id": "773563519",
         "type": "service",
         "highway_type": "service",
@@ -15144,10 +15238,10 @@
         "oneway_reverse": false
       }
     ],
-    "26.467848,73.115797": [
+    "26.467862,73.115772": [
       {
         "id": "26.467496,73.115499",
-        "dist": 49.045693610259924,
+        "dist": 48.876747966396884,
         "osm_id": "773563519",
         "type": "service",
         "highway_type": "service",
@@ -15161,8 +15255,8 @@
         "oneway_reverse": false
       },
       {
-        "id": "26.467993,73.116013",
-        "dist": 26.93428905540667,
+        "id": "26.467905,73.115797",
+        "dist": 5.424388564992257,
         "osm_id": "773563519",
         "type": "service",
         "highway_type": "service",
@@ -15176,10 +15270,10 @@
         "oneway_reverse": false
       }
     ],
-    "26.467993,73.116013": [
+    "26.467905,73.115797": [
       {
-        "id": "26.467848,73.115797",
-        "dist": 26.93428905540667,
+        "id": "26.467862,73.115772",
+        "dist": 5.424388564992257,
         "osm_id": "773563519",
         "type": "service",
         "highway_type": "service",
@@ -15193,8 +15287,55 @@
         "oneway_reverse": false
       },
       {
-        "id": "26.468074,73.116343",
-        "dist": 33.98749623864626,
+        "id": "26.467969,73.115879",
+        "dist": 10.843450652823886,
+        "osm_id": "773563519",
+        "type": "service",
+        "highway_type": "service",
+        "name": "service",
+        "navigation_class": "campus_service_connector",
+        "vehicle_access": "yes",
+        "walk_access": "yes",
+        "drive_confidence": 0.68,
+        "drive_penalty": 2.5,
+        "oneway": false,
+        "oneway_reverse": false
+      },
+      {
+        "id": "26.467955,73.115737",
+        "dist": 8.20491223799834,
+        "osm_id": "1529899559",
+        "type": "service",
+        "highway_type": "service",
+        "name": "service",
+        "navigation_class": "service_access",
+        "vehicle_access": "destination",
+        "walk_access": "yes",
+        "drive_confidence": 0.58,
+        "drive_penalty": 4,
+        "oneway": false,
+        "oneway_reverse": false
+      }
+    ],
+    "26.467969,73.115879": [
+      {
+        "id": "26.467905,73.115797",
+        "dist": 10.843450652823886,
+        "osm_id": "773563519",
+        "type": "service",
+        "highway_type": "service",
+        "name": "service",
+        "navigation_class": "campus_service_connector",
+        "vehicle_access": "yes",
+        "walk_access": "yes",
+        "drive_confidence": 0.68,
+        "drive_penalty": 2.5,
+        "oneway": false,
+        "oneway_reverse": false
+      },
+      {
+        "id": "26.468028,73.115983",
+        "dist": 12.223725657354008,
         "osm_id": "773563519",
         "type": "service",
         "highway_type": "service",
@@ -15208,10 +15349,89 @@
         "oneway_reverse": false
       }
     ],
-    "26.468074,73.116343": [
+    "26.468028,73.115983": [
       {
-        "id": "26.467993,73.116013",
-        "dist": 33.98749623864626,
+        "id": "26.467969,73.115879",
+        "dist": 12.223725657354008,
+        "osm_id": "773563519",
+        "type": "service",
+        "highway_type": "service",
+        "name": "service",
+        "navigation_class": "campus_service_connector",
+        "vehicle_access": "yes",
+        "walk_access": "yes",
+        "drive_confidence": 0.68,
+        "drive_penalty": 2.5,
+        "oneway": false,
+        "oneway_reverse": false
+      },
+      {
+        "id": "26.468038,73.116011",
+        "dist": 2.9942629465839374,
+        "osm_id": "773563519",
+        "type": "service",
+        "highway_type": "service",
+        "name": "service",
+        "navigation_class": "campus_service_connector",
+        "vehicle_access": "yes",
+        "walk_access": "yes",
+        "drive_confidence": 0.68,
+        "drive_penalty": 2.5,
+        "oneway": false,
+        "oneway_reverse": false
+      },
+      {
+        "id": "26.468130,73.115897",
+        "dist": 14.212960563633155,
+        "osm_id": "1529899559",
+        "type": "service",
+        "highway_type": "service",
+        "name": "service",
+        "navigation_class": "service_access",
+        "vehicle_access": "destination",
+        "walk_access": "yes",
+        "drive_confidence": 0.58,
+        "drive_penalty": 4,
+        "oneway": false,
+        "oneway_reverse": false
+      }
+    ],
+    "26.468038,73.116011": [
+      {
+        "id": "26.468028,73.115983",
+        "dist": 2.9942629465839374,
+        "osm_id": "773563519",
+        "type": "service",
+        "highway_type": "service",
+        "name": "service",
+        "navigation_class": "campus_service_connector",
+        "vehicle_access": "yes",
+        "walk_access": "yes",
+        "drive_confidence": 0.68,
+        "drive_penalty": 2.5,
+        "oneway": false,
+        "oneway_reverse": false
+      },
+      {
+        "id": "26.468107,73.116339",
+        "dist": 33.5435363107869,
+        "osm_id": "773563519",
+        "type": "service",
+        "highway_type": "service",
+        "name": "service",
+        "navigation_class": "campus_service_connector",
+        "vehicle_access": "yes",
+        "walk_access": "yes",
+        "drive_confidence": 0.68,
+        "drive_penalty": 2.5,
+        "oneway": false,
+        "oneway_reverse": false
+      }
+    ],
+    "26.468107,73.116339": [
+      {
+        "id": "26.468038,73.116011",
+        "dist": 33.5435363107869,
         "osm_id": "773563519",
         "type": "service",
         "highway_type": "service",
@@ -15226,7 +15446,7 @@
       },
       {
         "id": "26.468344,73.116532",
-        "dist": 35.49828712622438,
+        "dist": 32.6119010514239,
         "osm_id": "773563519",
         "type": "service",
         "highway_type": "service",
@@ -15242,8 +15462,8 @@
     ],
     "26.468344,73.116532": [
       {
-        "id": "26.468074,73.116343",
-        "dist": 35.49828712622438,
+        "id": "26.468107,73.116339",
+        "dist": 32.6119010514239,
         "osm_id": "773563519",
         "type": "service",
         "highway_type": "service",
@@ -15400,8 +15620,8 @@
         "oneway_reverse": false
       },
       {
-        "id": "26.471530,73.118769",
-        "dist": 159.75314498647785,
+        "id": "26.471215,73.118555",
+        "dist": 118.7220526909549,
         "osm_id": "773563519",
         "type": "service",
         "highway_type": "service",
@@ -15430,10 +15650,57 @@
         "oneway_reverse": false
       }
     ],
-    "26.471530,73.118769": [
+    "26.471215,73.118555": [
       {
         "id": "26.470304,73.117933",
-        "dist": 159.75314498647785,
+        "dist": 118.7220526909549,
+        "osm_id": "773563519",
+        "type": "service",
+        "highway_type": "service",
+        "name": "service",
+        "navigation_class": "campus_service_connector",
+        "vehicle_access": "yes",
+        "walk_access": "yes",
+        "drive_confidence": 0.68,
+        "drive_penalty": 2.5,
+        "oneway": false,
+        "oneway_reverse": false
+      },
+      {
+        "id": "26.471530,73.118769",
+        "dist": 41.031092388630775,
+        "osm_id": "773563519",
+        "type": "service",
+        "highway_type": "service",
+        "name": "service",
+        "navigation_class": "campus_service_connector",
+        "vehicle_access": "yes",
+        "walk_access": "yes",
+        "drive_confidence": 0.68,
+        "drive_penalty": 2.5,
+        "oneway": false,
+        "oneway_reverse": false
+      },
+      {
+        "id": "26.471325,73.118298",
+        "dist": 28.321343540942035,
+        "osm_id": "1529899557",
+        "type": "service",
+        "highway_type": "service",
+        "name": "service",
+        "navigation_class": "service_access",
+        "vehicle_access": "destination",
+        "walk_access": "yes",
+        "drive_confidence": 0.58,
+        "drive_penalty": 4,
+        "oneway": false,
+        "oneway_reverse": false
+      }
+    ],
+    "26.471530,73.118769": [
+      {
+        "id": "26.471215,73.118555",
+        "dist": 41.031092388630775,
         "osm_id": "773563519",
         "type": "service",
         "highway_type": "service",
@@ -29795,21 +30062,6 @@
         "walk_access": "yes",
         "drive_confidence": 0.86,
         "drive_penalty": 1.22,
-        "oneway": false,
-        "oneway_reverse": false
-      },
-      {
-        "id": "26.465874,73.122790",
-        "dist": 37.31442036312849,
-        "osm_id": "914954874",
-        "type": "service",
-        "highway_type": "service",
-        "name": "service",
-        "navigation_class": "service_access",
-        "vehicle_access": "destination",
-        "walk_access": "yes",
-        "drive_confidence": 0.58,
-        "drive_penalty": 4,
         "oneway": false,
         "oneway_reverse": false
       }
@@ -48359,119 +48611,6 @@
         "oneway_reverse": false
       }
     ],
-    "26.465874,73.122790": [
-      {
-        "id": "26.465842,73.122417",
-        "dist": 37.31442036312849,
-        "osm_id": "914954874",
-        "type": "service",
-        "highway_type": "service",
-        "name": "service",
-        "navigation_class": "service_access",
-        "vehicle_access": "destination",
-        "walk_access": "yes",
-        "drive_confidence": 0.58,
-        "drive_penalty": 4,
-        "oneway": false,
-        "oneway_reverse": false
-      },
-      {
-        "id": "26.465888,73.122978",
-        "dist": 18.752460608751356,
-        "osm_id": "914954874",
-        "type": "service",
-        "highway_type": "service",
-        "name": "service",
-        "navigation_class": "service_access",
-        "vehicle_access": "destination",
-        "walk_access": "yes",
-        "drive_confidence": 0.58,
-        "drive_penalty": 4,
-        "oneway": false,
-        "oneway_reverse": false
-      }
-    ],
-    "26.465888,73.122978": [
-      {
-        "id": "26.465874,73.122790",
-        "dist": 18.752460608751356,
-        "osm_id": "914954874",
-        "type": "service",
-        "highway_type": "service",
-        "name": "service",
-        "navigation_class": "service_access",
-        "vehicle_access": "destination",
-        "walk_access": "yes",
-        "drive_confidence": 0.58,
-        "drive_penalty": 4,
-        "oneway": false,
-        "oneway_reverse": false
-      },
-      {
-        "id": "26.465905,73.123101",
-        "dist": 12.426356412027916,
-        "osm_id": "914954874",
-        "type": "service",
-        "highway_type": "service",
-        "name": "service",
-        "navigation_class": "service_access",
-        "vehicle_access": "destination",
-        "walk_access": "yes",
-        "drive_confidence": 0.58,
-        "drive_penalty": 4,
-        "oneway": false,
-        "oneway_reverse": false
-      }
-    ],
-    "26.465905,73.123101": [
-      {
-        "id": "26.465888,73.122978",
-        "dist": 12.426356412027916,
-        "osm_id": "914954874",
-        "type": "service",
-        "highway_type": "service",
-        "name": "service",
-        "navigation_class": "service_access",
-        "vehicle_access": "destination",
-        "walk_access": "yes",
-        "drive_confidence": 0.58,
-        "drive_penalty": 4,
-        "oneway": false,
-        "oneway_reverse": false
-      },
-      {
-        "id": "26.465919,73.123215",
-        "dist": 11.415546392011667,
-        "osm_id": "914954874",
-        "type": "service",
-        "highway_type": "service",
-        "name": "service",
-        "navigation_class": "service_access",
-        "vehicle_access": "destination",
-        "walk_access": "yes",
-        "drive_confidence": 0.58,
-        "drive_penalty": 4,
-        "oneway": false,
-        "oneway_reverse": false
-      }
-    ],
-    "26.465919,73.123215": [
-      {
-        "id": "26.465905,73.123101",
-        "dist": 11.415546392011667,
-        "osm_id": "914954874",
-        "type": "service",
-        "highway_type": "service",
-        "name": "service",
-        "navigation_class": "service_access",
-        "vehicle_access": "destination",
-        "walk_access": "yes",
-        "drive_confidence": 0.58,
-        "drive_penalty": 4,
-        "oneway": false,
-        "oneway_reverse": false
-      }
-    ],
     "26.465128,73.125698": [
       {
         "id": "26.465051,73.125500",
@@ -60993,8 +61132,8 @@
     ],
     "26.476039,73.119491": [
       {
-        "id": "26.476095,73.119367",
-        "dist": 13.773374352078607,
+        "id": "26.476078,73.119398",
+        "dist": 10.18925683742481,
         "osm_id": "1412392595",
         "type": "footway",
         "highway_type": "footway",
@@ -62395,8 +62534,8 @@
         "oneway_reverse": false
       },
       {
-        "id": "26.477987,73.111340",
-        "dist": 8.635228912893364,
+        "id": "26.478024,73.111297",
+        "dist": 14.451959022175904,
         "osm_id": "1412504083",
         "type": "service",
         "highway_type": "service",
@@ -65119,10 +65258,10 @@
         "oneway_reverse": false
       }
     ],
-    "26.477987,73.111340": [
+    "26.478024,73.111297": [
       {
         "id": "26.477949,73.111416",
-        "dist": 8.635228912893364,
+        "dist": 14.451959022175904,
         "osm_id": "1412504083",
         "type": "service",
         "highway_type": "service",
@@ -70877,10 +71016,10 @@
         "oneway_reverse": false
       }
     ],
-    "26.478634,73.116161": [
+    "26.478630,73.116127": [
       {
         "id": "26.478630,73.116005",
-        "dist": 15.49469651047154,
+        "dist": 12.142745471220353,
         "osm_id": "1528702859",
         "type": "path",
         "highway_type": "path",
@@ -72739,10 +72878,10 @@
         "oneway_reverse": false
       }
     ],
-    "26.472956,73.113793": [
+    "26.472862,73.113791": [
       {
-        "id": "26.472960,73.113704",
-        "dist": 8.850508034350273,
+        "id": "26.472866,73.113702",
+        "dist": 8.85051525376723,
         "osm_id": "1528715815",
         "type": "path",
         "highway_type": "path",
@@ -73509,8 +73648,8 @@
         "oneway_reverse": false
       },
       {
-        "id": "26.474255,73.114670",
-        "dist": 27.08805152429839,
+        "id": "26.474233,73.114662",
+        "dist": 24.630045346717825,
         "osm_id": "1529641605",
         "type": "path",
         "highway_type": "path",
@@ -73524,10 +73663,10 @@
         "oneway_reverse": false
       }
     ],
-    "26.474255,73.114670": [
+    "26.474233,73.114662": [
       {
         "id": "26.474011,73.114672",
-        "dist": 27.08805152429839,
+        "dist": 24.630045346717825,
         "osm_id": "1529641605",
         "type": "path",
         "highway_type": "path",
@@ -73541,8 +73680,8 @@
         "oneway_reverse": false
       },
       {
-        "id": "26.474513,73.114515",
-        "dist": 32.56846738585261,
+        "id": "26.474525,73.114537",
+        "dist": 34.82274589801976,
         "osm_id": "1529641605",
         "type": "path",
         "highway_type": "path",
@@ -75009,6 +75148,21 @@
         "drive_penalty": null,
         "oneway": false,
         "oneway_reverse": false
+      },
+      {
+        "id": "26.476568,73.119740",
+        "dist": 5.003837848717244,
+        "osm_id": "1529899553",
+        "type": "footway",
+        "highway_type": "footway",
+        "name": "footway",
+        "navigation_class": "pedestrian_path",
+        "vehicle_access": "no",
+        "walk_access": "yes",
+        "drive_confidence": 0,
+        "drive_penalty": null,
+        "oneway": false,
+        "oneway_reverse": false
       }
     ],
     "26.476624,73.119809": [
@@ -75105,6 +75259,21 @@
         "drive_penalty": null,
         "oneway": false,
         "oneway_reverse": false
+      },
+      {
+        "id": "26.476508,73.119803",
+        "dist": 5.140830949927988,
+        "osm_id": "1529899553",
+        "type": "footway",
+        "highway_type": "footway",
+        "name": "footway",
+        "navigation_class": "pedestrian_path",
+        "vehicle_access": "no",
+        "walk_access": "yes",
+        "drive_confidence": 0,
+        "drive_penalty": null,
+        "oneway": false,
+        "oneway_reverse": false
       }
     ],
     "26.476478,73.119896": [
@@ -75120,6 +75289,279 @@
         "walk_access": "yes",
         "drive_confidence": 0,
         "drive_penalty": null,
+        "oneway": false,
+        "oneway_reverse": false
+      }
+    ],
+    "26.476568,73.119740": [
+      {
+        "id": "26.476601,73.119775",
+        "dist": 5.003837848717244,
+        "osm_id": "1529899553",
+        "type": "footway",
+        "highway_type": "footway",
+        "name": "footway",
+        "navigation_class": "pedestrian_path",
+        "vehicle_access": "no",
+        "walk_access": "yes",
+        "drive_confidence": 0,
+        "drive_penalty": null,
+        "oneway": false,
+        "oneway_reverse": false
+      },
+      {
+        "id": "26.476508,73.119803",
+        "dist": 9.203569917441586,
+        "osm_id": "1529899553",
+        "type": "footway",
+        "highway_type": "footway",
+        "name": "footway",
+        "navigation_class": "pedestrian_path",
+        "vehicle_access": "no",
+        "walk_access": "yes",
+        "drive_confidence": 0,
+        "drive_penalty": null,
+        "oneway": false,
+        "oneway_reverse": false
+      }
+    ],
+    "26.476508,73.119803": [
+      {
+        "id": "26.476568,73.119740",
+        "dist": 9.203569917441586,
+        "osm_id": "1529899553",
+        "type": "footway",
+        "highway_type": "footway",
+        "name": "footway",
+        "navigation_class": "pedestrian_path",
+        "vehicle_access": "no",
+        "walk_access": "yes",
+        "drive_confidence": 0,
+        "drive_penalty": null,
+        "oneway": false,
+        "oneway_reverse": false
+      },
+      {
+        "id": "26.476536,73.119844",
+        "dist": 5.140830949927988,
+        "osm_id": "1529899553",
+        "type": "footway",
+        "highway_type": "footway",
+        "name": "footway",
+        "navigation_class": "pedestrian_path",
+        "vehicle_access": "no",
+        "walk_access": "yes",
+        "drive_confidence": 0,
+        "drive_penalty": null,
+        "oneway": false,
+        "oneway_reverse": false
+      }
+    ],
+    "26.471375,73.118302": [
+      {
+        "id": "26.471325,73.118298",
+        "dist": 5.640532849904881,
+        "osm_id": "1529899557",
+        "type": "service",
+        "highway_type": "service",
+        "name": "service",
+        "navigation_class": "service_access",
+        "vehicle_access": "destination",
+        "walk_access": "yes",
+        "drive_confidence": 0.58,
+        "drive_penalty": 4,
+        "oneway": false,
+        "oneway_reverse": false
+      }
+    ],
+    "26.471325,73.118298": [
+      {
+        "id": "26.471375,73.118302",
+        "dist": 5.640532849904881,
+        "osm_id": "1529899557",
+        "type": "service",
+        "highway_type": "service",
+        "name": "service",
+        "navigation_class": "service_access",
+        "vehicle_access": "destination",
+        "walk_access": "yes",
+        "drive_confidence": 0.58,
+        "drive_penalty": 4,
+        "oneway": false,
+        "oneway_reverse": false
+      },
+      {
+        "id": "26.471215,73.118555",
+        "dist": 28.321343540942035,
+        "osm_id": "1529899557",
+        "type": "service",
+        "highway_type": "service",
+        "name": "service",
+        "navigation_class": "service_access",
+        "vehicle_access": "destination",
+        "walk_access": "yes",
+        "drive_confidence": 0.58,
+        "drive_penalty": 4,
+        "oneway": false,
+        "oneway_reverse": false
+      }
+    ],
+    "26.467955,73.115737": [
+      {
+        "id": "26.467905,73.115797",
+        "dist": 8.20491223799834,
+        "osm_id": "1529899559",
+        "type": "service",
+        "highway_type": "service",
+        "name": "service",
+        "navigation_class": "service_access",
+        "vehicle_access": "destination",
+        "walk_access": "yes",
+        "drive_confidence": 0.58,
+        "drive_penalty": 4,
+        "oneway": false,
+        "oneway_reverse": false
+      },
+      {
+        "id": "26.468006,73.115701",
+        "dist": 6.738973560288577,
+        "osm_id": "1529899559",
+        "type": "service",
+        "highway_type": "service",
+        "name": "service",
+        "navigation_class": "service_access",
+        "vehicle_access": "destination",
+        "walk_access": "yes",
+        "drive_confidence": 0.58,
+        "drive_penalty": 4,
+        "oneway": false,
+        "oneway_reverse": false
+      }
+    ],
+    "26.468006,73.115701": [
+      {
+        "id": "26.467955,73.115737",
+        "dist": 6.738973560288577,
+        "osm_id": "1529899559",
+        "type": "service",
+        "highway_type": "service",
+        "name": "service",
+        "navigation_class": "service_access",
+        "vehicle_access": "destination",
+        "walk_access": "yes",
+        "drive_confidence": 0.58,
+        "drive_penalty": 4,
+        "oneway": false,
+        "oneway_reverse": false
+      },
+      {
+        "id": "26.468094,73.115705",
+        "dist": 9.703965750831923,
+        "osm_id": "1529899559",
+        "type": "service",
+        "highway_type": "service",
+        "name": "service",
+        "navigation_class": "service_access",
+        "vehicle_access": "destination",
+        "walk_access": "yes",
+        "drive_confidence": 0.58,
+        "drive_penalty": 4,
+        "oneway": false,
+        "oneway_reverse": false
+      }
+    ],
+    "26.468094,73.115705": [
+      {
+        "id": "26.468006,73.115701",
+        "dist": 9.703965750831923,
+        "osm_id": "1529899559",
+        "type": "service",
+        "highway_type": "service",
+        "name": "service",
+        "navigation_class": "service_access",
+        "vehicle_access": "destination",
+        "walk_access": "yes",
+        "drive_confidence": 0.58,
+        "drive_penalty": 4,
+        "oneway": false,
+        "oneway_reverse": false
+      },
+      {
+        "id": "26.468149,73.115788",
+        "dist": 10.333540308066945,
+        "osm_id": "1529899559",
+        "type": "service",
+        "highway_type": "service",
+        "name": "service",
+        "navigation_class": "service_access",
+        "vehicle_access": "destination",
+        "walk_access": "yes",
+        "drive_confidence": 0.58,
+        "drive_penalty": 4,
+        "oneway": false,
+        "oneway_reverse": false
+      }
+    ],
+    "26.468149,73.115788": [
+      {
+        "id": "26.468094,73.115705",
+        "dist": 10.333540308066945,
+        "osm_id": "1529899559",
+        "type": "service",
+        "highway_type": "service",
+        "name": "service",
+        "navigation_class": "service_access",
+        "vehicle_access": "destination",
+        "walk_access": "yes",
+        "drive_confidence": 0.58,
+        "drive_penalty": 4,
+        "oneway": false,
+        "oneway_reverse": false
+      },
+      {
+        "id": "26.468130,73.115897",
+        "dist": 11.078510608017021,
+        "osm_id": "1529899559",
+        "type": "service",
+        "highway_type": "service",
+        "name": "service",
+        "navigation_class": "service_access",
+        "vehicle_access": "destination",
+        "walk_access": "yes",
+        "drive_confidence": 0.58,
+        "drive_penalty": 4,
+        "oneway": false,
+        "oneway_reverse": false
+      }
+    ],
+    "26.468130,73.115897": [
+      {
+        "id": "26.468149,73.115788",
+        "dist": 11.078510608017021,
+        "osm_id": "1529899559",
+        "type": "service",
+        "highway_type": "service",
+        "name": "service",
+        "navigation_class": "service_access",
+        "vehicle_access": "destination",
+        "walk_access": "yes",
+        "drive_confidence": 0.58,
+        "drive_penalty": 4,
+        "oneway": false,
+        "oneway_reverse": false
+      },
+      {
+        "id": "26.468028,73.115983",
+        "dist": 14.212960563633155,
+        "osm_id": "1529899559",
+        "type": "service",
+        "highway_type": "service",
+        "name": "service",
+        "navigation_class": "service_access",
+        "vehicle_access": "destination",
+        "walk_access": "yes",
+        "drive_confidence": 0.58,
+        "drive_penalty": 4,
         "oneway": false,
         "oneway_reverse": false
       }
@@ -153150,9 +153592,13 @@
       73.1206568,
       26.4740609
     ],
-    "26.476095,73.119367": [
-      73.1193674,
-      26.4760952
+    "26.476078,73.119398": [
+      73.119398,
+      26.4760778
+    ],
+    "26.476122,73.119429": [
+      73.1194289,
+      26.4761225
     ],
     "26.476136,73.119460": [
       73.1194596,
@@ -153366,6 +153812,10 @@
       73.1115146,
       26.4658866
     ],
+    "26.476630,73.118659": [
+      73.1186587,
+      26.4766301
+    ],
     "26.476892,73.118901": [
       73.1189013,
       26.4768923
@@ -153486,9 +153936,9 @@
       73.1136951,
       26.4723521
     ],
-    "26.472960,73.113704": [
-      73.1137037,
-      26.47296
+    "26.472866,73.113702": [
+      73.1137024,
+      26.4728659
     ],
     "26.473225,73.113708": [
       73.1137075,
@@ -153514,17 +153964,17 @@
       73.1139755,
       26.4734892
     ],
-    "26.474107,73.114213": [
-      73.1142131,
+    "26.474107,73.114251": [
+      73.1142507,
       26.4741067
     ],
-    "26.474290,73.114341": [
-      73.1143407,
-      26.4742903
+    "26.474293,73.114360": [
+      73.1143595,
+      26.4742931
     ],
-    "26.474513,73.114515": [
-      73.1145151,
-      26.4745128
+    "26.474525,73.114537": [
+      73.1145372,
+      26.4745252
     ],
     "26.474606,73.114588": [
       73.1145882,
@@ -153790,17 +154240,29 @@
       73.1154989,
       26.4674962
     ],
-    "26.467848,73.115797": [
-      73.1157967,
-      26.4678476
+    "26.467862,73.115772": [
+      73.115772,
+      26.4678615
     ],
-    "26.467993,73.116013": [
-      73.1160132,
-      26.4679929
+    "26.467905,73.115797": [
+      73.1157971,
+      26.4679048
     ],
-    "26.468074,73.116343": [
-      73.1163425,
-      26.4680737
+    "26.467969,73.115879": [
+      73.115879,
+      26.4679691
+    ],
+    "26.468028,73.115983": [
+      73.1159829,
+      26.4680277
+    ],
+    "26.468038,73.116011": [
+      73.1160106,
+      26.4680382
+    ],
+    "26.468107,73.116339": [
+      73.1163386,
+      26.4681074
     ],
     "26.468344,73.116532": [
       73.1165319,
@@ -153821,6 +154283,10 @@
     "26.470304,73.117933": [
       73.1179334,
       26.4703039
+    ],
+    "26.471215,73.118555": [
+      73.1185547,
+      26.4712153
     ],
     "26.471530,73.118769": [
       73.1187694,
@@ -157670,22 +158136,6 @@
       73.1263782,
       26.4783388
     ],
-    "26.465874,73.122790": [
-      73.1227899,
-      26.4658741
-    ],
-    "26.465888,73.122978": [
-      73.1229776,
-      26.4658885
-    ],
-    "26.465905,73.123101": [
-      73.123101,
-      26.4659054
-    ],
-    "26.465919,73.123215": [
-      73.1232147,
-      26.4659188
-    ],
     "26.465128,73.125698": [
       73.1256983,
       26.4651278
@@ -159630,9 +160080,9 @@
       73.1126819,
       26.4780073
     ],
-    "26.477987,73.111340": [
-      73.1113401,
-      26.4779873
+    "26.478024,73.111297": [
+      73.1112968,
+      26.4780238
     ],
     "26.477166,73.111927": [
       73.1119269,
@@ -160346,9 +160796,9 @@
       73.1168443,
       26.4796724
     ],
-    "26.478634,73.116161": [
-      73.1161608,
-      26.4786345
+    "26.478630,73.116127": [
+      73.1161272,
+      26.4786302
     ],
     "26.480173,73.117019": [
       73.117019,
@@ -160590,9 +161040,9 @@
       73.1149523,
       26.4760602
     ],
-    "26.472956,73.113793": [
-      73.1137925,
-      26.4729559
+    "26.472862,73.113791": [
+      73.1137912,
+      26.4728618
     ],
     "26.473415,73.114847": [
       73.1148467,
@@ -160690,9 +161140,9 @@
       73.1146725,
       26.4740113
     ],
-    "26.474255,73.114670": [
-      73.1146702,
-      26.4742549
+    "26.474233,73.114662": [
+      73.1146619,
+      26.4742326
     ],
     "26.474574,73.110536": [
       73.1105361,
@@ -160889,6 +161339,42 @@
     "26.476478,73.119896": [
       73.1198962,
       26.4764785
+    ],
+    "26.476568,73.119740": [
+      73.1197402,
+      26.4765685
+    ],
+    "26.476508,73.119803": [
+      73.1198027,
+      26.4765075
+    ],
+    "26.471375,73.118302": [
+      73.1183017,
+      26.4713752
+    ],
+    "26.471325,73.118298": [
+      73.1182977,
+      26.4713246
+    ],
+    "26.467955,73.115737": [
+      73.115737,
+      26.4679553
+    ],
+    "26.468006,73.115701": [
+      73.1157006,
+      26.4680064
+    ],
+    "26.468094,73.115705": [
+      73.1157045,
+      26.4680936
+    ],
+    "26.468149,73.115788": [
+      73.1157876,
+      26.4681493
+    ],
+    "26.468130,73.115897": [
+      73.1158967,
+      26.4681296
     ],
     "26.486040,73.126929": [
       73.1269289,
