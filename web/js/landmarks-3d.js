@@ -5502,6 +5502,21 @@ var Landmarks3D = (() => {
                    [73.1101340,26.4723533],[73.1101839,26.4722519],
                    [73.1102375,26.4721522],[73.1102949,26.4720544],
                    [73.1103563,26.4719586]],
+    // 746 — SW-corner berm bridging green West and green Central. Its raw OSM
+    // ring fits to a near-straight centre-line that ignores the perimeter curve
+    // and leaves a kink at each green neighbour. This Hermite curve instead
+    // matches green West's end tangent and green Central's start tangent, so the
+    // campus wall lands EXACTLY on each green wall endpoint (0.1 m) and the berm
+    // bows along the perimeter (14° turn) — continuous with the adjacent berms.
+    '1412399746': [[73.1114458,26.4709836],[73.1114937,26.4709531],
+                   [73.1115532,26.4709178],[73.1116230,26.4708784],
+                   [73.1117015,26.4708356],[73.1117870,26.4707903],
+                   [73.1118780,26.4707431],[73.1119728,26.4706951],
+                   [73.1120697,26.4706469],[73.1121670,26.4705995],
+                   [73.1122631,26.4705536],[73.1123563,26.4705101],
+                   [73.1124450,26.4704699],[73.1125275,26.4704338],
+                   [73.1126023,26.4704025],[73.1126678,26.4703769],
+                   [73.1127229,26.4703576]],
   };
 
   // Build every campus berm: 8 hostel wave berms (real footprints) + the three
