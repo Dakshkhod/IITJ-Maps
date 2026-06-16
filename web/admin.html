@@ -6,8 +6,12 @@
   <title>IITJ Maps — Admin Review</title>
   <meta name="theme-color" content="#0a0a0a">
 
-  <link href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" rel="stylesheet">
-  <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+  <link href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" rel="stylesheet"
+        integrity="sha384-MinO0mNliZ3vwppuPOUnGa+iq619pfMhLVUXfC4LHwSCvF9H+6P/KO4Q7qBOYV5V"
+        crossorigin="anonymous" referrerpolicy="no-referrer">
+  <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"
+          integrity="sha384-SYKAG6cglRMN0RVvhNeBY0r3FYKNOJtznwA0v7B5Vp9tr31xAHsZC0DqkQ/pZDmj"
+          crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -15,17 +19,6 @@
   <link rel="stylesheet" href="css/admin.css">
 </head>
 <body>
-  <!-- Passphrase gate (client-side only — for casual deterrence) -->
-  <div id="gate" class="gate">
-    <div class="gate-card">
-      <h1>Admin Review</h1>
-      <p>Enter the admin passphrase to continue.</p>
-      <input id="gate-input" type="password" placeholder="Passphrase" autocomplete="off">
-      <button id="gate-btn">Unlock</button>
-      <p class="gate-hint">First-time setup: any passphrase you enter will be saved to this browser. Clear localStorage to reset.</p>
-    </div>
-  </div>
-
   <div id="app" class="hidden">
     <!-- Top bar -->
     <header class="topbar">
@@ -75,54 +68,27 @@
       <div class="modal-backdrop"></div>
       <div class="modal-card">
         <header class="modal-head">
-          <h2>GitHub publishing</h2>
+          <h2>Admin login</h2>
           <button id="settings-close" class="modal-close" aria-label="Close">×</button>
         </header>
         <div class="modal-body">
           <p class="modal-intro">
-            Configure direct publish so clicking <strong>Publish to live site</strong>
-            commits <code>web/data/overlay.json</code> to your repo through the GitHub API.
-            Vercel will auto-redeploy from there.
+            Enter the admin password to publish the accepted overlay to the live site.
+            The GitHub credentials live only on the server — nothing sensitive is stored
+            in this browser. Your session lasts a few hours, then you log in again.
           </p>
 
-          <div class="form-row">
-            <label for="cfg-owner">Repo owner</label>
-            <input id="cfg-owner" type="text" placeholder="Dakshkhod" autocomplete="off" spellcheck="false">
-            <span class="form-hint">The GitHub user or organisation that owns the repository.</span>
-          </div>
-
-          <div class="form-row">
-            <label for="cfg-repo">Repo name</label>
-            <input id="cfg-repo" type="text" placeholder="IITJ-Maps" autocomplete="off" spellcheck="false">
-          </div>
-
-          <div class="form-row">
-            <label for="cfg-branch">Branch</label>
-            <input id="cfg-branch" type="text" placeholder="main" autocomplete="off" spellcheck="false">
-            <span class="form-hint">The branch Vercel deploys from (usually <code>main</code>).</span>
-          </div>
-
-          <div class="form-row">
-            <label for="cfg-path">File path</label>
-            <input id="cfg-path" type="text" placeholder="web/data/overlay.json" autocomplete="off" spellcheck="false">
-          </div>
-
-          <div class="form-row">
-            <label for="cfg-token">Personal Access Token</label>
-            <input id="cfg-token" type="password" placeholder="github_pat_…" autocomplete="off" spellcheck="false">
-            <span class="form-hint">
-              Stored only in this browser's localStorage. Create a
-              <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">fine-grained PAT</a>
-              scoped to <em>only</em> the IITJ Maps repo with <strong>Contents: Read &amp; write</strong>. Revoke it anytime.
-            </span>
-          </div>
-
-          <div class="form-status" id="settings-status"></div>
+          <form id="login-form" autocomplete="off">
+            <div class="form-row">
+              <label for="cfg-password">Admin password</label>
+              <input id="cfg-password" type="password" placeholder="••••••••" autocomplete="current-password" spellcheck="false">
+            </div>
+            <div class="form-status" id="settings-status"></div>
+          </form>
         </div>
         <footer class="modal-foot">
-          <button class="btn btn-ghost" id="settings-test">Test connection</button>
-          <button class="btn btn-ghost" id="settings-forget">Forget token</button>
-          <button class="btn btn-primary" id="settings-save">Save</button>
+          <button class="btn btn-ghost" id="settings-logout" type="button">Log out</button>
+          <button class="btn btn-primary" id="settings-save" type="submit" form="login-form">Log in &amp; publish</button>
         </footer>
       </div>
     </div>
@@ -239,6 +205,6 @@
   </div>
 
   <script src="js/data-overlay.js?v=3"></script>
-  <script src="js/admin.js?v=3"></script>
+  <script src="js/admin.js?v=5"></script>
 </body>
 </html>

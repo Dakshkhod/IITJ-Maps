@@ -1609,12 +1609,12 @@ async function performSearch(query) {
         <div class="search-result-item"
              data-lat="${item.lat}" data-lng="${item.lng}"
              data-name="${escapeHtml(item.name)}"
-             data-category="${item.category}"
+             data-category="${escapeHtml(item.category)}"
              data-desc="${escapeHtml(item.description || '')}">
           <div class="result-icon">${style.abbr}</div>
           <div class="result-info">
             <div class="result-name">${escapeHtml(item.name)}${badge}</div>
-            <div class="result-category">${style.label || item.category}</div>
+            <div class="result-category">${escapeHtml(style.label || item.category)}</div>
           </div>
           ${dist}
         </div>`;
@@ -1993,7 +1993,7 @@ function renderDirResults(target, query) {
     return `<div class="dir-result-item" data-lat="${item.lat}" data-lng="${item.lng}" data-name="${escapeHtml(item.name)}">
       <div class="result-icon">${style.abbr}</div>
       <div class="result-info"><div class="result-name">${escapeHtml(item.name)}</div>
-      <div class="result-category">${style.label || item.category}</div></div>
+      <div class="result-category">${escapeHtml(style.label || item.category)}</div></div>
     </div>`;
   }).join('');
   container.querySelectorAll('.dir-result-item[data-lat]').forEach(el => {
@@ -3277,7 +3277,7 @@ function showToast(msg, type = 'info', duration = 2800) {
   const t = document.createElement('div');
   t.id = 'toast';
   t.className = `toast toast-${type}`;
-  t.innerHTML = `<span class="toast-dot"></span><span>${msg}</span>`;
+  t.innerHTML = `<span class="toast-dot"></span><span>${escapeHtml(msg)}</span>`;
   document.body.appendChild(t);
   requestAnimationFrame(() => t.classList.add('visible'));
   setTimeout(() => { t.classList.remove('visible'); setTimeout(() => t.remove(), 300); }, duration);
@@ -3289,7 +3289,7 @@ function showLoadingToast(msg) {
   const t = document.createElement('div');
   t.id = 'toast-loading';
   t.className = 'toast toast-info';
-  t.innerHTML = `<span class="toast-spinner"></span><span>${msg}</span>`;
+  t.innerHTML = `<span class="toast-spinner"></span><span>${escapeHtml(msg)}</span>`;
   document.body.appendChild(t);
   requestAnimationFrame(() => t.classList.add('visible'));
 }

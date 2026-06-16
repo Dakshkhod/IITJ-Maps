@@ -4812,7 +4812,9 @@ var Landmarks3D = (() => {
     const sun = new THREE.DirectionalLight(0xffffff, 1.05);
     sun.position.set(0.5, -1, 0.8).normalize();
     _scene.add(sun);
-    const fill = new THREE.DirectionalLight(0xfff2d5, 0.45);
+    // Neutral white fill (was warm cream 0xfff2d5, which cast an orange/yellow
+    // tint on the sunlit walls — read as a "shadow" beneath the pale roofs).
+    const fill = new THREE.DirectionalLight(0xffffff, 0.45);
     fill.position.set(-0.7, 0.6, 0.4).normalize();
     _scene.add(fill);
     _scene.add(new THREE.AmbientLight(0xffffff, 0.35));
@@ -5916,11 +5918,14 @@ var Landmarks3D = (() => {
   function _raise() {
     if (!_map) return;
     if (_map.getLayer(LAYER_ID)) try { _map.moveLayer(LAYER_ID); } catch (_) {}
-    // In 3D, the place markers + labels (e.g. the perimeter W/E unit codes)
-    // would otherwise be drawn under the 3D building meshes. Lift them above
-    // the mesh — same treatment the landmark labels get below.
+    // In 3D, every name/marker layer would otherwise be drawn under the 3D
+    // building & landmark meshes. Lift them above the mesh — same treatment the
+    // landmark labels get below. moveLayer() raises to the very TOP each call,
+    // so list these bottom-to-top: area names ("TRANSIT ACCOMMODATION", "Tank
+    // at Shaurya Sthal", the Type-B code) and building names were the layers
+    // still buried under the custom models; POI markers stay above them.
     if (_labelOpts.is3D) {
-      for (const id of ['places-circles', 'places-labels']) {
+      for (const id of ['areas-labels', 'buildings-labels', 'places-circles', 'places-labels']) {
         if (_map.getLayer(id)) try { _map.moveLayer(id); } catch (_) {}
       }
     }

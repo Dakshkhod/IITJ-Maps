@@ -10,13 +10,25 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
-  <link href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" rel="stylesheet">
-  <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+  <!-- Pinned CDN deps with Subresource Integrity (SRI) + CORS, so a tampered
+       or substituted file from the CDN is rejected by the browser. -->
+  <link href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" rel="stylesheet"
+        integrity="sha384-MinO0mNliZ3vwppuPOUnGa+iq619pfMhLVUXfC4LHwSCvF9H+6P/KO4Q7qBOYV5V"
+        crossorigin="anonymous" referrerpolicy="no-referrer">
+  <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"
+          integrity="sha384-SYKAG6cglRMN0RVvhNeBY0r3FYKNOJtznwA0v7B5Vp9tr31xAHsZC0DqkQ/pZDmj"
+          crossorigin="anonymous" referrerpolicy="no-referrer"></script>
   <!-- Three.js for the 3D landmark models (r144 is the last release that
        still ships the UMD examples/js loaders) -->
-  <script src="https://unpkg.com/three@0.144.0/build/three.min.js" defer></script>
-  <script src="https://unpkg.com/three@0.144.0/examples/js/loaders/OBJLoader.js" defer></script>
-  <script src="https://unpkg.com/three@0.144.0/examples/js/loaders/GLTFLoader.js" defer></script>
+  <script src="https://unpkg.com/three@0.144.0/build/three.min.js" defer
+          integrity="sha384-UeYnsImn15wLN2RmvFuufa/wN6Ijws5LkdZpyhjfHnqKY30zmWvm67bpzAz0HLT8"
+          crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script src="https://unpkg.com/three@0.144.0/examples/js/loaders/OBJLoader.js" defer
+          integrity="sha384-MQumaiEfGDwXNviMfAi7dVi/OySNARdLBSTN9g9G0ZRqzyBjGt+WwjcFUzjY1jRa"
+          crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script src="https://unpkg.com/three@0.144.0/examples/js/loaders/GLTFLoader.js" defer
+          integrity="sha384-+T7zyJFelhxfE6dSQZg8EjauzcjsATKxdLDTMduCAXFzqTsOqUuYb5sjSTj00Kb3"
+          crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -345,6 +357,10 @@
           <span class="menu-item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg></span>
           <span>About IITJ Maps</span>
         </a>
+        <a class="menu-item" id="menu-privacy" href="privacy.html" target="_blank" rel="noopener">
+          <span class="menu-item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></span>
+          <span>Privacy</span>
+        </a>
       </div>
       <div class="menu-footer">IIT Jodhpur · Campus Navigation</div>
     </div>
@@ -354,7 +370,7 @@
   <script src="js/data-overlay.js"></script>
   <script src="js/search.js?v=35"></script>
   <script src="js/routing.js?v=32"></script>
-  <script src="js/landmarks-3d.js?v=32" defer></script>
-  <script src="js/app.js?v=29"></script>
+  <script src="js/landmarks-3d.js?v=34" defer></script>
+  <script src="js/app.js?v=30"></script>
 </body>
 </html>
