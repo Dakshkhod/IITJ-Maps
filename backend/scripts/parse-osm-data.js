@@ -785,11 +785,19 @@ function snapPerimeterCodes(places) {
   const ELIGIBILITY_M = 25;
   const OVERFLOW_M    = 120;
 
-  // 1. Collect every sandstone-gate center across all berm ribbons. For
-  //    ribbons 746/747 the 3D mesh is built from BERM_CL_OVERRIDE (not the
+  // 1. Collect every sandstone-gate center across the BLUE wave-berm ribbons.
+  //    For ribbons 746/747 the 3D mesh is built from BERM_CL_OVERRIDE (not the
   //    raw OSM polygon centerline), so step gates along that path instead.
+  //    The SOUTH-edge ways (742/756/757) are rendered as the GREEN terraced
+  //    landscape berm, NOT as blue ribbons (see landmarks-3d.js BERM_IDS), and
+  //    OSM already places the south E-codes / W-1 right on that green crest
+  //    (1.7-4.7 m). Snapping them to these ribbons' centerlines would drag them
+  //    ~15 m inward off the green berm, so they are excluded here — the south
+  //    POIs keep their accurate raw OSM positions on the green slope.
+  const GREEN_BERM_IDS = new Set(['1412399742', '1412399756', '1412399757']);
   const gates = [];
   for (const id of Object.keys(BERM_RINGS)) {
+    if (GREEN_BERM_IDS.has(id)) continue;
     const centers = BERM_CL_OVERRIDE[id]
       ? pathGateCenters(BERM_CL_OVERRIDE[id])
       : ribbonGateCenters(BERM_RINGS[id]);

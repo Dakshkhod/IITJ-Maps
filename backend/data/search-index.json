@@ -71,8 +71,8 @@
     "category": "academic",
     "description": "Civil Department laboratory",
     "keywords": [],
-    "lat": 26.470021338256828,
-    "lng": 73.11412915620637,
+    "lat": 26.4701657,
+    "lng": 73.1141367,
     "source": "osm",
     "is_proposed": false
   },
@@ -82,8 +82,8 @@
     "category": "academic",
     "description": "Civil Department laboratory",
     "keywords": [],
-    "lat": 26.470058631880942,
-    "lng": 73.11457712371198,
+    "lat": 26.4702127,
+    "lng": 73.114562,
     "source": "osm",
     "is_proposed": false
   },
@@ -93,8 +93,8 @@
     "category": "academic",
     "description": "Civil Department laboratory",
     "keywords": [],
-    "lat": 26.470135296153618,
-    "lng": 73.11501877185054,
+    "lat": 26.4702837,
+    "lng": 73.1149697,
     "source": "osm",
     "is_proposed": false
   },
@@ -104,8 +104,8 @@
     "category": "academic",
     "description": "Civil Department laboratory",
     "keywords": [],
-    "lat": 26.470252760196605,
-    "lng": 73.11544906714302,
+    "lat": 26.4703871,
+    "lng": 73.1153832,
     "source": "osm",
     "is_proposed": false
   },
@@ -115,8 +115,8 @@
     "category": "academic",
     "description": "Laboratory",
     "keywords": [],
-    "lat": 26.470381615399287,
-    "lng": 73.11579526816467,
+    "lat": 26.4705239,
+    "lng": 73.1157193,
     "source": "osm",
     "is_proposed": false
   },
@@ -126,8 +126,8 @@
     "category": "academic",
     "description": "JCKC engineering laboratory",
     "keywords": [],
-    "lat": 26.470537425015735,
-    "lng": 73.11612735704023,
+    "lat": 26.470676,
+    "lng": 73.1160235,
     "source": "osm",
     "is_proposed": false
   },
@@ -137,8 +137,8 @@
     "category": "academic",
     "description": "JJM Department laboratory",
     "keywords": [],
-    "lat": 26.470680195480973,
-    "lng": 73.1163814368841,
+    "lat": 26.4708343,
+    "lng": 73.1162936,
     "source": "osm",
     "is_proposed": false
   },
@@ -148,8 +148,8 @@
     "category": "academic",
     "description": "Laboratory",
     "keywords": [],
-    "lat": 26.470921643359834,
-    "lng": 73.11674151592977,
+    "lat": 26.4710369,
+    "lng": 73.1165963,
     "source": "osm",
     "is_proposed": false
   },
@@ -159,8 +159,8 @@
     "category": "administrative",
     "description": "Office",
     "keywords": [],
-    "lat": 26.47115623304923,
-    "lng": 73.11098282057281,
+    "lat": 26.471232,
+    "lng": 73.1110302,
     "source": "osm",
     "is_proposed": false
   },
@@ -170,8 +170,8 @@
     "category": "administrative",
     "description": "Office",
     "keywords": [],
-    "lat": 26.47099447231215,
-    "lng": 73.11130632086196,
+    "lat": 26.4710194,
+    "lng": 73.111326,
     "source": "osm",
     "is_proposed": false
   },
@@ -205,8 +205,8 @@
     "keywords": [
       "W1 (ID Card)"
     ],
-    "lat": 26.470074562115368,
-    "lng": 73.11324068383843,
+    "lat": 26.4701534,
+    "lng": 73.113235,
     "source": "osm",
     "is_proposed": false
   },
@@ -1041,8 +1041,8 @@
     "category": "bank",
     "description": "Bank",
     "keywords": [],
-    "lat": 26.471351270328167,
-    "lng": 73.11068311565205,
+    "lat": 26.4714234,
+    "lng": 73.1107926,
     "source": "osm",
     "is_proposed": false
   },
