@@ -34,9 +34,23 @@ def cls(t):
     return 'grass'   # grassland, park, garden, meadow, recreation_ground, village_green
 
 
-d = json.load(open('greens_raw.json'))
+# Merge the greens Overpass result with veg_geom.json (the bake_trees source).
+# veg_geom carries natural=scrub polygons that the greens query above omits, so
+# without this those scrub areas scatter trees over BARE ground. Deduping by OSM
+# id (greens_raw wins on shared ways) folds the scrub fills in and leaves every
+# tree-bearing polygon with a matching green patch.
+elements = {}
+for src in ('greens_raw.json', 'veg_geom.json'):
+    try:
+        data = json.load(open(src))
+    except FileNotFoundError:
+        continue
+    for e in data['elements']:
+        if e.get('type') == 'way' and e.get('geometry'):
+            elements.setdefault(e['id'], e)
+
 feats = []
-for e in d['elements']:
+for e in elements.values():
     geom = e.get('geometry', [])
     if len(geom) < 4:
         continue
@@ -51,4 +65,7 @@ for e in d['elements']:
 
 json.dump({'type': 'FeatureCollection', 'features': feats},
           open('web/data/greens.geojson', 'w'))
-print('greens features:', len(feats))
+by_cls = {}
+for f in feats:
+    by_cls[f['properties']['g']] = by_cls.get(f['properties']['g'], 0) + 1
+print('greens features:', len(feats), by_cls)

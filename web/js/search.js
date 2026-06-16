@@ -28,7 +28,7 @@ const IITJData = (() => {
       fetch(`${base}/search-index.json?v=34`).then(r => r.json()),
       fetch(`${base}/categories.json`).then(r => r.json()),
       fetch(`${base}/entrances.json?v=31`).then(r => r.ok ? r.json() : {}).catch(() => ({})),
-      fetch(`${base}/greens.geojson`).then(r => r.ok ? r.json() : null).catch(() => null),
+      fetch(`${base}/greens.geojson?v=2`).then(r => r.ok ? r.json() : null).catch(() => null),
     ]);
 
     // Apply admin-approved OSM overlay (bundled + this browser's localStorage)
