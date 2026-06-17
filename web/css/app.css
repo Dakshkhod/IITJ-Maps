@@ -975,7 +975,16 @@ input[type="checkbox"]:checked + .toggle-track .toggle-thumb { transform: transl
   color: var(--text-primary);
 }
 
-.sheet-content { padding: 12px 20px 24px; padding-right: 52px; }
+.sheet-content {
+  padding: 12px 20px 24px;
+  padding-right: 52px;
+  /* Never let a tall detail card run off-screen (esp. landscape phones) —
+     cap it and let the body scroll instead of the whole sheet overflowing. */
+  max-height: min(72vh, calc(100vh - 96px));
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
 .sheet-header { margin-bottom: 16px; }
 
 .sheet-category-badge {
@@ -1646,6 +1655,23 @@ input[type="checkbox"]:checked + .toggle-track .toggle-thumb { transform: transl
 .search-container { padding-top: max(12px, env(safe-area-inset-top, 12px)); }
 .bottom-sheet, .nav-panel { padding-bottom: max(20px, env(safe-area-inset-bottom, 20px)); }
 
+/* Safe-area insets for the remaining edge-anchored chrome — keeps controls
+   clear of notches, punch-holes and the home indicator (needs viewport-fit=
+   cover, set on the <meta viewport>). Left/right insets matter in landscape
+   where the notch sits on a side. */
+.directions-panel {
+  padding-top: max(12px, env(safe-area-inset-top, 12px));
+  padding-left: max(12px, env(safe-area-inset-left, 12px));
+  padding-right: max(12px, env(safe-area-inset-right, 12px));
+}
+.map-controls {
+  right: max(14px, env(safe-area-inset-right, 14px));
+  bottom: max(120px, calc(env(safe-area-inset-bottom, 0px) + 120px));
+}
+.toast { bottom: max(28px, calc(env(safe-area-inset-bottom, 0px) + 16px)); }
+.side-menu .menu-header { padding-top: max(20px, env(safe-area-inset-top, 20px)); }
+.side-menu { padding-left: env(safe-area-inset-left, 0px); }
+
 @media (min-width: 768px) {
   .search-container {
     max-width: 440px;
@@ -1684,10 +1710,59 @@ input[type="checkbox"]:checked + .toggle-track .toggle-thumb { transform: transl
   .layer-panel { right: 68px; }
 }
 
+/* Large desktops — keep the chrome as a tidy left/centre column instead of
+   letting panels drift to the far edges of an ultra-wide window. */
+@media (min-width: 1280px) {
+  .bottom-sheet, .nav-panel { max-width: 400px; }
+  .search-container, .search-results { max-width: 480px; }
+}
+
+/* Landscape phones (short viewport): a full-width bottom sheet would swallow
+   the map. Dock panels as a scrollable left card and lift the map controls. */
+@media (orientation: landscape) and (max-height: 500px) {
+  .bottom-sheet, .nav-panel {
+    max-width: 360px;
+    left: max(12px, env(safe-area-inset-left, 12px));
+    right: auto;
+    bottom: 10px;
+    border-radius: var(--radius-lg);
+  }
+  .sheet-content { max-height: calc(100vh - 28px); }
+  .search-container { max-width: 380px; left: max(12px, env(safe-area-inset-left, 12px)); transform: none; }
+  .search-results   { max-width: 380px; left: max(12px, env(safe-area-inset-left, 12px)); transform: none; right: auto; }
+  .map-controls { bottom: max(16px, calc(env(safe-area-inset-bottom, 0px) + 16px)); }
+  .nav-recenter-btn { bottom: calc(env(safe-area-inset-bottom, 0px) + 80px); }
+}
+
+/* Foldables / dual-screen: don't let a panel straddle the hinge. */
+@media (horizontal-viewport-segments: 2) {
+  .bottom-sheet, .nav-panel, .directions-panel,
+  .search-container, .search-results { max-width: env(viewport-segment-width 0 0, 420px); }
+}
+
 @media (pointer: coarse) {
   .map-ctrl-btn { width: 46px; height: 46px; }
   .action-btn { padding: 14px; font-size: 14px; }
   .sheet-content { padding: 12px 52px 28px 20px; }
+
+  /* iOS Safari auto-zooms the page when focusing an input under 16px now that
+     user-scalable is back on. Keep text fields at 16px on touch to suppress it. */
+  #search-input,
+  .dir-input-row input { font-size: 16px; }
+
+  /* Touch targets: ensure every icon button presents a >=44px hit area
+     (WCAG 2.5.5). Visual size is kept by centering the icon in the larger box. */
+  .search-icon-btn,
+  .dir-pick-btn { min-width: 44px; min-height: 44px; }
+  .dir-swap-btn,
+  .dir-back-btn,
+  .dir-minimize-btn,
+  .sheet-close-btn,
+  .nav-close-btn,
+  .nav-voice-btn { width: 44px; height: 44px; }
+  .category-chip,
+  .qa-chip { min-height: 40px; }
+  .dir-mode-btn { min-height: 44px; }
 }
 
 /* ============================================================

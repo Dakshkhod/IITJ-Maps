@@ -2,7 +2,10 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <!-- Page zoom stays enabled for low-vision users (WCAG 1.4.4). The map's own
+       pinch/rotate gestures are unaffected: MapLibre sets touch-action:none on
+       its canvas, so the browser never hijacks gestures over the map. -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>IITJ Maps — Smart Campus Navigation</title>
   <meta name="description" content="Navigate IIT Jodhpur campus with interactive maps, search, and turn-by-turn directions">
   <meta name="theme-color" content="#0a0a0a">
@@ -39,7 +42,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
-  <link rel="stylesheet" href="css/app.css?v=6">
+  <link rel="stylesheet" href="css/app.css?v=7">
 </head>
 <body>
   <!-- Loading Splash -->
