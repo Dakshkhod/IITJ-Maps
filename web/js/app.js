@@ -2051,18 +2051,23 @@ function openDirectionsPanel(initial = {}) {
 
 function expandDirectionsPanel() {
   document.getElementById('directions-panel').classList.remove('minimized');
-  // The "minimize" affordance only makes sense once there's a route summary to
-  // collapse back to — otherwise the slim bar would show an empty meta line.
-  document.getElementById('dir-minimize').classList.toggle('hidden', !currentRoute);
+  // Minimize is always available — the user can tuck the form away to see the
+  // map even before a route is computed.
+  document.getElementById('dir-minimize').classList.remove('hidden');
 }
 
 function minimizeDirectionsPanel() {
   const panel = document.getElementById('directions-panel');
   panel.classList.add('minimized');
+  const from = directionsFrom && directionsFrom.name;
+  const to   = directionsTo && directionsTo.name;
   document.getElementById('dir-collapsed-route').textContent =
-    `${directionsFrom?.name || 'Start'} → ${directionsTo?.name || 'End'}`;
+    (from || to) ? `${from || 'Start'} → ${to || 'End'}` : 'Directions';
+  // With a route, show the ETA/distance summary + the Start button; without
+  // one, the slim bar is just a "tap to edit" handle.
   document.getElementById('dir-collapsed-meta').textContent =
-    document.getElementById('dir-summary-text').textContent || '';
+    currentRoute ? (document.getElementById('dir-summary-text').textContent || '') : 'Tap to edit route';
+  document.getElementById('dir-start-mini').style.display = currentRoute ? '' : 'none';
   hideAllDirResults();
   clearDirectionsPickMode();
 }
