@@ -1,0 +1,19 @@
+{
+  "name": "IITJ Maps — Campus Navigation",
+  "short_name": "IITJ Maps",
+  "description": "Navigate IIT Jodhpur campus with interactive maps, search and turn-by-turn directions.",
+  "id": "/",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#0a0a0a",
+  "theme_color": "#0a0a0a",
+  "lang": "en",
+  "dir": "ltr",
+  "categories": ["navigation", "maps", "education"],
+  "icons": [
+    { "src": "/icons/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "/icons/maskable.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable" }
+  ]
+}

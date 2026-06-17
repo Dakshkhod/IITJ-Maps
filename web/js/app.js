@@ -2051,6 +2051,9 @@ function openDirectionsPanel(initial = {}) {
 
 function expandDirectionsPanel() {
   document.getElementById('directions-panel').classList.remove('minimized');
+  // The "minimize" affordance only makes sense once there's a route summary to
+  // collapse back to — otherwise the slim bar would show an empty meta line.
+  document.getElementById('dir-minimize').classList.toggle('hidden', !currentRoute);
 }
 
 function minimizeDirectionsPanel() {
@@ -2228,6 +2231,7 @@ function setupDirectionsPanel() {
   document.getElementById('dir-close-mini').addEventListener('click', closeDirectionsPanel);
   document.getElementById('dir-expand').addEventListener('click', expandDirectionsPanel);
   document.getElementById('dir-expand-icon').addEventListener('click', expandDirectionsPanel);
+  document.getElementById('dir-minimize').addEventListener('click', minimizeDirectionsPanel);
 
   document.getElementById('dir-your-location').addEventListener('click', () => {
     if (!userLocation) {
@@ -4080,3 +4084,13 @@ function hideSplash() {
 }
 
 document.addEventListener('DOMContentLoaded', init);
+
+// Register the service worker for offline support + installability. Best-effort
+// and deferred to `load` so it never competes with first paint; failures are
+// swallowed (the app works fine without it). Only ever runs on the public app
+// (app.js isn't loaded by admin.html).
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').catch(() => {});
+  });
+}

@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 56 56" role="img" aria-label="IITJ Maps">
+  <rect width="56" height="56" fill="#0a0a0a"/>
+  <g transform="translate(28 28) scale(0.7) translate(-28 -28)">
+    <path d="M28 12C22 12 17 16.9 17 23C17 30.6 28 44 28 44C28 44 39 30.6 39 23C39 16.9 34 12 28 12Z" fill="#fafafa"/>
+    <circle cx="28" cy="23" r="4.3" fill="#0a0a0a"/>
+  </g>
+</svg>

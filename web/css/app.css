@@ -365,6 +365,23 @@ html, body {
   letter-spacing: -0.02em;
 }
 
+.dir-minimize-btn {
+  margin-left: auto;
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-glass);
+  color: var(--text-secondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s, color 0.15s;
+}
+.dir-minimize-btn:hover { background: var(--surface); color: var(--text-primary); }
+.dir-minimize-btn.hidden { display: none; }
+
 .dir-inputs-wrap {
   display: flex;
   align-items: stretch;
