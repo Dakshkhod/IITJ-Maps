@@ -1491,16 +1491,17 @@ function toggle3D() {
   }
 }
 
-// Lazy-init 3D landmark layers (waits for three.js + loaders to be ready)
-function showLandmarks3D(attempts = 0) {
+// Show the 3D landmark models. Three.js is loaded lazily here the first time
+// the user enters 3D (not on every page load); the callback fires once the
+// library is live, so 2D buildings appear instantly while the detailed models
+// stream in a moment later. Subsequent calls are instant (already loaded).
+function showLandmarks3D() {
   if (typeof Landmarks3D === 'undefined') return;
-  if (typeof THREE === 'undefined' || !THREE.OBJLoader || !THREE.GLTFLoader) {
-    if (attempts < 50) setTimeout(() => showLandmarks3D(attempts + 1), 100);
-    return;
-  }
-  Landmarks3D.init(map);
-  syncLandmarkLabels();
-  Landmarks3D.show();
+  Landmarks3D.load(() => {
+    Landmarks3D.init(map);
+    syncLandmarkLabels();
+    Landmarks3D.show();
+  });
 }
 
 // ============================================================

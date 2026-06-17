@@ -15,9 +15,19 @@ var Landmarks3D = (() => {
   // Three.js Y-up → MapLibre Z-up (mesh-derived models all use Y-up)
   const Y_UP_TO_Z_UP = Math.PI / 2;
 
-  // Materials used across procedural builds (and as a fallback uniform
-  // material for OBJ / GLB meshes that have no embedded materials).
-  const MAT = {
+  // THREE-dependent objects (materials + reusable matrices) are built lazily so
+  // this module parses even before Three.js is loaded. Three.js is now fetched
+  // only when the user first enters 3D, keeping ~600 KB off the 2D-only load
+  // path. _initThreeObjects() runs once, from _initSceneShell(), after Three.js
+  // is confirmed ready. (Object bodies below sit one indent level shallow to
+  // keep this a minimal, low-risk diff.)
+  let MAT = null, BMAT = null;
+  let _rotX = null, _projM = null, _localM = null, _scaleVec = null;
+  let _threeObjectsReady = false;
+  function _initThreeObjects() {
+    if (_threeObjectsReady) return;
+    _threeObjectsReady = true;
+    MAT = {
     // Polished gold — lower metalness so the diffuse colour reads on the
     // map without a fancy environment map (pure metal needs reflections)
     gold:      new THREE.MeshStandardMaterial({ color: 0xe2c073, metalness: 0.45, roughness: 0.45, side: THREE.DoubleSide }),
@@ -154,7 +164,7 @@ var Landmarks3D = (() => {
 
   // Perimeter berm materials — separate from MAT so they aren't traversed
   // during material-override passes on landmark groups.
-  const BMAT = {
+  BMAT = {
     // Wave berm exterior: muted blue representing the mural palette
     // (dominant colour of the blue/white wave murals on the perimeter berm)
     waveExt: new THREE.MeshStandardMaterial({ color: 0x6fa9c6, metalness: 0.03, roughness: 0.9, side: THREE.DoubleSide }),
@@ -176,6 +186,13 @@ var Landmarks3D = (() => {
     bermGreen2: new THREE.MeshStandardMaterial({ color: 0x5c7e44, metalness: 0.02, roughness: 0.97, side: THREE.DoubleSide }),
     bermSoil:   new THREE.MeshStandardMaterial({ color: 0xa98a63, metalness: 0.02, roughness: 0.98, side: THREE.DoubleSide }),
   };
+
+    // Reusable frame buffers — allocated once Three.js is present.
+    _rotX = new THREE.Matrix4().makeRotationAxis(new THREE.Vector3(1, 0, 0), Y_UP_TO_Z_UP);
+    _projM = new THREE.Matrix4();
+    _localM = new THREE.Matrix4();
+    _scaleVec = new THREE.Vector3();
+  }
 
   // ─────────────────────────────────────────────────────────────────────
   // O-LANE / Y-LANE HOSTEL — closed rectangular ring with central courtyard
@@ -4076,7 +4093,9 @@ var Landmarks3D = (() => {
       lng: 73.1141633, lat: 26.4692796,
       heightMeters: 14,
       yOffsetMeters: BRAIN_TREE_BASE_TOP_Y,   // lift so it rests on the pedestal
-      material: MAT.gold,
+      // Lazy getter: MAT is built only after Three.js loads, but this array is
+      // created at module-eval. Resolved when the OBJ loader reads it at build.
+      get material() { return MAT.gold; },
       rotateMeshToUp: Y_UP_TO_Z_UP,
       bearingOffset: 0,
     },
@@ -4796,17 +4815,15 @@ var Landmarks3D = (() => {
                               // mounts still takes effect when meshes appear
   let _targetIds = null;      // null = apply to all; Set = apply only to these landmark ids
 
-  // Reusable buffers — allocated once, mutated each frame
-  const _rotX = new THREE.Matrix4().makeRotationAxis(new THREE.Vector3(1, 0, 0), Y_UP_TO_Z_UP);
-  const _projM = new THREE.Matrix4();
-  const _localM = new THREE.Matrix4();
-  const _scaleVec = new THREE.Vector3();
+  // Reusable per-frame buffers (_rotX/_projM/_localM/_scaleVec) are declared
+  // and allocated lazily in _initThreeObjects() — see the top of the module.
 
   // Scene container, lights, camera and origin frame. Cheap (no per-building
   // geometry) so it is safe to run on the critical path; the heavy landmark
   // builders run separately via _buildLandmarkChunk().
   function _initSceneShell() {
     if (_sceneShellReady) return;
+    _initThreeObjects();   // materials + matrices (Three.js is ready by now)
 
     _scene = new THREE.Scene();
     const sun = new THREE.DirectionalLight(0xffffff, 1.05);
@@ -5868,11 +5885,59 @@ var Landmarks3D = (() => {
   // Public warm-up entry (called from init once the map exists).
   function prewarm() { _startBuild(); }
 
+  // ── Lazy Three.js loader ────────────────────────────────────────────────
+  // Three.js + its OBJ/GLTF loaders (~600 KB) are fetched the first time the
+  // user enters 3D, not on every page load — a big win for 2D-only sessions and
+  // slow connections. SRI + crossorigin mirror the old static <script> tags so
+  // the CSP and tamper protection are unchanged. Idempotent; callbacks queue
+  // until the loaders are live.
+  const _THREE_SCRIPTS = [
+    { src: 'https://unpkg.com/three@0.144.0/build/three.min.js',
+      integrity: 'sha384-UeYnsImn15wLN2RmvFuufa/wN6Ijws5LkdZpyhjfHnqKY30zmWvm67bpzAz0HLT8' },
+    { src: 'https://unpkg.com/three@0.144.0/examples/js/loaders/OBJLoader.js',
+      integrity: 'sha384-MQumaiEfGDwXNviMfAi7dVi/OySNARdLBSTN9g9G0ZRqzyBjGt+WwjcFUzjY1jRa' },
+    { src: 'https://unpkg.com/three@0.144.0/examples/js/loaders/GLTFLoader.js',
+      integrity: 'sha384-+T7zyJFelhxfE6dSQZg8EjauzcjsATKxdLDTMduCAXFzqTsOqUuYb5sjSTj00Kb3' },
+  ];
+  let _threeLoadStarted = false;
+  const _threeReadyCbs = [];
+
+  function _injectScript({ src, integrity }) {
+    return new Promise((resolve, reject) => {
+      const s = document.createElement('script');
+      s.src = src;
+      s.integrity = integrity;
+      s.crossOrigin = 'anonymous';
+      s.referrerPolicy = 'no-referrer';
+      s.async = false;             // keep execution order deterministic
+      s.onload = () => resolve();
+      s.onerror = () => reject(new Error('failed to load ' + src));
+      document.head.appendChild(s);
+    });
+  }
+
+  function load(onReady) {
+    if (_threeReady()) { if (onReady) onReady(); return; }
+    if (onReady) _threeReadyCbs.push(onReady);
+    if (_threeLoadStarted) return;
+    _threeLoadStarted = true;
+    // three.min.js must execute before the loaders (they extend THREE).
+    _injectScript(_THREE_SCRIPTS[0])
+      .then(() => Promise.all([_injectScript(_THREE_SCRIPTS[1]), _injectScript(_THREE_SCRIPTS[2])]))
+      .then(() => {
+        prewarm();   // build the scene now that Three.js exists
+        _threeReadyCbs.splice(0).forEach(cb => { try { cb(); } catch (_) {} });
+      })
+      .catch((e) => { _threeLoadStarted = false; console.warn('[Landmarks3D] Three.js load failed:', e); });
+  }
+
   function init(map) {
     _map = map;
     _ready = true;
     _ensureLabels();
-    prewarm();   // start warming the 3D scene off the critical path
+    // NOTE: no prewarm() here — the 3D scene needs Three.js, which is now loaded
+    // lazily (see load()) only when the user first enters 3D. init() runs at
+    // startup purely to wire up the 2D landmark labels, which need no Three.js.
 
     // Load the pre-baked OSM tree positions once. If the scene shell already
     // exists, inject the trees immediately; otherwise the scene build
@@ -6078,7 +6143,7 @@ var Landmarks3D = (() => {
   }
 
   return {
-    init, show, hide, isVisible, listIds, replacedBuildingIds, setOpacity, getLandmarks,
+    init, load, show, hide, isVisible, listIds, replacedBuildingIds, setOpacity, getLandmarks,
     getLabelGeoJSON, landmarkLabelNames, labelLayerId: () => LABEL_LAYER_ID,
     syncLabels, raise: _raise, prewarm,
   };

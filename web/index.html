@@ -27,17 +27,9 @@
   <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"
           integrity="sha384-SYKAG6cglRMN0RVvhNeBY0r3FYKNOJtznwA0v7B5Vp9tr31xAHsZC0DqkQ/pZDmj"
           crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-  <!-- Three.js for the 3D landmark models (r144 is the last release that
-       still ships the UMD examples/js loaders) -->
-  <script src="https://unpkg.com/three@0.144.0/build/three.min.js" defer
-          integrity="sha384-UeYnsImn15wLN2RmvFuufa/wN6Ijws5LkdZpyhjfHnqKY30zmWvm67bpzAz0HLT8"
-          crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-  <script src="https://unpkg.com/three@0.144.0/examples/js/loaders/OBJLoader.js" defer
-          integrity="sha384-MQumaiEfGDwXNviMfAi7dVi/OySNARdLBSTN9g9G0ZRqzyBjGt+WwjcFUzjY1jRa"
-          crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-  <script src="https://unpkg.com/three@0.144.0/examples/js/loaders/GLTFLoader.js" defer
-          integrity="sha384-+T7zyJFelhxfE6dSQZg8EjauzcjsATKxdLDTMduCAXFzqTsOqUuYb5sjSTj00Kb3"
-          crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <!-- Three.js (for 3D landmark models) is NOT loaded here. It's fetched lazily
+       by landmarks-3d.js (see Landmarks3D.load) the first time the user enters
+       3D, so 2D-only sessions never download ~600 KB. -->
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -462,7 +454,7 @@
   <script src="js/data-overlay.js"></script>
   <script src="js/search.js?v=37"></script>
   <script src="js/routing.js?v=32"></script>
-  <script src="js/landmarks-3d.js?v=34" defer></script>
-  <script src="js/app.js?v=41"></script>
+  <script src="js/landmarks-3d.js?v=35" defer></script>
+  <script src="js/app.js?v=42"></script>
 </body>
 </html>
