@@ -4076,7 +4076,11 @@ function shareMyLocation() {
 }
 
 function hideSplash() {
+  // Tell the boot watchdog (inline in index.html) we booted cleanly so it
+  // stands down and resets its one-shot recovery guard.
+  try { window.dispatchEvent(new Event('iitj-booted')); } catch (_) {}
   const splash = document.getElementById('splash');
+  if (!splash) return;
   splash.style.transition = 'opacity 0.5s ease';
   splash.style.opacity = '0';
   document.getElementById('app').classList.remove('hidden');

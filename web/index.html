@@ -43,6 +43,47 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="css/app.css?v=7">
+
+  <!-- Boot watchdog — last-resort recovery from a wedged service worker / bad
+       cache that leaves the app stuck on the splash. Runs independently of
+       app.js (so it works even if app.js itself was served broken): if the app
+       hasn't booted in time, drop the SW + all caches and reload ONCE. The
+       sessionStorage guard prevents a reload loop; if it's still stuck after
+       that, the splash is force-hidden so the user at least sees the map. -->
+  <script>
+    (function () {
+      var KEY = 'iitj-boot-recovery';
+      window.__iitjBooted = false;
+      // Clear the guard on a clean start so a future wedge can self-heal again.
+      window.addEventListener('iitj-booted', function () {
+        window.__iitjBooted = true;
+        try { sessionStorage.removeItem(KEY); } catch (e) {}
+      });
+      setTimeout(function () {
+        if (window.__iitjBooted) return;
+        var splash = document.getElementById('splash');
+        var stuck = splash && splash.style.opacity !== '0' && splash.style.display !== 'none';
+        if (!stuck) return;
+        var tried = false;
+        try { tried = !!sessionStorage.getItem(KEY); } catch (e) {}
+        if (tried) { if (splash) splash.style.display = 'none'; return; }  // don't loop
+        try { sessionStorage.setItem(KEY, '1'); } catch (e) {}
+        var reload = function () { location.reload(); };
+        var jobs = [];
+        if ('serviceWorker' in navigator) {
+          jobs.push(navigator.serviceWorker.getRegistrations()
+            .then(function (rs) { return Promise.all(rs.map(function (r) { return r.unregister(); })); })
+            .catch(function () {}));
+        }
+        if (window.caches) {
+          jobs.push(caches.keys()
+            .then(function (ks) { return Promise.all(ks.map(function (k) { return caches.delete(k); })); })
+            .catch(function () {}));
+        }
+        Promise.all(jobs).then(reload, reload);
+      }, 15000);
+    })();
+  </script>
 </head>
 <body>
   <!-- Loading Splash -->
@@ -422,6 +463,6 @@
   <script src="js/search.js?v=37"></script>
   <script src="js/routing.js?v=32"></script>
   <script src="js/landmarks-3d.js?v=34" defer></script>
-  <script src="js/app.js?v=38"></script>
+  <script src="js/app.js?v=39"></script>
 </body>
 </html>

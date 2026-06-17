@@ -1,24 +1,28 @@
 /* IITJ Maps — service worker
- * Offline app shell + runtime caching of map tiles, data and CDN assets.
+ * Offline support that NEVER blocks a normal (online) load.
+ *
+ * Hard-won lesson: a stale-while-revalidate / cache-first app shell can wedge
+ * the app if a cached entry is ever bad — the page then breaks on every
+ * SW-controlled load while a fresh (cache-less) load works. So the critical
+ * path is now NETWORK-FIRST: an online load behaves exactly like a cache-less
+ * load, and the cache is only ever a fallback when the network is unavailable.
  *
  * Strategy:
- *   • navigations  → network-first, fall back to the cached shell offline
- *   • same-origin static (js/css/json/geojson/img) → stale-while-revalidate
- *   • map tiles (CARTO / ArcGIS / OpenMapTiles glyphs) → cache-first, capped
- *   • CDN + fonts (unpkg / Google Fonts) → stale-while-revalidate
- *   • /admin* and /api/* are never intercepted (auth gate + no-store stay intact)
+ *   • navigations              → network-first, cached shell only when offline
+ *   • same-origin js/css/data  → network-first, cache only when offline
+ *   • map tiles / glyphs        → cache-first, capped (immutable; offline maps)
+ *   • CDN + fonts (unpkg/google)→ cache-first (version-pinned, immutable)
+ *   • /admin* and /api/*        → never intercepted
  *
- * Versioned ?v= assets are picked up at runtime, so there's no hand-maintained
- * precache list to keep in sync with index.html. Bump CACHE_VERSION whenever
- * this file changes to roll every cache forward on activate.
+ * Bump CACHE_VERSION on any change here: activate wipes every non-matching
+ * cache, which also clears a previously-broken cache on users' devices.
  */
-const CACHE_VERSION = 'iitj-2026-06-17a';
+const CACHE_VERSION = 'iitj-2026-06-18b';
 const PRECACHE = `${CACHE_VERSION}-precache`;
 const RUNTIME  = `${CACHE_VERSION}-runtime`;
 const TILES    = `${CACHE_VERSION}-tiles`;
-const TILE_MAX = 800;   // rough LRU cap so the tile cache can't grow unbounded
+const TILE_MAX = 800;
 
-// Just enough to boot the shell offline; everything else fills in at runtime.
 const PRECACHE_URLS = ['/', '/manifest.webmanifest', '/icons/icon.svg', '/icons/maskable.svg'];
 
 self.addEventListener('install', (event) => {
@@ -38,7 +42,6 @@ self.addEventListener('activate', (event) => {
   })());
 });
 
-// Let the page promote a waiting worker without a manual reload.
 self.addEventListener('message', (e) => { if (e.data === 'skipWaiting') self.skipWaiting(); });
 
 function isTileHost(url) {
@@ -58,26 +61,31 @@ async function trimCache(name, max) {
   for (let i = 0; i < keys.length - max; i++) await cache.delete(keys[i]);
 }
 
-async function staleWhileRevalidate(req, cacheName) {
+// Network-first: prefer the live response; only touch the cache when the
+// network genuinely fails (offline). Successful responses refresh the cache
+// for that offline fallback. Never serves a cached entry while online, so a
+// bad cache can't wedge the app.
+async function networkFirst(req, cacheName, fallbackKey) {
   const cache = await caches.open(cacheName);
-  const cached = await cache.match(req);
-  const networkPromise = fetch(req).then(res => {
-    if (res && (res.ok || res.type === 'opaque')) cache.put(req, res.clone());
+  try {
+    const res = await fetch(req);
+    if (res && res.ok && res.type === 'basic') cache.put(req, res.clone()).catch(() => {});
     return res;
-  }).catch(() => null);
-  if (cached) return cached;
-  const net = await networkPromise;
-  return net || Response.error();
+  } catch (_) {
+    const cached = await cache.match(req) || (fallbackKey && await caches.match(fallbackKey));
+    return cached || Response.error();
+  }
 }
 
+// Cache-first with cap — for immutable cross-origin tiles/glyphs/CDN.
 async function cacheFirstCapped(req, cacheName, max) {
   const cache = await caches.open(cacheName);
   const cached = await cache.match(req);
   if (cached) return cached;
   const res = await fetch(req);
   if (res && (res.ok || res.type === 'opaque')) {
-    cache.put(req, res.clone());
-    trimCache(cacheName, max);
+    cache.put(req, res.clone()).catch(() => {});
+    if (max) trimCache(cacheName, max);
   }
   return res;
 }
@@ -89,36 +97,24 @@ self.addEventListener('fetch', (event) => {
   let url;
   try { url = new URL(req.url); } catch (_) { return; }
 
-  // Never touch the admin gate or APIs — they must hit the network directly so
-  // the edge middleware (Basic Auth) and no-store semantics are preserved.
+  // Never touch the admin gate or APIs.
   if (url.origin === self.location.origin &&
       (url.pathname === '/admin.html' || url.pathname.startsWith('/admin') || url.pathname.startsWith('/api/'))) {
     return;
   }
 
-  // App navigations: network-first, cached shell as the offline fallback.
+  // Navigations + same-origin app shell/data → network-first.
   if (req.mode === 'navigate') {
-    event.respondWith((async () => {
-      try {
-        const res = await fetch(req);
-        if (url.pathname === '/' || url.pathname === '/index.html') {
-          (await caches.open(PRECACHE)).put('/', res.clone());
-        }
-        return res;
-      } catch (_) {
-        return (await caches.match(req)) || (await caches.match('/')) || Response.error();
-      }
-    })());
+    event.respondWith(networkFirst(req, PRECACHE, '/'));
+    return;
+  }
+  if (url.origin === self.location.origin) {
+    event.respondWith(networkFirst(req, RUNTIME));
     return;
   }
 
-  // Cross-origin: tiles → cache-first capped; CDN/fonts → SWR; else passthrough.
-  if (url.origin !== self.location.origin) {
-    if (isTileHost(url)) { event.respondWith(cacheFirstCapped(req, TILES, TILE_MAX)); return; }
-    if (isCdnAsset(url)) { event.respondWith(staleWhileRevalidate(req, RUNTIME)); return; }
-    return;
-  }
-
-  // Same-origin static assets → stale-while-revalidate.
-  event.respondWith(staleWhileRevalidate(req, RUNTIME));
+  // Cross-origin: tiles/glyphs cache-first capped; CDN/fonts cache-first.
+  if (isTileHost(url)) { event.respondWith(cacheFirstCapped(req, TILES, TILE_MAX)); return; }
+  if (isCdnAsset(url)) { event.respondWith(cacheFirstCapped(req, RUNTIME, 0)); return; }
+  // Anything else cross-origin: leave to the browser.
 });
