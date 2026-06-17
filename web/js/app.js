@@ -81,10 +81,11 @@ function buildingHeightExpr() {
 
 function labelPaint() {
   const onSatellite = isSatellite;
+  const on3dDay = is3D && !isSatellite && !isDark;
   return {
-    'text-color': onSatellite ? '#ffffff' : (isDark ? '#e2e8f0' : '#374151'),
-    'text-halo-color': onSatellite ? 'rgba(0,0,0,0.85)' : (isDark ? 'rgba(15,23,42,0.85)' : 'rgba(255,255,255,0.9)'),
-    'text-halo-width': onSatellite ? 2 : 1.5
+    'text-color': onSatellite ? '#ffffff' : (isDark ? '#e2e8f0' : (on3dDay ? '#2d3748' : '#374151')),
+    'text-halo-color': onSatellite ? 'rgba(0,0,0,0.85)' : (isDark ? 'rgba(15,23,42,0.85)' : 'rgba(255,255,255,0.92)'),
+    'text-halo-width': onSatellite ? 2 : (on3dDay ? 1.75 : 1.5)
   };
 }
 
@@ -162,7 +163,17 @@ function buildingFillOpacity() {
   return ['interpolate', ['linear'], ['zoom'], 14, 0.5, 17, 0.65];
 }
 
+/** F4-style extrusion opacity — fully opaque in 3D for crisp white blocks. */
+function buildingExtrusionOpacity() {
+  if (is3D && !isSatellite) return 1;
+  return 0.82;
+}
+
 function buildingFillColor() {
+  // F4map 3D: bright sunlit walls in day, muted blue-grey at night.
+  if (is3D && !isSatellite) {
+    return isDark ? '#7a8494' : '#fafaf8';
+  }
   return isDark ? '#475569' : '#f1f5f9';
 }
 
@@ -317,6 +328,34 @@ function finishMapLayers() {
   ensureLandmarkLabelsLayer();
   restoreLocationLayer();
   if (directionsOpen) updateDirectionsMarkers();
+  syncMapBodyClasses();
+  refreshBuildingTheme();
+}
+
+/** Body classes drive F4-style canvas brightness (day 3D glow / night dim). */
+function syncMapBodyClasses() {
+  document.body.classList.toggle('map-3d', is3D && !isSatellite);
+  document.body.classList.toggle('map-dark', isDark && !isSatellite);
+  document.body.classList.toggle('map-satellite', isSatellite);
+}
+
+/** Live-update building extrusion colours when 3D / theme toggles (no style reload). */
+function refreshBuildingTheme() {
+  if (!map) return;
+  const color = buildingFillColor();
+  const extrusionOpacity = buildingExtrusionOpacity();
+  if (map.getLayer('buildings-3d')) {
+    map.setPaintProperty('buildings-3d', 'fill-extrusion-color', color);
+    map.setPaintProperty('buildings-3d', 'fill-extrusion-opacity', extrusionOpacity);
+  }
+  if (map.getLayer('buildings-fill')) {
+    map.setPaintProperty('buildings-fill', 'fill-color', color);
+  }
+  // F4 shows mostly grass + roads in 3D — fade the tinted area overlays.
+  if (map.getLayer('areas-fill')) {
+    map.setPaintProperty('areas-fill', 'fill-opacity',
+      isSatellite ? 0 : (is3D ? 0.1 : 0.35));
+  }
 }
 
 const LAYERS = { buildings: true, roads: true, markers: true };
@@ -928,23 +967,23 @@ function addRoadsLayer(data) {
   ];
   const vehicleCasingW = ['interpolate', ['linear'], ['zoom'],
     13, ['match', ['get', 'navigation_class'],
-      ['major_vehicle_road'], 10.2,
-      ['vehicle_connector'], 8.8,
-      ['campus_main_road', 'local_through_road'], 8.5,
-      ['campus_standard_road', 'local_street', 'vehicle_road'], 6.5,
-      6.0],
+      ['major_vehicle_road'], 11.4,
+      ['vehicle_connector'], 10.0,
+      ['campus_main_road', 'local_through_road'], 9.7,
+      ['campus_standard_road', 'local_street', 'vehicle_road'], 7.7,
+      7.2],
     16, ['match', ['get', 'navigation_class'],
-      ['major_vehicle_road'], 18.5,
-      ['vehicle_connector'], 15.2,
-      ['campus_main_road', 'local_through_road'], 15,
-      ['campus_standard_road', 'local_street', 'vehicle_road'], 11.6,
-      10.8],
+      ['major_vehicle_road'], 20.5,
+      ['vehicle_connector'], 17.2,
+      ['campus_main_road', 'local_through_road'], 17.0,
+      ['campus_standard_road', 'local_street', 'vehicle_road'], 13.6,
+      12.8],
     19, ['match', ['get', 'navigation_class'],
-      ['major_vehicle_road'], 30,
-      ['vehicle_connector'], 25,
-      ['campus_main_road', 'local_through_road'], 25.5,
-      ['campus_standard_road', 'local_street', 'vehicle_road'], 19.5,
-      18],
+      ['major_vehicle_road'], 32,
+      ['vehicle_connector'], 27,
+      ['campus_main_road', 'local_through_road'], 27.5,
+      ['campus_standard_road', 'local_street', 'vehicle_road'], 21.5,
+      20],
   ];
   // Service roads now start at z13 (was z14) so they don't vanish when zoomed
   // out — they're a big part of the internal campus network.
@@ -954,9 +993,9 @@ function addRoadsLayer(data) {
     19, ['match', ['get', 'navigation_class'], 'campus_service_road', 10, 'campus_service_connector', 8.0, 7.0],
   ];
   const serviceCasingW = ['interpolate', ['linear'], ['zoom'],
-    13, ['match', ['get', 'navigation_class'], 'campus_service_road', 4.0, 'campus_service_connector', 3.2, 2.9],
-    16, ['match', ['get', 'navigation_class'], 'campus_service_road', 8.0, 'campus_service_connector', 6.4, 5.7],
-    19, ['match', ['get', 'navigation_class'], 'campus_service_road', 13.5, 'campus_service_connector', 11, 10],
+    13, ['match', ['get', 'navigation_class'], 'campus_service_road', 4.8, 'campus_service_connector', 4.0, 3.7],
+    16, ['match', ['get', 'navigation_class'], 'campus_service_road', 9.2, 'campus_service_connector', 7.6, 6.9],
+    19, ['match', ['get', 'navigation_class'], 'campus_service_road', 15.5, 'campus_service_connector', 12.8, 11.6],
   ];
   const narrowW = ['interpolate', ['linear'], ['zoom'],
     15, ['match', ['get', 'navigation_class'], 'narrow_service_road', 1.2, 'service_access', 1.0, 0.9],
@@ -967,19 +1006,14 @@ function addRoadsLayer(data) {
   const cycleW = ['interpolate', ['linear'], ['zoom'], 15, 1.0, 17, 2.2, 19, 3.8];
   const restrictedW = ['interpolate', ['linear'], ['zoom'], 15, 1.0, 17, 2.0, 19, 3.6];
 
-  // Light-mode roads use a solid, warm-grey asphalt palette (F4map-style): main
-  // arteries are the darkest grey so the hierarchy still reads, minor roads a
-  // touch lighter, all sitting clearly darker than the near-white basemap with a
-  // crisp darker casing. Dark + satellite keep bright surfaces (they need to pop
-  // against a dark/imagery background, where "darker" would hurt legibility).
+  // F4map roads: darker grey asphalt with a crisp light casing that matches the
+  // cream ground (#f2efe7) — the casing reads as a clear boundary, not a soft
+  // gradient. Dark + satellite keep their own high-contrast palettes.
   const vehicleCasingColor = isSatellite
     ? 'rgba(0,0,0,0.62)'
     : (isDark
       ? '#0f172a'
-      : ['match', ['get', 'navigation_class'],
-        ['major_vehicle_road', 'vehicle_connector'], '#5f5f5f',
-        ['campus_main_road', 'local_through_road'], '#6e6e6e',
-        '#7b7b7b']);
+      : '#ebe8e0');
   const vehicleSurfaceColor = isSatellite
     ? ['match', ['get', 'navigation_class'],
       ['major_vehicle_road', 'vehicle_connector'], '#ffd166',
@@ -991,17 +1025,15 @@ function addRoadsLayer(data) {
         ['campus_main_road', 'local_through_road'], '#f8d87a',
         '#dbe4ef']
       : ['match', ['get', 'navigation_class'],
-        // F4map roads are a flat neutral grey (#8E8E8E); width carries the
-        // hierarchy, so colour only varies by a hair for the main arteries.
-        ['major_vehicle_road', 'vehicle_connector'], '#828282',
-        ['campus_main_road', 'local_through_road'], '#888888',
-        '#8e8e8e']);
-  const serviceCasingColor = isSatellite ? 'rgba(0,0,0,0.52)' : (isDark ? '#111827' : '#878787');
+        ['major_vehicle_road', 'vehicle_connector'], '#525252',
+        ['campus_main_road', 'local_through_road'], '#585858',
+        '#5e5e5e']);
+  const serviceCasingColor = isSatellite ? 'rgba(0,0,0,0.52)' : (isDark ? '#111827' : '#ebe8e0');
   const serviceSurfaceColor = isSatellite
     ? ['match', ['get', 'navigation_class'], 'campus_service_road', '#f8fafc', '#d9e2ec']
     : (isDark
       ? ['match', ['get', 'navigation_class'], 'campus_service_road', '#64748b', '#526174']
-      : ['match', ['get', 'navigation_class'], 'campus_service_road', '#999999', '#a2a2a2']);
+      : ['match', ['get', 'navigation_class'], 'campus_service_road', '#636363', '#6a6a6a']);
   const narrowColor = isSatellite ? '#ffffff' : (isDark ? '#94a3b8' : '#9c9c9c');
   const footwayColor = isSatellite ? '#9ff5bd' : (isDark ? '#5ee589' : '#1f9d55');
   const walkwayColor = isSatellite ? '#7ddce5' : (isDark ? '#22d3ee' : '#078a8f');
@@ -1052,9 +1084,9 @@ function addRoadsLayer(data) {
       'line-color': vehicleCasingColor,
       'line-width': vehicleCasingW,
       'line-opacity': ['match', ['get', 'navigation_class'],
-        ['major_vehicle_road', 'vehicle_connector'], isSatellite ? 0.92 : 0.96,
-        ['campus_main_road', 'local_through_road'], isSatellite ? 0.86 : 0.9,
-        isSatellite ? 0.78 : 0.82]
+        ['major_vehicle_road', 'vehicle_connector'], isSatellite ? 0.92 : 1,
+        ['campus_main_road', 'local_through_road'], isSatellite ? 0.86 : 1,
+        isSatellite ? 0.78 : 1]
     }
   });
 
@@ -1259,7 +1291,7 @@ function addBuildingsLayer(data) {
       'fill-extrusion-color': buildingFillColor(),
       'fill-extrusion-height': buildingHeightExpr(),
       'fill-extrusion-base': 0,
-      'fill-extrusion-opacity': 0.82,
+      'fill-extrusion-opacity': buildingExtrusionOpacity(),
       'fill-extrusion-vertical-gradient': true
     }
   });
@@ -1514,6 +1546,8 @@ function toggle3D() {
       Landmarks3D.hide();
     }
     syncLandmarkLabels();
+    syncMapBodyClasses();
+    refreshBuildingTheme();
     // Keep easeTo synchronous — immersive navigation overrides the camera on
     // the same tick and a deferred easeTo would clobber that framing.
     map.easeTo({ pitch: 52, bearing: 0, duration: 900 });
@@ -1526,6 +1560,8 @@ function toggle3D() {
       if (map.getLayer('buildings-outline')) map.setLayoutProperty('buildings-outline', 'visibility', 'visible');
     }
     syncLandmarkLabels();
+    syncMapBodyClasses();
+    refreshBuildingTheme();
     map.easeTo({ pitch: 0, bearing: 0, duration: 900 });
   }
 }
@@ -3813,6 +3849,7 @@ async function toggleSatellite() {
   }
   showToast(isSatellite ? 'Satellite view' : 'Map view', 'info');
   await applyMapStyle();
+  syncMapBodyClasses();
 }
 
 async function toggleDarkMode() {
@@ -3823,6 +3860,7 @@ async function toggleDarkMode() {
   isDark = !isDark;
   document.documentElement.setAttribute('data-theme', isDark ? 'dark' : '');
   await applyMapStyle();
+  syncMapBodyClasses();
 }
 
 // ============================================================
