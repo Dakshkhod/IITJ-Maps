@@ -280,6 +280,10 @@ html, body {
 .directions-panel.minimized .dir-collapsed-bar { display: flex; }
 .directions-panel.minimized .dir-form-body { display: none; }
 
+/* Map-pick mode: keep only the slim directions bar so the map is fully tappable */
+body.dir-map-pick .directions-panel { pointer-events: none; }
+body.dir-map-pick .directions-panel .dir-collapsed-bar { pointer-events: all; }
+
 .dir-collapsed-info {
   flex: 1;
   min-width: 0;

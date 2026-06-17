@@ -6024,6 +6024,7 @@ var Landmarks3D = (() => {
   function show() {
     _visible = true;
     if (!_ready || !_threeReady()) return;
+    if (!_sceneComplete) _startBuild();
     // If the user clicked 3D while a setStyle() is still loading (e.g.
     // immediately after toggling satellite off), addLayer would throw
     // "Style is not done loading". Defer until the style is ready.

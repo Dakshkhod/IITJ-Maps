@@ -122,6 +122,41 @@ function ensureLandmarkLabelsLayer(attempts = 0) {
   syncLandmarkLabels();
 }
 
+// Three.js (~600 KB) stays off the critical path, but we pre-warm it in the
+// background once the 2D map is interactive so the first 3D toggle is smooth.
+let _landmarks3dPrewarmScheduled = false;
+
+function canBackgroundPrewarm3D() {
+  try {
+    const conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+    if (!conn) return true;
+    if (conn.saveData) return false;
+    const slow = conn.effectiveType === 'slow-2g' || conn.effectiveType === '2g';
+    if (slow) return false;
+  } catch (_) {}
+  return true;
+}
+
+function scheduleLandmarks3DPrewarm() {
+  if (_landmarks3dPrewarmScheduled || !canBackgroundPrewarm3D()) return;
+  if (typeof Landmarks3D === 'undefined') return;
+  _landmarks3dPrewarmScheduled = true;
+
+  const kick = () => {
+    if (!map?.isStyleLoaded()) {
+      map.once('sourcedata', kick);
+      return;
+    }
+    Landmarks3D.init(map);
+    Landmarks3D.load(() => {
+      if (typeof Landmarks3D.prewarm === 'function') Landmarks3D.prewarm();
+    });
+  };
+
+  // Give tiles and gestures a head start before the Three.js download.
+  setTimeout(kick, 3000);
+}
+
 function buildingFillOpacity() {
   if (isSatellite) return 0;
   return ['interpolate', ['linear'], ['zoom'], 14, 0.5, 17, 0.65];
@@ -167,7 +202,7 @@ function tryDirectionsMapPick(e, name) {
     lat, lng,
     name: name || `${lat.toFixed(5)}, ${lng.toFixed(5)}`,
   });
-  clearDirectionsPickMode();
+  clearDirectionsPickMode(true);
   return true;
 }
 
@@ -423,6 +458,7 @@ async function init() {
     setupEventListeners();
     handleDeepLink();
     requestUserLocation();
+    scheduleLandmarks3DPrewarm();
   });
 }
 
@@ -1469,14 +1505,17 @@ function toggle3D() {
       if (map.getLayer('buildings-3d'))      map.setLayoutProperty('buildings-3d',      'visibility', 'visible');
     }
     // Custom 3D landmark models are only shown on the vector base map, not
-    // over satellite imagery (matches buildings-3d behaviour).
-    if (!isSatellite) showLandmarks3D();
-    else if (typeof Landmarks3D !== 'undefined') Landmarks3D.hide();
+    // over satellite imagery (matches buildings-3d behaviour). Defer one frame
+    // so extrusion visibility + pitch animation start before the custom layer
+    // attaches (scene is usually pre-built by scheduleLandmarks3DPrewarm).
+    if (!isSatellite) {
+      requestAnimationFrame(() => { if (is3D) showLandmarks3D(); });
+    } else if (typeof Landmarks3D !== 'undefined') {
+      Landmarks3D.hide();
+    }
     syncLandmarkLabels();
-    // Scene geometry is pre-built at idle by Landmarks3D.prewarm(), so showing
-    // it here is cheap and the tilt stays smooth. Keep this easeTo synchronous:
-    // immersive navigation calls toggle3D() then overrides the camera on the
-    // same tick, and a deferred easeTo would clobber that framing a frame later.
+    // Keep easeTo synchronous — immersive navigation overrides the camera on
+    // the same tick and a deferred easeTo would clobber that framing.
     map.easeTo({ pitch: 52, bearing: 0, duration: 900 });
     showToast('3D view — drag to rotate', 'info');
   } else {
@@ -1612,7 +1651,7 @@ function setupSearch() {
         lng: e.lngLat.lng,
         name: `${e.lngLat.lat.toFixed(5)}, ${e.lngLat.lng.toFixed(5)}`,
       });
-      clearDirectionsPickMode();
+      clearDirectionsPickMode(true);
       return;
     }
 
@@ -2109,21 +2148,33 @@ function updateDirectionsGoButton() {
 
 function setDirectionsPickMode(target) {
   directionsPickTarget = target;
+  document.body.classList.add('dir-map-pick');
   document.querySelectorAll('.dir-pick-btn').forEach(btn => {
     btn.classList.toggle('active', btn.dataset.pick === target);
   });
-  const hint = document.getElementById('dir-pick-hint');
-  hint.textContent = target === 'from'
+  const msg = target === 'from'
     ? 'Tap the map to set starting point'
     : 'Tap the map to set destination';
-  hint.classList.remove('hidden');
-  showToast(hint.textContent, 'info');
+  showToast(msg, 'info');
+
+  // Tuck the form into the slim bar so the map underneath is fully visible and
+  // tappable. We add the class directly rather than calling
+  // minimizeDirectionsPanel() — that helper clears the pick target we just set.
+  const panel = document.getElementById('directions-panel');
+  panel.classList.add('minimized');
+  document.getElementById('dir-collapsed-route').textContent =
+    target === 'from' ? 'Tap the map to set start' : 'Tap the map to set destination';
+  document.getElementById('dir-collapsed-meta').textContent = 'Choosing on map…';
+  document.getElementById('dir-start-mini').style.display = 'none';
+  hideAllDirResults();
 }
 
-function clearDirectionsPickMode() {
+function clearDirectionsPickMode(restorePanel = false) {
   directionsPickTarget = null;
+  document.body.classList.remove('dir-map-pick');
   document.querySelectorAll('.dir-pick-btn').forEach(btn => btn.classList.remove('active'));
   document.getElementById('dir-pick-hint').classList.add('hidden');
+  if (restorePanel) expandDirectionsPanel();
 }
 
 function removeDirectionsMarkers() {
