@@ -178,9 +178,20 @@ function buildingFillColor() {
 }
 
 function buildingOutlineColor() {
-  // F4 buildings are uniform white blocks with a soft grey edge, not category hues.
-  if (!isSatellite && !isDark) return '#d4d0c8';
   return categoryColorExpr();
+}
+
+function buildingOutlineCasingColor() {
+  if (isSatellite) return 'rgba(0,0,0,0.45)';
+  return isDark ? '#1e293b' : '#c8c3b8';
+}
+
+function buildingOutlineWidth() {
+  return ['interpolate', ['linear'], ['zoom'], 14, 2, 17, 3.2, 19, 4];
+}
+
+function buildingOutlineCasingWidth() {
+  return ['interpolate', ['linear'], ['zoom'], 14, 3, 17, 4.4, 19, 5.2];
 }
 
 function areaFillOpacity() {
@@ -190,7 +201,8 @@ function areaFillOpacity() {
 }
 
 function buildingOutlineOpacity() {
-  return isSatellite ? 0 : 0.95;
+  if (isSatellite) return 0.9;
+  return 1;
 }
 
 function areaOutlineOpacity() {
@@ -354,7 +366,6 @@ function refreshBuildingTheme() {
   const color = buildingFillColor();
   const extrusionOpacity = buildingExtrusionOpacity();
   const fillOpacity = buildingFillOpacity();
-  const outlineColor = buildingOutlineColor();
   if (map.getLayer('buildings-3d')) {
     map.setPaintProperty('buildings-3d', 'fill-extrusion-color', color);
     map.setPaintProperty('buildings-3d', 'fill-extrusion-opacity', extrusionOpacity);
@@ -363,8 +374,14 @@ function refreshBuildingTheme() {
     map.setPaintProperty('buildings-fill', 'fill-color', color);
     map.setPaintProperty('buildings-fill', 'fill-opacity', fillOpacity);
   }
+  if (map.getLayer('buildings-outline-casing')) {
+    map.setPaintProperty('buildings-outline-casing', 'line-color', buildingOutlineCasingColor());
+    map.setPaintProperty('buildings-outline-casing', 'line-width', buildingOutlineCasingWidth());
+  }
   if (map.getLayer('buildings-outline')) {
-    map.setPaintProperty('buildings-outline', 'line-color', outlineColor);
+    map.setPaintProperty('buildings-outline', 'line-color', buildingOutlineColor());
+    map.setPaintProperty('buildings-outline', 'line-width', buildingOutlineWidth());
+    map.setPaintProperty('buildings-outline', 'line-opacity', buildingOutlineOpacity());
   }
   if (map.getLayer('areas-fill')) {
     map.setPaintProperty('areas-fill', 'fill-opacity', areaFillOpacity());
@@ -602,7 +619,7 @@ const OVERLAY_LAYER_IDS = [
   'campus-roads-ped', 'campus-roads-walkway', 'campus-roads-cycle', 'campus-roads-mixed',
   'campus-roads-hit', 'campus-roads-labels',
   'areas-fill', 'areas-outline', 'areas-labels',
-  'buildings-fill', 'buildings-outline', 'buildings-3d', 'buildings-labels',
+  'buildings-fill', 'buildings-outline-casing', 'buildings-outline', 'buildings-3d', 'buildings-labels',
   'buildings-highlight-fill', 'buildings-highlight-outline',
   'places-circles', 'places-labels',
 ];
@@ -667,6 +684,7 @@ async function applyMapStyle() {
 
         if (is3D && !isSatellite) {
           if (map.getLayer('buildings-fill'))    map.setLayoutProperty('buildings-fill',    'visibility', 'none');
+          if (map.getLayer('buildings-outline-casing')) map.setLayoutProperty('buildings-outline-casing', 'visibility', 'none');
           if (map.getLayer('buildings-outline')) map.setLayoutProperty('buildings-outline', 'visibility', 'none');
           if (map.getLayer('buildings-3d'))      map.setLayoutProperty('buildings-3d',      'visibility', 'visible');
           showLandmarks3D();
@@ -757,7 +775,7 @@ function removeCustomLayers() {
   const layers = [
     'areas-fill', 'areas-outline', 'areas-labels',
     ...ROAD_LAYER_IDS,
-    'buildings-fill', 'buildings-outline', 'buildings-3d', 'buildings-labels',
+    'buildings-fill', 'buildings-outline-casing', 'buildings-outline', 'buildings-3d', 'buildings-labels',
     'landmark-labels',
     'places-circles', 'places-labels',
     'route-glow', 'route-casing', 'route-line',
@@ -1286,14 +1304,35 @@ function addBuildingsLayer(data) {
   });
 
   map.addLayer({
+    id: 'buildings-outline-casing',
+    type: 'line',
+    source: 'buildings',
+    filter: polyFilter,
+    layout: {
+      'line-join': 'round',
+      'line-cap': 'round',
+      visibility: (LAYERS.buildings && !is3D) ? 'visible' : 'none',
+    },
+    paint: {
+      'line-color': buildingOutlineCasingColor(),
+      'line-width': buildingOutlineCasingWidth(),
+      'line-opacity': isSatellite ? 0.55 : (isDark ? 0.65 : 0.75),
+    }
+  });
+
+  map.addLayer({
     id: 'buildings-outline',
     type: 'line',
     source: 'buildings',
     filter: polyFilter,
-    layout: { visibility: (LAYERS.buildings && !is3D) ? 'visible' : 'none' },
+    layout: {
+      'line-join': 'round',
+      'line-cap': 'round',
+      visibility: (LAYERS.buildings && !is3D) ? 'visible' : 'none',
+    },
     paint: {
       'line-color': buildingOutlineColor(),
-      'line-width': ['interpolate', ['linear'], ['zoom'], 14, 1.5, 17, 3],
+      'line-width': buildingOutlineWidth(),
       'line-opacity': buildingOutlineOpacity()
     }
   });
@@ -1559,6 +1598,7 @@ function toggle3D() {
   if (is3D) {
     if (!isSatellite && LAYERS.buildings) {
       if (map.getLayer('buildings-fill'))    map.setLayoutProperty('buildings-fill',    'visibility', 'none');
+      if (map.getLayer('buildings-outline-casing')) map.setLayoutProperty('buildings-outline-casing', 'visibility', 'none');
       if (map.getLayer('buildings-outline')) map.setLayoutProperty('buildings-outline', 'visibility', 'none');
       if (map.getLayer('buildings-3d'))      map.setLayoutProperty('buildings-3d',      'visibility', 'visible');
     }
@@ -1583,7 +1623,8 @@ function toggle3D() {
     if (typeof Landmarks3D !== 'undefined') Landmarks3D.hide();
     if (!isSatellite && LAYERS.buildings) {
       if (map.getLayer('buildings-fill'))    map.setLayoutProperty('buildings-fill',    'visibility', 'visible');
-      if (map.getLayer('buildings-outline')) map.setLayoutProperty('buildings-outline', 'visibility', 'visible');
+      if (map.getLayer('buildings-outline-casing')) map.setLayoutProperty('buildings-outline-casing', 'visibility', 'visible');
+      if (map.getLayer('buildings-outline'))    map.setLayoutProperty('buildings-outline',    'visibility', 'visible');
     }
     syncLandmarkLabels();
     syncMapBodyClasses();
@@ -1615,7 +1656,7 @@ function toggleLayer(layerName) {
   const layerMap = {
     buildings: is3D
       ? ['buildings-3d', 'buildings-labels', 'landmark-labels']
-      : ['buildings-fill', 'buildings-outline', 'buildings-labels', 'landmark-labels'],
+      : ['buildings-fill', 'buildings-outline-casing', 'buildings-outline', 'buildings-labels', 'landmark-labels'],
     roads: ROAD_LAYER_IDS,
     markers: ['places-circles', 'places-labels'],
   };
