@@ -28,6 +28,15 @@
   --radius-lg: 14px;
   --radius-xl: 16px;
   --font: 'Inter', system-ui, -apple-system, sans-serif;
+  /* Motion scale — one ramp so transitions feel consistent across the app.
+     --ease-spring gives panels a gentle, premium overshoot; --ease-out for
+     everyday fades. */
+  --dur-fast: 0.14s;
+  --dur-base: 0.22s;
+  --dur-slow: 0.36s;
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --focus-ring: 0 0 0 2px var(--bg-elevated), 0 0 0 4px var(--accent);
   --toast-success-bg: #f4f4f5;
   --toast-success-text: #404040;
   --toast-success-border: #d4d4d4;
@@ -894,7 +903,7 @@ input[type="checkbox"]:checked + .toggle-track .toggle-thumb { transform: transl
   box-shadow: var(--shadow-lg);
   padding-bottom: env(safe-area-inset-bottom, 0);
   will-change: transform;
-  animation: slide-up 0.25s ease;
+  animation: slide-up var(--dur-slow) var(--ease-spring);
 }
 
 .bottom-sheet.sheet-closing {
@@ -1283,14 +1292,22 @@ input[type="checkbox"]:checked + .toggle-track .toggle-thumb { transform: transl
   transform: translateX(-50%) rotate(-45deg);
   box-shadow: 0 3px 10px rgba(255,59,48,0.5);
 }
+/* Soft expanding ground-pulse under the destination pin. Centered via margin
+   (not transform) so the looping scale animation can't fight MapLibre's marker
+   positioning transform on the root element. */
 .route-dest-marker::after {
   content: '';
   position: absolute;
-  bottom: 0; left: 50%;
-  transform: translateX(-50%);
-  width: 6px; height: 6px;
-  background: rgba(255,59,48,0.35);
+  bottom: -2px; left: 50%;
+  margin-left: -6px;
+  width: 12px; height: 12px;
+  background: rgba(255,59,48,0.34);
   border-radius: 50%;
+  animation: dest-pulse 1.9s ease-out infinite;
+}
+@keyframes dest-pulse {
+  0%        { transform: scale(0.5); opacity: 0.55; }
+  70%, 100% { transform: scale(2.7); opacity: 0; }
 }
 
 /* ============================================================
@@ -1308,7 +1325,7 @@ input[type="checkbox"]:checked + .toggle-track .toggle-thumb { transform: transl
   box-shadow: var(--shadow-lg);
   display: flex;
   flex-direction: column;
-  animation: slide-right 0.2s ease;
+  animation: slide-right var(--dur-base) var(--ease-spring);
 }
 
 @keyframes slide-right {
@@ -1634,4 +1651,132 @@ input[type="checkbox"]:checked + .toggle-track .toggle-thumb { transform: transl
   .map-ctrl-btn { width: 46px; height: 46px; }
   .action-btn { padding: 14px; font-size: 14px; }
   .sheet-content { padding: 12px 52px 28px 20px; }
+}
+
+/* ============================================================
+   Offline banner
+   ============================================================ */
+.offline-banner {
+  position: absolute;
+  top: max(12px, env(safe-area-inset-top, 12px));
+  left: 50%;
+  transform: translateX(-50%) translateY(-140%);
+  z-index: 45;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  max-width: calc(100vw - 32px);
+  padding: 9px 14px;
+  background: #1c1917;
+  color: #fafaf9;
+  font-size: 12.5px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  border-radius: 999px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.22);
+  opacity: 0;
+  pointer-events: none;
+  transition: transform var(--dur-slow) var(--ease-spring), opacity var(--dur-base) var(--ease-out);
+}
+.offline-banner svg { flex-shrink: 0; opacity: 0.85; }
+.offline-banner.visible {
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+  pointer-events: auto;
+}
+.offline-banner[hidden] { display: none; }
+
+/* ============================================================
+   Focus rings — keyboard-only, never on mouse/touch
+   ============================================================ */
+:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+  border-radius: var(--radius-sm);
+}
+.maplibregl-canvas:focus-visible { box-shadow: none; }
+
+/* ============================================================
+   Reduced motion — respect the OS setting
+   ============================================================ */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ============================================================
+   Favorite button (place sheet) + open-now badge
+   ============================================================ */
+.action-icon {
+  flex: 0 0 auto;
+  width: 46px;
+  padding: 12px 0;
+  background: var(--bg-elevated);
+  color: var(--text-secondary);
+  border: 1px solid var(--border);
+}
+.action-icon:hover { background: var(--surface); color: var(--text-primary); }
+.action-icon:active { transform: scale(0.92); }
+.action-icon.is-fav { color: #e8a91d; border-color: rgba(232,169,29,0.4); background: rgba(232,169,29,0.1); }
+.action-icon.is-fav svg { fill: #e8a91d; }
+
+.sheet-hours {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: 8px;
+  font-size: 12.5px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+.sheet-hours .hours-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.sheet-hours.open  { color: #15803d; }
+.sheet-hours.open  .hours-dot { background: #22c55e; box-shadow: 0 0 0 3px rgba(34,197,94,0.18); }
+.sheet-hours.closed { color: #b91c1c; }
+.sheet-hours.closed .hours-dot { background: #ef4444; box-shadow: 0 0 0 3px rgba(239,68,68,0.16); }
+.sheet-hours .hours-sub { color: var(--text-muted); font-weight: 500; }
+[data-theme="dark"] .sheet-hours.open  { color: #4ade80; }
+[data-theme="dark"] .sheet-hours.closed { color: #f87171; }
+
+/* ============================================================
+   Quick-access (recents / favorites / near-me) in the search panel
+   ============================================================ */
+.qa-actions { padding: 10px 12px 4px; }
+.qa-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--bg-elevated);
+  color: var(--text-primary);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  cursor: pointer;
+  transition: background var(--dur-fast) var(--ease-out), transform var(--dur-fast) var(--ease-out);
+}
+.qa-chip:hover { background: var(--surface); }
+.qa-chip:active { transform: scale(0.96); }
+.qa-section { padding-top: 2px; }
+.qa-head {
+  padding: 10px 14px 4px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+}
+.qa-hint { padding: 16px 16px 20px; font-size: 13px; color: var(--text-muted); line-height: 1.5; }
+
+/* Voice search — mic listening pulse */
+.search-icon-btn.listening { color: #ef4444; animation: mic-pulse 1.2s ease-in-out infinite; }
+@keyframes mic-pulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50%      { transform: scale(1.14); opacity: 0.7; }
 }

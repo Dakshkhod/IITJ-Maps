@@ -143,7 +143,28 @@ const IITJData = (() => {
       .slice(0, limit);
   }
 
+  // Resolve a place by (case-insensitive) name — exact match first, then the
+  // best fuzzy search hit. Used for ?place=Name deep links and "open now".
+  function getPlaceByName(name) {
+    if (!name || !_searchTokens) return null;
+    const n = String(name).toLowerCase().trim();
+    let entry = _searchTokens.find(e => e.name.toLowerCase() === n);
+    if (!entry) entry = search(name, 1)[0];
+    if (!entry) return null;
+    const { _tokens, score, ...clean } = entry;
+    return { ...clean, opening_hours: getOpeningHours(entry.name) };
+  }
+
+  // OSM opening_hours string for a place, looked up by name from the full
+  // places FC (the search index doesn't carry it).
+  function getOpeningHours(name) {
+    if (!_places || !name) return null;
+    const n = String(name).toLowerCase().trim();
+    const f = _places.features.find(ft => (ft.properties && ft.properties.name || '').toLowerCase() === n);
+    return f && f.properties ? (f.properties.opening_hours || null) : null;
+  }
+
   function isReady() { return _ready; }
 
-  return { init, onReady, isReady, search, getPlaces, getBuildings, getRoads, getAreas, getGreens, getCategories, getEntrance, nearby };
+  return { init, onReady, isReady, search, getPlaces, getBuildings, getRoads, getAreas, getGreens, getCategories, getEntrance, nearby, getPlaceByName, getOpeningHours };
 })();

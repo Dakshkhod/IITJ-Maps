@@ -359,6 +359,28 @@ let directionsMode = 'drive';  // 'drive' (main roads only) | 'walk' (shortcuts 
 // ============================================================
 // Initialize
 // ============================================================
+// Slim top banner when the network drops — tiles and data can't load offline,
+// so this explains a half-rendered map rather than leaving the user guessing.
+function setupOfflineBanner() {
+  const banner = document.getElementById('offline-banner');
+  if (!banner) return;
+  let hideTimer = null;
+  const apply = () => {
+    if (navigator.onLine === false) {
+      if (hideTimer) { clearTimeout(hideTimer); hideTimer = null; }
+      banner.hidden = false;
+      // next frame so the entry transition runs
+      requestAnimationFrame(() => banner.classList.add('visible'));
+    } else {
+      banner.classList.remove('visible');
+      hideTimer = setTimeout(() => { banner.hidden = true; }, 400);
+    }
+  };
+  window.addEventListener('online', apply);
+  window.addEventListener('offline', apply);
+  apply();
+}
+
 async function init() {
   map = new maplibregl.Map({
     container: 'map',
@@ -377,6 +399,8 @@ async function init() {
   try { window.__map = map; } catch (e) {}
   map.addControl(new maplibregl.AttributionControl({ compact: true }), 'bottom-left');
   map.addControl(new maplibregl.ScaleControl({ maxWidth: 150, unit: 'metric' }), 'bottom-left');
+
+  setupOfflineBanner();
 
   map.dragRotate.enable();
 
@@ -535,7 +559,7 @@ async function applyMapStyle() {
         addBuildingsLayer(buildingsRes);
         addPlacesLayer(placesRes.features || []);
         ensureLandmarkLabelsLayer();
-        if (currentRoute) drawRoute(currentRoute.geometry);
+        if (currentRoute) drawRoute(currentRoute.geometry, /*animate=*/false);
 
         map.jumpTo({ center: savedCenter, zoom: savedZoom, pitch: savedPitch, bearing: savedBearing });
 
@@ -683,12 +707,16 @@ function addGreensLayer(data) {
     paint: {
       'fill-color': [
         'match', ['get', 'g'],
-        'forest', isDark ? '#36502f' : '#a9c78f',
-        'scrub',  isDark ? '#33502f' : '#bcd49a',
-        'pitch',  isDark ? '#2f4a36' : '#bcd996',
-        /* grass */ isDark ? '#2f4632' : '#c8e0a6'
+        // Exact F4map olive-green palette (grass #B7C088, forest #A4AF6A);
+        // scrub/pitch interpolated between the two.
+        'forest', isDark ? '#36502f' : '#a4af6a',
+        'scrub',  isDark ? '#33502f' : '#aeb87e',
+        'pitch',  isDark ? '#2f4a36' : '#b4be83',
+        /* grass */ isDark ? '#2f4632' : '#b7c088'
       ],
-      'fill-opacity': isSatellite ? 0 : (isDark ? 0.5 : 0.9),
+      // Full opacity in light mode so the grass shows as the true F4map hue
+      // rather than being lightened by the cream ground bleeding through.
+      'fill-opacity': isSatellite ? 0 : (isDark ? 0.5 : 1),
       'fill-antialias': true
     }
   });
@@ -714,7 +742,7 @@ function addAreasLayer(data) {
   // footprint inside campus while leaving the basemap untouched off-campus.
   // Hidden on satellite (we want the imagery there).
   if (!isSatellite) {
-    const landColor = isDark ? '#26282a' : '#fafaf8';
+    const landColor = isDark ? '#26282a' : '#f2efe7';
     map.addLayer({
       id: 'campus-basemask',
       type: 'fill',
@@ -838,55 +866,60 @@ function addRoadsLayer(data) {
 
   map.addSource('campus-roads', { type: 'geojson', data });
 
+  // Broader road geometry with a wide low-zoom floor: the z13 stop is kept
+  // deliberately large so the campus network stays clearly visible when fully
+  // zoomed out (maxBounds caps you near z14), not just up close.
   const vehicleSurfaceW = ['interpolate', ['linear'], ['zoom'],
     13, ['match', ['get', 'navigation_class'],
-      ['major_vehicle_road'], 4.7,
-      ['vehicle_connector'], 3.8,
-      ['campus_main_road', 'local_through_road'], 3.5,
-      ['campus_standard_road', 'local_street', 'vehicle_road'], 2.2,
-      2.0],
+      ['major_vehicle_road'], 7.6,
+      ['vehicle_connector'], 6.4,
+      ['campus_main_road', 'local_through_road'], 6.1,
+      ['campus_standard_road', 'local_street', 'vehicle_road'], 4.5,
+      4.1],
     16, ['match', ['get', 'navigation_class'],
-      ['major_vehicle_road'], 9.4,
-      ['vehicle_connector'], 7.6,
-      ['campus_main_road', 'local_through_road'], 7.4,
-      ['campus_standard_road', 'local_street', 'vehicle_road'], 5.4,
-      5.0],
+      ['major_vehicle_road'], 14.5,
+      ['vehicle_connector'], 11.8,
+      ['campus_main_road', 'local_through_road'], 11.5,
+      ['campus_standard_road', 'local_street', 'vehicle_road'], 8.6,
+      8.0],
     19, ['match', ['get', 'navigation_class'],
-      ['major_vehicle_road'], 17,
-      ['vehicle_connector'], 13.5,
-      ['campus_main_road', 'local_through_road'], 14,
-      ['campus_standard_road', 'local_street', 'vehicle_road'], 10,
-      9],
+      ['major_vehicle_road'], 25,
+      ['vehicle_connector'], 20.5,
+      ['campus_main_road', 'local_through_road'], 21,
+      ['campus_standard_road', 'local_street', 'vehicle_road'], 15.5,
+      14],
   ];
   const vehicleCasingW = ['interpolate', ['linear'], ['zoom'],
     13, ['match', ['get', 'navigation_class'],
-      ['major_vehicle_road'], 6.4,
-      ['vehicle_connector'], 5.3,
-      ['campus_main_road', 'local_through_road'], 5.2,
-      ['campus_standard_road', 'local_street', 'vehicle_road'], 3.8,
-      3.4],
+      ['major_vehicle_road'], 10.2,
+      ['vehicle_connector'], 8.8,
+      ['campus_main_road', 'local_through_road'], 8.5,
+      ['campus_standard_road', 'local_street', 'vehicle_road'], 6.5,
+      6.0],
     16, ['match', ['get', 'navigation_class'],
-      ['major_vehicle_road'], 12.8,
-      ['vehicle_connector'], 10.4,
-      ['campus_main_road', 'local_through_road'], 10.5,
-      ['campus_standard_road', 'local_street', 'vehicle_road'], 7.8,
-      7.2],
+      ['major_vehicle_road'], 18.5,
+      ['vehicle_connector'], 15.2,
+      ['campus_main_road', 'local_through_road'], 15,
+      ['campus_standard_road', 'local_street', 'vehicle_road'], 11.6,
+      10.8],
     19, ['match', ['get', 'navigation_class'],
-      ['major_vehicle_road'], 22,
-      ['vehicle_connector'], 18,
-      ['campus_main_road', 'local_through_road'], 18.5,
-      ['campus_standard_road', 'local_street', 'vehicle_road'], 13.8,
-      12.5],
+      ['major_vehicle_road'], 30,
+      ['vehicle_connector'], 25,
+      ['campus_main_road', 'local_through_road'], 25.5,
+      ['campus_standard_road', 'local_street', 'vehicle_road'], 19.5,
+      18],
   ];
+  // Service roads now start at z13 (was z14) so they don't vanish when zoomed
+  // out — they're a big part of the internal campus network.
   const serviceSurfaceW = ['interpolate', ['linear'], ['zoom'],
-    14, ['match', ['get', 'navigation_class'], 'campus_service_road', 1.6, 'campus_service_connector', 1.15, 1],
-    16, ['match', ['get', 'navigation_class'], 'campus_service_road', 4.0, 'campus_service_connector', 3.0, 2.6],
-    19, ['match', ['get', 'navigation_class'], 'campus_service_road', 7.2, 'campus_service_connector', 5.5, 4.8],
+    13, ['match', ['get', 'navigation_class'], 'campus_service_road', 2.6, 'campus_service_connector', 2.0, 1.8],
+    16, ['match', ['get', 'navigation_class'], 'campus_service_road', 5.8, 'campus_service_connector', 4.4, 3.9],
+    19, ['match', ['get', 'navigation_class'], 'campus_service_road', 10, 'campus_service_connector', 8.0, 7.0],
   ];
   const serviceCasingW = ['interpolate', ['linear'], ['zoom'],
-    14, ['match', ['get', 'navigation_class'], 'campus_service_road', 2.7, 'campus_service_connector', 2.1, 1.8],
-    16, ['match', ['get', 'navigation_class'], 'campus_service_road', 5.8, 'campus_service_connector', 4.6, 4.0],
-    19, ['match', ['get', 'navigation_class'], 'campus_service_road', 10, 'campus_service_connector', 8.0, 7.2],
+    13, ['match', ['get', 'navigation_class'], 'campus_service_road', 4.0, 'campus_service_connector', 3.2, 2.9],
+    16, ['match', ['get', 'navigation_class'], 'campus_service_road', 8.0, 'campus_service_connector', 6.4, 5.7],
+    19, ['match', ['get', 'navigation_class'], 'campus_service_road', 13.5, 'campus_service_connector', 11, 10],
   ];
   const narrowW = ['interpolate', ['linear'], ['zoom'],
     15, ['match', ['get', 'navigation_class'], 'narrow_service_road', 1.2, 'service_access', 1.0, 0.9],
@@ -897,19 +930,19 @@ function addRoadsLayer(data) {
   const cycleW = ['interpolate', ['linear'], ['zoom'], 15, 1.0, 17, 2.2, 19, 3.8];
   const restrictedW = ['interpolate', ['linear'], ['zoom'], 15, 1.0, 17, 2.0, 19, 3.6];
 
-  // Light-mode roads use a deeper, warmer hierarchy so main arteries read as
-  // strong dark-gold lines instead of washed-out pale yellow, and the bulk
-  // standard/minor roads gain a darker casing for crisp definition against the
-  // near-white basemap. Dark + satellite keep bright surfaces (they need to pop
+  // Light-mode roads use a solid, warm-grey asphalt palette (F4map-style): main
+  // arteries are the darkest grey so the hierarchy still reads, minor roads a
+  // touch lighter, all sitting clearly darker than the near-white basemap with a
+  // crisp darker casing. Dark + satellite keep bright surfaces (they need to pop
   // against a dark/imagery background, where "darker" would hurt legibility).
   const vehicleCasingColor = isSatellite
     ? 'rgba(0,0,0,0.62)'
     : (isDark
       ? '#0f172a'
       : ['match', ['get', 'navigation_class'],
-        ['major_vehicle_road', 'vehicle_connector'], '#6f4406',
-        ['campus_main_road', 'local_through_road'], '#9a6a1c',
-        '#7c828b']);
+        ['major_vehicle_road', 'vehicle_connector'], '#5f5f5f',
+        ['campus_main_road', 'local_through_road'], '#6e6e6e',
+        '#7b7b7b']);
   const vehicleSurfaceColor = isSatellite
     ? ['match', ['get', 'navigation_class'],
       ['major_vehicle_road', 'vehicle_connector'], '#ffd166',
@@ -921,16 +954,18 @@ function addRoadsLayer(data) {
         ['campus_main_road', 'local_through_road'], '#f8d87a',
         '#dbe4ef']
       : ['match', ['get', 'navigation_class'],
-        ['major_vehicle_road', 'vehicle_connector'], '#d9941a',
-        ['campus_main_road', 'local_through_road'], '#eebb38',
-        '#f2f1ec']);
-  const serviceCasingColor = isSatellite ? 'rgba(0,0,0,0.52)' : (isDark ? '#111827' : '#b7bdc4');
+        // F4map roads are a flat neutral grey (#8E8E8E); width carries the
+        // hierarchy, so colour only varies by a hair for the main arteries.
+        ['major_vehicle_road', 'vehicle_connector'], '#828282',
+        ['campus_main_road', 'local_through_road'], '#888888',
+        '#8e8e8e']);
+  const serviceCasingColor = isSatellite ? 'rgba(0,0,0,0.52)' : (isDark ? '#111827' : '#878787');
   const serviceSurfaceColor = isSatellite
     ? ['match', ['get', 'navigation_class'], 'campus_service_road', '#f8fafc', '#d9e2ec']
     : (isDark
       ? ['match', ['get', 'navigation_class'], 'campus_service_road', '#64748b', '#526174']
-      : ['match', ['get', 'navigation_class'], 'campus_service_road', '#e7eaee', '#d3d8de']);
-  const narrowColor = isSatellite ? '#ffffff' : (isDark ? '#94a3b8' : '#9aa1aa');
+      : ['match', ['get', 'navigation_class'], 'campus_service_road', '#999999', '#a2a2a2']);
+  const narrowColor = isSatellite ? '#ffffff' : (isDark ? '#94a3b8' : '#9c9c9c');
   const footwayColor = isSatellite ? '#9ff5bd' : (isDark ? '#5ee589' : '#1f9d55');
   const walkwayColor = isSatellite ? '#7ddce5' : (isDark ? '#22d3ee' : '#078a8f');
   const cycleColor = isSatellite ? '#8ec5ff' : (isDark ? '#60a5fa' : '#1a73e8');
@@ -960,7 +995,7 @@ function addRoadsLayer(data) {
     id: 'campus-roads-service-casing',
     type: 'line',
     source: 'campus-roads',
-    minzoom: 14,
+    minzoom: 13,
     filter: serviceAndNarrowFilter,
     layout: { 'line-join': 'round', 'line-cap': 'round', visibility: roadVis },
     paint: {
@@ -990,7 +1025,7 @@ function addRoadsLayer(data) {
     id: 'campus-roads-service',
     type: 'line',
     source: 'campus-roads',
-    minzoom: 14,
+    minzoom: 13,
     filter: serviceFilter,
     layout: { 'line-join': 'round', 'line-cap': 'round', visibility: roadVis },
     paint: {
@@ -1546,20 +1581,23 @@ function setupSearch() {
     const q = input.value.trim();
     clearBtn.classList.toggle('hidden', !q.length);
     clearTimeout(searchTimeout);
-    if (!q) { results.classList.add('hidden'); return; }
+    if (!q) { renderQuickAccess(); return; }
     searchTimeout = setTimeout(() => performSearch(q), 250);
   });
 
   input.addEventListener('focus', () => {
     if (input.value.trim()) performSearch(input.value.trim());
+    else renderQuickAccess();
   });
 
   clearBtn.addEventListener('click', () => {
     input.value = '';
-    results.classList.add('hidden');
     clearBtn.classList.add('hidden');
     input.focus();
+    renderQuickAccess();
   });
+
+  setupVoiceSearch();
 
   map.on('click', (e) => {
     results.classList.add('hidden');
@@ -1590,6 +1628,39 @@ function setupSearch() {
   });
 }
 
+// One result row — shared by search, quick-access (recents/favorites) and near-me.
+function _placeItemHTML(item) {
+  const style = CATEGORY_STYLES[item.category] || CATEGORY_STYLES.other;
+  const dist  = userLocation ? `<span class="result-distance">${formatDist(haversine(userLocation.lat, userLocation.lng, item.lat, item.lng))}</span>` : '';
+  const badge = item.is_proposed ? `<span class="proposed-badge">Proposed</span>` : '';
+  return `
+    <div class="search-result-item"
+         data-lat="${item.lat}" data-lng="${item.lng}"
+         data-name="${escapeHtml(item.name)}"
+         data-category="${escapeHtml(item.category || 'other')}"
+         data-desc="${escapeHtml(item.description || '')}">
+      <div class="result-icon">${style.abbr}</div>
+      <div class="result-info">
+        <div class="result-name">${escapeHtml(item.name)}${badge}</div>
+        <div class="result-category">${escapeHtml(style.label || item.category || '')}</div>
+      </div>
+      ${dist}
+    </div>`;
+}
+
+function _wireResultClicks(results) {
+  results.querySelectorAll('.search-result-item').forEach(el => {
+    el.addEventListener('click', () => {
+      const lat = parseFloat(el.dataset.lat);
+      const lng = parseFloat(el.dataset.lng);
+      results.classList.add('hidden');
+      document.getElementById('search-input').value = el.dataset.name;
+      map.flyTo({ center: [lng, lat], zoom: 17, duration: 1000 });
+      showCoordPin({ lat, lng }, { name: el.dataset.name, category: el.dataset.category, description: el.dataset.desc });
+    });
+  });
+}
+
 async function performSearch(query) {
   const results = document.getElementById('search-results');
   try {
@@ -1601,41 +1672,106 @@ async function performSearch(query) {
       return;
     }
 
-    results.innerHTML = data.map(item => {
-      const style = CATEGORY_STYLES[item.category] || CATEGORY_STYLES.other;
-      const dist  = userLocation ? `<span class="result-distance">${formatDist(haversine(userLocation.lat, userLocation.lng, item.lat, item.lng))}</span>` : '';
-      const badge = item.is_proposed ? `<span class="proposed-badge">Proposed</span>` : '';
-      return `
-        <div class="search-result-item"
-             data-lat="${item.lat}" data-lng="${item.lng}"
-             data-name="${escapeHtml(item.name)}"
-             data-category="${escapeHtml(item.category)}"
-             data-desc="${escapeHtml(item.description || '')}">
-          <div class="result-icon">${style.abbr}</div>
-          <div class="result-info">
-            <div class="result-name">${escapeHtml(item.name)}${badge}</div>
-            <div class="result-category">${escapeHtml(style.label || item.category)}</div>
-          </div>
-          ${dist}
-        </div>`;
-    }).join('');
-
-    results.querySelectorAll('.search-result-item').forEach(el => {
-      el.addEventListener('click', () => {
-        const lat = parseFloat(el.dataset.lat);
-        const lng = parseFloat(el.dataset.lng);
-        results.classList.add('hidden');
-        document.getElementById('search-input').value = el.dataset.name;
-        map.flyTo({ center: [lng, lat], zoom: 17, duration: 1000 });
-        // Drop pin at the search result's exact location
-        showCoordPin({ lat, lng }, { name: el.dataset.name, category: el.dataset.category, description: el.dataset.desc });
-      });
-    });
-
+    results.innerHTML = data.map(_placeItemHTML).join('');
+    _wireResultClicks(results);
     results.classList.remove('hidden');
   } catch (err) {
     console.error('Search error:', err);
   }
+}
+
+// Refresh the quick-access list in place, but ONLY when it's already on screen
+// (empty search box) — so favoriting from the place sheet doesn't pop the
+// search panel open unexpectedly.
+function refreshQuickAccessIfOpen() {
+  const results = document.getElementById('search-results');
+  const input = document.getElementById('search-input');
+  if (results && input && !results.classList.contains('hidden') && !input.value.trim()) {
+    renderQuickAccess();
+  }
+}
+
+// Quick-access view shown when the search box is empty/focused: Near-me action
+// plus the user's Favorites and Recents.
+function renderQuickAccess() {
+  const input = document.getElementById('search-input');
+  const results = document.getElementById('search-results');
+  if (input.value.trim()) return;
+  const favs = getFavorites();
+  const recents = getRecents();
+
+  let html = `<div class="qa-actions">
+      <button class="qa-chip" id="qa-near" type="button">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="10" r="3"/><path d="M12 21.7C17.3 17 20 13 20 10a8 8 0 1 0-16 0c0 3 2.7 7 8 11.7z"/></svg>
+        Near me
+      </button>
+    </div>`;
+  if (favs.length) {
+    html += `<div class="qa-section"><div class="qa-head">★ Favorites</div>${favs.map(_placeItemHTML).join('')}</div>`;
+  }
+  if (recents.length) {
+    html += `<div class="qa-section"><div class="qa-head">Recent</div>${recents.map(_placeItemHTML).join('')}</div>`;
+  }
+  if (!favs.length && !recents.length) {
+    html += `<div class="qa-hint">Find a place, then tap ★ to save it here for quick access.</div>`;
+  }
+
+  results.innerHTML = html;
+  _wireResultClicks(results);
+  const near = document.getElementById('qa-near');
+  if (near) near.addEventListener('click', showNearMe);
+  results.classList.remove('hidden');
+}
+
+// "Near me" — nearest POIs to the live GPS fix.
+function showNearMe() {
+  const results = document.getElementById('search-results');
+  if (!userLocation) {
+    showToast('Turn on location to see what’s near you', 'warn');
+    flyToUserLocation();
+    return;
+  }
+  const items = IITJData.nearby(userLocation.lat, userLocation.lng, 700, 12);
+  if (!items.length) {
+    results.innerHTML = `<div class="search-empty"><div class="empty-text">Nothing mapped within 700&nbsp;m</div></div>`;
+    results.classList.remove('hidden');
+    return;
+  }
+  results.innerHTML = `<div class="qa-section"><div class="qa-head">Near you</div>${items.map(_placeItemHTML).join('')}</div>`;
+  _wireResultClicks(results);
+  results.classList.remove('hidden');
+}
+
+// Voice search via the Web Speech API. The mic button stays hidden on browsers
+// that don't support it (notably Firefox), so it never looks broken.
+function setupVoiceSearch() {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  const btn = document.getElementById('btn-voice');
+  if (!btn) return;
+  if (!SR) { btn.hidden = true; return; }
+  btn.hidden = false;
+
+  const input = document.getElementById('search-input');
+  let rec = null, listening = false;
+  btn.addEventListener('click', () => {
+    if (listening) { try { rec && rec.stop(); } catch (_) {} return; }
+    rec = new SR();
+    rec.lang = 'en-IN';
+    rec.interimResults = true;
+    rec.maxAlternatives = 1;
+    rec.onstart = () => { listening = true; btn.classList.add('listening'); input.placeholder = 'Listening…'; };
+    rec.onresult = (e) => {
+      const txt = Array.from(e.results).map(r => r[0].transcript).join('');
+      input.value = txt;
+      document.getElementById('search-clear').classList.toggle('hidden', !txt.length);
+      if (e.results[e.results.length - 1].isFinal) performSearch(txt.trim());
+      else { clearTimeout(searchTimeout); searchTimeout = setTimeout(() => performSearch(txt.trim()), 250); }
+    };
+    const done = () => { listening = false; btn.classList.remove('listening'); input.placeholder = 'Search buildings, departments…'; };
+    rec.onerror = (e) => { done(); if (e.error === 'not-allowed' || e.error === 'service-not-allowed') showToast('Microphone access blocked', 'warn'); };
+    rec.onend = done;
+    try { rec.start(); } catch (_) {}
+  });
 }
 
 // ============================================================
@@ -1763,6 +1899,41 @@ function showPlaceDetail(place) {
     document.getElementById('sheet-distance').textContent = `${formatDist(d)} · ${Math.max(1, Math.round(d / 83))} min walk`;
   } else {
     document.getElementById('sheet-distance').textContent = 'Enable GPS for distance';
+  }
+
+  // "Open now" status — only for places that carry opening_hours.
+  const hoursEl = document.getElementById('sheet-hours');
+  const oh = place.opening_hours || (place.name ? IITJData.getOpeningHours(place.name) : null);
+  const status = getOpenStatus(oh);
+  if (status) {
+    hoursEl.className = 'sheet-hours ' + status.cls;
+    hoursEl.querySelector('.hours-label').textContent = status.label;
+    hoursEl.querySelector('.hours-sub').textContent = status.sub || '';
+    hoursEl.style.display = 'flex';
+  } else {
+    hoursEl.style.display = 'none';
+  }
+
+  // Favorite toggle — hidden for ad-hoc dropped pins (nothing stable to save).
+  const favBtn = document.getElementById('sheet-fav');
+  const favable = place.name && place.name !== 'Dropped Pin' && place.lat != null && place.lng != null;
+  favBtn.style.display = favable ? 'flex' : 'none';
+  if (favable) {
+    const sync = () => {
+      const on = isFavorite(place);
+      favBtn.classList.toggle('is-fav', on);
+      favBtn.setAttribute('aria-pressed', on ? 'true' : 'false');
+      favBtn.title = on ? 'Remove from favorites' : 'Save to favorites';
+    };
+    sync();
+    favBtn.onclick = () => {
+      const added = toggleFavorite(place);
+      sync();
+      showToast(added ? 'Saved to favorites' : 'Removed from favorites', added ? 'success' : 'info');
+      refreshQuickAccessIfOpen();
+    };
+    pushRecent(place);
+    refreshQuickAccessIfOpen();
   }
 
   if (place.lat != null && place.lng != null) {
@@ -2221,8 +2392,11 @@ function _addRouteMarkers(startCoord, endCoord) {
     .setLngLat(endCoord).addTo(map);
 }
 
-function drawRoute(geometry) {
+function drawRoute(geometry, animate = true) {
   const data = { type: 'Feature', geometry };
+
+  // Cancel any in-flight draw animation from a previous route.
+  if (_routeDrawRAF) { cancelAnimationFrame(_routeDrawRAF); _routeDrawRAF = null; }
 
   // Remove old route layers so they can be re-added on top after style reload
   ['route-traveled', 'route-glow', 'route-casing', 'route-line'].forEach(id => {
@@ -2232,7 +2406,15 @@ function drawRoute(geometry) {
     if (map.getSource(id)) map.removeSource(id);
   });
 
-  map.addSource('route', { type: 'geojson', data });
+  // Grow the line from origin → destination on the first draw. During live
+  // navigation / reroutes we skip it (the line should just be there), and we
+  // honour prefers-reduced-motion.
+  const doAnimate = animate && !navigationActive && !prefersReducedMotion()
+    && geometry.type === 'LineString' && geometry.coordinates.length > 1;
+
+  map.addSource('route', { type: 'geojson', data: doAnimate
+    ? { type: 'Feature', geometry: { type: 'LineString', coordinates: [geometry.coordinates[0]] } }
+    : data });
 
   // Traveled portion source (updated as user moves)
   map.addSource('route-traveled-src', { type: 'geojson', data: { type: 'Feature', geometry: { type: 'LineString', coordinates: [] } } });
@@ -2265,6 +2447,53 @@ function drawRoute(geometry) {
   // Place start/end markers
   const coords = geometry.coordinates;
   _addRouteMarkers(coords[0], coords[coords.length - 1]);
+
+  if (doAnimate) _animateRouteDraw(geometry.coordinates);
+}
+
+// Reveal the route by growing its geometry from the origin to the destination.
+// Cheap and robust: we re-`setData` a progressively longer slice each frame,
+// which works with the existing glow/casing/line layers untouched.
+let _routeDrawRAF = null;
+function _animateRouteDraw(coords) {
+  const src = map.getSource('route');
+  if (!src) return;
+  // Cumulative pixel-independent lengths so the reveal is evenly paced.
+  const seg = [0];
+  let total = 0;
+  for (let i = 1; i < coords.length; i++) {
+    total += haversine(coords[i - 1][1], coords[i - 1][0], coords[i][1], coords[i][0]);
+    seg.push(total);
+  }
+  if (total <= 0) { src.setData({ type: 'Feature', geometry: { type: 'LineString', coordinates: coords } }); return; }
+
+  // Pace: longer routes draw a touch longer, but clamp so it always feels snappy.
+  const duration = Math.min(900, Math.max(450, total * 1.6));
+  const start = performance.now();
+  const easeOut = t => 1 - Math.pow(1 - t, 3);
+
+  const tick = (now) => {
+    const p = Math.min(1, (now - start) / duration);
+    const target = easeOut(p) * total;
+    // Walk to the segment containing `target`, interpolating the final bit.
+    let i = 1;
+    while (i < seg.length && seg[i] < target) i++;
+    const drawn = coords.slice(0, i);
+    if (i < coords.length) {
+      const segLen = seg[i] - seg[i - 1];
+      const f = segLen > 0 ? (target - seg[i - 1]) / segLen : 0;
+      const a = coords[i - 1], b = coords[i];
+      drawn.push([a[0] + f * (b[0] - a[0]), a[1] + f * (b[1] - a[1])]);
+    }
+    src.setData({ type: 'Feature', geometry: { type: 'LineString', coordinates: drawn } });
+    if (p < 1) {
+      _routeDrawRAF = requestAnimationFrame(tick);
+    } else {
+      _routeDrawRAF = null;
+      src.setData({ type: 'Feature', geometry: { type: 'LineString', coordinates: coords } });
+    }
+  };
+  _routeDrawRAF = requestAnimationFrame(tick);
 }
 
 // Update the "traveled" gray overlay up to segIdx/t on the route
@@ -3372,6 +3601,107 @@ function closeMenu() { document.getElementById('side-menu').classList.add('hidde
 // ============================================================
 // Utilities
 // ============================================================
+// Cached media-query for users who asked the OS to reduce motion — we skip
+// the route-draw / pulse animations for them.
+let _rmQuery = null;
+function prefersReducedMotion() {
+  if (!_rmQuery && typeof window.matchMedia === 'function') {
+    _rmQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+  }
+  return !!(_rmQuery && _rmQuery.matches);
+}
+
+// Parse an OSM opening_hours string into a live "open now" status. Handles the
+// shapes present in our data: 24/7, plain "HH:MM-HH:MM[,…]", and day-scoped
+// rules ("Mo-Su 07:00-23:00", "Mo-Fr 09:00-17:00; Sa 09:00-13:00").
+function getOpenStatus(oh) {
+  if (!oh) return null;
+  oh = String(oh).trim();
+  if (oh === '24/7' || /24\/7/.test(oh)) return { open: true, label: 'Open 24/7', sub: '', cls: 'open' };
+
+  const now = new Date();
+  const today = now.getDay();                      // 0=Sun … 6=Sat
+  const mins = now.getHours() * 60 + now.getMinutes();
+  const DAY = { Su: 0, Mo: 1, Tu: 2, We: 3, Th: 4, Fr: 5, Sa: 6 };
+  const fmt = m => `${String(Math.floor(m / 60) % 24).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`;
+
+  let openNow = false, closeAt = null, nextOpen = null, sawValid = false;
+
+  for (const rule of oh.split(';').map(s => s.trim()).filter(Boolean)) {
+    const m = rule.match(/^([A-Za-z,\-\s]+?)\s+([\d:\-,\s]+)$/);
+    const dayPart = m ? m[1].trim() : null;
+    const timePart = m ? m[2].trim() : rule;       // no day spec → every day
+
+    let applies = true;
+    if (dayPart) {
+      applies = false;
+      for (const tok of dayPart.split(',').map(s => s.trim())) {
+        if (tok.includes('-')) {
+          const [a, b] = tok.split('-').map(s => s.trim());
+          if (DAY[a] == null || DAY[b] == null) continue;
+          for (let d = DAY[a]; ; d = (d + 1) % 7) { if (d === today) applies = true; if (d === DAY[b]) break; }
+        } else if (DAY[tok] === today) { applies = true; }
+      }
+    }
+    if (!applies) continue;
+
+    for (const tr of timePart.split(',').map(s => s.trim())) {
+      const tm = tr.match(/^(\d{1,2}):(\d{2})-(\d{1,2}):(\d{2})$/);
+      if (!tm) continue;
+      sawValid = true;
+      const start = (+tm[1]) * 60 + (+tm[2]);
+      let end = (+tm[3]) * 60 + (+tm[4]);
+      if (end === 0) end = 1440;                   // 00:00 close = midnight
+      if (mins >= start && mins < end) { openNow = true; closeAt = Math.max(closeAt ?? 0, end); }
+      else if (mins < start) { nextOpen = nextOpen == null ? start : Math.min(nextOpen, start); }
+    }
+  }
+
+  if (!sawValid) return null;
+  if (openNow) return { open: true, label: 'Open now', sub: closeAt != null ? `· until ${fmt(closeAt)}` : '', cls: 'open' };
+  if (nextOpen != null) return { open: false, label: 'Closed', sub: `· opens ${fmt(nextOpen)}`, cls: 'closed' };
+  return { open: false, label: 'Closed now', sub: '', cls: 'closed' };
+}
+
+// ── Favorites & Recents (localStorage) ───────────────────────────────
+// Small, self-contained store. Each entry is a slim place ref so it survives
+// data reloads: { name, category, lat, lng, description }.
+const FAVORITES_KEY = 'iitj-favorites-v1';
+const RECENTS_KEY   = 'iitj-recents-v1';
+const RECENTS_MAX   = 8;
+
+function _loadList(key) { try { return JSON.parse(localStorage.getItem(key) || '[]'); } catch (_) { return []; } }
+function _saveList(key, arr) { try { localStorage.setItem(key, JSON.stringify(arr)); } catch (_) {} }
+function _placeRef(p) {
+  return { name: p.name, category: p.category || 'other',
+    lat: +Number(p.lat).toFixed(6), lng: +Number(p.lng).toFixed(6),
+    description: p.description || null };
+}
+function _samePlace(a, b) {
+  return a && b && a.name === b.name &&
+    Math.abs(a.lat - b.lat) < 1e-5 && Math.abs(a.lng - b.lng) < 1e-5;
+}
+
+function getFavorites() { return _loadList(FAVORITES_KEY); }
+function isFavorite(p) { return getFavorites().some(f => _samePlace(f, p)); }
+function toggleFavorite(p) {
+  if (!p || p.lat == null || p.lng == null || !p.name || p.name === 'Dropped Pin') return false;
+  const list = getFavorites();
+  const i = list.findIndex(f => _samePlace(f, p));
+  let added;
+  if (i >= 0) { list.splice(i, 1); added = false; }
+  else { list.unshift(_placeRef(p)); added = true; }
+  _saveList(FAVORITES_KEY, list);
+  return added;
+}
+function getRecents() { return _loadList(RECENTS_KEY); }
+function pushRecent(p) {
+  if (!p || p.lat == null || p.lng == null || !p.name || p.name === 'Dropped Pin') return;
+  let list = getRecents().filter(r => !_samePlace(r, p));
+  list.unshift(_placeRef(p));
+  _saveList(RECENTS_KEY, list.slice(0, RECENTS_MAX));
+}
+
 function haversine(lat1, lng1, lat2, lng2) {
   const R = 6371000;
   const a = Math.sin((lat2-lat1)*Math.PI/360)**2 +
@@ -3405,6 +3735,22 @@ function handleDeepLink() {
     }
     // Wait for flyTo, then drop pin + open place sheet (named shares included)
     setTimeout(() => showCoordPin({ lat, lng }, info), 900);
+    return;
+  }
+
+  // ?place=Library  — resolve by name when no coordinates were given. Lets you
+  // share a clean, human-readable link ("meet me here") without coordinates.
+  if (placeParam) {
+    const resolve = () => {
+      const place = IITJData.getPlaceByName(placeParam);
+      if (place) {
+        map.flyTo({ center: [place.lng, place.lat], zoom, duration: 800 });
+        setTimeout(() => showPlaceDetail({ ...place, _noFly: true }), 850);
+      } else {
+        showToast(`Couldn't find "${placeParam}"`, 'warn');
+      }
+    };
+    if (IITJData.isReady()) resolve(); else IITJData.onReady(resolve);
   }
 }
 
