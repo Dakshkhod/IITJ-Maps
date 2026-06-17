@@ -81,11 +81,11 @@ function buildingHeightExpr() {
 
 function labelPaint() {
   const onSatellite = isSatellite;
-  const on3dDay = is3D && !isSatellite && !isDark;
+  const onF4Day = !isSatellite && !isDark;
   return {
-    'text-color': onSatellite ? '#ffffff' : (isDark ? '#e2e8f0' : (on3dDay ? '#2d3748' : '#374151')),
+    'text-color': onSatellite ? '#ffffff' : (isDark ? '#e2e8f0' : (onF4Day ? '#2d3748' : '#374151')),
     'text-halo-color': onSatellite ? 'rgba(0,0,0,0.85)' : (isDark ? 'rgba(15,23,42,0.85)' : 'rgba(255,255,255,0.92)'),
-    'text-halo-width': onSatellite ? 2 : (on3dDay ? 1.75 : 1.5)
+    'text-halo-width': onSatellite ? 2 : (onF4Day ? 1.75 : 1.5)
   };
 }
 
@@ -160,7 +160,9 @@ function scheduleLandmarks3DPrewarm() {
 
 function buildingFillOpacity() {
   if (isSatellite) return 0;
-  return ['interpolate', ['linear'], ['zoom'], 14, 0.5, 17, 0.65];
+  // F4map: solid white footprints in day vector mode.
+  if (!isDark) return ['interpolate', ['linear'], ['zoom'], 14, 0.78, 17, 0.92];
+  return ['interpolate', ['linear'], ['zoom'], 14, 0.55, 17, 0.72];
 }
 
 /** F4-style extrusion opacity — fully opaque in 3D for crisp white blocks. */
@@ -170,15 +172,21 @@ function buildingExtrusionOpacity() {
 }
 
 function buildingFillColor() {
-  // F4map 3D: bright sunlit walls in day, muted blue-grey at night.
-  if (is3D && !isSatellite) {
-    return isDark ? '#7a8494' : '#fafaf8';
-  }
-  return isDark ? '#475569' : '#f1f5f9';
+  if (isSatellite) return isDark ? '#475569' : '#f1f5f9';
+  // F4map vector (2D + 3D): bright sunlit walls in day, muted blue-grey at night.
+  return isDark ? '#7a8494' : '#fafaf8';
+}
+
+function buildingOutlineColor() {
+  // F4 buildings are uniform white blocks with a soft grey edge, not category hues.
+  if (!isSatellite && !isDark) return '#d4d0c8';
+  return categoryColorExpr();
 }
 
 function areaFillOpacity() {
-  return isSatellite ? 0 : 0.35;
+  if (isSatellite) return 0;
+  // F4: grass + roads dominate; keep area tints barely visible.
+  return 0.1;
 }
 
 function buildingOutlineOpacity() {
@@ -332,30 +340,48 @@ function finishMapLayers() {
   refreshBuildingTheme();
 }
 
-/** Body classes drive F4-style canvas brightness (day 3D glow / night dim). */
+/** Body classes drive F4-style canvas brightness (vector map day/night). */
 function syncMapBodyClasses() {
+  document.body.classList.toggle('map-vector', !isSatellite);
   document.body.classList.toggle('map-3d', is3D && !isSatellite);
   document.body.classList.toggle('map-dark', isDark && !isSatellite);
   document.body.classList.toggle('map-satellite', isSatellite);
 }
 
-/** Live-update building extrusion colours when 3D / theme toggles (no style reload). */
+/** Live-update F4 cartography when 2D/3D / theme toggles (no style reload). */
 function refreshBuildingTheme() {
   if (!map) return;
   const color = buildingFillColor();
   const extrusionOpacity = buildingExtrusionOpacity();
+  const fillOpacity = buildingFillOpacity();
+  const outlineColor = buildingOutlineColor();
   if (map.getLayer('buildings-3d')) {
     map.setPaintProperty('buildings-3d', 'fill-extrusion-color', color);
     map.setPaintProperty('buildings-3d', 'fill-extrusion-opacity', extrusionOpacity);
   }
   if (map.getLayer('buildings-fill')) {
     map.setPaintProperty('buildings-fill', 'fill-color', color);
+    map.setPaintProperty('buildings-fill', 'fill-opacity', fillOpacity);
   }
-  // F4 shows mostly grass + roads in 3D — fade the tinted area overlays.
+  if (map.getLayer('buildings-outline')) {
+    map.setPaintProperty('buildings-outline', 'line-color', outlineColor);
+  }
   if (map.getLayer('areas-fill')) {
-    map.setPaintProperty('areas-fill', 'fill-opacity',
-      isSatellite ? 0 : (is3D ? 0.1 : 0.35));
+    map.setPaintProperty('areas-fill', 'fill-opacity', areaFillOpacity());
   }
+  refreshMapLabelPaint();
+}
+
+function refreshMapLabelPaint() {
+  if (!map) return;
+  const p = labelPaint();
+  for (const id of ['buildings-labels', 'areas-labels', 'campus-roads-labels', 'places-labels']) {
+    if (!map.getLayer(id)) continue;
+    map.setPaintProperty(id, 'text-color', p['text-color']);
+    map.setPaintProperty(id, 'text-halo-color', p['text-halo-color']);
+    map.setPaintProperty(id, 'text-halo-width', p['text-halo-width']);
+  }
+  syncLandmarkLabels();
 }
 
 const LAYERS = { buildings: true, roads: true, markers: true };
@@ -1266,7 +1292,7 @@ function addBuildingsLayer(data) {
     filter: polyFilter,
     layout: { visibility: (LAYERS.buildings && !is3D) ? 'visible' : 'none' },
     paint: {
-      'line-color': colorExpr,
+      'line-color': buildingOutlineColor(),
       'line-width': ['interpolate', ['linear'], ['zoom'], 14, 1.5, 17, 3],
       'line-opacity': buildingOutlineOpacity()
     }
