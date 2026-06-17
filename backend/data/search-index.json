@@ -554,7 +554,7 @@
   {
     "id": "1419313442",
     "name": "LHC 2",
-    "category": "building",
+    "category": "academic",
     "description": "",
     "keywords": [],
     "lat": 26.480015633333327,
@@ -1087,7 +1087,7 @@
   {
     "id": "1529899558",
     "name": "Animal House",
-    "category": "building",
+    "category": "academic",
     "description": "",
     "keywords": [],
     "lat": 26.47154638,
@@ -1234,7 +1234,7 @@
   {
     "id": "773563492",
     "name": "Fresh and Green",
-    "category": "dining",
+    "category": "utility",
     "description": "Convenience store",
     "keywords": [
       "Fresh and green"
@@ -1258,7 +1258,7 @@
   {
     "id": "773839450",
     "name": "Faculty Housing",
-    "category": "hostel",
+    "category": "residential",
     "description": "",
     "keywords": [],
     "lat": 26.47321932,
@@ -1462,7 +1462,7 @@
   {
     "id": "1412443820",
     "name": "Security Checking",
-    "category": "administrative",
+    "category": "gate",
     "description": "",
     "keywords": [],
     "lat": 26.4666777125,
@@ -1473,7 +1473,7 @@
   {
     "id": "1521877041",
     "name": "Academic Building",
-    "category": "building",
+    "category": "academic",
     "description": "",
     "keywords": [],
     "lat": 26.476047766666667,
@@ -1484,7 +1484,7 @@
   {
     "id": "1523529514",
     "name": "B.R cycle service",
-    "category": "dining",
+    "category": "utility",
     "description": "",
     "keywords": [],
     "lat": 26.475252639999997,
@@ -1528,7 +1528,7 @@
   {
     "id": "773563508",
     "name": "Office Of Students",
-    "category": "academic",
+    "category": "administrative",
     "description": "",
     "keywords": [],
     "lat": 26.471139444444447,
@@ -1539,7 +1539,7 @@
   {
     "id": "1412504080",
     "name": "Ess 09 Sub Station",
-    "category": "academic",
+    "category": "utility",
     "description": "",
     "keywords": [],
     "lat": 26.476578916666668,
@@ -1709,7 +1709,7 @@
   {
     "id": "773563532",
     "name": "Guest House (Visitor)",
-    "category": "building",
+    "category": "residential",
     "description": "",
     "keywords": [],
     "lat": 26.47291519285714,
@@ -1753,7 +1753,7 @@
   {
     "id": "773563509",
     "name": "Office of Administration",
-    "category": "academic",
+    "category": "administrative",
     "description": "",
     "keywords": [],
     "lat": 26.47114722857143,
@@ -1872,7 +1872,7 @@
   {
     "id": "1529899555",
     "name": "Clean  Room & Service Block",
-    "category": "building",
+    "category": "academic",
     "description": "",
     "keywords": [],
     "lat": 26.465720977777778,

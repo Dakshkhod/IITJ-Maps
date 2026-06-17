@@ -3677,9 +3677,16 @@ function _placeRef(p) {
     lat: +Number(p.lat).toFixed(6), lng: +Number(p.lng).toFixed(6),
     description: p.description || null };
 }
+// Same place if the names match (case-insensitive) OR the coordinates nearly
+// coincide. Name-first matters because the same place opened from its building
+// polygon vs. its POI point has slightly different coords — without this they'd
+// pile up as duplicate recents (the "three New Mess" bug).
 function _samePlace(a, b) {
-  return a && b && a.name === b.name &&
-    Math.abs(a.lat - b.lat) < 1e-5 && Math.abs(a.lng - b.lng) < 1e-5;
+  if (!a || !b) return false;
+  const na = (a.name || '').trim().toLowerCase();
+  const nb = (b.name || '').trim().toLowerCase();
+  if (na && na === nb) return true;
+  return Math.abs(a.lat - b.lat) < 1e-5 && Math.abs(a.lng - b.lng) < 1e-5;
 }
 
 function getFavorites() { return _loadList(FAVORITES_KEY); }
@@ -3694,7 +3701,16 @@ function toggleFavorite(p) {
   _saveList(FAVORITES_KEY, list);
   return added;
 }
-function getRecents() { return _loadList(RECENTS_KEY); }
+function getRecents() {
+  // Dedupe by name on read so any duplicates already saved in a browser
+  // (from before the name-based dedupe) collapse to one.
+  const seen = new Set();
+  return _loadList(RECENTS_KEY).filter(r => {
+    const k = (r.name || '').trim().toLowerCase();
+    if (!k || seen.has(k)) return false;
+    seen.add(k); return true;
+  });
+}
 function pushRecent(p) {
   if (!p || p.lat == null || p.lng == null || !p.name || p.name === 'Dropped Pin') return;
   let list = getRecents().filter(r => !_samePlace(r, p));

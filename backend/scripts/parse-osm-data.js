@@ -147,7 +147,11 @@ function parseKML(filePath) {
 
 function classifyKMLPlace(name) {
   const lower = name.toLowerCase();
-  if (lower.includes('hostel') || lower.includes('housing')) return 'hostel';
+  // Faculty/staff residential first, so "Faculty Housing"/quarters/Type-X don't
+  // fall into the student-hostel bucket.
+  if (lower.includes('housing') || lower.includes('quarter') || lower.includes('quater') ||
+      lower.includes('bungalow') || /\btype[\s-]?[a-z]\b/.test(lower)) return 'residential';
+  if (lower.includes('hostel')) return 'hostel';
   if (lower.includes('dining') || lower.includes('mess') || lower.includes('d-5') || lower.includes('d-6')) return 'dining';
   if (lower.includes('parking')) return 'parking';
   if (lower.includes('admin')) return 'administrative';
@@ -307,6 +311,9 @@ function classifyBuilding(tags) {
   if (/\b(phc|primary health centre|primary health center|health centre|hospital|clinic)\b/.test(nameLower)) return 'medical';
   if (tags.amenity === 'university' || tags.building === 'university' || tags.building === 'college') return 'academic';
   if (tags.building === 'dormitory' || tags.tourism === 'hostel' || tags.building === 'hostel') return 'hostel';
+  if (/\bhostel\b/.test(nameLower)) return 'hostel';
+  // Faculty/staff residential: housing, quarters, Type-X blocks, bungalows.
+  if (/\b(housing|quarter|quaters|bungalow)\b/.test(nameLower) || /\btype[\s-]?[a-z]\b/.test(nameLower)) return 'residential';
   if (tags.amenity === 'restaurant' || tags.amenity === 'cafe' || tags.amenity === 'food_court') return 'dining';
   if (tags.amenity === 'hospital' || tags.amenity === 'clinic' || tags.amenity === 'pharmacy') return 'medical';
   if (tags.amenity === 'parking' || tags.building === 'parking') return 'parking';

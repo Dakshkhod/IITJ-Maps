@@ -21,11 +21,11 @@ const IITJData = (() => {
   async function init() {
     const base = '/data';
     const [places, buildings, roads, areas, searchIndex, categories, entrances, greens] = await Promise.all([
-      fetch(`${base}/places.geojson?v=34`).then(r => r.json()),
-      fetch(`${base}/buildings.geojson?v=31`).then(r => r.json()),
+      fetch(`${base}/places.geojson?v=35`).then(r => r.json()),
+      fetch(`${base}/buildings.geojson?v=32`).then(r => r.json()),
       fetch(`${base}/roads.geojson?v=32`).then(r => r.json()),
       fetch(`${base}/areas.geojson?v=31`).then(r => r.json()),
-      fetch(`${base}/search-index.json?v=34`).then(r => r.json()),
+      fetch(`${base}/search-index.json?v=35`).then(r => r.json()),
       fetch(`${base}/categories.json`).then(r => r.json()),
       fetch(`${base}/entrances.json?v=31`).then(r => r.ok ? r.json() : {}).catch(() => ({})),
       fetch(`${base}/greens.geojson?v=2`).then(r => r.ok ? r.json() : null).catch(() => null),
@@ -46,16 +46,24 @@ const IITJData = (() => {
     _entrances  = entrances || {};
     _greens     = greens || { type: 'FeatureCollection', features: [] };
 
-    // Pre-build search token strings once
-    _searchTokens = searchIndex.map(entry => ({
-      ...entry,
-      _tokens: [
+    // Pre-build search token strings once. `_nameNorm`/`_tokensNorm` are the
+    // alphanumeric-only forms (no spaces, hyphens or dots) so codes like "E-6",
+    // "Hostel B1" or "C.S.E." match when typed as "e6", "hostelb1", "cse".
+    const norm = s => (s || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+    _searchTokens = searchIndex.map(entry => {
+      const tokens = [
         entry.name.toLowerCase(),
         ...(entry.keywords || []).map(k => k.toLowerCase()),
         entry.category.toLowerCase(),
         (entry.description || '').toLowerCase(),
-      ].join(' '),
-    }));
+      ].join(' ');
+      return {
+        ...entry,
+        _tokens: tokens,
+        _nameNorm: norm(entry.name),
+        _tokensNorm: tokens.split(/\s+/).map(norm).filter(Boolean),
+      };
+    });
 
     _ready = true;
     _readyCallbacks.forEach(cb => cb());
@@ -85,9 +93,11 @@ const IITJData = (() => {
   // ── Public API ───────────────────────────────────────────────
   function search(q, limit = 10) {
     if (!_searchTokens || !q || q.length < 1) return [];
-    const query  = q.toLowerCase().trim();
-    const words  = query.split(/\s+/);
+    const query     = q.toLowerCase().trim();
+    const queryNorm = query.replace(/[^a-z0-9]/g, '');
+    const words     = query.split(/\s+/);
 
+    const seen = new Set();
     return _searchTokens
       .map(entry => {
         let score = 0;
@@ -97,19 +107,37 @@ const IITJData = (() => {
         else if (nameL.startsWith(query)) score += 80;
         else if (nameL.includes(query))  score += 60;
 
+        // Separator-insensitive match on the whole query ("e6" → "E-6").
+        const nameNorm = entry._nameNorm;
+        if (queryNorm.length >= 2 && nameNorm) {
+          if (nameNorm === queryNorm)            score += 95;
+          else if (nameNorm.startsWith(queryNorm)) score += 72;
+          else if (nameNorm.includes(queryNorm))   score += 48;
+        }
+
         for (const word of words) {
           if (word.length < 2) continue;
+          const wNorm = word.replace(/[^a-z0-9]/g, '');
           if (nameL.includes(word))        score += 30;
           if (entry._tokens.includes(word)) score += 15;
           for (const tw of entry._tokens.split(/\s+/)) {
             if (tw.startsWith(word)) score += 10;
             if (word.length >= 3 && tw.length >= 3 && levenshteinLite(word, tw) <= 1) score += 5;
           }
+          // normalized per-token prefix match ("b1" → "Hostel B1")
+          if (wNorm.length >= 2) {
+            for (const tw of entry._tokensNorm) {
+              if (tw === wNorm) { score += 12; break; }
+              if (tw.startsWith(wNorm)) { score += 7; break; }
+            }
+          }
         }
         return { ...entry, score };
       })
       .filter(r => r.score > 0)
       .sort((a, b) => b.score - a.score)
+      // Collapse any same-name duplicates (e.g. a building + its POI point).
+      .filter(r => { const k = r.name.toLowerCase(); if (seen.has(k)) return false; seen.add(k); return true; })
       .slice(0, limit);
   }
 
@@ -151,7 +179,7 @@ const IITJData = (() => {
     let entry = _searchTokens.find(e => e.name.toLowerCase() === n);
     if (!entry) entry = search(name, 1)[0];
     if (!entry) return null;
-    const { _tokens, score, ...clean } = entry;
+    const { _tokens, _nameNorm, _tokensNorm, score, ...clean } = entry;
     return { ...clean, opening_hours: getOpeningHours(entry.name) };
   }
 
