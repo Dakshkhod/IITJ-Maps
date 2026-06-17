@@ -33,7 +33,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
-  <link rel="stylesheet" href="css/app.css?v=3">
+  <link rel="stylesheet" href="css/app.css?v=5">
 </head>
 <body>
   <!-- Loading Splash -->
@@ -108,6 +108,12 @@
         <button class="dir-collapsed-info" id="dir-expand" type="button">
           <span id="dir-collapsed-route" class="dir-collapsed-route"></span>
           <span id="dir-collapsed-meta" class="dir-collapsed-meta"></span>
+        </button>
+        <button class="dir-start-btn dir-start-btn-mini" id="dir-start-mini" type="button">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="5 3 19 12 5 21 5 3" fill="currentColor"/>
+          </svg>
+          Start
         </button>
         <button class="dir-expand-btn" id="dir-expand-icon" type="button" aria-label="Edit route">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="18 15 12 9 6 15"/></svg>
@@ -259,6 +265,12 @@
             <span class="hours-label"></span>
             <span class="hours-sub"></span>
           </div>
+          <div class="sheet-entrance" id="sheet-entrance" style="display:none">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/>
+            </svg>
+            <span class="entrance-label"></span>
+          </div>
           <div class="sheet-coords" id="sheet-coords" style="display:none">
             <span class="sheet-coords-text" id="sheet-coords-text"></span>
             <button class="sheet-coords-copy" id="sheet-coords-copy">Copy</button>
@@ -311,6 +323,7 @@
           <div class="nav-turn-dist" id="nav-turn-dist">—</div>
           <div class="nav-turn-text" id="nav-text">Calculating…</div>
         </div>
+        <button class="nav-voice-btn" id="nav-voice-btn" type="button" aria-label="Toggle voice guidance" title="Voice guidance"></button>
         <button class="nav-close-btn" id="nav-close-btn" aria-label="End navigation">✕</button>
       </div>
 
@@ -395,6 +408,6 @@
   <script src="js/search.js?v=37"></script>
   <script src="js/routing.js?v=32"></script>
   <script src="js/landmarks-3d.js?v=34" defer></script>
-  <script src="js/app.js?v=35"></script>
+  <script src="js/app.js?v=37"></script>
 </body>
 </html>

@@ -339,6 +339,7 @@ let labeledNames = new Set();
 let searchTimeout;
 let currentRoute = null;
 let navDestination = null;           // preserved so re-route works after sheet close
+let navEntrance = null;              // registered entrance gate (+floor) of the destination, if any
 let navigationActive = false;
 let navInstructionIndex = 0;
 let immersiveNav = false;            // true while in Google-Maps-style immersive 3D nav view
@@ -1914,6 +1915,21 @@ function showPlaceDetail(place) {
     hoursEl.style.display = 'none';
   }
 
+  // Registered entrance gate (+ floor, when the data carries it). Directions
+  // route to this gate; surfacing it here sets the "meet me at the door"
+  // expectation before the user even starts navigating.
+  const entEl = document.getElementById('sheet-entrance');
+  const entrance = place.name ? IITJData.getEntrance(place.name) : null;
+  if (entEl) {
+    if (entrance && entrance.gate_name) {
+      const floor = entrance.floor != null ? ` · ${_floorLabel(entrance.floor)}` : '';
+      entEl.querySelector('.entrance-label').textContent = `Enter via ${entrance.gate_name}${floor}`;
+      entEl.style.display = 'flex';
+    } else {
+      entEl.style.display = 'none';
+    }
+  }
+
   // Favorite toggle — hidden for ad-hoc dropped pins (nothing stable to save).
   const favBtn = document.getElementById('sheet-fav');
   const favable = place.name && place.name !== 'Dropped Pin' && place.lat != null && place.lng != null;
@@ -2207,6 +2223,7 @@ function setupDirectionsPanel() {
   document.getElementById('dir-swap').addEventListener('click', swapDirectionsPoints);
   document.getElementById('dir-go').addEventListener('click', calculateDirectionsRoute);
   document.getElementById('dir-start').addEventListener('click', startImmersiveNavigation);
+  document.getElementById('dir-start-mini').addEventListener('click', startImmersiveNavigation);
   document.getElementById('dir-close').addEventListener('click', closeDirectionsPanel);
   document.getElementById('dir-close-mini').addEventListener('click', closeDirectionsPanel);
   document.getElementById('dir-expand').addEventListener('click', expandDirectionsPanel);
@@ -2259,6 +2276,7 @@ async function calculateDirectionsRoute() {
     // (e.g. hostels route to their actual entry gate, not the building centroid)
     const fromEntry = IITJData.getEntrance(directionsFrom.name);
     const toEntry   = IITJData.getEntrance(directionsTo.name);
+    navEntrance = toEntry || null;   // surfaced on arrival (visual + spoken)
     const routeFromLat = fromEntry ? fromEntry.lat : directionsFrom.lat;
     const routeFromLng = fromEntry ? fromEntry.lng : directionsFrom.lng;
     const routeToLat   = toEntry   ? toEntry.lat   : directionsTo.lat;
@@ -2301,6 +2319,10 @@ async function calculateDirectionsRoute() {
     else summaryType = route.profile === 'driving' ? 'Driving · main roads' : 'Walking · campus paths';
     document.getElementById('dir-summary-type').textContent = summaryType;
 
+    // Collapse the form to a slim bar so the route stays visible on small
+    // screens (Google Maps-style) — full form only needed while editing.
+    minimizeDirectionsPanel();
+
     // Prime the nav-panel content so it's ready the moment Start is pressed,
     // but keep the panel hidden until then (Google Maps-style preview).
     document.getElementById('nav-destination').textContent = directionsTo.name;
@@ -2341,6 +2363,8 @@ async function reRoute() {
   setTimeout(() => { _rerouteCooldown = false; }, 8000);
 
   _showRerouting(true);
+  _resetNavVoiceState();
+  NavVoice.speak('Rerouting');
   if (directionsFrom && directionsTo) {
     // Update from-point to current GPS if available
     if (userLocation) directionsFrom = { lat: userLocation.lat, lng: userLocation.lng, name: 'Your location' };
@@ -2699,8 +2723,11 @@ function updateNavInstruction(distToNextTurn) {
     distEl.textContent = instr.type === 'arrive' ? 'Arriving' : (instr.distance ? formatDist(instr.distance) : '—');
   }
 
-  // Instruction text
-  document.getElementById('nav-text').textContent = instr.text;
+  // Instruction text — arrival surfaces the registered entrance gate.
+  document.getElementById('nav-text').textContent =
+    (instr.type === 'arrive' && navEntrance && navEntrance.gate_name)
+      ? `Arrive — enter via ${navEntrance.gate_name}${navEntrance.floor != null ? ' · ' + _floorLabel(navEntrance.floor) : ''}`
+      : instr.text;
 
   // Next instruction
   const next  = currentRoute.instructions[navInstructionIndex + 1];
@@ -2799,6 +2826,24 @@ function startImmersiveNavigation() {
   });
 
   hideRecenterBtn();
+
+  // Compass: requested here because the Start tap is a user gesture — the only
+  // context iOS 13+ accepts DeviceOrientationEvent.requestPermission() from.
+  _enableCompassWithUX();
+
+  // Spoken guidance: open with the first instruction (+ the maneuver after it).
+  _resetNavVoiceState();
+  if (NavVoice.enabled() && currentRoute.instructions && currentRoute.instructions.length) {
+    const first  = currentRoute.instructions[0];
+    const second = currentRoute.instructions[1];
+    let phrase = first?.text || 'Starting navigation';
+    if (second && second.type !== 'arrive' && second.distance) {
+      phrase += `. In ${_spokenDist(second.distance)}, ${_lower1(second.text)}`;
+    } else if (second && second.type === 'arrive') {
+      phrase += '. ' + _arrivalPhrase();
+    }
+    NavVoice.speak(phrase);
+  }
 
   if (!userLocation) {
     showToast('Enable GPS for live navigation', 'info');
@@ -2949,8 +2994,10 @@ function clearRoute() {
   // Gyroscope is only ever on during nav — shut it off as soon as nav ends
   // so it doesn't keep firing in the background.
   LocationTracker.disableCompass();
+  _resetNavVoiceState();
   currentRoute     = null;
   navDestination   = null;
+  navEntrance      = null;
   _rerouteCooldown = false;
   _offRouteSince   = 0;
   _showOffRoute(false);
@@ -2970,6 +3017,160 @@ function clearRoute() {
 function endNavigation() {
   clearRoute();
   showToast('Navigation ended', 'info');
+}
+
+// ============================================================
+// NavVoice — spoken turn-by-turn (Web Speech API speechSynthesis)
+// ============================================================
+// Announces the upcoming maneuver as the user approaches it, the maneuver
+// itself at the turn, reroutes, and arrival. Feature-detected (no-ops where
+// speechSynthesis is missing) and user-mutable; the preference persists.
+const NavVoice = (() => {
+  const PREF_KEY = 'iitj-nav-voice-v1';
+  const synth = (typeof window !== 'undefined' && window.speechSynthesis) || null;
+  let _enabled = synth ? (localStorage.getItem(PREF_KEY) !== 'off') : false;
+  let _voice = null;
+
+  function supported() { return !!synth; }
+  function enabled()   { return supported() && _enabled; }
+
+  function _pickVoice() {
+    if (!synth) return;
+    const voices = synth.getVoices() || [];
+    _voice = voices.find(v => /en[-_]IN/i.test(v.lang))
+          || voices.find(v => /^en/i.test(v.lang))
+          || voices[0] || null;
+  }
+  if (synth) {
+    _pickVoice();
+    // Chrome populates voices asynchronously.
+    try { synth.addEventListener('voiceschanged', _pickVoice); } catch (_) {}
+  }
+
+  // flush=true cancels anything queued so a fresh turn supersedes a stale one.
+  function speak(text, { flush = true } = {}) {
+    if (!enabled() || !text) return;
+    try {
+      if (flush) synth.cancel();
+      const u = new SpeechSynthesisUtterance(text);
+      u.lang = (_voice && _voice.lang) || 'en-IN';
+      if (_voice) u.voice = _voice;
+      u.rate = 1.02; u.pitch = 1.0; u.volume = 1.0;
+      synth.speak(u);
+    } catch (_) {}
+  }
+
+  function setEnabled(on) {
+    _enabled = !!on && supported();
+    try { localStorage.setItem(PREF_KEY, _enabled ? 'on' : 'off'); } catch (_) {}
+    if (!_enabled) stop();
+    return _enabled;
+  }
+  function toggle() { return setEnabled(!_enabled); }
+  function stop()   { if (synth) { try { synth.cancel(); } catch (_) {} } }
+
+  return { supported, enabled, speak, setEnabled, toggle, stop };
+})();
+
+// Spoken-form distance — "90 metres" / "1.2 kilometres" reads better aloud.
+function _spokenDist(m) {
+  if (m == null) return '';
+  if (m < 1000) return `${Math.max(10, Math.round(m / 10) * 10)} metres`;
+  return `${(m / 1000).toFixed(1)} kilometres`;
+}
+// Lowercase the first letter so "In 90 metres, turn left" flows naturally.
+function _lower1(s) { return s ? s.charAt(0).toLowerCase() + s.slice(1) : s; }
+
+function _floorLabel(f) {
+  const n = Number(f);
+  if (!isFinite(n)) return String(f);
+  if (n === 0) return 'ground floor';
+  const ord = n === 1 ? '1st' : n === 2 ? '2nd' : n === 3 ? '3rd' : `${n}th`;
+  return `${ord} floor`;
+}
+
+// Arrival phrase, entrance-aware: routes to a registered gate announce it.
+function _arrivalPhrase() {
+  if (navEntrance && navEntrance.gate_name) {
+    const floor = navEntrance.floor != null ? `, ${_floorLabel(navEntrance.floor)}` : '';
+    return `You have arrived. Enter via ${navEntrance.gate_name}${floor}.`;
+  }
+  return 'You have arrived at your destination.';
+}
+
+// Per-route announcement bookkeeping.
+let _voiceNowIdx  = -1;     // last index announced "at the turn"
+let _voicePreIdx  = -1;     // last upcoming-maneuver index pre-announced
+let _voiceArrived = false;  // arrival announced once
+function _resetNavVoiceState() {
+  _voiceNowIdx = -1; _voicePreIdx = -1; _voiceArrived = false;
+  NavVoice.stop();
+}
+
+// Drive spoken guidance off the per-frame nav state computed in _navTick.
+function _voiceGuidance(instrs, idx, nextInstr, distToTurn, remDist) {
+  if (!NavVoice.enabled()) return;
+  const cur = instrs[idx];
+
+  // At-the-turn: the index just advanced onto a new maneuver → say it.
+  if (idx !== _voiceNowIdx) {
+    _voiceNowIdx = idx;
+    if (cur && cur.type === 'arrive') {
+      if (!_voiceArrived) { _voiceArrived = true; NavVoice.speak(_arrivalPhrase()); }
+    } else if (cur && cur.type !== 'depart') {
+      NavVoice.speak(cur.text);
+    }
+  }
+
+  // Pre-turn heads-up as we approach the next maneuver (once per maneuver).
+  if (nextInstr && nextInstr.type !== 'arrive' && distToTurn != null) {
+    const pre = currentRoute.profile === 'driving' ? 200 : 70;
+    const upcoming = idx + 1;
+    if (distToTurn <= pre && distToTurn > 25 && _voicePreIdx !== upcoming) {
+      _voicePreIdx = upcoming;
+      NavVoice.speak(`In ${_spokenDist(distToTurn)}, ${_lower1(nextInstr.text)}`);
+    }
+  }
+
+  // Arrival by proximity, in case the arrive index never quite advances.
+  if (!_voiceArrived && remDist != null && remDist <= 20) {
+    _voiceArrived = true;
+    NavVoice.speak(_arrivalPhrase());
+  }
+}
+
+const _VOICE_ON_SVG =
+  '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
+  '<polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" fill="currentColor"/>' +
+  '<path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></svg>';
+const _VOICE_OFF_SVG =
+  '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
+  '<polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" fill="currentColor"/>' +
+  '<line x1="22" y1="9" x2="16" y2="15"/><line x1="16" y1="9" x2="22" y2="15"/></svg>';
+
+function setupVoiceToggle() {
+  const btn = document.getElementById('nav-voice-btn');
+  if (!btn) return;
+  if (!NavVoice.supported()) { btn.style.display = 'none'; return; }
+
+  const sync = () => {
+    const on = NavVoice.enabled();
+    btn.classList.toggle('is-muted', !on);
+    btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+    btn.title = on ? 'Voice guidance on' : 'Voice guidance off';
+    btn.innerHTML = on ? _VOICE_ON_SVG : _VOICE_OFF_SVG;
+  };
+  sync();
+  btn.addEventListener('click', () => {
+    const on = NavVoice.toggle();
+    sync();
+    showToast(on ? 'Voice guidance on' : 'Voice guidance off', 'info');
+    // Confirm the current step aloud so the user hears it engage.
+    if (on && navigationActive && currentRoute?.instructions) {
+      const cur = currentRoute.instructions[navInstructionIndex];
+      if (cur && cur.type !== 'depart') NavVoice.speak(cur.text);
+    }
+  });
 }
 
 // ============================================================
@@ -3007,6 +3208,8 @@ const LocationTracker = (() => {
   let _compassRaw     = null;  // smoothed raw bearing before deadzone gating
   let _compassLastT   = 0;
   let _compassEnabled = false;
+  let _compassGotSample = false;  // a usable orientation event has actually arrived
+  let _compassAccuracy  = null;   // webkitCompassAccuracy (deg); <0 or large = poor
   let _speed          = null;
   let _watchId = null;
   let _rafId   = 0;
@@ -3089,13 +3292,22 @@ const LocationTracker = (() => {
 
   function _onCompass(e) {
     let h = null;
-    // iOS Safari provides webkitCompassHeading (true-north, 0..360)
+    // iOS Safari provides webkitCompassHeading (true-north, 0..360) and a
+    // companion accuracy in degrees (negative = uncalibrated).
     if (typeof e.webkitCompassHeading === 'number' && !isNaN(e.webkitCompassHeading)) {
       h = e.webkitCompassHeading;
-    } else if (e.alpha != null && !isNaN(e.alpha)) {
+      if (typeof e.webkitCompassAccuracy === 'number') _compassAccuracy = e.webkitCompassAccuracy;
+    } else if (e.absolute === true && e.alpha != null && !isNaN(e.alpha)) {
+      // Only trust alpha when the platform flags it absolute (true-north);
+      // relative alpha drifts and would point the camera the wrong way.
+      h = (360 - e.alpha) % 360;
+    } else if (e.alpha != null && !isNaN(e.alpha) && e.absolute == null) {
+      // Older Android Chrome fires plain `deviceorientation` with no
+      // `absolute` flag but alpha is magnetometer-backed — accept it.
       h = (360 - e.alpha) % 360;
     }
     if (h == null) return;
+    _compassGotSample = true;
 
     const now = (typeof performance !== 'undefined' ? performance.now() : Date.now());
     if (now - _compassLastT < COMPASS_MIN_INTERVAL_MS) return;
@@ -3147,19 +3359,42 @@ const LocationTracker = (() => {
   // bearing (i.e. during turn-by-turn nav). Attaching it always leaks the
   // gyroscope's twitchy input into the marker heading and any UI that reads
   // _bestHeading() at rest, which is what made the puck feel jittery.
+  //
+  // Returns a Promise resolving to one of:
+  //   'attached'    — listeners attached (no permission gate on this platform)
+  //   'granted'     — iOS permission prompt accepted, listeners attached
+  //   'denied'      — iOS permission prompt rejected (caller falls back to GPS)
+  //   'unsupported' — no DeviceOrientation API at all
+  // MUST be invoked from a user gesture on iOS 13+, where requestPermission()
+  // only resolves when triggered by a tap.
   function enableCompass() {
-    if (_compassEnabled) return;
-    _compassEnabled = true;
-    if (window.DeviceOrientationEvent && typeof DeviceOrientationEvent.requestPermission === 'function') {
-      DeviceOrientationEvent.requestPermission().catch(() => {});
+    if (_compassEnabled) return Promise.resolve('attached');
+    if (typeof window === 'undefined' || !window.DeviceOrientationEvent) {
+      return Promise.resolve('unsupported');
     }
-    window.addEventListener('deviceorientationabsolute', _onCompass, { passive: true });
-    window.addEventListener('deviceorientation',         _onCompass, { passive: true });
+    const attach = () => {
+      _compassEnabled   = true;
+      _compassGotSample = false;
+      window.addEventListener('deviceorientationabsolute', _onCompass, { passive: true });
+      window.addEventListener('deviceorientation',         _onCompass, { passive: true });
+    };
+    if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+      return DeviceOrientationEvent.requestPermission()
+        .then(state => {
+          if (state === 'granted') { attach(); return 'granted'; }
+          return 'denied';
+        })
+        .catch(() => 'denied');
+    }
+    attach();
+    return Promise.resolve('attached');
   }
 
   function disableCompass() {
     if (!_compassEnabled) return;
-    _compassEnabled = false;
+    _compassEnabled   = false;
+    _compassGotSample = false;
+    _compassAccuracy  = null;
     window.removeEventListener('deviceorientationabsolute', _onCompass);
     window.removeEventListener('deviceorientation',         _onCompass);
     _compassHeading = null;
@@ -3172,9 +3407,11 @@ const LocationTracker = (() => {
   function getRaw()     { return _raw; }
   function hasFix()     { return !!_disp; }
   function watching()   { return _watchId !== null; }
-  function compassEnabled() { return _compassEnabled; }
+  function compassEnabled()  { return _compassEnabled; }
+  function compassActive()   { return _compassEnabled && _compassGotSample; }
+  function compassAccuracy() { return _compassAccuracy; }
 
-  return { start, subscribe, getDisplay, getRaw, hasFix, watching, enableCompass, disableCompass, compassEnabled };
+  return { start, subscribe, getDisplay, getRaw, hasFix, watching, enableCompass, disableCompass, compassEnabled, compassActive, compassAccuracy };
 })();
 
 // ============================================================
@@ -3403,6 +3640,7 @@ function _navTick(lat, lng, snap) {
   document.getElementById('nav-distance').textContent = formatDist(remDist);
 
   updateNavInstruction(distToTurn);
+  _voiceGuidance(instrs, navInstructionIndex, nextInstr, distToTurn, remDist);
 
   if (autoFollow) {
     _cameraFollow(lat, lng, userLocation.heading, /*nav=*/true);
@@ -3421,12 +3659,41 @@ function setAutoFollow(on) {
   }
 }
 
+// Turn the gyroscope on with graceful fallback + calibration UX. Safe to call
+// from any user gesture (Start tap, locate button). Resolves the permission
+// promise so iOS denials degrade to GPS heading instead of failing silently.
+let _calibHintShown = false;
+function _enableCompassWithUX() {
+  if (LocationTracker.compassEnabled()) return;
+  Promise.resolve(LocationTracker.enableCompass()).then(status => {
+    if (status === 'denied') {
+      showToast('Compass blocked — using GPS heading', 'warn');
+      return;
+    }
+    if (status === 'unsupported') return;  // GPS heading covers movement
+    // Listeners attached. Give the sensor a moment, then sanity-check it.
+    setTimeout(() => {
+      if (!navigationActive || !LocationTracker.compassEnabled()) return;
+      if (!LocationTracker.compassActive()) {
+        // No orientation events arrived — desktop or sensor-less device.
+        // Stay quiet; the GPS heading still steers the camera while moving.
+        return;
+      }
+      const acc = LocationTracker.compassAccuracy();
+      if (!_calibHintShown && acc != null && (acc < 0 || acc > 30)) {
+        _calibHintShown = true;
+        showToast('Compass needs calibration — move phone in a figure 8', 'info');
+      }
+    }, 2500);
+  });
+}
+
 function flyToUserLocation() {
   if (!LocationTracker.watching()) {
     requestUserLocation();
     // First click ever — if we happen to already be in directions, opt the
     // user straight into heading-tracked follow.
-    if (navigationActive) LocationTracker.enableCompass();
+    if (navigationActive) _enableCompassWithUX();
     return;
   }
   if (autoFollow) {
@@ -3434,7 +3701,7 @@ function flyToUserLocation() {
     // gyroscope ("follow with heading" — same gesture Google Maps uses).
     // A second click then turns everything off.
     if (navigationActive && !LocationTracker.compassEnabled()) {
-      LocationTracker.enableCompass();
+      _enableCompassWithUX();
       showToast('Following heading', 'info');
     } else {
       setAutoFollow(false);
@@ -3443,7 +3710,7 @@ function flyToUserLocation() {
     }
   } else {
     setAutoFollow(true);
-    if (navigationActive) LocationTracker.enableCompass();
+    if (navigationActive) _enableCompassWithUX();
     if (!userLocation) showToast('Waiting for GPS signal…', 'info');
     else showToast('Following your location', 'info');
   }
@@ -3561,6 +3828,7 @@ function setupEventListeners() {
   document.getElementById('nav-close-btn')?.addEventListener('click', endNavigation);
   document.getElementById('nav-end-btn')?.addEventListener('click',   endNavigation);
   document.getElementById('nav-recenter-btn')?.addEventListener('click', recenterImmersive);
+  setupVoiceToggle();
 
   document.getElementById('menu-btn').addEventListener('click',     openMenu);
   document.getElementById('menu-close').addEventListener('click',   closeMenu);

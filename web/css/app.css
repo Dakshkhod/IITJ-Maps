@@ -618,6 +618,8 @@ html, body {
 .dir-start-btn:active { transform: scale(0.97); }
 .dir-start-btn svg { flex-shrink: 0; }
 
+.dir-start-btn-mini { padding: 8px 16px; font-size: 13px; gap: 6px; }
+
 /* Re-centre button — floats above nav-panel during immersive nav */
 .nav-recenter-btn {
   position: absolute;
@@ -1169,6 +1171,24 @@ input[type="checkbox"]:checked + .toggle-track .toggle-thumb { transform: transl
   transition: background 0.15s;
 }
 .nav-close-btn:hover { background: var(--surface-hover); color: var(--text-primary); }
+
+.nav-voice-btn {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  border: none;
+  background: var(--surface);
+  color: var(--accent);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-right: 4px;
+  transition: background 0.15s, color 0.15s;
+}
+.nav-voice-btn:hover { background: var(--surface-hover); }
+.nav-voice-btn.is-muted { color: var(--text-muted); }
+.nav-voice-btn svg { display: block; }
 
 /* Next step bar */
 .nav-next-bar {
@@ -1741,6 +1761,17 @@ input[type="checkbox"]:checked + .toggle-track .toggle-thumb { transform: transl
 .sheet-hours .hours-sub { color: var(--text-muted); font-weight: 500; }
 [data-theme="dark"] .sheet-hours.open  { color: #4ade80; }
 [data-theme="dark"] .sheet-hours.closed { color: #f87171; }
+
+.sheet-entrance {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--accent);
+}
+.sheet-entrance svg { flex-shrink: 0; opacity: 0.9; }
 
 /* ============================================================
    Quick-access (recents / favorites / near-me) in the search panel
