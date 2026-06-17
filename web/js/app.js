@@ -4089,12 +4089,17 @@ function hideSplash() {
 
 document.addEventListener('DOMContentLoaded', init);
 
-// Register the service worker for offline support + installability. Best-effort
-// and deferred to `load` so it never competes with first paint; failures are
-// swallowed (the app works fine without it). Only ever runs on the public app
-// (app.js isn't loaded by admin.html).
+// Offline/PWA service worker was removed — it could wedge the app on slow
+// connections (a fresh load worked, the next SW-controlled load hung). We no
+// longer register one, and we proactively dismantle any worker + caches a
+// device still has from a previous version so nothing stale can intercept
+// requests. /sw.js is now a self-unregistering kill switch as a second path
+// for devices whose app.js never even runs.
 if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js').catch(() => {});
-  });
+  navigator.serviceWorker.getRegistrations()
+    .then(regs => regs.forEach(r => r.unregister()))
+    .catch(() => {});
+}
+if (window.caches && caches.keys) {
+  caches.keys().then(keys => keys.forEach(k => caches.delete(k))).catch(() => {});
 }
