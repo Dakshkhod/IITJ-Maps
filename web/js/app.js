@@ -2262,6 +2262,13 @@ function openDirectionsPanel(initial = {}) {
   expandDirectionsPanel();
 
   if (initial.from) setDirectionsPoint('from', initial.from, false);
+  else if (userLocation) {
+    setDirectionsPoint('from', {
+      lat: userLocation.lat,
+      lng: userLocation.lng,
+      name: 'Your location',
+    }, false);
+  }
   else if (!directionsFrom) document.getElementById('dir-from').value = '';
 
   if (initial.to) setDirectionsPoint('to', initial.to, false);
@@ -2529,10 +2536,15 @@ async function calculateDirectionsRoute() {
     navEntrance = toEntry || null;   // surfaced on arrival (visual + spoken)
     let routeFromLat = fromEntry ? fromEntry.lat : directionsFrom.lat;
     let routeFromLng = fromEntry ? fromEntry.lng : directionsFrom.lng;
-    // Always route from the live puck when the user declared "Your location".
-    if (directionsFrom.name === 'Your location' && userLocation) {
-      routeFromLat = userLocation.lat;
-      routeFromLng = userLocation.lng;
+    // Route from the live puck when the user picked "Your location", or when
+    // GPS is clearly somewhere else than the search-picked origin (e.g. puck
+    // at Security Checkpost but "Indian Institute of Technology" in the box).
+    if (userLocation) {
+      const gpsGap = haversine(userLocation.lat, userLocation.lng, routeFromLat, routeFromLng);
+      if (directionsFrom.name === 'Your location' || gpsGap > 100) {
+        routeFromLat = userLocation.lat;
+        routeFromLng = userLocation.lng;
+      }
     }
     const routeToLat   = toEntry   ? toEntry.lat   : directionsTo.lat;
     const routeToLng   = toEntry   ? toEntry.lng   : directionsTo.lng;

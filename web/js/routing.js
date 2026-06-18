@@ -90,7 +90,16 @@ const IITJRouter = (() => {
   function isAllowedEdge(edge, mode, opts = {}) {
     if (mode === 'walk') return edge.walk_access !== 'no';
 
-    if (edge.oneway_reverse) return false;
+    // OSM one-way service spurs into security gates block the reverse edge in
+    // the graph, but vehicles routinely exit the gate back onto the trunk link.
+    if (edge.oneway_reverse) {
+      if (opts.allowGateExit
+        && edge.navigation_class === 'campus_service_connector'
+        && edge.vehicle_access === 'yes') {
+        return (Number(edge.drive_confidence) || 0) >= 0.5;
+      }
+      return false;
+    }
     if (edge.vehicle_access === 'yes') {
       return (Number(edge.drive_confidence) || 0) >= 0.5;
     }
@@ -114,6 +123,27 @@ const IITJRouter = (() => {
     return edge.dist;
   }
 
+  function _bearingDelta(b1, b2) {
+    let delta = Math.abs(b1 - b2);
+    if (delta > 180) delta = 360 - delta;
+    return delta;
+  }
+
+  // Penalise the first graph hop when it points away from the destination.
+  // Without this, Dijkstra leaves a gate via a cheaper service spur toward a
+  // monument (Prithvi) even though the trunk road is right ahead.
+  function _departHopMultiplier(curId, nbId, fromLat, fromLng, toLat, toLng) {
+    if (fromLat == null || toLat == null) return 1;
+    const c0 = _nodeCoords[curId], c1 = _nodeCoords[nbId];
+    if (!c0 || !c1) return 1;
+    const hopB = getBearing(c0[1], c0[0], c1[1], c1[0]);
+    const destB = getBearing(fromLat, fromLng, toLat, toLng);
+    const delta = _bearingDelta(hopB, destB);
+    if (delta <= 50) return 1;
+    if (delta <= 90) return 2.5;
+    return 8;
+  }
+
   // ── Dijkstra ──────────────────────────────────────────────────
   function dijkstra(startId, endId, mode = 'drive', opts = {}) {
     const dist = { [startId]: 0 };
@@ -122,6 +152,7 @@ const IITJRouter = (() => {
     const visited = new Set();
     const heap = new MinHeap();
     heap.push({ id: startId, dist: 0 });
+    const departBias = opts.departFromLat != null && opts.departToLat != null;
 
     while (heap.size > 0) {
       const { id: cur, dist: curDist } = heap.pop();
@@ -133,7 +164,13 @@ const IITJRouter = (() => {
         if (!isAllowedEdge(edge, mode, opts)) continue;
         const nb = edge.id;
         if (visited.has(nb)) continue;
-        const nd = curDist + edgeCost(edge, mode);
+        let step = edgeCost(edge, mode);
+        if (departBias && cur === startId) {
+          step *= _departHopMultiplier(
+            cur, nb, opts.departFromLat, opts.departFromLng, opts.departToLat, opts.departToLng
+          );
+        }
+        const nd = curDist + step;
         if (nd < (dist[nb] ?? Infinity)) {
           dist[nb] = nd;
           physicalDist[nb] = (physicalDist[cur] ?? 0) + edge.dist;
@@ -229,6 +266,56 @@ const IITJRouter = (() => {
     return merged;
   }
 
+  // Smallest outbound bearing error from a node toward the destination.
+  function _minDepartDelta(nodeId, fromLat, fromLng, toLat, toLng, mode, opts) {
+    const c0 = _nodeCoords[nodeId];
+    if (!c0) return 180;
+    const destB = getBearing(fromLat, fromLng, toLat, toLng);
+    let best = 180;
+    for (const e of (_graph[nodeId] || [])) {
+      if (!isAllowedEdge(e, mode, opts)) continue;
+      const c1 = _nodeCoords[e.id];
+      if (!c1) continue;
+      const hopB = getBearing(c0[1], c0[0], c1[1], c1[0]);
+      best = Math.min(best, _bearingDelta(hopB, destB));
+    }
+    return best;
+  }
+
+  function _firstHopMisalignment(fromNodeId, pathNodes, fromLat, fromLng, toLat, toLng) {
+    if (pathNodes.length < 2) return 0;
+    const c0 = _nodeCoords[fromNodeId];
+    const c1 = _nodeCoords[pathNodes[1]];
+    if (!c0 || !c1) return 0;
+    const hopB = getBearing(c0[1], c0[0], c1[1], c1[0]);
+    const destB = getBearing(fromLat, fromLng, toLat, toLng);
+    return _bearingDelta(hopB, destB);
+  }
+
+  // When the nearest snap is a one-way gate spur (only backward departures),
+  // shift the origin to a nearby junction that faces the destination.
+  function _forwardGateSnapNode(fromLat, fromLng, toLat, toLng, mode, opts) {
+    const destB = getBearing(fromLat, fromLng, toLat, toLng);
+    let nearest = null, nearestD = Infinity, nearestMis = 180;
+    let forward = null, forwardScore = Infinity;
+
+    for (const [id, coords] of Object.entries(_nodeCoords)) {
+      const d = haversine(fromLat, fromLng, coords[1], coords[0]);
+      if (d > 45) continue;
+      const edges = _graph[id] || [];
+      if (!edges.some(e => isAllowedEdge(e, mode, opts))) continue;
+      const mis = _minDepartDelta(id, fromLat, fromLng, toLat, toLng, mode, opts);
+      if (d < nearestD) { nearestD = d; nearest = id; nearestMis = mis; }
+      if (mis > 50) continue;
+      const score = d + mis * 0.6;
+      if (score < forwardScore) { forwardScore = score; forward = id; }
+    }
+
+    if (!forward || forward === nearest) return null;
+    if (nearestMis <= 55) return null;
+    return forward;
+  }
+
   // Score how much the first few hops move toward the destination. Campus
   // graphs often need a short connector before the main road — a pure bearing
   // check on hop 1 rejects those valid departures.
@@ -247,6 +334,35 @@ const IITJRouter = (() => {
       lng = c[0];
     }
     return progress / magSq;
+  }
+
+  // Drop a short backward graph spur at one-way gates (e.g. Security
+  // Checkpost → Prithvi) and rejoin where the road turns toward the destination.
+  function _trimBackwardDepartLeg(coords, fromLat, fromLng, toLat, toLng) {
+    if (coords.length < 3) return coords;
+    const destB = getBearing(fromLat, fromLng, toLat, toLng);
+    const graphStart = haversine(coords[0][1], coords[0][0], fromLat, fromLng) < 15 ? 1 : 0;
+    if (graphStart + 1 >= coords.length) return coords;
+
+    const departB = getBearing(
+      coords[graphStart][1], coords[graphStart][0],
+      coords[graphStart + 1][1], coords[graphStart + 1][0]
+    );
+    if (_bearingDelta(departB, destB) <= 55) return coords;
+
+    let cutBefore = graphStart + 1;
+    for (let i = graphStart; i < coords.length - 1; i++) {
+      const segB = getBearing(coords[i][1], coords[i][0], coords[i + 1][1], coords[i + 1][0]);
+      if (_bearingDelta(segB, destB) <= 55) {
+        cutBefore = i + 1;
+        break;
+      }
+    }
+
+    if (cutBefore <= graphStart + 1) return coords;
+    const joinM = haversine(fromLat, fromLng, coords[cutBefore][1], coords[cutBefore][0]);
+    if (joinM > 120) return coords;
+    return [[fromLng, fromLat], ...coords.slice(cutBefore)];
   }
 
   // ── Turn instructions ─────────────────────────────────────────
@@ -301,27 +417,56 @@ const IITJRouter = (() => {
       const toNode = findNearestNode(toLat, toLng, 400, m, { ...opts, ...toSnapOpts });
       if (!toNode) return null;
 
+      const routeOpts = {
+        ...opts,
+        allowGateExit: southGateOrigin && m === 'drive',
+        departFromLat: fromLat,
+        departFromLng: fromLng,
+        departToLat: toLat,
+        departToLng: toLng,
+      };
+
       const fromCandidates = findCandidateNodes(fromLat, fromLng, 400, m, { ...opts, ...fromSnapOpts });
       if (!fromCandidates.length) return null;
 
+      const gateSnap = _forwardGateSnapNode(fromLat, fromLng, toLat, toLng, m, routeOpts);
+      if (gateSnap) {
+        const existing = fromCandidates.find(c => c.id === gateSnap);
+        if (existing) {
+          existing.gateForward = true;
+        } else {
+          const c = _nodeCoords[gateSnap];
+          fromCandidates.unshift({
+            id: gateSnap,
+            dist: haversine(fromLat, fromLng, c[1], c[0]),
+            score: _nodeSnapScore(fromLat, fromLng, c, haversine(fromLat, fromLng, c[1], c[0]), fromSnapOpts),
+            gateForward: true,
+          });
+        }
+      }
+
       const nearestDist = Math.min(...fromCandidates.map(c => c.dist));
       const snapBand = Math.min(nearestDist + ORIGIN_SNAP_EXTRA_M, ORIGIN_SNAP_MAX_M);
-      const viable = fromCandidates.filter(c => c.dist <= snapBand);
+      const viable = fromCandidates.filter(c => c.dist <= snapBand || c.gateForward || c.id === gateSnap);
       const pool = viable.length ? viable : fromCandidates;
 
       let best = null;
       let fallback = null;
       for (const cand of pool) {
         if (cand.id === toNode) continue;
-        const path = dijkstra(cand.id, toNode, m, opts);
+        const path = dijkstra(cand.id, toNode, m, routeOpts);
         if (!path || path.nodes.length < 2) continue;
         const progress = _departureProgress(cand.id, path.nodes, toLat, toLng);
-        const rank = path.cost
+        const hopMis = _firstHopMisalignment(cand.id, path.nodes, fromLat, fromLng, toLat, toLng);
+        // Rank on physical road distance — path.cost carries departure-bias
+        // multipliers that are only meaningful within a single Dijkstra run.
+        const rank = path.distance
           + (cand.dist - nearestDist) * 4
           + cand.score * 0.2
+          + (progress < 0 ? hopMis * 12 : 0)
           - progress * 25;
-        const entry = { path, fromNode: cand.id, toNode, opts, rank, progress };
-        if (progress >= -0.00002) {
+        const entry = { path, fromNode: cand.id, toNode, opts: routeOpts, rank, progress, hopMis };
+        if (hopMis <= 95 && progress >= -0.00002) {
           if (!best || rank < best.rank) best = entry;
         } else if (!fallback || rank < fallback.rank) {
           fallback = entry;
@@ -356,32 +501,24 @@ const IITJRouter = (() => {
       const nodeList = path.nodes;
 
       const firstNc = _nodeCoords[fromNode];
-      const secondNc = nodeList.length > 1 ? _nodeCoords[nodeList[1]] : null;
-      let startPt = secondNc
-        ? projectOntoSegment(fromLat, fromLng, firstNc[1], firstNc[0], secondNc[1], secondNc[0])
-        : { lat: firstNc[1], lng: firstNc[0] };
-
       const lastNc = _nodeCoords[toNode];
       const prevNc = nodeList.length > 1 ? _nodeCoords[nodeList[nodeList.length - 2]] : null;
       const endPt = prevNc
         ? projectOntoSegment(toLat, toLng, prevNc[1], prevNc[0], lastNc[1], lastNc[0])
         : { lat: lastNc[1], lng: lastNc[0] };
 
-      // If the projected road point is still far from the user, lead in from
-      // their actual position so the line doesn't jump to a distant road.
-      const userToStartM = haversine(fromLat, fromLng, startPt.lat, startPt.lng);
-      const userToNodeM = haversine(fromLat, fromLng, firstNc[1], firstNc[0]);
-      if (userToStartM > 25 && userToNodeM > userToStartM) {
-        startPt = { lat: fromLat, lng: fromLng };
-      }
-
-      coords = [[startPt.lng, startPt.lat]];
+      // Always draw from the user's actual position — projecting onto the
+      // first graph segment pulled the line to Prithvi when the gate spur
+      // only allows a westward graph hop.
+      coords = [[fromLng, fromLat]];
       for (const id of nodeList) { const c = _nodeCoords[id]; if (c) coords.push(c); }
       coords.push([endPt.lng, endPt.lat]);
 
       distance = path.distance
-        + haversine(startPt.lat, startPt.lng, firstNc[1], firstNc[0])
+        + haversine(fromLat, fromLng, firstNc[1], firstNc[0])
         + haversine(endPt.lat, endPt.lng, lastNc[1], lastNc[0]);
+
+      coords = _trimBackwardDepartLeg(coords, fromLat, fromLng, toLat, toLng);
     }
 
     // Straight-line fallback (no graph reachable at all)
