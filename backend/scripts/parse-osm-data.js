@@ -672,6 +672,19 @@ const BERM_CL_OVERRIDE = {
                  [73.1124450,26.4704699],[73.1125275,26.4704338],
                  [73.1126023,26.4704025],[73.1126678,26.4703769],
                  [73.1127229,26.4703576]],
+  // 744 — east hostel berm: OSM ribbon midline (not a single parabolic fit) so the
+  // 3D wave follows the real curved footprint; north cap extended to the NW
+  // vertex so Designing / Photography clubs sit on arches, not past the berm.
+  '1412399744': [[73.1178625,26.4732272],[73.1178267,26.4732736],[73.1178357,26.4733457],
+                 [73.1178453,26.4734181],[73.1178549,26.4734906],[73.1178645,26.4735631],
+                 [73.1178741,26.4736355],[73.1178837,26.4737080],[73.1178933,26.4737804],
+                 [73.1179029,26.4738529],[73.1179109,26.4739255],[73.1179182,26.4739981],
+                 [73.1179240,26.4740709],[73.1179289,26.4741437],[73.1179338,26.4742166],
+                 [73.1179388,26.4742894],[73.1179437,26.4743622],[73.1179486,26.4744351],
+                 [73.1179536,26.4745079],[73.1179575,26.4745808],[73.1179599,26.4746537],
+                 [73.1179607,26.4747266],[73.1179766,26.4747872],[73.1180214,26.4748232],
+                 [73.1179940,26.4748215],[73.1179665,26.4748202],[73.1179390,26.4748199],
+                 [73.1179079,26.4748199]],
 };
 
 // Same ribbon polygons as web/js/landmarks-3d.js BERM_RINGS — keep in sync.
@@ -804,6 +817,46 @@ function _moduleMidpointsFromMetric(samples, cx, cy, mLng, mLat, moduleW) {
   return { gates, centerline, total, moduleW, minModules: nMods };
 }
 
+function _ringMidlineCenterline(ring, K = 48) {
+  const pts = ring.slice(0, ring.length - 1);
+  const n = pts.length;
+  let cx = 0, cy = 0;
+  pts.forEach(p => { cx += p[0]; cy += p[1]; }); cx /= n; cy /= n;
+  const mLng = 111320 * Math.cos(cy * Math.PI / 180), mLat = 111320;
+  const P = pts.map(p => [(p[0] - cx) * mLng, (p[1] - cy) * mLat]);
+  let sxx = 0, sxy = 0, syy = 0;
+  P.forEach(([x, y]) => { sxx += x * x; sxy += x * y; syy += y * y; });
+  const theta = 0.5 * Math.atan2(2 * sxy, sxx - syy);
+  const ax = Math.cos(theta), ay = Math.sin(theta), bx = -ay, by = ax;
+  const t = P.map(([x, y]) => x * ax + y * ay);
+  let iMin = 0, iMax = 0;
+  t.forEach((v, i) => { if (v < t[iMin]) iMin = i; if (v > t[iMax]) iMax = i; });
+  const chain = (from, to) => {
+    const c = []; let i = from;
+    for (;;) { c.push(P[i]); if (i === to) break; i = (i + 1) % n; }
+    return c;
+  };
+  const ra = _resampleXY(chain(iMin, iMax), K);
+  const rb = _resampleXY(chain(iMax, iMin).reverse(), K);
+  const centerline = [];
+  for (let i = 0; i < K; i++) {
+    centerline.push([
+      cx + (ra[i][0] + rb[i][0]) / 2 / mLng,
+      cy + (ra[i][1] + rb[i][1]) / 2 / mLat,
+    ]);
+  }
+  let total = 0;
+  for (let i = 1; i < centerline.length; i++) {
+    total += _distPairM(centerline[i - 1], centerline[i]);
+  }
+  return { centerline, total, cx, cy, mLng, mLat };
+}
+
+function _distPairM(a, b) {
+  const cosLat = Math.cos(((a[1] + b[1]) / 2) * Math.PI / 180);
+  return Math.hypot((b[0] - a[0]) * 111320 * cosLat, (b[1] - a[1]) * 111320);
+}
+
 function _denseMetricSamples(ring, overridePath) {
   if (overridePath) {
     let cx = 0, cy = 0;
@@ -812,37 +865,8 @@ function _denseMetricSamples(ring, overridePath) {
     const samples = overridePath.map(p => [(p[0]-cx)*mLng, (p[1]-cy)*mLat]);
     return { samples, cx, cy, mLng, mLat };
   }
-  const pts = ring.slice(0, ring.length-1);
-  const n = pts.length;
-  let cx = 0, cy = 0;
-  pts.forEach(p => { cx += p[0]; cy += p[1]; }); cx /= n; cy /= n;
-  const mLng = 111320 * Math.cos(cy * Math.PI/180), mLat = 111320;
-  const P = pts.map(p => [(p[0]-cx)*mLng, (p[1]-cy)*mLat]);
-  let sxx = 0, sxy = 0, syy = 0;
-  P.forEach(([x,y]) => { sxx += x*x; sxy += x*y; syy += y*y; });
-  const theta = 0.5 * Math.atan2(2*sxy, sxx - syy);
-  const ax = Math.cos(theta), ay = Math.sin(theta), bx = -ay, by = ax;
-  const t = P.map(([x,y]) => x*ax + y*ay);
-  let iMin = 0, iMax = 0;
-  t.forEach((v,i) => { if (v < t[iMin]) iMin = i; if (v > t[iMax]) iMax = i; });
-  const chain = (from, to) => { const c = []; let i = from; for (;;) { c.push(P[i]); if (i === to) break; i = (i+1)%n; } return c; };
-  const K = 22;
-  const ra = _resampleXY(chain(iMin, iMax), K);
-  const rb = _resampleXY(chain(iMax, iMin).reverse(), K);
-  const T = [], W = [];
-  for (let i = 0; i < K; i++) {
-    const mx = (ra[i][0]+rb[i][0])/2, my = (ra[i][1]+rb[i][1])/2;
-    T.push(mx*ax + my*ay); W.push(mx*bx + my*by);
-  }
-  const f = _quadFit(T, W);
-  const tMin = Math.min(...T), tMax = Math.max(...T);
-  const dense = 200;
-  const samples = [];
-  for (let i = 0; i < dense; i++) {
-    const tt = tMin + (tMax-tMin)*i/(dense-1);
-    const ww = f.A*tt*tt + f.B*tt + f.C;
-    samples.push([tt*ax + ww*bx, tt*ay + ww*by]);
-  }
+  const { centerline, cx, cy, mLng, mLat } = _ringMidlineCenterline(ring, 56);
+  const samples = centerline.map(p => [(p[0] - cx) * mLng, (p[1] - cy) * mLat]);
   return { samples, cx, cy, mLng, mLat };
 }
 
@@ -927,12 +951,45 @@ function _extendCenterlineArc(centerline, targetS) {
   if (targetS <= total + 0.5) return { centerline, lengthM: total };
   const extended = centerline.slice();
   let cur = total;
-  const step = 4;
+  const step = 3.5;
   while (cur < targetS) {
     cur += step;
     extended.push(_lngLatAtArcS(cur, extended));
   }
   return { centerline: extended, lengthM: cur };
+}
+
+// Keep every POI gate on the berm arc — shift or compress along the curve
+// instead of extrapolating straight past the OSM footprint.
+function _fitGateArcsToBerm(poiBindings, centerline, minSpacing) {
+  if (!poiBindings.length) return;
+  const total = _centerlineTotal(centerline);
+  const endPad = minSpacing * 0.4;
+  const startPad = minSpacing * 0.25;
+
+  let maxS = poiBindings[poiBindings.length - 1].s;
+  if (maxS > total - endPad) {
+    const shift = maxS - (total - endPad);
+    poiBindings.forEach(b => { b.s = Math.max(startPad, b.s - shift); });
+  }
+
+  for (let i = 1; i < poiBindings.length; i++) {
+    if (poiBindings[i].s - poiBindings[i - 1].s < minSpacing * 0.92) {
+      poiBindings[i].s = poiBindings[i - 1].s + minSpacing;
+    }
+  }
+
+  maxS = poiBindings[poiBindings.length - 1].s;
+  if (maxS > total - endPad && poiBindings.length > 1) {
+    const span = maxS - poiBindings[0].s;
+    const avail = total - endPad - poiBindings[0].s;
+    if (span > avail) {
+      const scale = avail / span;
+      for (let i = 1; i < poiBindings.length; i++) {
+        poiBindings[i].s = poiBindings[0].s + (poiBindings[i].s - poiBindings[0].s) * scale;
+      }
+    }
+  }
 }
 
 // One dedicated gate per POI on the berm centerline; spread clusters so labels
@@ -953,6 +1010,8 @@ function _poiGateLayoutFromPOIs(list, centerline, minSpacing = 7.25, fillGap = 1
     poiBindings.push({ poiIdx: item.idx, s });
     lastS = s;
   }
+
+  _fitGateArcsToBerm(poiBindings, centerline, minSpacing);
 
   const moduleArcs = [];
   const pushArc = (s) => {
@@ -1116,12 +1175,15 @@ function snapPerimeterCodes(places, osmData) {
     const override = BERM_CL_OVERRIDE[ribbonId];
     const baseSpec = ribbonGatesForRibbon(ring, override, layout[ribbonId].moduleW, 0);
     const gateSpacing = baseSpec.moduleW;
-
-    const { poiBindings, moduleArcs } = _poiGateLayoutFromPOIs(
-      list, baseSpec.centerline, gateSpacing,
-    );
-    const maxArc = poiBindings[poiBindings.length - 1].s + gateSpacing;
-    const { centerline, lengthM } = _extendCenterlineArc(baseSpec.centerline, maxArc);
+    let centerline = override || baseSpec.centerline;
+    let { poiBindings, moduleArcs } = _poiGateLayoutFromPOIs(list, centerline, gateSpacing);
+    let lengthM = _centerlineTotal(centerline);
+    const maxArc = poiBindings[poiBindings.length - 1].s + gateSpacing * 0.5;
+    if (maxArc > lengthM - gateSpacing * 0.4) {
+      centerline = _extendCenterlineArc(centerline, maxArc).centerline;
+      lengthM = _centerlineTotal(centerline);
+      ({ poiBindings, moduleArcs } = _poiGateLayoutFromPOIs(list, centerline, gateSpacing));
+    }
 
     const gates = moduleArcs.map(s => {
       const [lng, lat] = _lngLatAtArcS(s, centerline);
