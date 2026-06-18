@@ -1079,24 +1079,6 @@
     "is_proposed": false
   },
   {
-    "id": "curated_2",
-    "name": "ATM (SBI)",
-    "category": "bank",
-    "description": "SBI ATM near academic area",
-    "keywords": [
-      "atm",
-      "cash",
-      "money",
-      "bank",
-      "withdraw",
-      "sbi"
-    ],
-    "lat": 26.4718,
-    "lng": 73.1133,
-    "source": "curated",
-    "is_proposed": false
-  },
-  {
     "id": "1524213393",
     "name": "Prasadanam",
     "category": "dining",
@@ -1193,22 +1175,6 @@
     "lat": 26.4714234,
     "lng": 73.1107926,
     "source": "osm",
-    "is_proposed": false
-  },
-  {
-    "id": "curated_3",
-    "name": "Post Office",
-    "category": "utility",
-    "description": "Campus post office",
-    "keywords": [
-      "post",
-      "mail",
-      "courier",
-      "letter"
-    ],
-    "lat": 26.4716,
-    "lng": 73.1131,
-    "source": "curated",
     "is_proposed": false
   },
   {
@@ -1673,7 +1639,7 @@
     "is_proposed": false
   },
   {
-    "id": "curated_7",
+    "id": "curated_2",
     "name": "Visitor's Hostel",
     "category": "hostel",
     "description": "Guest accommodation for campus visitors",
@@ -1893,23 +1859,7 @@
     "is_proposed": true
   },
   {
-    "id": "curated_1",
-    "name": "Gate 2 (South Gate)",
-    "category": "gate",
-    "description": "South campus gate",
-    "keywords": [
-      "gate 2",
-      "south gate",
-      "entrance",
-      "exit"
-    ],
-    "lat": 26.4666,
-    "lng": 73.1078,
-    "source": "curated",
-    "is_proposed": false
-  },
-  {
-    "id": "curated_5",
+    "id": "curated_0",
     "name": "Parking (4-Wheeler)",
     "category": "parking",
     "description": "4-wheeler parking area",
@@ -1925,7 +1875,7 @@
     "is_proposed": false
   },
   {
-    "id": "curated_6",
+    "id": "curated_1",
     "name": "Parking (2-Wheeler)",
     "category": "parking",
     "description": "2-wheeler parking area",
@@ -1938,22 +1888,6 @@
     ],
     "lat": 26.4671,
     "lng": 73.111,
-    "source": "curated",
-    "is_proposed": false
-  },
-  {
-    "id": "curated_4",
-    "name": "Bus Stop (Main Gate)",
-    "category": "transport",
-    "description": "Main campus bus stop near Gate 1",
-    "keywords": [
-      "bus",
-      "stop",
-      "transport",
-      "bus stop"
-    ],
-    "lat": 26.4591,
-    "lng": 73.1106,
     "source": "curated",
     "is_proposed": false
   },
@@ -2044,24 +1978,6 @@
     "lng": 73.11768938007633,
     "source": "kml",
     "is_proposed": true
-  },
-  {
-    "id": "curated_0",
-    "name": "Gate 1 (Main Gate - NH62)",
-    "category": "gate",
-    "description": "Principal campus entrance from NH-62",
-    "keywords": [
-      "gate",
-      "entrance",
-      "exit",
-      "main gate",
-      "nh62",
-      "security"
-    ],
-    "lat": 26.4587,
-    "lng": 73.1103,
-    "source": "curated",
-    "is_proposed": false
   },
   {
     "id": "13906909076",

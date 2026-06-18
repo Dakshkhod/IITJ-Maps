@@ -6192,9 +6192,89 @@ var Landmarks3D = (() => {
     return ids;
   }
 
+  const CATEGORY_HIGHLIGHT_COLORS = {
+    academic: 0x3b82f6, hostel: 0xf97316, dining: 0xef4444, sports: 0x22c55e,
+    medical: 0xec4899, administrative: 0x8b5cf6, residential: 0xeab308,
+  };
+  let _highlightCategoryId = null;
+  let _highlightLandmarkIds = null;
+
+  function _restoreLandmarkEmissive(group) {
+    group.traverse(obj => {
+      if (!obj.isMesh || !obj.material) return;
+      const restore = (m) => {
+        if (!m.emissive || !m.userData._catSaved) return;
+        m.emissive.setHex(m.userData._catSaved.e);
+        m.emissiveIntensity = m.userData._catSaved.i;
+        delete m.userData._catSaved;
+      };
+      if (Array.isArray(obj.material)) obj.material.forEach(restore);
+      else restore(obj.material);
+    });
+  }
+
+  function setCategoryHighlight(categoryId) {
+    clearCategoryHighlight();
+    if (!categoryId) return;
+    _highlightCategoryId = categoryId;
+    _highlightLandmarkIds = new Set();
+    const buildings = (typeof IITJData !== 'undefined' && IITJData.isReady?.())
+      ? IITJData.getBuildings().features : [];
+    const byOsm = new Map();
+    for (const f of buildings) {
+      const id = f.properties?.osm_id;
+      if (id != null) byOsm.set(String(id), f);
+    }
+    for (const l of LANDMARKS) {
+      if (!Array.isArray(l.replacesOsmBuildings)) continue;
+      const match = l.replacesOsmBuildings.some((osmId) => {
+        const feat = byOsm.get(String(osmId));
+        return feat && feat.properties?.category === categoryId;
+      });
+      if (match) _highlightLandmarkIds.add(l.id);
+    }
+  }
+
+  function pulseCategoryHighlight(high) {
+    if (!_root || !_highlightLandmarkIds?.size || !_highlightCategoryId) return;
+    const colorHex = CATEGORY_HIGHLIGHT_COLORS[_highlightCategoryId] ?? 0x6366f1;
+    _root.children.forEach((group) => {
+      if (!_highlightLandmarkIds.has(group.userData?.landmarkId)) return;
+      group.traverse((obj) => {
+        if (!obj.isMesh || !obj.material) return;
+        const apply = (m) => {
+          if (!m.emissive) return;
+          if (!m.userData._catSaved) {
+            m.userData._catSaved = { e: m.emissive.getHex(), i: m.emissiveIntensity ?? 1 };
+          }
+          m.emissive.setHex(colorHex);
+          const base = m.userData._catSaved.i;
+          m.emissiveIntensity = high
+            ? Math.max(0.55, base * 0.9 + 0.35)
+            : Math.max(0.12, base * 0.35 + 0.08);
+        };
+        if (Array.isArray(obj.material)) obj.material.forEach(apply);
+        else apply(obj.material);
+      });
+    });
+    if (_map) _map.triggerRepaint();
+  }
+
+  function clearCategoryHighlight() {
+    if (_root && _highlightLandmarkIds?.size) {
+      _root.children.forEach((group) => {
+        if (_highlightLandmarkIds.has(group.userData?.landmarkId)) _restoreLandmarkEmissive(group);
+      });
+    }
+    _highlightCategoryId = null;
+    _highlightLandmarkIds = null;
+    if (_map) _map.triggerRepaint();
+  }
+
   return {
     init, load, show, hide, isVisible, listIds, replacedBuildingIds, setOpacity, getLandmarks,
     getLabelGeoJSON, landmarkLabelNames, labelLayerId: () => LABEL_LAYER_ID,
     syncLabels, syncSceneLighting, raise: _raise, prewarm,
+    setCategoryHighlight, pulseCategoryHighlight, clearCategoryHighlight,
   };
 })();

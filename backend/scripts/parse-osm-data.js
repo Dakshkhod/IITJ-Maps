@@ -564,11 +564,6 @@ function getHardcodedPlaces() {
   // Cricket/Basketball/Football grounds, Tapri, Mess, Admin building.
   // These curated entries fill genuine gaps.
   return [
-    { name: "Gate 1 (Main Gate - NH62)", category: "gate", lat: 26.4587, lng: 73.1103, keywords: ["gate", "entrance", "exit", "main gate", "nh62", "security"], description: "Principal campus entrance from NH-62" },
-    { name: "Gate 2 (South Gate)", category: "gate", lat: 26.4666, lng: 73.1078, keywords: ["gate 2", "south gate", "entrance", "exit"], description: "South campus gate" },
-    { name: "ATM (SBI)", category: "bank", lat: 26.4718, lng: 73.1133, keywords: ["atm", "cash", "money", "bank", "withdraw", "sbi"], description: "SBI ATM near academic area" },
-    { name: "Post Office", category: "utility", lat: 26.4716, lng: 73.1131, keywords: ["post", "mail", "courier", "letter"], description: "Campus post office" },
-    { name: "Bus Stop (Main Gate)", category: "transport", lat: 26.4591, lng: 73.1106, keywords: ["bus", "stop", "transport", "bus stop"], description: "Main campus bus stop near Gate 1" },
     { name: "Parking (4-Wheeler)", category: "parking", lat: 26.4668, lng: 73.1115, keywords: ["parking", "car", "4 wheeler", "vehicle"], description: "4-wheeler parking area" },
     { name: "Parking (2-Wheeler)", category: "parking", lat: 26.4671, lng: 73.1110, keywords: ["parking", "bike", "2 wheeler", "scooter", "motorcycle"], description: "2-wheeler parking area" },
     { name: "Visitor's Hostel", category: "hostel", lat: 26.4682, lng: 73.1127, keywords: ["visitor", "guest house", "accommodation", "visitors hostel"], description: "Guest accommodation for campus visitors" },

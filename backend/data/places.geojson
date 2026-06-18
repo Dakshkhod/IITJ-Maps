@@ -4561,35 +4561,6 @@
     {
       "type": "Feature",
       "properties": {
-        "id": "curated_2",
-        "name": "ATM (SBI)",
-        "category": "bank",
-        "description": "SBI ATM near academic area",
-        "keywords": [
-          "atm",
-          "cash",
-          "money",
-          "bank",
-          "withdraw",
-          "sbi"
-        ],
-        "source": "curated"
-      },
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          73.1133,
-          26.4718
-        ]
-      },
-      "centroid": {
-        "lat": 26.4718,
-        "lng": 73.1133
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
         "osm_id": "1524213393",
         "name": "Prasadanam",
         "category": "dining",
@@ -4902,33 +4873,6 @@
       "centroid": {
         "lat": 26.4714234,
         "lng": 73.1107926
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
-        "id": "curated_3",
-        "name": "Post Office",
-        "category": "utility",
-        "description": "Campus post office",
-        "keywords": [
-          "post",
-          "mail",
-          "courier",
-          "letter"
-        ],
-        "source": "curated"
-      },
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          73.1131,
-          26.4716
-        ]
-      },
-      "centroid": {
-        "lat": 26.4716,
-        "lng": 73.1131
       }
     },
     {
@@ -6959,7 +6903,7 @@
     {
       "type": "Feature",
       "properties": {
-        "id": "curated_7",
+        "id": "curated_2",
         "name": "Visitor's Hostel",
         "category": "hostel",
         "description": "Guest accommodation for campus visitors",
@@ -7861,34 +7805,7 @@
     {
       "type": "Feature",
       "properties": {
-        "id": "curated_1",
-        "name": "Gate 2 (South Gate)",
-        "category": "gate",
-        "description": "South campus gate",
-        "keywords": [
-          "gate 2",
-          "south gate",
-          "entrance",
-          "exit"
-        ],
-        "source": "curated"
-      },
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          73.1078,
-          26.4666
-        ]
-      },
-      "centroid": {
-        "lat": 26.4666,
-        "lng": 73.1078
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
-        "id": "curated_5",
+        "id": "curated_0",
         "name": "Parking (4-Wheeler)",
         "category": "parking",
         "description": "4-wheeler parking area",
@@ -7915,7 +7832,7 @@
     {
       "type": "Feature",
       "properties": {
-        "id": "curated_6",
+        "id": "curated_1",
         "name": "Parking (2-Wheeler)",
         "category": "parking",
         "description": "2-wheeler parking area",
@@ -7938,33 +7855,6 @@
       "centroid": {
         "lat": 26.4671,
         "lng": 73.111
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
-        "id": "curated_4",
-        "name": "Bus Stop (Main Gate)",
-        "category": "transport",
-        "description": "Main campus bus stop near Gate 1",
-        "keywords": [
-          "bus",
-          "stop",
-          "transport",
-          "bus stop"
-        ],
-        "source": "curated"
-      },
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          73.1106,
-          26.4591
-        ]
-      },
-      "centroid": {
-        "lat": 26.4591,
-        "lng": 73.1106
       }
     },
     {
@@ -8363,35 +8253,6 @@
       "centroid": {
         "lat": 26.474854272506462,
         "lng": 73.11768938007633
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
-        "id": "curated_0",
-        "name": "Gate 1 (Main Gate - NH62)",
-        "category": "gate",
-        "description": "Principal campus entrance from NH-62",
-        "keywords": [
-          "gate",
-          "entrance",
-          "exit",
-          "main gate",
-          "nh62",
-          "security"
-        ],
-        "source": "curated"
-      },
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          73.1103,
-          26.4587
-        ]
-      },
-      "centroid": {
-        "lat": 26.4587,
-        "lng": 73.1103
       }
     },
     {

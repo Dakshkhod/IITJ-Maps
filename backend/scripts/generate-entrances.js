@@ -96,12 +96,18 @@ for (const b of buildings) {
   report.push(`ring   ${b.name.padEnd(22)} ← entrance node ${e.id} (${e.kind})`);
 }
 
-// 3. Carry over curated campus main gates (Gate 1 / Gate 2) from the old file.
+// 3. Carry over curated campus entrances from the old file (skip removed POIs).
+const CURATED_ENTRANCE_SKIP = new Set([
+  'Gate 1 (Main Gate - NH62)',
+  'Gate 2 (South Gate)',
+]);
 let carried = 0;
 try {
   const prev = JSON.parse(fs.readFileSync(path.join(WEB_DATA, 'entrances.json'), 'utf8'));
   for (const [k, v] of Object.entries(prev)) {
-    if (!v.osm_id && !out[k]) { out[k] = v; carried++; report.push(`keep   ${k.padEnd(22)} ← curated`); }
+    if (!v.osm_id && !out[k] && !CURATED_ENTRANCE_SKIP.has(k)) {
+      out[k] = v; carried++; report.push(`keep   ${k.padEnd(22)} ← curated`);
+    }
   }
 } catch (_) {}
 

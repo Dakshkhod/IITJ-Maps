@@ -507,6 +507,7 @@ function applyBuildingViewMode() {
   set('buildings-3d-glow', buildingGlowLayerVisible() ? 'visible' : 'none');
   set('buildings-labels', LAYERS.buildings ? 'visible' : 'none');
   syncRoadLamps();
+  if (activeCategory) startBuildingHighlight(activeCategory);
 }
 
 /** Live-update F4 cartography when 2D/3D / theme toggles (no style reload). */
@@ -576,9 +577,8 @@ const LAYERS = { buildings: true, roads: true, markers: true };
 
 // Lower = higher label priority when markers collide (symbol-sort-key). Keeps
 // the dense perimeter office/utility codes from crowding out real destinations.
-// Gates / parking / transport are bumped into tier 1 because the curated set
-// is small (Gate 1, Gate 2, main parking, bus stop) and these are landmarks
-// people orient by even at campus-overview zoom.
+// Gates / parking / transport are bumped into tier 1 when the curated set is
+// small and people orient by those landmarks at campus-overview zoom.
 const LABEL_PRIORITY = {
   medical: 0, dining: 0, bank: 0,
   academic: 1, sports: 1, hostel: 1, place_of_worship: 1,
@@ -802,6 +802,7 @@ const OVERLAY_LAYER_IDS = [
   'areas-fill', 'areas-outline', 'areas-labels',
   'berms-fill', 'berms-outline',
   'buildings-fill', 'buildings-outline-casing', 'buildings-outline', 'buildings-3d-glow', 'buildings-3d', 'buildings-labels',
+  'buildings-highlight-3d-glow', 'buildings-highlight-3d',
   'buildings-highlight-fill', 'buildings-highlight-outline',
   'places-circles', 'places-labels',
 ];
@@ -1658,6 +1659,8 @@ function addBermsLayer(data) {
 // ============================================================
 // Buildings Layer: 2D fill + 3D extrusion + labels
 // ============================================================
+const NEVER_BUILDING_FILTER = ['==', ['literal', 1], 0];
+
 function addBuildingsLayer(data) {
   if (map.getSource('buildings')) {
     map.getSource('buildings').setData(data);
@@ -1759,6 +1762,37 @@ function addBuildingsLayer(data) {
     },
   });
 
+  // Category pulse in 3D — bright extrusion on matching buildings (hidden by default).
+  map.addLayer({
+    id: 'buildings-highlight-3d',
+    type: 'fill-extrusion',
+    source: 'buildings',
+    filter: NEVER_BUILDING_FILTER,
+    layout: { visibility: 'none' },
+    paint: {
+      'fill-extrusion-color': categoryHighlightColorExpr(),
+      'fill-extrusion-height': buildingHeightExpr(),
+      'fill-extrusion-base': 0,
+      'fill-extrusion-opacity': 0.88,
+      'fill-extrusion-vertical-gradient': true,
+    },
+  });
+
+  map.addLayer({
+    id: 'buildings-highlight-3d-glow',
+    type: 'fill-extrusion',
+    source: 'buildings',
+    filter: NEVER_BUILDING_FILTER,
+    layout: { visibility: 'none' },
+    paint: {
+      'fill-extrusion-color': categoryHighlightColorExpr(),
+      'fill-extrusion-height': buildingGlowHeightExpr(),
+      'fill-extrusion-base': buildingGlowBaseExpr(),
+      'fill-extrusion-opacity': 0.5,
+      'fill-extrusion-vertical-gradient': true,
+    },
+  });
+
   // Name labels at high zoom — hide labels for buildings replaced by a 3D
   // landmark so the text doesn't float underneath the model.
   const labelsFilter = replacedIds.length
@@ -1783,27 +1817,26 @@ function addBuildingsLayer(data) {
     paint: labelPaint()
   });
 
-  // Highlight fill — glowing colour for the active category (hidden by default)
-  const NEVER = ['==', ['literal', 1], 0]; // filter that never matches
+  // Highlight fill — glowing colour for the active category (2D only; hidden by default)
   map.addLayer({
     id: 'buildings-highlight-fill',
     type: 'fill',
     source: 'buildings',
-    filter: NEVER,
-    layout: { visibility: 'visible' },
+    filter: NEVER_BUILDING_FILTER,
+    layout: { visibility: 'none' },
     paint: {
       'fill-color': categoryHighlightColorExpr(),
       'fill-opacity': 0.55,
     }
   });
 
-  // Highlight outline — thick bright border (above fill)
+  // Highlight outline — thick bright border (2D only; above fill)
   map.addLayer({
     id: 'buildings-highlight-outline',
     type: 'line',
     source: 'buildings',
-    filter: NEVER,
-    layout: { visibility: 'visible' },
+    filter: NEVER_BUILDING_FILTER,
+    layout: { visibility: 'none' },
     paint: {
       'line-color': categoryHighlightColorExpr(),
       'line-width': ['interpolate', ['linear'], ['zoom'], 14, 2, 17, 4.5, 19, 6],
@@ -1831,41 +1864,102 @@ function categoryHighlightColorExpr() {
 let _pulseTimer = null;
 let _pulseHigh = true;
 
+function buildingHighlightUses3D() {
+  return is3D && !isSatellite && LAYERS.buildings;
+}
+
+function buildingHighlight3dFilter(categoryId) {
+  const polyFilter = ['all',
+    ['==', ['geometry-type'], 'Polygon'],
+    ['==', ['get', 'category'], categoryId],
+  ];
+  const replacedIds = (typeof Landmarks3D !== 'undefined' && Landmarks3D.replacedBuildingIds)
+    ? Landmarks3D.replacedBuildingIds() : [];
+  return replacedIds.length
+    ? ['all', polyFilter, ['!', ['in', ['get', 'osm_id'], ['literal', replacedIds]]]]
+    : polyFilter;
+}
+
+function _pulseBuildingHighlight(high) {
+  if (buildingHighlightUses3D()) {
+    if (map.getLayer('buildings-highlight-3d')) {
+      map.setPaintProperty('buildings-highlight-3d', 'fill-extrusion-opacity', high ? 0.88 : 0.34);
+    }
+    if (map.getLayer('buildings-highlight-3d-glow')) {
+      map.setPaintProperty('buildings-highlight-3d-glow', 'fill-extrusion-opacity', high ? 0.52 : 0.14);
+    }
+    if (typeof Landmarks3D !== 'undefined') Landmarks3D.pulseCategoryHighlight(high);
+    return;
+  }
+  if (!map.getLayer('buildings-highlight-fill')) return;
+  map.setPaintProperty('buildings-highlight-fill', 'fill-opacity', high ? 0.55 : 0.18);
+  map.setPaintProperty('buildings-highlight-outline', 'line-opacity', high ? 1.0 : 0.35);
+  map.setPaintProperty('buildings-highlight-outline', 'line-width',
+    ['interpolate', ['linear'], ['zoom'], 14, high ? 2 : 1, 17, high ? 4.5 : 2.5]);
+}
+
 function startBuildingHighlight(categoryId) {
   stopBuildingHighlight();
   if (!categoryId) return;
 
   const polyFilter = ['all',
     ['==', ['geometry-type'], 'Polygon'],
-    ['==', ['get', 'category'], categoryId]
+    ['==', ['get', 'category'], categoryId],
   ];
+  const use3d = buildingHighlightUses3D();
+  const setVis = (id, vis) => { if (map.getLayer(id)) map.setLayoutProperty(id, 'visibility', vis); };
 
-  if (map.getLayer('buildings-highlight-fill')) {
-    map.setFilter('buildings-highlight-fill',    polyFilter);
-    map.setFilter('buildings-highlight-outline', polyFilter);
+  if (use3d) {
+    setVis('buildings-highlight-fill', 'none');
+    setVis('buildings-highlight-outline', 'none');
+    const f3d = buildingHighlight3dFilter(categoryId);
+    if (map.getLayer('buildings-highlight-3d')) {
+      map.setFilter('buildings-highlight-3d', f3d);
+      map.setFilter('buildings-highlight-3d-glow', f3d);
+      setVis('buildings-highlight-3d', 'visible');
+      setVis('buildings-highlight-3d-glow', 'visible');
+    }
+    if (typeof Landmarks3D !== 'undefined') Landmarks3D.setCategoryHighlight(categoryId);
+  } else {
+    setVis('buildings-highlight-3d', 'none');
+    setVis('buildings-highlight-3d-glow', 'none');
+    if (map.getLayer('buildings-highlight-fill')) {
+      map.setFilter('buildings-highlight-fill', polyFilter);
+      map.setFilter('buildings-highlight-outline', polyFilter);
+      setVis('buildings-highlight-fill', 'visible');
+      setVis('buildings-highlight-outline', 'visible');
+    }
+    if (typeof Landmarks3D !== 'undefined') Landmarks3D.clearCategoryHighlight();
   }
 
-  // Pulsing opacity animation
   _pulseHigh = true;
+  _pulseBuildingHighlight(_pulseHigh);
   _pulseTimer = setInterval(() => {
     _pulseHigh = !_pulseHigh;
-    if (!map.getLayer('buildings-highlight-fill')) return;
-    map.setPaintProperty('buildings-highlight-fill',    'fill-opacity',  _pulseHigh ? 0.55 : 0.18);
-    map.setPaintProperty('buildings-highlight-outline', 'line-opacity',  _pulseHigh ? 1.0  : 0.35);
-    map.setPaintProperty('buildings-highlight-outline', 'line-width',
-      ['interpolate', ['linear'], ['zoom'], 14, _pulseHigh ? 2 : 1, 17, _pulseHigh ? 4.5 : 2.5]);
+    _pulseBuildingHighlight(_pulseHigh);
   }, 700);
 }
 
 function stopBuildingHighlight() {
   if (_pulseTimer) { clearInterval(_pulseTimer); _pulseTimer = null; }
-  const NEVER = ['==', ['literal', 1], 0];
+  const setVis = (id, vis) => { if (map.getLayer(id)) map.setLayoutProperty(id, 'visibility', vis); };
   if (map.getLayer('buildings-highlight-fill')) {
-    map.setFilter('buildings-highlight-fill',    NEVER);
-    map.setFilter('buildings-highlight-outline', NEVER);
-    map.setPaintProperty('buildings-highlight-fill',    'fill-opacity',  0.55);
-    map.setPaintProperty('buildings-highlight-outline', 'line-opacity',  1.0);
+    map.setFilter('buildings-highlight-fill', NEVER_BUILDING_FILTER);
+    map.setFilter('buildings-highlight-outline', NEVER_BUILDING_FILTER);
+    map.setPaintProperty('buildings-highlight-fill', 'fill-opacity', 0.55);
+    map.setPaintProperty('buildings-highlight-outline', 'line-opacity', 1.0);
+    setVis('buildings-highlight-fill', 'none');
+    setVis('buildings-highlight-outline', 'none');
   }
+  if (map.getLayer('buildings-highlight-3d')) {
+    map.setFilter('buildings-highlight-3d', NEVER_BUILDING_FILTER);
+    map.setFilter('buildings-highlight-3d-glow', NEVER_BUILDING_FILTER);
+    map.setPaintProperty('buildings-highlight-3d', 'fill-extrusion-opacity', 0.88);
+    map.setPaintProperty('buildings-highlight-3d-glow', 'fill-extrusion-opacity', 0.52);
+    setVis('buildings-highlight-3d', 'none');
+    setVis('buildings-highlight-3d-glow', 'none');
+  }
+  if (typeof Landmarks3D !== 'undefined') Landmarks3D.clearCategoryHighlight();
 }
 
 // ============================================================
@@ -2018,6 +2112,7 @@ function toggle3D() {
     map.easeTo({ pitch: 0, bearing: 0, duration: 900 });
     map.triggerRepaint();
   }
+  if (activeCategory) startBuildingHighlight(activeCategory);
 }
 
 // Show the 3D landmark models. Three.js is loaded lazily here the first time
