@@ -163,7 +163,7 @@ body.map-vector.map-dark:not(.map-satellite) #map .maplibregl-canvas {
 }
 /* 3D night — keep extrusion glow readable (less canvas dimming). */
 body.map-3d.map-vector.map-dark:not(.map-satellite) #map .maplibregl-canvas {
-  filter: brightness(0.86) contrast(1.02) saturate(0.92);
+  filter: brightness(0.89) contrast(1.04) saturate(0.96);
 }
 
 /* ============================================================

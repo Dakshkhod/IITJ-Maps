@@ -6061,7 +6061,7 @@ var Landmarks3D = (() => {
         if (dark) {
           const c = m.color?.getHex?.() ?? 0xc4b5a0;
           m.emissive.setHex(c);
-          m.emissiveIntensity = Math.max(0.18, (m.userData._nightSaved.i || 1) * 0.32 + 0.1);
+          m.emissiveIntensity = Math.max(0.24, (m.userData._nightSaved.i || 1) * 0.4 + 0.14);
         } else {
           m.emissive.setHex(m.userData._nightSaved.e);
           m.emissiveIntensity = m.userData._nightSaved.i;

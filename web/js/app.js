@@ -218,22 +218,26 @@ function buildingFillColor() {
 }
 
 function buildingExtrusionOpacity() {
-  if (isDark && is3D && !isSatellite) return 0.78;
+  if (isDark && is3D && !isSatellite) return 0.84;
   if (is3D && !isSatellite) return 0.96;
   return 0.82;
 }
 
 function buildingGlowHeightExpr() {
-  return ['*', buildingHeightExpr(), 1.06];
+  return ['*', buildingHeightExpr(), 1.1];
 }
 
 function buildingGlowBaseExpr() {
-  return ['*', buildingHeightExpr(), 0.92];
+  return ['*', buildingHeightExpr(), 0.88];
+}
+
+function buildingGlowOpacity() {
+  return isDark ? 0.32 : 0.14;
 }
 
 function buildingOutlineColor() {
   if (isSatellite) return isDark ? '#e2e8f0' : '#ffffff';
-  // Category colour on footprints — visible in 2D and as ground layout in 3D.
+  // Category colour on building footprints in 2D only.
   return categoryColorExpr();
 }
 
@@ -287,7 +291,7 @@ function bermOutlineColor() {
 }
 
 function bermLayerVisible() {
-  return LAYERS.buildings && !isSatellite;
+  return LAYERS.buildings && !is3D && !isSatellite;
 }
 
 function buildingOutlineOpacity() {
@@ -492,14 +496,13 @@ function applyBuildingViewMode() {
   if (!map || isSatellite) return;
   const showFlat = LAYERS.buildings && !is3D;
   const show3d = LAYERS.buildings && is3D;
-  const showFootprints = LAYERS.buildings && is3D && !isSatellite;
   const bermVis = bermLayerVisible() ? 'visible' : 'none';
   const set = (id, vis) => { if (map.getLayer(id)) map.setLayoutProperty(id, 'visibility', vis); };
   set('berms-fill', bermVis);
   set('berms-outline', bermVis);
   set('buildings-fill', showFlat ? 'visible' : 'none');
-  set('buildings-outline-casing', (showFlat || showFootprints) ? 'visible' : 'none');
-  set('buildings-outline', (showFlat || showFootprints) ? 'visible' : 'none');
+  set('buildings-outline-casing', showFlat ? 'visible' : 'none');
+  set('buildings-outline', showFlat ? 'visible' : 'none');
   set('buildings-3d', show3d ? 'visible' : 'none');
   set('buildings-3d-glow', buildingGlowLayerVisible() ? 'visible' : 'none');
   set('buildings-labels', LAYERS.buildings ? 'visible' : 'none');
@@ -523,7 +526,7 @@ function refreshBuildingTheme() {
   if (map.getLayer('buildings-3d-glow')) {
     map.setLayoutProperty('buildings-3d-glow', 'visibility', buildingGlowLayerVisible() ? 'visible' : 'none');
     map.setPaintProperty('buildings-3d-glow', 'fill-extrusion-color', buildingGlowColorExpr());
-    map.setPaintProperty('buildings-3d-glow', 'fill-extrusion-opacity', isDark ? 0.22 : 0.12);
+    map.setPaintProperty('buildings-3d-glow', 'fill-extrusion-opacity', buildingGlowOpacity());
     map.setPaintProperty('buildings-3d-glow', 'fill-extrusion-height', buildingGlowHeightExpr());
     map.setPaintProperty('buildings-3d-glow', 'fill-extrusion-base', buildingGlowBaseExpr());
   }
@@ -1689,7 +1692,7 @@ function addBuildingsLayer(data) {
     layout: {
       'line-join': 'round',
       'line-cap': 'round',
-      visibility: (LAYERS.buildings && (!is3D || !isSatellite)) ? 'visible' : 'none',
+      visibility: (LAYERS.buildings && !is3D) ? 'visible' : 'none',
     },
     paint: {
       'line-color': buildingOutlineCasingColor(),
@@ -1706,7 +1709,7 @@ function addBuildingsLayer(data) {
     layout: {
       'line-join': 'round',
       'line-cap': 'round',
-      visibility: (LAYERS.buildings && (!is3D || !isSatellite)) ? 'visible' : 'none',
+      visibility: (LAYERS.buildings && !is3D) ? 'visible' : 'none',
     },
     paint: {
       'line-color': buildingOutlineColor(),
@@ -1751,7 +1754,7 @@ function addBuildingsLayer(data) {
       'fill-extrusion-color': buildingGlowColorExpr(),
       'fill-extrusion-height': buildingGlowHeightExpr(),
       'fill-extrusion-base': buildingGlowBaseExpr(),
-      'fill-extrusion-opacity': isDark ? 0.22 : 0,
+      'fill-extrusion-opacity': buildingGlowOpacity(),
       'fill-extrusion-vertical-gradient': true,
     },
   });
@@ -2039,8 +2042,7 @@ function toggleLayer(layerName) {
 
   const layerMap = {
     buildings: is3D
-      ? ['buildings-3d', 'buildings-3d-glow', 'buildings-outline-casing', 'buildings-outline',
-         'berms-fill', 'berms-outline', 'buildings-labels', 'landmark-labels']
+      ? ['buildings-3d', 'buildings-3d-glow', 'buildings-labels', 'landmark-labels']
       : ['berms-fill', 'berms-outline', 'buildings-fill', 'buildings-outline-casing', 'buildings-outline', 'buildings-labels', 'landmark-labels'],
     roads: ROAD_LAYER_IDS,
     markers: ['places-circles', 'places-labels'],
@@ -2074,17 +2076,15 @@ function renderCategoryChips(categoriesData) {
   container.appendChild(createChip('All', null, true));
   for (const cat of categoriesData) {
     if (['other', 'building'].includes(cat.id)) continue;
-    container.appendChild(createChip(cat.name, cat.id, false, cat.icon, cat.color));
+    container.appendChild(createChip(cat.name, cat.id, false, cat.color));
   }
 }
 
-function createChip(name, categoryId, isActive, icon, color) {
+function createChip(name, categoryId, isActive, color) {
   const chip = document.createElement('div');
   chip.className = `category-chip${isActive ? ' active' : ''}`;
   if (color) chip.style.setProperty('--chip-color', color);
-  chip.innerHTML = icon
-    ? `<span class="chip-icon" aria-hidden="true">${icon}</span><span>${escapeHtml(name)}</span>`
-    : escapeHtml(name);
+  chip.textContent = name;
   chip.addEventListener('click', () => filterByCategory(categoryId, chip));
   return chip;
 }
