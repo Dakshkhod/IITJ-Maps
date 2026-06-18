@@ -164,44 +164,44 @@ function buildingFillOpacity() {
   return ['interpolate', ['linear'], ['zoom'], 14, 0.78, 17, 0.92];
 }
 
-/** Luminous category hues for 3D night extrusions (window-lit effect). */
+/** Subtle category tint for 3D night extrusions — muted so campus stays readable. */
 function buildingNightGlowColorExpr() {
   return ['match', ['get', 'category'],
-    'academic',       '#9ec5ff',
-    'hostel',         '#ffc48a',
-    'dining',         '#ff8a8a',
-    'sports',         '#86efac',
-    'medical',        '#f9a8d4',
-    'gate',           '#a5b4fc',
-    'parking',        '#7dd3fc',
-    'utility',        '#cbd5e1',
-    'administrative', '#94a3b8',
-    'transport',      '#5eead4',
-    'recreation',     '#d8b4fe',
-    'residential',    '#d4a574',
-    'bank',           '#fcd34d',
-    'university',     '#9ec5ff',
-    '#c8daf4',
+    'academic',       '#6b8fb8',
+    'hostel',         '#b8956a',
+    'dining',         '#b87070',
+    'sports',         '#6a9a78',
+    'medical',        '#b87a9a',
+    'gate',           '#7a84b8',
+    'parking',        '#5a8aa8',
+    'utility',        '#8a919a',
+    'administrative', '#707a88',
+    'transport',      '#5a9088',
+    'recreation',     '#9a82b0',
+    'residential',    '#a08868',
+    'bank',           '#a89050',
+    'university',     '#6b8fb8',
+    '#8a9cb0',
   ];
 }
 
 function buildingGlowColorExpr() {
   return ['match', ['get', 'category'],
-    'academic',       '#ffe8b8',
-    'hostel',         '#ffd9a0',
-    'dining',         '#ffb4a8',
-    'sports',         '#d4f5c4',
-    'medical',        '#ffd0ec',
-    'gate',           '#d4dcff',
-    'parking',        '#b8e8ff',
-    'utility',        '#e8edf2',
-    'administrative', '#d8dee8',
-    'transport',      '#b8f0e8',
-    'recreation',     '#ecd4ff',
-    'residential',    '#edd5b8',
-    'bank',           '#ffe8a8',
-    'university',     '#ffe8b8',
-    '#ffe8b8',
+    'academic',       '#c8b890',
+    'hostel',         '#c0a880',
+    'dining',         '#c09890',
+    'sports',         '#a8c0a0',
+    'medical',        '#c0a0b0',
+    'gate',           '#a8b0c8',
+    'parking',        '#98b8c8',
+    'utility',        '#b0b4b8',
+    'administrative', '#a8acb4',
+    'transport',      '#98b8b0',
+    'recreation',     '#b8a8c8',
+    'residential',    '#c0b098',
+    'bank',           '#c8b888',
+    'university',     '#c8b890',
+    '#c8b890',
   ];
 }
 
@@ -218,17 +218,17 @@ function buildingFillColor() {
 }
 
 function buildingExtrusionOpacity() {
-  if (isDark && is3D && !isSatellite) return 0.92;
+  if (isDark && is3D && !isSatellite) return 0.78;
   if (is3D && !isSatellite) return 0.96;
   return 0.82;
 }
 
 function buildingGlowHeightExpr() {
-  return ['*', buildingHeightExpr(), 1.14];
+  return ['*', buildingHeightExpr(), 1.06];
 }
 
 function buildingGlowBaseExpr() {
-  return ['*', buildingHeightExpr(), 0.82];
+  return ['*', buildingHeightExpr(), 0.92];
 }
 
 function buildingOutlineColor() {
@@ -523,7 +523,7 @@ function refreshBuildingTheme() {
   if (map.getLayer('buildings-3d-glow')) {
     map.setLayoutProperty('buildings-3d-glow', 'visibility', buildingGlowLayerVisible() ? 'visible' : 'none');
     map.setPaintProperty('buildings-3d-glow', 'fill-extrusion-color', buildingGlowColorExpr());
-    map.setPaintProperty('buildings-3d-glow', 'fill-extrusion-opacity', isDark ? 0.48 : 0.22);
+    map.setPaintProperty('buildings-3d-glow', 'fill-extrusion-opacity', isDark ? 0.22 : 0.12);
     map.setPaintProperty('buildings-3d-glow', 'fill-extrusion-height', buildingGlowHeightExpr());
     map.setPaintProperty('buildings-3d-glow', 'fill-extrusion-base', buildingGlowBaseExpr());
   }
@@ -1248,9 +1248,9 @@ function addRoadsLayer(data) {
       '#ffffff']
     : (isDark
       ? ['match', ['get', 'navigation_class'],
-        ['major_vehicle_road', 'vehicle_connector'], '#fbbf24',
-        ['campus_main_road', 'local_through_road'], '#f8d87a',
-        '#dbe4ef']
+        ['major_vehicle_road', 'vehicle_connector'], '#6b6358',
+        ['campus_main_road', 'local_through_road'], '#5c6470',
+        '#4a5568']
       : ['match', ['get', 'navigation_class'],
         ['major_vehicle_road', 'vehicle_connector'], '#525252',
         ['campus_main_road', 'local_through_road'], '#585858',
@@ -1476,11 +1476,12 @@ function shouldPlaceRoadLamps(props = {}) {
 }
 
 function roadLampSpacingM(nc) {
-  if (nc === 'pedestrian_path' || nc === 'stairs') return 44;
-  if (nc === 'cycle_pedestrian') return 40;
-  if (nc === 'campus_service_connector' || nc === 'narrow_service_road' || nc === 'service_access') return 34;
-  if (nc === 'major_vehicle_road' || nc === 'vehicle_connector' || nc === 'campus_main_road') return 32;
-  return 36;
+  // Wider spacing — roughly half the lamp count vs the prior dense layout.
+  if (nc === 'pedestrian_path' || nc === 'stairs') return 88;
+  if (nc === 'cycle_pedestrian') return 80;
+  if (nc === 'campus_service_connector' || nc === 'narrow_service_road' || nc === 'service_access') return 72;
+  if (nc === 'major_vehicle_road' || nc === 'vehicle_connector' || nc === 'campus_main_road') return 68;
+  return 74;
 }
 
 function segmentBearingDeg(lat1, lng1, lat2, lng2) {
@@ -1562,10 +1563,10 @@ function addRoadLampLayers(roadsData) {
     minzoom: 13,
     layout: { visibility: lampVis },
     paint: {
-      'circle-radius': ['interpolate', ['linear'], ['zoom'], 13, 2.8, 14, 3.5, 17, 7, 19, 11],
+      'circle-radius': ['interpolate', ['linear'], ['zoom'], 13, 2.2, 14, 2.8, 17, 5.5, 19, 8],
       'circle-color': '#ffe6a3',
-      'circle-opacity': 0.38,
-      'circle-blur': 0.85,
+      'circle-opacity': 0.22,
+      'circle-blur': 0.9,
     },
   }, beforeLabels);
 
@@ -1589,9 +1590,9 @@ function addRoadLampLayers(roadsData) {
     minzoom: 13,
     layout: { visibility: lampVis },
     paint: {
-      'circle-radius': ['interpolate', ['linear'], ['zoom'], 13, 1.0, 14, 1.2, 17, 2.2, 19, 3],
+      'circle-radius': ['interpolate', ['linear'], ['zoom'], 13, 0.8, 14, 1.0, 17, 1.8, 19, 2.4],
       'circle-color': '#fff8e1',
-      'circle-opacity': 0.95,
+      'circle-opacity': 0.72,
       'circle-stroke-width': 0.4,
       'circle-stroke-color': '#fde68a',
     },
@@ -1750,7 +1751,7 @@ function addBuildingsLayer(data) {
       'fill-extrusion-color': buildingGlowColorExpr(),
       'fill-extrusion-height': buildingGlowHeightExpr(),
       'fill-extrusion-base': buildingGlowBaseExpr(),
-      'fill-extrusion-opacity': isDark ? 0.48 : 0,
+      'fill-extrusion-opacity': isDark ? 0.22 : 0,
       'fill-extrusion-vertical-gradient': true,
     },
   });

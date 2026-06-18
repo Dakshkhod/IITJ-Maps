@@ -6061,7 +6061,7 @@ var Landmarks3D = (() => {
         if (dark) {
           const c = m.color?.getHex?.() ?? 0xc4b5a0;
           m.emissive.setHex(c);
-          m.emissiveIntensity = Math.max(0.35, (m.userData._nightSaved.i || 1) * 0.55 + 0.22);
+          m.emissiveIntensity = Math.max(0.18, (m.userData._nightSaved.i || 1) * 0.32 + 0.1);
         } else {
           m.emissive.setHex(m.userData._nightSaved.e);
           m.emissiveIntensity = m.userData._nightSaved.i;
@@ -6075,12 +6075,12 @@ var Landmarks3D = (() => {
   function syncSceneLighting(dark) {
     if (!_sunLight) return;
     if (dark) {
-      _sunLight.intensity = 0.48;
-      _sunLight.color.setHex(0xb8c8e8);
-      _fillLight.intensity = 0.28;
-      _fillLight.color.setHex(0x8a9ab8);
-      _ambientLight.intensity = 0.42;
-      _ambientLight.color.setHex(0xa0b0cc);
+      _sunLight.intensity = 0.36;
+      _sunLight.color.setHex(0x9cb0d8);
+      _fillLight.intensity = 0.18;
+      _fillLight.color.setHex(0x6a7a94);
+      _ambientLight.intensity = 0.3;
+      _ambientLight.color.setHex(0x8899b8);
     } else {
       _sunLight.intensity = 1.05;
       _sunLight.color.setHex(0xffffff);
