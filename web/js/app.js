@@ -1773,7 +1773,7 @@ function addBuildingsLayer(data) {
       'fill-extrusion-color': categoryHighlightColorExpr(),
       'fill-extrusion-height': buildingHeightExpr(),
       'fill-extrusion-base': 0,
-      'fill-extrusion-opacity': 0.42,
+      'fill-extrusion-opacity': 0.62,
       'fill-extrusion-vertical-gradient': true,
     },
   });
@@ -1788,7 +1788,7 @@ function addBuildingsLayer(data) {
       'fill-extrusion-color': categoryHighlightColorExpr(),
       'fill-extrusion-height': buildingGlowHeightExpr(),
       'fill-extrusion-base': buildingGlowBaseExpr(),
-      'fill-extrusion-opacity': 0.22,
+      'fill-extrusion-opacity': 0.36,
       'fill-extrusion-vertical-gradient': true,
     },
   });
@@ -1846,17 +1846,24 @@ function addBuildingsLayer(data) {
   });
 }
 
-// Returns a MapLibre match expression: category → bright highlight colour
+// Returns a MapLibre match expression: category → vivid highlight colour
 function categoryHighlightColorExpr() {
   return ['match', ['get', 'category'],
-    'academic',       '#5b8fd4',   // muted blue
-    'hostel',         '#d08040',   // muted orange
-    'dining',         '#d06060',   // muted red
-    'sports',         '#3d9a5c',   // muted green
-    'medical',        '#d06090',   // muted pink
-    'administrative', '#7a68c8',   // muted purple
-    'residential',    '#c8a030',   // muted yellow
-    '#6068c8'                      // fallback indigo
+    'academic',       '#60a5fa',   // sky blue
+    'hostel',         '#fb923c',   // bright orange
+    'dining',         '#f87171',   // coral red
+    'sports',         '#4ade80',   // mint green
+    'medical',        '#f472b6',   // rose pink
+    'gate',           '#818cf8',   // periwinkle
+    'parking',        '#38bdf8',   // light cyan
+    'utility',        '#94a3b8',   // slate
+    'administrative', '#a78bfa',   // violet
+    'transport',      '#2dd4bf',   // teal
+    'recreation',     '#c084fc',   // purple
+    'residential',    '#fbbf24',   // amber
+    'bank',           '#f59e0b',   // gold
+    'university',     '#60a5fa',
+    '#818cf8'                      // fallback indigo
   ];
 }
 
@@ -1883,17 +1890,17 @@ function buildingHighlight3dFilter(categoryId) {
 function _pulseBuildingHighlight(high) {
   if (buildingHighlightUses3D()) {
     if (map.getLayer('buildings-highlight-3d')) {
-      map.setPaintProperty('buildings-highlight-3d', 'fill-extrusion-opacity', high ? 0.42 : 0.14);
+      map.setPaintProperty('buildings-highlight-3d', 'fill-extrusion-opacity', high ? 0.62 : 0.22);
     }
     if (map.getLayer('buildings-highlight-3d-glow')) {
-      map.setPaintProperty('buildings-highlight-3d-glow', 'fill-extrusion-opacity', high ? 0.22 : 0.06);
+      map.setPaintProperty('buildings-highlight-3d-glow', 'fill-extrusion-opacity', high ? 0.36 : 0.10);
     }
     if (typeof Landmarks3D !== 'undefined') Landmarks3D.pulseCategoryHighlight(high);
     return;
   }
   if (!map.getLayer('buildings-highlight-fill')) return;
-  map.setPaintProperty('buildings-highlight-fill', 'fill-opacity', high ? 0.38 : 0.12);
-  map.setPaintProperty('buildings-highlight-outline', 'line-opacity', high ? 0.72 : 0.22);
+  map.setPaintProperty('buildings-highlight-fill', 'fill-opacity', high ? 0.48 : 0.16);
+  map.setPaintProperty('buildings-highlight-outline', 'line-opacity', high ? 0.88 : 0.28);
   map.setPaintProperty('buildings-highlight-outline', 'line-width',
     ['interpolate', ['linear'], ['zoom'], 14, high ? 2 : 1, 17, high ? 4.5 : 2.5]);
 }
@@ -1954,8 +1961,8 @@ function stopBuildingHighlight() {
   if (map.getLayer('buildings-highlight-3d')) {
     map.setFilter('buildings-highlight-3d', NEVER_BUILDING_FILTER);
     map.setFilter('buildings-highlight-3d-glow', NEVER_BUILDING_FILTER);
-    map.setPaintProperty('buildings-highlight-3d', 'fill-extrusion-opacity', 0.42);
-    map.setPaintProperty('buildings-highlight-3d-glow', 'fill-extrusion-opacity', 0.22);
+    map.setPaintProperty('buildings-highlight-3d', 'fill-extrusion-opacity', 0.62);
+    map.setPaintProperty('buildings-highlight-3d-glow', 'fill-extrusion-opacity', 0.36);
     setVis('buildings-highlight-3d', 'none');
     setVis('buildings-highlight-3d-glow', 'none');
   }

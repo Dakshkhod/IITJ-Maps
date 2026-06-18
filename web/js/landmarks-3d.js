@@ -6193,8 +6193,10 @@ var Landmarks3D = (() => {
   }
 
   const CATEGORY_HIGHLIGHT_COLORS = {
-    academic: 0x5b8fd4, hostel: 0xd08040, dining: 0xd06060, sports: 0x3d9a5c,
-    medical: 0xd06090, administrative: 0x7a68c8, residential: 0xc8a030,
+    academic: 0x60a5fa, hostel: 0xfb923c, dining: 0xf87171, sports: 0x4ade80,
+    medical: 0xf472b6, gate: 0x818cf8, parking: 0x38bdf8, utility: 0x94a3b8,
+    administrative: 0xa78bfa, transport: 0x2dd4bf, recreation: 0xc084fc,
+    residential: 0xfbbf24, bank: 0xf59e0b,
   };
   let _highlightCategoryId = null;
   let _highlightLandmarkIds = null;
@@ -6257,8 +6259,8 @@ var Landmarks3D = (() => {
           m.emissive.setHex(colorHex);
           const base = m.userData._catSaved.i;
           m.emissiveIntensity = high
-            ? Math.max(0.22, base * 0.45 + 0.1)
-            : Math.max(0.06, base * 0.2 + 0.03);
+            ? Math.max(0.38, base * 0.65 + 0.18)
+            : Math.max(0.10, base * 0.28 + 0.05);
         };
         if (Array.isArray(obj.material)) obj.material.forEach(apply);
         else apply(obj.material);
