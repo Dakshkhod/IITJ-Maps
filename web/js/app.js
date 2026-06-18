@@ -385,6 +385,59 @@ function syncMapBodyClasses() {
   document.body.classList.toggle('map-satellite', isSatellite);
 }
 
+/** True between 18:00 and 06:00 campus local time (IST). */
+function isCampusNight(now = new Date()) {
+  const hour = Number(new Intl.DateTimeFormat('en-GB', {
+    timeZone: CAMPUS_TZ,
+    hour: 'numeric',
+    hour12: false,
+  }).format(now));
+  return hour < 6 || hour >= 18;
+}
+
+function desiredNightMode() {
+  if (nightModeManual) return isDark;
+  return isCampusNight();
+}
+
+async function syncAutoNightMode() {
+  if (isSatellite) return;
+  const wantDark = desiredNightMode();
+  if (wantDark === isDark) {
+    syncMapBodyClasses();
+    refreshBuildingTheme();
+    return;
+  }
+  isDark = wantDark;
+  document.documentElement.setAttribute('data-theme', isDark ? 'dark' : '');
+  await applyMapStyle();
+  syncMapBodyClasses();
+  updateBaseMapButtons();
+}
+
+function scheduleAutoNightWatch() {
+  if (_nightWatchTimer) clearInterval(_nightWatchTimer);
+  _nightWatchTimer = setInterval(() => {
+    if (!nightModeManual) syncAutoNightMode();
+  }, 60_000);
+}
+
+/** Show 2D footprints or 3D extrusions — never both at once. */
+function applyBuildingViewMode() {
+  if (!map || isSatellite) return;
+  const showFlat = LAYERS.buildings && !is3D;
+  const show3d = LAYERS.buildings && is3D;
+  const bermVis = bermLayerVisible() ? 'visible' : 'none';
+  const set = (id, vis) => { if (map.getLayer(id)) map.setLayoutProperty(id, 'visibility', vis); };
+  set('berms-fill', showFlat ? bermVis : 'none');
+  set('berms-outline', showFlat ? bermVis : 'none');
+  set('buildings-fill', showFlat ? 'visible' : 'none');
+  set('buildings-outline-casing', showFlat ? 'visible' : 'none');
+  set('buildings-outline', showFlat ? 'visible' : 'none');
+  set('buildings-3d', show3d ? 'visible' : 'none');
+  set('buildings-labels', LAYERS.buildings ? 'visible' : 'none');
+}
+
 /** Live-update F4 cartography when 2D/3D / theme toggles (no style reload). */
 function refreshBuildingTheme() {
   if (!map) return;
@@ -431,6 +484,9 @@ function refreshMapLabelPaint() {
     map.setPaintProperty(id, 'text-halo-width', p['text-halo-width']);
   }
   syncLandmarkLabels();
+  if (typeof Landmarks3D !== 'undefined' && typeof Landmarks3D.syncSceneLighting === 'function') {
+    Landmarks3D.syncSceneLighting(isDark);
+  }
 }
 
 const LAYERS = { buildings: true, roads: true, markers: true };
@@ -484,6 +540,9 @@ let headingDeg = null;               // device compass bearing
 let autoFollow = false;              // map pans to keep user centred
 let watchId = null;                  // geolocation watchPosition handle
 let isDark = false, is3D = false, isSatellite = false;
+let nightModeManual = false;         // true after user taps the dark-mode button
+let _nightWatchTimer = null;
+const CAMPUS_TZ = 'Asia/Kolkata';
 let labeledNames = new Set();
 let searchTimeout;
 let currentRoute = null;
@@ -532,6 +591,9 @@ function setupOfflineBanner() {
 }
 
 async function init() {
+  isDark = isCampusNight();
+  if (isDark) document.documentElement.setAttribute('data-theme', 'dark');
+
   map = new maplibregl.Map({
     container: 'map',
     style: getMapStyle(),
@@ -573,6 +635,9 @@ async function init() {
     handleDeepLink();
     requestUserLocation();
     scheduleLandmarks3DPrewarm();
+    syncMapBodyClasses();
+    updateBaseMapButtons();
+    scheduleAutoNightWatch();
   });
 }
 
@@ -717,13 +782,10 @@ async function applyMapStyle() {
         map.jumpTo({ center: savedCenter, zoom: savedZoom, pitch: savedPitch, bearing: savedBearing });
 
         if (is3D && !isSatellite) {
-          if (map.getLayer('berms-fill'))        map.setLayoutProperty('berms-fill',        'visibility', 'none');
-          if (map.getLayer('berms-outline'))     map.setLayoutProperty('berms-outline',     'visibility', 'none');
-          if (map.getLayer('buildings-fill'))    map.setLayoutProperty('buildings-fill',    'visibility', 'none');
-          if (map.getLayer('buildings-outline-casing')) map.setLayoutProperty('buildings-outline-casing', 'visibility', 'none');
-          if (map.getLayer('buildings-outline')) map.setLayoutProperty('buildings-outline', 'visibility', 'none');
-          if (map.getLayer('buildings-3d'))      map.setLayoutProperty('buildings-3d',      'visibility', 'visible');
+          applyBuildingViewMode();
           showLandmarks3D();
+        } else {
+          applyBuildingViewMode();
         }
 
         updateBaseMapButtons();
@@ -1678,14 +1740,7 @@ function toggle3D() {
   document.getElementById('btn-3d').classList.toggle('active', is3D);
 
   if (is3D) {
-    if (!isSatellite && LAYERS.buildings) {
-      if (map.getLayer('berms-fill'))        map.setLayoutProperty('berms-fill',        'visibility', 'none');
-      if (map.getLayer('berms-outline'))     map.setLayoutProperty('berms-outline',     'visibility', 'none');
-      if (map.getLayer('buildings-fill'))    map.setLayoutProperty('buildings-fill',    'visibility', 'none');
-      if (map.getLayer('buildings-outline-casing')) map.setLayoutProperty('buildings-outline-casing', 'visibility', 'none');
-      if (map.getLayer('buildings-outline')) map.setLayoutProperty('buildings-outline', 'visibility', 'none');
-      if (map.getLayer('buildings-3d'))      map.setLayoutProperty('buildings-3d',      'visibility', 'visible');
-    }
+    applyBuildingViewMode();
     // Custom 3D landmark models are only shown on the vector base map, not
     // over satellite imagery (matches buildings-3d behaviour). Defer one frame
     // so extrusion visibility + pitch animation start before the custom layer
@@ -1698,24 +1753,16 @@ function toggle3D() {
     syncLandmarkLabels();
     syncMapBodyClasses();
     refreshBuildingTheme();
-    // Keep easeTo synchronous — immersive navigation overrides the camera on
-    // the same tick and a deferred easeTo would clobber that framing.
     map.easeTo({ pitch: 52, bearing: 0, duration: 900 });
     showToast('3D view — drag to rotate', 'info');
   } else {
-    if (map.getLayer('buildings-3d')) map.setLayoutProperty('buildings-3d', 'visibility', 'none');
     if (typeof Landmarks3D !== 'undefined') Landmarks3D.hide();
-    if (!isSatellite && LAYERS.buildings) {
-      if (map.getLayer('berms-fill'))        map.setLayoutProperty('berms-fill',        bermLayerVisible() ? 'visible' : 'none');
-      if (map.getLayer('berms-outline'))     map.setLayoutProperty('berms-outline',     bermLayerVisible() ? 'visible' : 'none');
-      if (map.getLayer('buildings-fill'))    map.setLayoutProperty('buildings-fill',    'visibility', 'visible');
-      if (map.getLayer('buildings-outline-casing')) map.setLayoutProperty('buildings-outline-casing', 'visibility', 'visible');
-      if (map.getLayer('buildings-outline'))    map.setLayoutProperty('buildings-outline',    'visibility', 'visible');
-    }
+    applyBuildingViewMode();
     syncLandmarkLabels();
     syncMapBodyClasses();
     refreshBuildingTheme();
     map.easeTo({ pitch: 0, bearing: 0, duration: 900 });
+    map.triggerRepaint();
   }
 }
 
@@ -4059,6 +4106,8 @@ async function toggleSatellite() {
     if (typeof Landmarks3D !== 'undefined') Landmarks3D.hide();
   } else {
     map.setMaxZoom(19);
+    if (!nightModeManual) isDark = isCampusNight();
+    document.documentElement.setAttribute('data-theme', isDark ? 'dark' : '');
   }
   showToast(isSatellite ? 'Satellite view' : 'Map view', 'info');
   await applyMapStyle();
@@ -4070,10 +4119,12 @@ async function toggleDarkMode() {
     isSatellite = false;
     showToast('Switched to map view', 'info');
   }
+  nightModeManual = true;
   isDark = !isDark;
   document.documentElement.setAttribute('data-theme', isDark ? 'dark' : '');
   await applyMapStyle();
   syncMapBodyClasses();
+  updateBaseMapButtons();
 }
 
 // ============================================================

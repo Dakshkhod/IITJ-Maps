@@ -4808,6 +4808,9 @@ var Landmarks3D = (() => {
   // and still finish synchronously if 3D is opened before warming completes.
   let _sceneShellReady = false;   // lights + camera + origin frame in place
   let _sceneComplete = false;     // every landmark + vegetation + berm built
+  let _sunLight = null;
+  let _fillLight = null;
+  let _ambientLight = null;
   let _buildIndex = 0;            // next LANDMARKS entry awaiting geometry build
   let _originMc = null;           // cached mercator origin for chunked builds
   let _buildLoopRunning = false;  // a chunked build loop is currently scheduled
@@ -4827,15 +4830,14 @@ var Landmarks3D = (() => {
     _initThreeObjects();   // materials + matrices (Three.js is ready by now)
 
     _scene = new THREE.Scene();
-    const sun = new THREE.DirectionalLight(0xffffff, 1.05);
-    sun.position.set(0.5, -1, 0.8).normalize();
-    _scene.add(sun);
-    // Neutral white fill (was warm cream 0xfff2d5, which cast an orange/yellow
-    // tint on the sunlit walls — read as a "shadow" beneath the pale roofs).
-    const fill = new THREE.DirectionalLight(0xffffff, 0.45);
-    fill.position.set(-0.7, 0.6, 0.4).normalize();
-    _scene.add(fill);
-    _scene.add(new THREE.AmbientLight(0xffffff, 0.35));
+    _sunLight = new THREE.DirectionalLight(0xffffff, 1.05);
+    _sunLight.position.set(0.5, -1, 0.8).normalize();
+    _scene.add(_sunLight);
+    _fillLight = new THREE.DirectionalLight(0xffffff, 0.45);
+    _fillLight.position.set(-0.7, 0.6, 0.4).normalize();
+    _scene.add(_fillLight);
+    _ambientLight = new THREE.AmbientLight(0xffffff, 0.35);
+    _scene.add(_ambientLight);
 
     _root = new THREE.Group();
     _scene.add(_root);
@@ -5694,7 +5696,7 @@ var Landmarks3D = (() => {
         if (_sceneComplete) _warmGpu();
       },
       render(_gl, matrix) {
-        if (!_scene || !_renderer) return;
+        if (!_visible || !_scene || !_renderer) return;
         _scaleVec.set(_mercPerMeter, -_mercPerMeter, _mercPerMeter);
         _localM.makeTranslation(_originMcX, _originMcY, _originMcZ)
                .scale(_scaleVec)
@@ -6047,12 +6049,33 @@ var Landmarks3D = (() => {
     tryAdd();
   }
 
+  function syncSceneLighting(dark) {
+    if (!_sunLight) return;
+    if (dark) {
+      _sunLight.intensity = 0.38;
+      _sunLight.color.setHex(0xa8b8d8);
+      _fillLight.intensity = 0.2;
+      _fillLight.color.setHex(0x8899aa);
+      _ambientLight.intensity = 0.24;
+      _ambientLight.color.setHex(0x8899aa);
+    } else {
+      _sunLight.intensity = 1.05;
+      _sunLight.color.setHex(0xffffff);
+      _fillLight.intensity = 0.45;
+      _fillLight.color.setHex(0xffffff);
+      _ambientLight.intensity = 0.35;
+      _ambientLight.color.setHex(0xffffff);
+    }
+    if (_map) _map.triggerRepaint();
+  }
+
   function hide() {
     _visible = false;
     if (!_ready) return;
     if (_map.getLayer(LAYER_ID)) {
       try { _map.setLayoutProperty(LAYER_ID, 'visibility', 'none'); } catch (_) {}
     }
+    if (_map) _map.triggerRepaint();
   }
 
   function isVisible() { return _visible; }
@@ -6148,6 +6171,6 @@ var Landmarks3D = (() => {
   return {
     init, load, show, hide, isVisible, listIds, replacedBuildingIds, setOpacity, getLandmarks,
     getLabelGeoJSON, landmarkLabelNames, labelLayerId: () => LABEL_LAYER_ID,
-    syncLabels, raise: _raise, prewarm,
+    syncLabels, syncSceneLighting, raise: _raise, prewarm,
   };
 })();

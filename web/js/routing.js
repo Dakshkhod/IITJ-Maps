@@ -43,7 +43,7 @@ const IITJRouter = (() => {
     const lenSq = dx * dx + dy * dy;
     let t = lenSq > 0 ? ((lng - lng1) * dx + (lat - lat1) * dy) / lenSq : 0;
     t = Math.max(0, Math.min(1, t));
-    return { lat: lat1 + t * dy, lng: lng1 + t * dx };
+    return { lat: lat1 + t * dy, lng: lng1 + t * dx, t };
   }
 
   // ── Binary min-heap ───────────────────────────────────────────
@@ -336,35 +336,6 @@ const IITJRouter = (() => {
     return progress / magSq;
   }
 
-  // Drop a short backward graph spur at one-way gates (e.g. Security
-  // Checkpost → Prithvi) and rejoin where the road turns toward the destination.
-  function _trimBackwardDepartLeg(coords, fromLat, fromLng, toLat, toLng) {
-    if (coords.length < 3) return coords;
-    const destB = getBearing(fromLat, fromLng, toLat, toLng);
-    const graphStart = haversine(coords[0][1], coords[0][0], fromLat, fromLng) < 15 ? 1 : 0;
-    if (graphStart + 1 >= coords.length) return coords;
-
-    const departB = getBearing(
-      coords[graphStart][1], coords[graphStart][0],
-      coords[graphStart + 1][1], coords[graphStart + 1][0]
-    );
-    if (_bearingDelta(departB, destB) <= 55) return coords;
-
-    let cutBefore = graphStart + 1;
-    for (let i = graphStart; i < coords.length - 1; i++) {
-      const segB = getBearing(coords[i][1], coords[i][0], coords[i + 1][1], coords[i + 1][0]);
-      if (_bearingDelta(segB, destB) <= 55) {
-        cutBefore = i + 1;
-        break;
-      }
-    }
-
-    if (cutBefore <= graphStart + 1) return coords;
-    const joinM = haversine(fromLat, fromLng, coords[cutBefore][1], coords[cutBefore][0]);
-    if (joinM > 120) return coords;
-    return [[fromLng, fromLat], ...coords.slice(cutBefore)];
-  }
-
   // ── Turn instructions ─────────────────────────────────────────
   function generateInstructions(coords, totalDistance, etaMinutes) {
     if (coords.length < 2) return [{ type: 'arrive', text: 'You have arrived', distance: 0 }];
@@ -501,24 +472,31 @@ const IITJRouter = (() => {
       const nodeList = path.nodes;
 
       const firstNc = _nodeCoords[fromNode];
+      const secondNc = nodeList.length > 1 ? _nodeCoords[nodeList[1]] : null;
       const lastNc = _nodeCoords[toNode];
       const prevNc = nodeList.length > 1 ? _nodeCoords[nodeList[nodeList.length - 2]] : null;
+
+      // Snap departure onto the first road segment — never draw a straight
+      // chord across open ground; every leg after that follows graph edges.
+      const startPt = secondNc
+        ? projectOntoSegment(fromLat, fromLng, firstNc[1], firstNc[0], secondNc[1], secondNc[0])
+        : { lat: firstNc[1], lng: firstNc[0], t: 0 };
       const endPt = prevNc
         ? projectOntoSegment(toLat, toLng, prevNc[1], prevNc[0], lastNc[1], lastNc[0])
-        : { lat: lastNc[1], lng: lastNc[0] };
+        : { lat: lastNc[1], lng: lastNc[0], t: 0 };
 
-      // Always draw from the user's actual position — projecting onto the
-      // first graph segment pulled the line to Prithvi when the gate spur
-      // only allows a westward graph hop.
-      coords = [[fromLng, fromLat]];
-      for (const id of nodeList) { const c = _nodeCoords[id]; if (c) coords.push(c); }
+      const startNodeIdx = secondNc && startPt.t > 0.35 ? 1 : 0;
+      coords = [[startPt.lng, startPt.lat]];
+      for (let i = startNodeIdx; i < nodeList.length; i++) {
+        const c = _nodeCoords[nodeList[i]];
+        if (c) coords.push(c);
+      }
       coords.push([endPt.lng, endPt.lat]);
 
-      distance = path.distance
-        + haversine(fromLat, fromLng, firstNc[1], firstNc[0])
-        + haversine(endPt.lat, endPt.lng, lastNc[1], lastNc[0]);
-
-      coords = _trimBackwardDepartLeg(coords, fromLat, fromLng, toLat, toLng);
+      distance = 0;
+      for (let i = 0; i < coords.length - 1; i++) {
+        distance += haversine(coords[i][1], coords[i][0], coords[i + 1][1], coords[i + 1][0]);
+      }
     }
 
     // Straight-line fallback (no graph reachable at all)
