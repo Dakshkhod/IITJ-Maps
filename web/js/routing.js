@@ -199,6 +199,11 @@ const IITJRouter = (() => {
   // includes every node within LOCAL_RADIUS_M so a gate 35 m from a cluster
   // of nearer-but-wrong service-road nodes is still considered.
   const LOCAL_RADIUS_M = 55;
+  // Never pick a graph node farther than this beyond the user's nearest snap —
+  // otherwise departure-progress scoring drags the route start 50–60 m away
+  // (e.g. Security Checkpost puck → Prithvi Missile road).
+  const ORIGIN_SNAP_EXTRA_M = 20;
+  const ORIGIN_SNAP_MAX_M = 35;
 
   function findCandidateNodes(lat, lng, radiusM = 400, mode = 'drive', opts = {}, limit = 6) {
     const byScore = [];
@@ -299,15 +304,22 @@ const IITJRouter = (() => {
       const fromCandidates = findCandidateNodes(fromLat, fromLng, 400, m, { ...opts, ...fromSnapOpts });
       if (!fromCandidates.length) return null;
 
+      const nearestDist = Math.min(...fromCandidates.map(c => c.dist));
+      const snapBand = Math.min(nearestDist + ORIGIN_SNAP_EXTRA_M, ORIGIN_SNAP_MAX_M);
+      const viable = fromCandidates.filter(c => c.dist <= snapBand);
+      const pool = viable.length ? viable : fromCandidates;
+
       let best = null;
       let fallback = null;
-      for (const cand of fromCandidates) {
+      for (const cand of pool) {
         if (cand.id === toNode) continue;
         const path = dijkstra(cand.id, toNode, m, opts);
         if (!path || path.nodes.length < 2) continue;
         const progress = _departureProgress(cand.id, path.nodes, toLat, toLng);
-        const tieBreak = cand.score * 0.5 - progress * 200;
-        const rank = path.cost + tieBreak;
+        const rank = path.cost
+          + (cand.dist - nearestDist) * 4
+          + cand.score * 0.2
+          - progress * 25;
         const entry = { path, fromNode: cand.id, toNode, opts, rank, progress };
         if (progress >= -0.00002) {
           if (!best || rank < best.rank) best = entry;
@@ -345,7 +357,7 @@ const IITJRouter = (() => {
 
       const firstNc = _nodeCoords[fromNode];
       const secondNc = nodeList.length > 1 ? _nodeCoords[nodeList[1]] : null;
-      const startPt = secondNc
+      let startPt = secondNc
         ? projectOntoSegment(fromLat, fromLng, firstNc[1], firstNc[0], secondNc[1], secondNc[0])
         : { lat: firstNc[1], lng: firstNc[0] };
 
@@ -354,6 +366,14 @@ const IITJRouter = (() => {
       const endPt = prevNc
         ? projectOntoSegment(toLat, toLng, prevNc[1], prevNc[0], lastNc[1], lastNc[0])
         : { lat: lastNc[1], lng: lastNc[0] };
+
+      // If the projected road point is still far from the user, lead in from
+      // their actual position so the line doesn't jump to a distant road.
+      const userToStartM = haversine(fromLat, fromLng, startPt.lat, startPt.lng);
+      const userToNodeM = haversine(fromLat, fromLng, firstNc[1], firstNc[0]);
+      if (userToStartM > 25 && userToNodeM > userToStartM) {
+        startPt = { lat: fromLat, lng: fromLng };
+      }
 
       coords = [[startPt.lng, startPt.lat]];
       for (const id of nodeList) { const c = _nodeCoords[id]; if (c) coords.push(c); }

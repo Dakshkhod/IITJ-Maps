@@ -2527,8 +2527,13 @@ async function calculateDirectionsRoute() {
     const fromEntry = IITJData.getEntrance(directionsFrom.name);
     const toEntry   = IITJData.getEntrance(directionsTo.name);
     navEntrance = toEntry || null;   // surfaced on arrival (visual + spoken)
-    const routeFromLat = fromEntry ? fromEntry.lat : directionsFrom.lat;
-    const routeFromLng = fromEntry ? fromEntry.lng : directionsFrom.lng;
+    let routeFromLat = fromEntry ? fromEntry.lat : directionsFrom.lat;
+    let routeFromLng = fromEntry ? fromEntry.lng : directionsFrom.lng;
+    // Always route from the live puck when the user declared "Your location".
+    if (directionsFrom.name === 'Your location' && userLocation) {
+      routeFromLat = userLocation.lat;
+      routeFromLng = userLocation.lng;
+    }
     const routeToLat   = toEntry   ? toEntry.lat   : directionsTo.lat;
     const routeToLng   = toEntry   ? toEntry.lng   : directionsTo.lng;
 
