@@ -2938,13 +2938,10 @@ const RoadSnap = (() => {
   // GPS accuracy isn't too poor to trust the snap, and (c) the road is
   // close enough. Returns the snapped point or null to fall through to
   // the raw filtered position.
-  function snap(lat, lng, accuracyM) {
+  function snap(lat, lng, accuracyM, opts = {}) {
     if (accuracyM != null && accuracyM > MAX_ACC_FOR_SNAP_M) return null;
     const best = nearest(lat, lng);
     if (!best) return null;
-    // Allow a slightly wider buffer when accuracy itself is large
-    // (the GPS error explains why we're "off" the road), but never
-    // past the hard cap.
     const buffer = Math.min(
       SNAP_RADIUS_HARD_CAP_M,
       Math.max(SNAP_RADIUS_M, (accuracyM || 0) * 0.6)
@@ -2953,9 +2950,47 @@ const RoadSnap = (() => {
     return best;
   }
 
+  // Like snap(), but when several roads are equally close (e.g. berm service
+  // path beside the main road) prefer the segment whose bearing best matches
+  // the caller's preferred heading.
+  function snapAligned(lat, lng, accuracyM, preferredBearingDeg) {
+    if (preferredBearingDeg == null || accuracyM != null && accuracyM > MAX_ACC_FOR_SNAP_M) {
+      return snap(lat, lng, accuracyM);
+    }
+    if (!_built || !_segs || _segs.length === 0) return null;
+    const buffer = Math.min(
+      SNAP_RADIUS_HARD_CAP_M,
+      Math.max(SNAP_RADIUS_M, (accuracyM || 0) * 0.6)
+    );
+    const [cx, cy] = _cellOf(lng, lat);
+    let best = null;
+    for (let dx = -1; dx <= 1; dx++) {
+      for (let dy = -1; dy <= 1; dy++) {
+        const arr = _grid.get(_cellKey(cx + dx, cy + dy));
+        if (!arr) continue;
+        for (const si of arr) {
+          const s = _segs[si];
+          const ux = s.bx - s.ax, uy = s.by - s.ay;
+          const lenSq = ux * ux + uy * uy;
+          let t = lenSq > 0 ? ((lng - s.ax) * ux + (lat - s.ay) * uy) / lenSq : 0;
+          if (t < 0) t = 0; else if (t > 1) t = 1;
+          const px = s.ax + t * ux, py = s.ay + t * uy;
+          const d = haversine(lat, lng, py, px);
+          if (d > buffer) continue;
+          const segBearing = ((Math.atan2(ux * Math.cos(py * Math.PI / 180), uy) * 180 / Math.PI) + 360) % 360;
+          let delta = Math.abs(segBearing - preferredBearingDeg);
+          if (delta > 180) delta = 360 - delta;
+          const score = d + delta * 0.35;
+          if (!best || score < best.score) best = { lat: py, lng: px, dist: d, score };
+        }
+      }
+    }
+    return best;
+  }
+
   function ready() { return _built; }
 
-  return { build, nearest, snap, ready };
+  return { build, nearest, snap, snapAligned, ready };
 })();
 
 function updateNavInstruction(distToNextTurn) {
@@ -3699,18 +3734,25 @@ function onLocationFrame(disp, raw) {
   if (navigationActive && currentRoute) {
     const coords = currentRoute.geometry.coordinates;
     snapInfo = _nearestOnRoute(disp.lat, disp.lng, coords);
-    if (snapInfo.dist < 22) {
+    const routeSnapM = 35;
+    if (snapInfo.dist < routeSnapM) {
       // Within road buffer → render the puck on the route line itself
       const [x1, y1] = coords[snapInfo.segIdx];
       const next    = coords[snapInfo.segIdx + 1] || coords[snapInfo.segIdx];
       renderLng = x1 + snapInfo.t * (next[0] - x1);
       renderLat = y1 + snapInfo.t * (next[1] - y1);
     } else if (RoadSnap.ready()) {
-      // The suggested route is too far away to be plausible — the user
-      // is on a different road. Snap to the road they're actually on so
-      // the puck reads correctly while _navTick decides whether to
-      // reroute.
-      const snapped = RoadSnap.snap(disp.lat, disp.lng, disp.accuracy);
+      // Parallel paths (berm service roads, etc.) can sit 25–35 m from the
+      // suggested route. Bias ambient snap toward the current route bearing
+      // so the puck doesn't drift onto the wrong parallel road.
+      const [x1, y1] = coords[snapInfo.segIdx];
+      const next = coords[snapInfo.segIdx + 1] || coords[snapInfo.segIdx];
+      const routeBearing = ((Math.atan2(
+        (next[0] - x1) * Math.cos(y1 * Math.PI / 180),
+        next[1] - y1
+      ) * 180 / Math.PI) + 360) % 360;
+      const snapped = RoadSnap.snapAligned(disp.lat, disp.lng, disp.accuracy, routeBearing)
+        || RoadSnap.snap(disp.lat, disp.lng, disp.accuracy);
       if (snapped) {
         renderLat = snapped.lat;
         renderLng = snapped.lng;

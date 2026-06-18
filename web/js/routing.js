@@ -10,7 +10,7 @@ const IITJRouter = (() => {
   let _loaded = false;
 
   async function init() {
-    const data = await fetch('/data/road-graph.json?v=32').then(r => r.json());
+    const data = await fetch('/data/road-graph.json?v=33').then(r => r.json());
     _graph = data.graph;
     _nodeCoords = data.nodeCoords;
     _loaded = true;
@@ -36,6 +36,14 @@ const IITJRouter = (() => {
   function bearingToCompass(b) {
     const dirs = ['north', 'northeast', 'east', 'southeast', 'south', 'southwest', 'west', 'northwest'];
     return dirs[Math.round(b / 45) % 8];
+  }
+
+  function projectOntoSegment(lat, lng, lat1, lng1, lat2, lng2) {
+    const dx = lng2 - lng1, dy = lat2 - lat1;
+    const lenSq = dx * dx + dy * dy;
+    let t = lenSq > 0 ? ((lng - lng1) * dx + (lat - lat1) * dy) / lenSq : 0;
+    t = Math.max(0, Math.min(1, t));
+    return { lat: lat1 + t * dy, lng: lng1 + t * dx };
   }
 
   // ── Binary min-heap ───────────────────────────────────────────
@@ -146,35 +154,94 @@ const IITJRouter = (() => {
   // sandstone-gate road, not the service road behind the berm ribbons.
   const CAMPUS_CENTER = { lng: 73.1147, lat: 26.4727 };
 
+  // Score a candidate snap node. Lower is better. Nodes that lie behind the
+  // user relative to the destination (or campus centre) are heavily penalised
+  // so a gate on the south perimeter doesn't snap to the outer service road
+  // behind it when the campus entry road is right ahead.
+  function _nodeSnapScore(lat, lng, coords, distM, opts = {}) {
+    const towardLat = opts.towardLat;
+    const towardLng = opts.towardLng;
+    let dLng, dLat;
+    if (towardLat != null && towardLng != null) {
+      dLng = towardLng - lng;
+      dLat = towardLat - lat;
+    } else if (opts.preferCampusSide) {
+      dLng = CAMPUS_CENTER.lng - lng;
+      dLat = CAMPUS_CENTER.lat - lat;
+    } else {
+      return distM;
+    }
+    const magSq = dLng * dLng + dLat * dLat;
+    if (magSq < 1e-14) return distM;
+    const dot = (coords[0] - lng) * dLng + (coords[1] - lat) * dLat;
+    if (dot <= 0) return distM + 120;
+    const align = dot / (Math.sqrt(magSq) * Math.max(distM, 1));
+    return distM - align * 20;
+  }
+
   // Nearest node that participates in at least one edge allowed by the mode.
-  // preferCampusSide: keep only nodes on the campus-interior side of the point
-  // (vector from point → node aligns toward CAMPUS_CENTER). Falls back to the
-  // unrestricted nearest node if the filter finds nothing within radiusM.
+  // towardLat/towardLng — prefer nodes on the destination side of the point.
+  // preferCampusSide — prefer nodes toward CAMPUS_CENTER (berm gates, S entry).
   function findNearestNode(lat, lng, radiusM = 400, mode = 'drive', opts = {}) {
-    const preferCampusSide = !!opts.preferCampusSide;
-    const dLng = CAMPUS_CENTER.lng - lng;
-    const dLat = CAMPUS_CENTER.lat - lat;
-
-    function scan(campusOnly) {
-      let nearest = null, minDist = Infinity;
-      for (const [id, coords] of Object.entries(_nodeCoords)) {
-        const edges = _graph[id] || [];
-        if (!edges.some(e => isAllowedEdge(e, mode, opts))) continue;
-        if (campusOnly) {
-          const dot = (coords[0] - lng) * dLng + (coords[1] - lat) * dLat;
-          if (dot <= 0) continue;
-        }
-        const d = haversine(lat, lng, coords[1], coords[0]);
-        if (d < minDist && d < radiusM) { minDist = d; nearest = id; }
-      }
-      return nearest;
+    let best = null, bestScore = Infinity;
+    for (const [id, coords] of Object.entries(_nodeCoords)) {
+      const edges = _graph[id] || [];
+      if (!edges.some(e => isAllowedEdge(e, mode, opts))) continue;
+      const d = haversine(lat, lng, coords[1], coords[0]);
+      if (d >= radiusM) continue;
+      const score = _nodeSnapScore(lat, lng, coords, d, opts);
+      if (score < bestScore) { bestScore = score; best = id; }
     }
+    return best;
+  }
 
-    if (preferCampusSide) {
-      const campus = scan(true);
-      if (campus) return campus;
+  // Top-K snap candidates for multi-path selection at the origin. Always
+  // includes every node within LOCAL_RADIUS_M so a gate 35 m from a cluster
+  // of nearer-but-wrong service-road nodes is still considered.
+  const LOCAL_RADIUS_M = 55;
+
+  function findCandidateNodes(lat, lng, radiusM = 400, mode = 'drive', opts = {}, limit = 6) {
+    const byScore = [];
+    const local = [];
+    for (const [id, coords] of Object.entries(_nodeCoords)) {
+      const edges = _graph[id] || [];
+      if (!edges.some(e => isAllowedEdge(e, mode, opts))) continue;
+      const d = haversine(lat, lng, coords[1], coords[0]);
+      if (d >= radiusM) continue;
+      const entry = { id, dist: d, score: _nodeSnapScore(lat, lng, coords, d, opts) };
+      byScore.push(entry);
+      if (d <= LOCAL_RADIUS_M) local.push(entry);
     }
-    return scan(false);
+    byScore.sort((a, b) => a.score - b.score || a.dist - b.dist);
+
+    const seen = new Set();
+    const merged = [];
+    for (const entry of [...local, ...byScore.slice(0, limit)]) {
+      if (seen.has(entry.id)) continue;
+      seen.add(entry.id);
+      merged.push(entry);
+    }
+    return merged;
+  }
+
+  // Score how much the first few hops move toward the destination. Campus
+  // graphs often need a short connector before the main road — a pure bearing
+  // check on hop 1 rejects those valid departures.
+  function _departureProgress(fromNodeId, pathNodes, toLat, toLng, hops = 3) {
+    const c0 = _nodeCoords[fromNodeId];
+    if (!c0) return 0;
+    const dLat = toLat - c0[1], dLng = toLng - c0[0];
+    const magSq = dLat * dLat + dLng * dLng;
+    if (magSq < 1e-14) return 0;
+    let lat = c0[1], lng = c0[0], progress = 0;
+    for (let i = 1; i < Math.min(hops + 1, pathNodes.length); i++) {
+      const c = _nodeCoords[pathNodes[i]];
+      if (!c) break;
+      progress += (c[1] - lat) * dLat + (c[0] - lng) * dLng;
+      lat = c[1];
+      lng = c[0];
+    }
+    return progress / magSq;
   }
 
   // ── Turn instructions ─────────────────────────────────────────
@@ -213,13 +280,42 @@ const IITJRouter = (() => {
     const preferCampusSideTo = !!routeOpts.preferCampusSideTo;
     let coords = [], distance = 0, usingGraph = false, fellBackToWalk = false, usedDestinationAccess = false;
 
+    const southGateOrigin = fromLat < CAMPUS_CENTER.lat - 0.002;
+    const fromSnapOpts = {
+      towardLat: toLat,
+      towardLng: toLng,
+      preferCampusSide: southGateOrigin,
+    };
+    const toSnapOpts = {
+      towardLat: fromLat,
+      towardLng: fromLng,
+      preferCampusSide: preferCampusSideTo,
+    };
+
     function tryMode(m, opts = {}) {
-      const fromNode = findNearestNode(fromLat, fromLng, 400, m, opts);
-      const toNode   = findNearestNode(toLat,   toLng,   400, m, { ...opts, preferCampusSide: preferCampusSideTo });
-      if (!fromNode || !toNode || fromNode === toNode) return null;
-      const path = dijkstra(fromNode, toNode, m, opts);
-      if (!path || path.nodes.length < 2) return null;
-      return { path, fromNode, toNode, opts };
+      const toNode = findNearestNode(toLat, toLng, 400, m, { ...opts, ...toSnapOpts });
+      if (!toNode) return null;
+
+      const fromCandidates = findCandidateNodes(fromLat, fromLng, 400, m, { ...opts, ...fromSnapOpts });
+      if (!fromCandidates.length) return null;
+
+      let best = null;
+      let fallback = null;
+      for (const cand of fromCandidates) {
+        if (cand.id === toNode) continue;
+        const path = dijkstra(cand.id, toNode, m, opts);
+        if (!path || path.nodes.length < 2) continue;
+        const progress = _departureProgress(cand.id, path.nodes, toLat, toLng);
+        const tieBreak = cand.score * 0.5 - progress * 200;
+        const rank = path.cost + tieBreak;
+        const entry = { path, fromNode: cand.id, toNode, opts, rank, progress };
+        if (progress >= -0.00002) {
+          if (!best || rank < best.rank) best = entry;
+        } else if (!fallback || rank < fallback.rank) {
+          fallback = entry;
+        }
+      }
+      return best || fallback;
     }
 
     let result = mode === 'drive'
@@ -245,12 +341,27 @@ const IITJRouter = (() => {
     if (result) {
       usingGraph = true;
       const { path, fromNode, toNode } = result;
-      coords = [[fromLng, fromLat]];
-      for (const id of path.nodes) { const c = _nodeCoords[id]; if (c) coords.push(c); }
-      coords.push([toLng, toLat]);
+      const nodeList = path.nodes;
+
+      const firstNc = _nodeCoords[fromNode];
+      const secondNc = nodeList.length > 1 ? _nodeCoords[nodeList[1]] : null;
+      const startPt = secondNc
+        ? projectOntoSegment(fromLat, fromLng, firstNc[1], firstNc[0], secondNc[1], secondNc[0])
+        : { lat: firstNc[1], lng: firstNc[0] };
+
+      const lastNc = _nodeCoords[toNode];
+      const prevNc = nodeList.length > 1 ? _nodeCoords[nodeList[nodeList.length - 2]] : null;
+      const endPt = prevNc
+        ? projectOntoSegment(toLat, toLng, prevNc[1], prevNc[0], lastNc[1], lastNc[0])
+        : { lat: lastNc[1], lng: lastNc[0] };
+
+      coords = [[startPt.lng, startPt.lat]];
+      for (const id of nodeList) { const c = _nodeCoords[id]; if (c) coords.push(c); }
+      coords.push([endPt.lng, endPt.lat]);
+
       distance = path.distance
-        + haversine(fromLat, fromLng, _nodeCoords[fromNode][1], _nodeCoords[fromNode][0])
-        + haversine(toLat, toLng,     _nodeCoords[toNode][1],   _nodeCoords[toNode][0]);
+        + haversine(startPt.lat, startPt.lng, firstNc[1], firstNc[0])
+        + haversine(endPt.lat, endPt.lng, lastNc[1], lastNc[0]);
     }
 
     // Straight-line fallback (no graph reachable at all)
