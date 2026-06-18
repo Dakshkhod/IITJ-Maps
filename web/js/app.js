@@ -164,23 +164,77 @@ function buildingFillOpacity() {
   return ['interpolate', ['linear'], ['zoom'], 14, 0.78, 17, 0.92];
 }
 
-/** Warm window-lit tone for 3D extrusions after dark. */
-function buildingNightGlowColor() {
-  return '#c8daf4';
+/** Luminous category hues for 3D night extrusions (window-lit effect). */
+function buildingNightGlowColorExpr() {
+  return ['match', ['get', 'category'],
+    'academic',       '#9ec5ff',
+    'hostel',         '#ffc48a',
+    'dining',         '#ff8a8a',
+    'sports',         '#86efac',
+    'medical',        '#f9a8d4',
+    'gate',           '#a5b4fc',
+    'parking',        '#7dd3fc',
+    'utility',        '#cbd5e1',
+    'administrative', '#94a3b8',
+    'transport',      '#5eead4',
+    'recreation',     '#d8b4fe',
+    'residential',    '#d4a574',
+    'bank',           '#fcd34d',
+    'university',     '#9ec5ff',
+    '#c8daf4',
+  ];
 }
 
-function buildingFillColor() {
+function buildingGlowColorExpr() {
+  return ['match', ['get', 'category'],
+    'academic',       '#ffe8b8',
+    'hostel',         '#ffd9a0',
+    'dining',         '#ffb4a8',
+    'sports',         '#d4f5c4',
+    'medical',        '#ffd0ec',
+    'gate',           '#d4dcff',
+    'parking',        '#b8e8ff',
+    'utility',        '#e8edf2',
+    'administrative', '#d8dee8',
+    'transport',      '#b8f0e8',
+    'recreation',     '#ecd4ff',
+    'residential',    '#edd5b8',
+    'bank',           '#ffe8a8',
+    'university',     '#ffe8b8',
+    '#ffe8b8',
+  ];
+}
+
+function buildingExtrusionColorExpr() {
   if (isSatellite) return isDark ? '#475569' : '#f1f5f9';
-  if (isDark) {
-    if (is3D && !isSatellite) return buildingNightGlowColor();
-    return '#9aa8bc';
-  }
+  if (isDark && is3D && !isSatellite) return buildingNightGlowColorExpr();
+  if (isDark) return '#9aa8bc';
+  if (is3D && !isSatellite) return categoryColorExpr();
   return '#fafaf8';
 }
 
+function buildingFillColor() {
+  return buildingExtrusionColorExpr();
+}
+
 function buildingExtrusionOpacity() {
-  if (is3D && !isSatellite) return 1;
+  if (isDark && is3D && !isSatellite) return 0.92;
+  if (is3D && !isSatellite) return 0.96;
   return 0.82;
+}
+
+function buildingGlowHeightExpr() {
+  return ['*', buildingHeightExpr(), 1.14];
+}
+
+function buildingGlowBaseExpr() {
+  return ['*', buildingHeightExpr(), 0.82];
+}
+
+function buildingOutlineColor() {
+  if (isSatellite) return isDark ? '#e2e8f0' : '#ffffff';
+  // Category colour on footprints — visible in 2D and as ground layout in 3D.
+  return categoryColorExpr();
 }
 
 function buildingGlowLayerVisible() {
@@ -220,6 +274,7 @@ function bermFillColor() {
 
 function bermFillOpacity() {
   if (isSatellite) return 0.4;
+  if (is3D) return isDark ? 0.38 : 0.28;
   return isDark ? 0.78 : 0.85;
 }
 
@@ -232,7 +287,7 @@ function bermOutlineColor() {
 }
 
 function bermLayerVisible() {
-  return LAYERS.buildings && !is3D;
+  return LAYERS.buildings && !isSatellite;
 }
 
 function buildingOutlineOpacity() {
@@ -437,13 +492,14 @@ function applyBuildingViewMode() {
   if (!map || isSatellite) return;
   const showFlat = LAYERS.buildings && !is3D;
   const show3d = LAYERS.buildings && is3D;
+  const showFootprints = LAYERS.buildings && is3D && !isSatellite;
   const bermVis = bermLayerVisible() ? 'visible' : 'none';
   const set = (id, vis) => { if (map.getLayer(id)) map.setLayoutProperty(id, 'visibility', vis); };
-  set('berms-fill', showFlat ? bermVis : 'none');
-  set('berms-outline', showFlat ? bermVis : 'none');
+  set('berms-fill', bermVis);
+  set('berms-outline', bermVis);
   set('buildings-fill', showFlat ? 'visible' : 'none');
-  set('buildings-outline-casing', showFlat ? 'visible' : 'none');
-  set('buildings-outline', showFlat ? 'visible' : 'none');
+  set('buildings-outline-casing', (showFlat || showFootprints) ? 'visible' : 'none');
+  set('buildings-outline', (showFlat || showFootprints) ? 'visible' : 'none');
   set('buildings-3d', show3d ? 'visible' : 'none');
   set('buildings-3d-glow', buildingGlowLayerVisible() ? 'visible' : 'none');
   set('buildings-labels', LAYERS.buildings ? 'visible' : 'none');
@@ -456,15 +512,20 @@ function refreshBuildingTheme() {
   const color = buildingFillColor();
   const extrusionOpacity = buildingExtrusionOpacity();
   const fillOpacity = buildingFillOpacity();
+  const extrusionColor = buildingExtrusionColorExpr();
   if (map.getLayer('buildings-3d')) {
-    map.setPaintProperty('buildings-3d', 'fill-extrusion-color', color);
+    map.setPaintProperty('buildings-3d', 'fill-extrusion-color', extrusionColor);
     map.setPaintProperty('buildings-3d', 'fill-extrusion-opacity', extrusionOpacity);
     if (map.getPaintProperty('buildings-3d', 'fill-extrusion-ambient-occlusion-intensity') != null) {
-      map.setPaintProperty('buildings-3d', 'fill-extrusion-ambient-occlusion-intensity', isDark ? 0.04 : 0.22);
+      map.setPaintProperty('buildings-3d', 'fill-extrusion-ambient-occlusion-intensity', isDark ? 0.02 : 0.22);
     }
   }
   if (map.getLayer('buildings-3d-glow')) {
     map.setLayoutProperty('buildings-3d-glow', 'visibility', buildingGlowLayerVisible() ? 'visible' : 'none');
+    map.setPaintProperty('buildings-3d-glow', 'fill-extrusion-color', buildingGlowColorExpr());
+    map.setPaintProperty('buildings-3d-glow', 'fill-extrusion-opacity', isDark ? 0.48 : 0.22);
+    map.setPaintProperty('buildings-3d-glow', 'fill-extrusion-height', buildingGlowHeightExpr());
+    map.setPaintProperty('buildings-3d-glow', 'fill-extrusion-base', buildingGlowBaseExpr());
   }
   if (map.getLayer('buildings-fill')) {
     map.setPaintProperty('buildings-fill', 'fill-color', color);
@@ -1403,11 +1464,24 @@ function addRoadsLayer(data) {
 // ============================================================
 // Road lamps — warm pools of light along drivable roads at night
 // ============================================================
-const ROAD_LAMP_DRIVE_CLASSES = new Set([
-  'major_vehicle_road', 'vehicle_connector', 'campus_main_road',
-  'local_through_road', 'campus_standard_road', 'vehicle_road',
-  'campus_service_road', 'local_street',
-]);
+// Every drawn campus road gets lamps at night — service connectors were the
+// biggest gap (most internal spurs were skipped by the old allow-list).
+const ROAD_LAMP_SKIP_CLASSES = new Set(['unknown', 'non_vehicle_route']);
+
+function shouldPlaceRoadLamps(props = {}) {
+  if (props.lit === 'no') return false;
+  const nc = props.navigation_class;
+  if (!nc || ROAD_LAMP_SKIP_CLASSES.has(nc)) return false;
+  return true;
+}
+
+function roadLampSpacingM(nc) {
+  if (nc === 'pedestrian_path' || nc === 'stairs') return 44;
+  if (nc === 'cycle_pedestrian') return 40;
+  if (nc === 'campus_service_connector' || nc === 'narrow_service_road' || nc === 'service_access') return 34;
+  if (nc === 'major_vehicle_road' || nc === 'vehicle_connector' || nc === 'campus_main_road') return 32;
+  return 36;
+}
 
 function segmentBearingDeg(lat1, lng1, lat2, lng2) {
   const dl = (lng2 - lng1) * Math.PI / 180;
@@ -1426,21 +1500,20 @@ function offsetPointM(lat, lng, bearingDeg, distM) {
 
 function buildRoadLampGeoJSON(roadsFc) {
   const features = [];
-  const SPACING_M = 38;
   const OFFSET_M = 3.8;
   for (const f of roadsFc.features || []) {
-    const nc = f.properties?.navigation_class;
-    if (!ROAD_LAMP_DRIVE_CLASSES.has(nc)) continue;
+    if (!shouldPlaceRoadLamps(f.properties)) continue;
+    const spacingM = roadLampSpacingM(f.properties?.navigation_class);
     let coords = null;
     if (f.geometry?.type === 'LineString') coords = f.geometry.coordinates;
     else if (f.geometry?.type === 'MultiLineString') {
       for (const line of f.geometry.coordinates) {
-        _sampleLampLine(line, features, SPACING_M, OFFSET_M);
+        _sampleLampLine(line, features, spacingM, OFFSET_M);
       }
       continue;
     }
     if (!coords || coords.length < 2) continue;
-    _sampleLampLine(coords, features, SPACING_M, OFFSET_M);
+    _sampleLampLine(coords, features, spacingM, OFFSET_M);
   }
   return { type: 'FeatureCollection', features };
 }
@@ -1486,10 +1559,10 @@ function addRoadLampLayers(roadsData) {
     id: 'road-lamps-glow',
     type: 'circle',
     source: 'road-lamps',
-    minzoom: 14,
+    minzoom: 13,
     layout: { visibility: lampVis },
     paint: {
-      'circle-radius': ['interpolate', ['linear'], ['zoom'], 14, 3.5, 17, 7, 19, 11],
+      'circle-radius': ['interpolate', ['linear'], ['zoom'], 13, 2.8, 14, 3.5, 17, 7, 19, 11],
       'circle-color': '#ffe6a3',
       'circle-opacity': 0.38,
       'circle-blur': 0.85,
@@ -1513,10 +1586,10 @@ function addRoadLampLayers(roadsData) {
     id: 'road-lamps',
     type: 'circle',
     source: 'road-lamps',
-    minzoom: 14,
+    minzoom: 13,
     layout: { visibility: lampVis },
     paint: {
-      'circle-radius': ['interpolate', ['linear'], ['zoom'], 14, 1.2, 17, 2.2, 19, 3],
+      'circle-radius': ['interpolate', ['linear'], ['zoom'], 13, 1.0, 14, 1.2, 17, 2.2, 19, 3],
       'circle-color': '#fff8e1',
       'circle-opacity': 0.95,
       'circle-stroke-width': 0.4,
@@ -1584,6 +1657,8 @@ function addBermsLayer(data) {
 function addBuildingsLayer(data) {
   if (map.getSource('buildings')) {
     map.getSource('buildings').setData(data);
+    refreshBuildingTheme();
+    applyBuildingViewMode();
     return;
   }
 
@@ -1613,12 +1688,12 @@ function addBuildingsLayer(data) {
     layout: {
       'line-join': 'round',
       'line-cap': 'round',
-      visibility: (LAYERS.buildings && !is3D) ? 'visible' : 'none',
+      visibility: (LAYERS.buildings && (!is3D || !isSatellite)) ? 'visible' : 'none',
     },
     paint: {
       'line-color': buildingOutlineCasingColor(),
       'line-width': buildingOutlineCasingWidth(),
-      'line-opacity': isSatellite ? 0.55 : (isDark ? 0.65 : 0.75),
+      'line-opacity': isSatellite ? 0.55 : (isDark ? 0.75 : 0.75),
     }
   });
 
@@ -1630,7 +1705,7 @@ function addBuildingsLayer(data) {
     layout: {
       'line-join': 'round',
       'line-cap': 'round',
-      visibility: (LAYERS.buildings && !is3D) ? 'visible' : 'none',
+      visibility: (LAYERS.buildings && (!is3D || !isSatellite)) ? 'visible' : 'none',
     },
     paint: {
       'line-color': buildingOutlineColor(),
@@ -1649,34 +1724,35 @@ function addBuildingsLayer(data) {
     : polyFilter;
 
   map.addLayer({
-    id: 'buildings-3d-glow',
-    type: 'fill-extrusion',
-    source: 'buildings',
-    filter: extrusionFilter,
-    layout: { visibility: buildingGlowLayerVisible() ? 'visible' : 'none' },
-    paint: {
-      'fill-extrusion-color': '#ffe8b8',
-      'fill-extrusion-height': buildingHeightExpr(),
-      'fill-extrusion-base': 0,
-      'fill-extrusion-opacity': 0.22,
-      'fill-extrusion-vertical-gradient': true,
-    },
-  });
-
-  map.addLayer({
     id: 'buildings-3d',
     type: 'fill-extrusion',
     source: 'buildings',
     filter: extrusionFilter,
     layout: { visibility: (LAYERS.buildings && is3D && !isSatellite) ? 'visible' : 'none' },
     paint: {
-      'fill-extrusion-color': buildingFillColor(),
+      'fill-extrusion-color': buildingExtrusionColorExpr(),
       'fill-extrusion-height': buildingHeightExpr(),
       'fill-extrusion-base': 0,
       'fill-extrusion-opacity': buildingExtrusionOpacity(),
       'fill-extrusion-vertical-gradient': true,
-      'fill-extrusion-ambient-occlusion-intensity': isDark ? 0.04 : 0.22,
+      'fill-extrusion-ambient-occlusion-intensity': isDark ? 0.02 : 0.22,
     }
+  });
+
+  // Warm crown glow — sits above the wall mass at night (category-tinted).
+  map.addLayer({
+    id: 'buildings-3d-glow',
+    type: 'fill-extrusion',
+    source: 'buildings',
+    filter: extrusionFilter,
+    layout: { visibility: buildingGlowLayerVisible() ? 'visible' : 'none' },
+    paint: {
+      'fill-extrusion-color': buildingGlowColorExpr(),
+      'fill-extrusion-height': buildingGlowHeightExpr(),
+      'fill-extrusion-base': buildingGlowBaseExpr(),
+      'fill-extrusion-opacity': isDark ? 0.48 : 0,
+      'fill-extrusion-vertical-gradient': true,
+    },
   });
 
   // Name labels at high zoom — hide labels for buildings replaced by a 3D
@@ -1962,7 +2038,8 @@ function toggleLayer(layerName) {
 
   const layerMap = {
     buildings: is3D
-      ? ['buildings-3d', 'buildings-labels', 'landmark-labels']
+      ? ['buildings-3d', 'buildings-3d-glow', 'buildings-outline-casing', 'buildings-outline',
+         'berms-fill', 'berms-outline', 'buildings-labels', 'landmark-labels']
       : ['berms-fill', 'berms-outline', 'buildings-fill', 'buildings-outline-casing', 'buildings-outline', 'buildings-labels', 'landmark-labels'],
     roads: ROAD_LAYER_IDS,
     markers: ['places-circles', 'places-labels'],
@@ -1971,7 +2048,10 @@ function toggleLayer(layerName) {
   for (const id of (layerMap[layerName] || [])) {
     if (map.getLayer(id)) map.setLayoutProperty(id, 'visibility', vis);
   }
-  if (layerName === 'buildings') syncLandmarkLabels();
+  if (layerName === 'buildings') {
+    applyBuildingViewMode();
+    syncLandmarkLabels();
+  }
 }
 
 function showLayerPanel() {
@@ -1989,17 +2069,21 @@ function showLayerPanel() {
 // ============================================================
 function renderCategoryChips(categoriesData) {
   const container = document.getElementById('category-chips');
+  container.replaceChildren();
   container.appendChild(createChip('All', null, true));
   for (const cat of categoriesData) {
     if (['other', 'building'].includes(cat.id)) continue;
-    container.appendChild(createChip(cat.name, cat.id, false));
+    container.appendChild(createChip(cat.name, cat.id, false, cat.icon, cat.color));
   }
 }
 
-function createChip(name, categoryId, isActive) {
+function createChip(name, categoryId, isActive, icon, color) {
   const chip = document.createElement('div');
   chip.className = `category-chip${isActive ? ' active' : ''}`;
-  chip.textContent = name;
+  if (color) chip.style.setProperty('--chip-color', color);
+  chip.innerHTML = icon
+    ? `<span class="chip-icon" aria-hidden="true">${icon}</span><span>${escapeHtml(name)}</span>`
+    : escapeHtml(name);
   chip.addEventListener('click', () => filterByCategory(categoryId, chip));
   return chip;
 }

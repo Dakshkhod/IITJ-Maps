@@ -161,6 +161,10 @@ body.map-vector.map-dark:not(.map-satellite) #map .maplibregl-canvas {
   filter: brightness(0.86) contrast(1.04) saturate(0.9);
   transition: filter 0.65s ease;
 }
+/* 3D night — keep extrusion glow readable (less canvas dimming). */
+body.map-3d.map-vector.map-dark:not(.map-satellite) #map .maplibregl-canvas {
+  filter: brightness(0.94) contrast(1.08) saturate(1.06);
+}
 
 /* ============================================================
    Search
@@ -235,6 +239,9 @@ body.map-vector.map-dark:not(.map-satellite) #map .maplibregl-canvas {
 .category-chips::-webkit-scrollbar { display: none; }
 
 .category-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
   padding: 6px 14px;
   border-radius: 99px;
   background: var(--bg-glass);
@@ -248,6 +255,21 @@ body.map-vector.map-dark:not(.map-satellite) #map .maplibregl-canvas {
   box-shadow: var(--shadow-sm);
   transition: background 0.15s, border-color 0.15s, color 0.15s;
   letter-spacing: -0.01em;
+}
+
+.category-chip .chip-icon {
+  font-size: 13px;
+  line-height: 1;
+}
+
+body.map-dark .category-chip:not(.active) {
+  background: rgba(15, 23, 42, 0.82);
+  border-color: rgba(148, 163, 184, 0.35);
+  color: #e2e8f0;
+}
+
+.category-chip:not(.active):hover {
+  border-color: var(--chip-color, var(--border));
 }
 
 .category-chip:hover {
