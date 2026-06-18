@@ -142,16 +142,39 @@ const IITJRouter = (() => {
     return { nodes, distance: physicalDist[endId] ?? dist[endId], cost: dist[endId] };
   }
 
+  // Campus centroid — berm shops must be approached from the campus-facing
+  // sandstone-gate road, not the service road behind the berm ribbons.
+  const CAMPUS_CENTER = { lng: 73.1147, lat: 26.4727 };
+
   // Nearest node that participates in at least one edge allowed by the mode.
+  // preferCampusSide: keep only nodes on the campus-interior side of the point
+  // (vector from point → node aligns toward CAMPUS_CENTER). Falls back to the
+  // unrestricted nearest node if the filter finds nothing within radiusM.
   function findNearestNode(lat, lng, radiusM = 400, mode = 'drive', opts = {}) {
-    let nearest = null, minDist = Infinity;
-    for (const [id, coords] of Object.entries(_nodeCoords)) {
-      const edges = _graph[id] || [];
-      if (!edges.some(e => isAllowedEdge(e, mode, opts))) continue;
-      const d = haversine(lat, lng, coords[1], coords[0]);
-      if (d < minDist && d < radiusM) { minDist = d; nearest = id; }
+    const preferCampusSide = !!opts.preferCampusSide;
+    const dLng = CAMPUS_CENTER.lng - lng;
+    const dLat = CAMPUS_CENTER.lat - lat;
+
+    function scan(campusOnly) {
+      let nearest = null, minDist = Infinity;
+      for (const [id, coords] of Object.entries(_nodeCoords)) {
+        const edges = _graph[id] || [];
+        if (!edges.some(e => isAllowedEdge(e, mode, opts))) continue;
+        if (campusOnly) {
+          const dot = (coords[0] - lng) * dLng + (coords[1] - lat) * dLat;
+          if (dot <= 0) continue;
+        }
+        const d = haversine(lat, lng, coords[1], coords[0]);
+        if (d < minDist && d < radiusM) { minDist = d; nearest = id; }
+      }
+      return nearest;
     }
-    return nearest;
+
+    if (preferCampusSide) {
+      const campus = scan(true);
+      if (campus) return campus;
+    }
+    return scan(false);
   }
 
   // ── Turn instructions ─────────────────────────────────────────
@@ -183,15 +206,16 @@ const IITJRouter = (() => {
   // ── Public: compute route ─────────────────────────────────────
   // mode: 'drive' (default — main roads only, car-passable) or 'walk' (also
   // uses footways, cycleways, paths — shortcuts allowed).
-  function computeRoute(fromLat, fromLng, toLat, toLng, mode = 'drive') {
+  function computeRoute(fromLat, fromLng, toLat, toLng, mode = 'drive', routeOpts = {}) {
     if (!_loaded) throw new Error('IITJRouter not initialised — call IITJRouter.init() first');
     if (mode !== 'walk') mode = 'drive';
 
+    const preferCampusSideTo = !!routeOpts.preferCampusSideTo;
     let coords = [], distance = 0, usingGraph = false, fellBackToWalk = false, usedDestinationAccess = false;
 
     function tryMode(m, opts = {}) {
       const fromNode = findNearestNode(fromLat, fromLng, 400, m, opts);
-      const toNode   = findNearestNode(toLat,   toLng,   400, m, opts);
+      const toNode   = findNearestNode(toLat,   toLng,   400, m, { ...opts, preferCampusSide: preferCampusSideTo });
       if (!fromNode || !toNode || fromNode === toNode) return null;
       const path = dijkstra(fromNode, toNode, m, opts);
       if (!path || path.nodes.length < 2) return null;

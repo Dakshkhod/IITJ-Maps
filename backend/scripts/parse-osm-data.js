@@ -345,9 +345,14 @@ function skipPoi(tags) {
 function bestName(tags) {
   const CODE = /^[A-Za-z]{1,4}[-\s]?\d+[A-Za-z]?$/;
   const name = (tags.name || tags['name:en'] || '').trim();
+  // Berm / perimeter unit codes (E-14, W-21, …) stay as the map label; society
+  // names remain searchable via keywords from alt_name / name:en.
+  if (CODE.test(name.replace(/\s+/g, ''))) {
+    return { name, ref: tags.ref || null };
+  }
   if (CODE.test(name)) {
     const real = [tags['name:en'], tags.alt_name].map(s => (s || '').trim())
-      .find(s => s && !CODE.test(s));
+      .find(s => s && !CODE.test(s.replace(/\s+/g, '')));
     if (real) return { name: real, ref: name };
   }
   return { name, ref: tags.ref || null };
@@ -760,7 +765,7 @@ function ribbonGateCenters(ring, moduleW = 7.5) {
     const ww = f.A*tt*tt + f.B*tt + f.C;
     samples.push([tt*ax + ww*bx, tt*ay + ww*by]);
   }
-  return _moduleMidpointsFromMetric(samples, cx, cy, mLng, mLat, moduleW);
+  return _moduleMidpointsFromMetric(samples, cx, cy, mLng, mLat, moduleW).gates;
 }
 
 // Step gates along a hand-tuned centerline (lng/lat polyline). Used for ribbons
@@ -770,7 +775,7 @@ function pathGateCenters(path, moduleW = 7.5) {
   path.forEach(p => { cx += p[0]; cy += p[1]; }); cx /= path.length; cy /= path.length;
   const mLng = 111320 * Math.cos(cy * Math.PI/180), mLat = 111320;
   const samples = path.map(p => [(p[0]-cx)*mLng, (p[1]-cy)*mLat]);
-  return _moduleMidpointsFromMetric(samples, cx, cy, mLng, mLat, moduleW);
+  return _moduleMidpointsFromMetric(samples, cx, cy, mLng, mLat, moduleW).gates;
 }
 
 function _moduleMidpointsFromMetric(samples, cx, cy, mLng, mLat, moduleW) {
@@ -792,91 +797,437 @@ function _moduleMidpointsFromMetric(samples, cx, cy, mLng, mLat, moduleW) {
     const ly = samples[seg][1] + u*(samples[seg+1][1]-samples[seg][1]);
     gates.push([cx + lx/mLng, cy + ly/mLat]);
   }
-  return gates;
+  const centerline = [];
+  for (let i = 0; i < samples.length; i++) {
+    centerline.push([cx + samples[i][0]/mLng, cy + samples[i][1]/mLat]);
+  }
+  return { gates, centerline, total, moduleW, minModules: nMods };
 }
 
-function snapPerimeterCodes(places) {
-  // Two-stage gating. A point is treated as "on the berm" only if its nearest
-  // gate is ≤ ELIGIBILITY_M (filters out interior labs like E-1..E-8 that sit
-  // 60–300 m from any berm). Once eligible, the candidate may spill to gates
-  // up to OVERFLOW_M away — needed because OSM puts 8-10 societies at near-
-  // identical coords that have to share 7 adjacent arches.
-  const ELIGIBILITY_M = 25;
-  const OVERFLOW_M    = 120;
+function _denseMetricSamples(ring, overridePath) {
+  if (overridePath) {
+    let cx = 0, cy = 0;
+    overridePath.forEach(p => { cx += p[0]; cy += p[1]; }); cx /= overridePath.length; cy /= overridePath.length;
+    const mLng = 111320 * Math.cos(cy * Math.PI/180), mLat = 111320;
+    const samples = overridePath.map(p => [(p[0]-cx)*mLng, (p[1]-cy)*mLat]);
+    return { samples, cx, cy, mLng, mLat };
+  }
+  const pts = ring.slice(0, ring.length-1);
+  const n = pts.length;
+  let cx = 0, cy = 0;
+  pts.forEach(p => { cx += p[0]; cy += p[1]; }); cx /= n; cy /= n;
+  const mLng = 111320 * Math.cos(cy * Math.PI/180), mLat = 111320;
+  const P = pts.map(p => [(p[0]-cx)*mLng, (p[1]-cy)*mLat]);
+  let sxx = 0, sxy = 0, syy = 0;
+  P.forEach(([x,y]) => { sxx += x*x; sxy += x*y; syy += y*y; });
+  const theta = 0.5 * Math.atan2(2*sxy, sxx - syy);
+  const ax = Math.cos(theta), ay = Math.sin(theta), bx = -ay, by = ax;
+  const t = P.map(([x,y]) => x*ax + y*ay);
+  let iMin = 0, iMax = 0;
+  t.forEach((v,i) => { if (v < t[iMin]) iMin = i; if (v > t[iMax]) iMax = i; });
+  const chain = (from, to) => { const c = []; let i = from; for (;;) { c.push(P[i]); if (i === to) break; i = (i+1)%n; } return c; };
+  const K = 22;
+  const ra = _resampleXY(chain(iMin, iMax), K);
+  const rb = _resampleXY(chain(iMax, iMin).reverse(), K);
+  const T = [], W = [];
+  for (let i = 0; i < K; i++) {
+    const mx = (ra[i][0]+rb[i][0])/2, my = (ra[i][1]+rb[i][1])/2;
+    T.push(mx*ax + my*ay); W.push(mx*bx + my*by);
+  }
+  const f = _quadFit(T, W);
+  const tMin = Math.min(...T), tMax = Math.max(...T);
+  const dense = 200;
+  const samples = [];
+  for (let i = 0; i < dense; i++) {
+    const tt = tMin + (tMax-tMin)*i/(dense-1);
+    const ww = f.A*tt*tt + f.B*tt + f.C;
+    samples.push([tt*ax + ww*bx, tt*ay + ww*by]);
+  }
+  return { samples, cx, cy, mLng, mLat };
+}
 
-  // 1. Collect every sandstone-gate center across the BLUE wave-berm ribbons.
-  //    For ribbons 746/747 the 3D mesh is built from BERM_CL_OVERRIDE (not the
-  //    raw OSM polygon centerline), so step gates along that path instead.
-  //    The SOUTH-edge ways (742/756/757) are rendered as the GREEN terraced
-  //    landscape berm, NOT as blue ribbons (see landmarks-3d.js BERM_IDS), and
-  //    OSM already places the south E-codes / W-1 right on that green crest
-  //    (1.7-4.7 m). Snapping them to these ribbons' centerlines would drag them
-  //    ~15 m inward off the green berm, so they are excluded here — the south
-  //    POIs keep their accurate raw OSM positions on the green slope.
-  const GREEN_BERM_IDS = new Set(['1412399742', '1412399756', '1412399757']);
-  const gates = [];
-  for (const id of Object.keys(BERM_RINGS)) {
-    if (GREEN_BERM_IDS.has(id)) continue;
-    const centers = BERM_CL_OVERRIDE[id]
-      ? pathGateCenters(BERM_CL_OVERRIDE[id])
-      : ribbonGateCenters(BERM_RINGS[id]);
-    for (const [lng, lat] of centers) gates.push({ lng, lat, ribbonId: id, used: false });
+function ribbonGatesForRibbon(ring, overridePath, moduleW = 7.5, minCount = 0) {
+  const MIN_W = 5.25;
+  let w = moduleW;
+  let result;
+  do {
+    const { samples, cx, cy, mLng, mLat } = _denseMetricSamples(ring, overridePath);
+    result = _moduleMidpointsFromMetric(samples, cx, cy, mLng, mLat, w);
+  } while (result.gates.length < minCount && (w -= 0.25) >= MIN_W);
+  return result;
+}
+
+// Metric arc-length along a lng/lat centerline — used to project OSM POIs onto
+// the berm ribbon so nearest-unused-gate assignment follows berm order, not
+// crow-flight distance (which lets southern POIs steal northern arches).
+function _centerlineMetric(centerline) {
+  const refLat = centerline[0][1];
+  const mLng = 111320 * Math.cos(refLat * Math.PI / 180);
+  const mLat = 111320;
+  const pts = centerline.map(([lng, lat]) => [lng * mLng, lat * mLat]);
+  const cum = [0];
+  for (let i = 1; i < pts.length; i++) {
+    cum.push(cum[i - 1] + Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]));
+  }
+  return { pts, cum, mLng, mLat };
+}
+
+function _projectArcS(lng, lat, centerline) {
+  const { pts, cum, mLng, mLat } = _centerlineMetric(centerline);
+  const px = lng * mLng, py = lat * mLat;
+  let bestS = 0, bestD = Infinity;
+  for (let i = 1; i < pts.length; i++) {
+    const ax = pts[i - 1][0], ay = pts[i - 1][1];
+    const bx = pts[i][0], by = pts[i][1];
+    const abx = bx - ax, aby = by - ay;
+    const ab2 = abx * abx + aby * aby || 1e-9;
+    const t = Math.max(0, Math.min(1, ((px - ax) * abx + (py - ay) * aby) / ab2));
+    const qx = ax + t * abx, qy = ay + t * aby;
+    const d = Math.hypot(px - qx, py - qy);
+    if (d < bestD) {
+      bestD = d;
+      bestS = cum[i - 1] + t * Math.sqrt(ab2);
+    }
+  }
+  return bestS;
+}
+
+function _centerlineTotal(centerline) {
+  const { cum } = _centerlineMetric(centerline);
+  return cum[cum.length - 1];
+}
+
+// Lng/lat on the berm centerline at arc-length s (extrapolates past the end).
+function _lngLatAtArcS(s, centerline) {
+  const { pts, cum, mLng, mLat } = _centerlineMetric(centerline);
+  const total = cum[cum.length - 1];
+  if (s <= total) {
+    let i = 1;
+    while (i < cum.length && cum[i] < s) i++;
+    const i0 = Math.max(0, i - 1);
+    const i1 = Math.min(pts.length - 1, i0 + 1);
+    const sl = cum[i1] - cum[i0] || 1;
+    const t = (s - cum[i0]) / sl;
+    return [
+      (pts[i0][0] + t * (pts[i1][0] - pts[i0][0])) / mLng,
+      (pts[i0][1] + t * (pts[i1][1] - pts[i0][1])) / mLat,
+    ];
+  }
+  const n = pts.length;
+  const ax = pts[n - 2][0], ay = pts[n - 2][1];
+  const bx = pts[n - 1][0], by = pts[n - 1][1];
+  const dx = bx - ax, dy = by - ay;
+  const segLen = Math.hypot(dx, dy) || 1;
+  const extra = s - total;
+  return [(bx + (dx / segLen) * extra) / mLng, (by + (dy / segLen) * extra) / mLat];
+}
+
+function _extendCenterlineArc(centerline, targetS) {
+  const total = _centerlineTotal(centerline);
+  if (targetS <= total + 0.5) return { centerline, lengthM: total };
+  const extended = centerline.slice();
+  let cur = total;
+  const step = 4;
+  while (cur < targetS) {
+    cur += step;
+    extended.push(_lngLatAtArcS(cur, extended));
+  }
+  return { centerline: extended, lengthM: cur };
+}
+
+// One 3D arch per POI at its OSM-projected arc position; spread clusters along
+// the berm and fill wide gaps so the mesh stays continuous.
+function _moduleArcsFromPOIs(list, centerline, minSpacing = 5.5, fillGap = 11) {
+  const sorted = list
+    .map((item, idx) => ({ ...item, idx, s: _projectArcS(item.lng, item.lat, centerline) }))
+    .sort((a, b) => a.s - b.s || a.lng - b.lng);
+
+  const poiArcs = [];
+  let lastS = -Infinity;
+  for (const item of sorted) {
+    let s = poiArcs.length === 0 ? Math.max(0, item.s) : Math.max(item.s, lastS + minSpacing);
+    poiArcs.push(s);
+    lastS = s;
   }
 
-  // 2. Candidates = every named point POI. Anything within SNAP_RADIUS_M of a
-  //    gate is eligible; the 25 m cap means features genuinely inside the
-  //    academic block (E-1..E-8 etc.) and other off-berm landmarks stay put.
-  //    Bare codes *and* named clubs/societies are handled the same way so the
-  //    "Music Society", "Dance Society", … cluster — which OSM places at
-  //    near-identical coords — spreads 1-per-arch across consecutive gates.
+  const moduleArcs = [];
+  const pushUnique = (s) => {
+    if (!moduleArcs.length || s - moduleArcs[moduleArcs.length - 1] >= minSpacing * 0.85) {
+      moduleArcs.push(s);
+    }
+  };
+
+  for (let i = 0; i < poiArcs.length; i++) {
+    if (i > 0) {
+      const gap = poiArcs[i] - poiArcs[i - 1];
+      if (gap > fillGap) {
+        const nFill = Math.max(1, Math.round(gap / 7.5) - 1);
+        for (let f = 1; f <= nFill; f++) {
+          pushUnique(poiArcs[i - 1] + (gap * f) / (nFill + 1));
+        }
+      }
+    }
+    pushUnique(poiArcs[i]);
+  }
+
+  const poiModuleIdx = sorted.map((item, i) => {
+    const target = poiArcs[i];
+    let best = 0, bestD = Infinity;
+    moduleArcs.forEach((s, mi) => {
+      const d = Math.abs(s - target);
+      if (d < bestD) { bestD = d; best = mi; }
+    });
+    return { poiIdx: item.idx, moduleIdx: best, arcS: moduleArcs[best] };
+  });
+
+  return { moduleArcs, poiModuleIdx, poiArcs };
+}
+
+// Minimum-cost bipartite matching: n POIs → m gates (n ≤ m). Hungarian
+// algorithm — globally optimal 1:1 assignment minimizing total distance.
+function minCostGateAssign(cost) {
+  const n = cost.length;
+  if (!n) return [];
+  const m = cost[0].length;
+  const u = new Array(n + 1).fill(0);
+  const v = new Array(m + 1).fill(0);
+  const p = new Array(m + 1).fill(0);
+  const way = new Array(m + 1).fill(0);
+
+  for (let i = 1; i <= n; i++) {
+    p[0] = i;
+    let j0 = 0;
+    const minv = new Array(m + 1).fill(Infinity);
+    const used = new Array(m + 1).fill(false);
+    do {
+      used[j0] = true;
+      const i0 = p[j0];
+      let delta = Infinity;
+      let j1 = 0;
+      const row = cost[i0 - 1];
+      for (let j = 1; j <= m; j++) {
+        if (!used[j]) {
+          const cur = row[j - 1] - u[i0] - v[j];
+          if (cur < minv[j]) { minv[j] = cur; way[j] = j0; }
+          if (minv[j] < delta) { delta = minv[j]; j1 = j; }
+        }
+      }
+      for (let j = 0; j <= m; j++) {
+        if (used[j]) { u[p[j]] += delta; v[j] -= delta; }
+        else minv[j] -= delta;
+      }
+      j0 = j1;
+    } while (p[j0] !== 0);
+    do {
+      const j1 = way[j0];
+      p[j0] = p[j1];
+      j0 = j1;
+    } while (j0);
+  }
+
+  const ans = new Array(n).fill(-1);
+  for (let j = 1; j <= m; j++) {
+    if (p[j]) ans[p[j] - 1] = j - 1;
+  }
+  return ans;
+}
+
+// Pull berm ribbon polygons from OSM (map-new.osm refresh) — falls back to BERM_RINGS.
+function extractOsmBermRings(osmData) {
+  const { nodes, ways } = osmData;
+  const rings = {};
+  for (const way of ways) {
+    const tags = way.tags || {};
+    const name = tags.name || '';
+    if (!(name === 'Berms' || name === 'W Berms' || tags.building === 'berms')) continue;
+    const coords = way.nodeIds
+      .filter(nid => nodes[nid])
+      .map(nid => [nodes[nid].lon, nodes[nid].lat]);
+    if (coords.length < 4) continue;
+    const closed = coords[0][0] === coords[coords.length-1][0]
+      && coords[0][1] === coords[coords.length-1][1];
+    rings[way.id] = closed ? coords : [...coords, coords[0]];
+  }
+  return rings;
+}
+
+function buildBermGateLayout(osmData, defaultModuleW = 7.5) {
+  const osmRings = extractOsmBermRings(osmData);
+  const mergedRings = { ...BERM_RINGS, ...osmRings };
+  const GREEN_BERM_IDS = new Set(['1412399742', '1412399756', '1412399757']);
+  const layout = {};
+  for (const id of Object.keys(mergedRings)) {
+    if (GREEN_BERM_IDS.has(id)) continue;
+    const ring = mergedRings[id];
+    const override = BERM_CL_OVERRIDE[id];
+    const spec = ribbonGatesForRibbon(ring, override, defaultModuleW, 0);
+    layout[id] = {
+      gates: spec.gates.map(([lng, lat]) => ({ lng, lat })),
+      centerline: spec.centerline,
+      moduleW: spec.moduleW,
+      minModules: spec.minModules,
+      lengthM: spec.total,
+    };
+  }
+  return { layout, mergedRings };
+}
+
+function snapPerimeterCodes(places, osmData) {
+  const ELIGIBILITY_M = 25;
+  const GREEN_BERM_IDS = new Set(['1412399742', '1412399756', '1412399757']);
+
+  const { layout, mergedRings } = buildBermGateLayout(osmData);
+  const flatGates = [];
+  for (const [ribbonId, spec] of Object.entries(layout)) {
+    spec.gates.forEach((g, gi) => {
+      flatGates.push({ ...g, ribbonId, gi, used: false });
+    });
+  }
+
   const candidates = places
     .map((place, idx) => ({ place, idx }))
     .filter(({ place }) => (place.properties.name || '').trim()
-      && place.geometry.type === 'Point');
+      && place.geometry.type === 'Point'
+      && !/^(Hockey Ground|Pronite Ground|Informal Grounds)$/i.test((place.properties.name || '').trim()));
 
-  // 3. For each candidate compute distance to its nearest gate. Only
-  //    candidates whose nearest gate is ≤ ELIGIBILITY_M qualify as berm POIs.
-  //    Build pairs from those candidates to every gate within OVERFLOW_M — but
-  //    ONLY to gates on the SAME berm ribbon the candidate actually fronts
-  //    (its nearest gate's ribbon). Without this, a cluster sitting at the very
-  //    end of one berm (e.g. Designing Club / Inventory Room at the north tip
-  //    of ribbon 744) can spill across the gap onto the adjacent berm (745)
-  //    once its own berm's nearby arches are taken. Confining overflow to the
-  //    home ribbon keeps every POI on the berm it belongs to while still
-  //    spreading an over-clustered group 1-per-arch along that berm.
   const cosLat = Math.cos(26.473 * Math.PI/180);
-  const pairs = [];
+  const distM = (lng, lat, g) => {
+    const dx = (g.lng - lng) * 111320 * cosLat;
+    const dy = (g.lat - lat) * 111320;
+    return Math.hypot(dx, dy);
+  };
+
+  // Group eligible candidates by home berm ribbon.
+  const byRibbon = new Map();
   for (const cand of candidates) {
     const [lng, lat] = cand.place.geometry.coordinates;
-    const dists = gates.map((g, gi) => {
-      const dx = (g.lng - lng) * 111320 * cosLat;
-      const dy = (g.lat - lat) * 111320;
-      return { gi, d: Math.hypot(dx, dy) };
+    let nearest = null, minD = Infinity;
+    for (const g of flatGates) {
+      const d = distM(lng, lat, g);
+      if (d < minD) { minD = d; nearest = g; }
+    }
+    if (!nearest || minD > ELIGIBILITY_M) continue;
+    const homeRibbon = nearest.ribbonId;
+    const list = byRibbon.get(homeRibbon) || [];
+    list.push({ cand, lat, lng, minD });
+    byRibbon.set(homeRibbon, list);
+  }
+
+  const bermEntrances = {};
+  let snapped = 0;
+
+  for (const [ribbonId, list] of byRibbon) {
+    const poiCount = list.length;
+    const ring = mergedRings[ribbonId];
+    const override = BERM_CL_OVERRIDE[ribbonId];
+    const baseSpec = ribbonGatesForRibbon(ring, override, layout[ribbonId].moduleW, 0);
+
+    const { moduleArcs, poiModuleIdx } = _moduleArcsFromPOIs(list, baseSpec.centerline);
+    const maxArc = moduleArcs[moduleArcs.length - 1] + 4;
+    const { centerline, lengthM } = _extendCenterlineArc(baseSpec.centerline, maxArc);
+
+    const gates = moduleArcs.map(s => {
+      const [lng, lat] = _lngLatAtArcS(s, centerline);
+      return { lng, lat, s };
     });
-    const nearest = dists.reduce((a, b) => a.d < b.d ? a : b);
-    if (nearest.d > ELIGIBILITY_M) continue;     // off-berm POI, skip
-    const homeRibbon = gates[nearest.gi].ribbonId;
-    for (const { gi, d } of dists) {
-      if (d <= OVERFLOW_M && gates[gi].ribbonId === homeRibbon) pairs.push({ cand, gi, d });
+
+    layout[ribbonId].gates = gates.map(({ lng, lat }) => ({ lng, lat }));
+    layout[ribbonId].centerline = centerline;
+    layout[ribbonId].moduleArcs = moduleArcs;
+    layout[ribbonId].moduleW = baseSpec.moduleW;
+    layout[ribbonId].minModules = moduleArcs.length;
+    layout[ribbonId].lengthM = lengthM;
+    layout[ribbonId].poiCount = poiCount;
+    layout[ribbonId].poiDriven = true;
+
+    // Keep exact OSM coordinates on labels; 3D arches follow moduleArcs above.
+    const listByIdx = list.slice();
+    for (const bind of poiModuleIdx) {
+      const { cand } = listByIdx[bind.poiIdx];
+      const [lng, lat] = cand.place.geometry.coordinates;
+      if (cand.place.centroid) cand.place.centroid = { lat, lng };
+      const name = (cand.place.properties.name || '').trim();
+      if (name) {
+        bermEntrances[name] = { lat, lng, gate_name: 'sandstone gate', berm: true };
+      }
+      snapped++;
     }
   }
 
-  // 4. Greedy 1:1 assignment by ascending distance — guarantees each W-N or
-  //    E-N lands on its own sandstone gate, no two codes on the same arch.
-  pairs.sort((a, b) => a.d - b.d);
-  const assignedCands = new Set();
-  let snapped = 0;
-  for (const { cand, gi } of pairs) {
-    if (assignedCands.has(cand.idx) || gates[gi].used) continue;
-    const g = gates[gi];
-    cand.place.geometry.coordinates = [g.lng, g.lat];
-    if (cand.place.centroid) cand.place.centroid = { lat: g.lat, lng: g.lng };
-    gates[gi].used = true;
-    assignedCands.add(cand.idx);
-    snapped++;
+  console.log(`  Perimeter layout: ${snapped} berm POIs at OSM coords, POI-driven 3D arches`);
+  return { places, bermEntrances, bermLayout: layout };
+}
+
+// Blue wave-berm ribbons rendered in 3D (landmarks-3d.js BERM_IDS) — keep in sync.
+const WAVE_BERM_IDS = new Set([
+  '1412399743', '1412399744', '1412399745', '1412399746',
+  '1412399747', '1412399748', '1412399749', '1412399750',
+]);
+// South-edge green terraced landscape berms (not blue wave ribbons).
+const LANDSCAPE_BERM_IDS = new Set(['1412399742', '1412399756', '1412399757']);
+
+function bermTypeForId(id) {
+  if (LANDSCAPE_BERM_IDS.has(id)) return 'landscape';
+  if (WAVE_BERM_IDS.has(id)) return 'wave';
+  return 'landscape';
+}
+
+// Build berms.geojson for the 2D map. OSM berm ways are the primary source;
+// any ribbon missing from the extract (e.g. map-new.osm drops the west cluster)
+// is filled from BERM_RINGS so normal view always matches the 3D berm layout.
+function buildBermsGeoJSON(osmData) {
+  const { nodes, ways } = osmData;
+  const features = [];
+  const seen = new Set();
+
+  for (const way of ways) {
+    const tags = way.tags || {};
+    const name = tags.name || tags['name:en'] || '';
+    const isBerm = name === 'Berms' || name === 'W Berms' || tags.building === 'berms';
+    if (!isBerm) continue;
+
+    const coords = way.nodeIds
+      .filter(nid => nodes[nid])
+      .map(nid => [nodes[nid].lon, nodes[nid].lat]);
+    if (coords.length < 4) continue;
+    const closed = coords[0][0] === coords[coords.length - 1][0]
+      && coords[0][1] === coords[coords.length - 1][1];
+    const ring = closed ? coords : [...coords, coords[0]];
+
+    seen.add(way.id);
+    features.push({
+      type: 'Feature',
+      properties: {
+        osm_id: way.id,
+        name: name || 'Berms',
+        berm_type: bermTypeForId(way.id),
+        category: 'berm',
+        source: 'osm',
+      },
+      geometry: { type: 'Polygon', coordinates: [ring] },
+      centroid: computeCentroid(ring),
+    });
   }
-  console.log(`  Perimeter snap: ${snapped} berm POIs anchored to sandstone gates`);
-  return places;
+
+  for (const [id, ring] of Object.entries(BERM_RINGS)) {
+    if (seen.has(id)) continue;
+    const coords = ring.slice();
+    if (coords.length < 4) continue;
+    features.push({
+      type: 'Feature',
+      properties: {
+        osm_id: id,
+        name: 'Berms',
+        berm_type: bermTypeForId(id),
+        category: 'berm',
+        source: 'berm_rings',
+      },
+      geometry: { type: 'Polygon', coordinates: [coords] },
+      centroid: computeCentroid(coords),
+    });
+  }
+
+  return { type: 'FeatureCollection', features };
 }
 
 // ============================================================
@@ -887,15 +1238,25 @@ function main() {
   console.log('  IITJ Maps — GIS Data Pipeline v2');
   console.log('═══════════════════════════════════════════\n');
 
-  const osmPath = path.join(__dirname, '..', '..', 'map.osm');
+  const osmPath = process.argv[2]
+    ? path.resolve(process.argv[2])
+    : path.join(__dirname, '..', '..', 'map.osm');
+  const mapNewPath = path.join(__dirname, '..', '..', 'map-new.osm');
   const kmlPath = path.join(__dirname, '..', '..', 'Copy of Phase 3B.kml');
   const outDir = path.join(__dirname, '..', 'data');
 
   if (!fs.existsSync(outDir)) fs.mkdirSync(outDir, { recursive: true });
 
   // 1. Parse OSM
+  console.log('📖 OSM source:', osmPath);
   const osmData = parseOSM(osmPath);
   const { buildings, roads, areas, allPlaces } = extractFeatures(osmData);
+  const bermOsmPath = (!process.argv[2] && fs.existsSync(mapNewPath)) ? mapNewPath : osmPath;
+  const bermOsmData = bermOsmPath === osmPath ? osmData : parseOSM(bermOsmPath);
+  const berms = buildBermsGeoJSON(bermOsmData);
+  if (bermOsmPath !== osmPath) {
+    console.log(`  Berm layout OSM  : ${bermOsmPath} (${berms.features.filter(f => f.properties.source === 'osm').length} ways + BERM_RINGS fill)`);
+  }
 
   // 2. Parse KML
   const kmlFeatures = parseKML(kmlPath);
@@ -912,13 +1273,27 @@ function main() {
   //     their dots appear on the flat ground rather than on the berm structure.
   //     homeRibbon constraint prevents cross-berm overflow (e.g. Designing Club
   //     staying on berm 744 instead of spilling onto 745).
-  snapPerimeterCodes(mergedPlaces);
+  const { bermEntrances, bermLayout } = snapPerimeterCodes(mergedPlaces, bermOsmData);
+  const webDataDir = path.join(__dirname, '..', '..', 'web', 'data');
+  const bermEntrancesPath = path.join(outDir, 'berm-entrances.json');
+  fs.writeFileSync(bermEntrancesPath, JSON.stringify(bermEntrances, null, 2));
+  fs.writeFileSync(path.join(webDataDir, 'berm-entrances.json'), JSON.stringify(bermEntrances, null, 2));
+  fs.writeFileSync(path.join(outDir, 'berm-layout.json'), JSON.stringify(bermLayout, null, 2));
+  fs.writeFileSync(path.join(webDataDir, 'berm-layout.json'), JSON.stringify(bermLayout, null, 2));
+  const layout9744 = bermLayout['1412399744'];
+  if (layout9744) {
+    console.log(`  Berm 9744 layout  : ${layout9744.poiCount || 0} POIs → ${layout9744.minModules} arches @ ${layout9744.moduleW}m`);
+  }
+  console.log(`  Berm entrances    : ${Object.keys(bermEntrances).length} routing gates`);
 
   // 5. Build road graph and save
   const { graph, nodeCoords } = RoadClassifier.buildRoadGraph(roads);
   const roadAudit = RoadClassifier.buildRoadAudit(roads);
 
   // 6. Write output files
+  fs.writeFileSync(path.join(outDir, 'berms.geojson'), JSON.stringify(berms, null, 2));
+  fs.writeFileSync(path.join(webDataDir, 'berms.geojson'), JSON.stringify(berms, null, 2));
+
   fs.writeFileSync(path.join(outDir, 'buildings.geojson'),
     JSON.stringify({ type: 'FeatureCollection', features: buildings }, null, 2));
   fs.writeFileSync(path.join(outDir, 'roads.geojson'),
@@ -967,7 +1342,13 @@ function main() {
   fs.writeFileSync(path.join(outDir, 'search-index.json'),
     JSON.stringify(dedupedIndex, null, 2));
 
+  // Mirror key campus layers to web/data (frontend reads from here).
+  for (const fname of ['places.geojson', 'search-index.json', 'buildings.geojson', 'roads.geojson', 'areas.geojson']) {
+    fs.copyFileSync(path.join(outDir, fname), path.join(webDataDir, fname));
+  }
+
   console.log('\n✅ Output files written to:', outDir);
+  console.log(`   berms.geojson     : ${berms.features.length} features`);
   console.log(`   buildings.geojson : ${buildings.length} features`);
   console.log(`   roads.geojson     : ${roads.length} features`);
   console.log(`   areas.geojson     : ${areas.length} features`);

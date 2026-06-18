@@ -12,6 +12,7 @@ const IITJData = (() => {
   let _areas       = null;
   let _categories  = null;
   let _entrances   = null;   // { "Hostel B1": { lat, lng, gate_name, osm_id } }
+  let _berms       = null;   // perimeter berm ribbon footprints (2D normal view)
   let _greens      = null;   // OSM grass / park / pitch / forest polygons
   let _searchTokens = null;
   let _ready       = false;
@@ -20,14 +21,15 @@ const IITJData = (() => {
   // ── Loader ──────────────────────────────────────────────────
   async function init() {
     const base = '/data';
-    const [places, buildings, roads, areas, searchIndex, categories, entrances, greens] = await Promise.all([
-      fetch(`${base}/places.geojson?v=35`).then(r => r.json()),
+    const [places, buildings, roads, areas, searchIndex, categories, entrances, berms, greens] = await Promise.all([
+      fetch(`${base}/places.geojson?v=37`).then(r => r.json()),
       fetch(`${base}/buildings.geojson?v=32`).then(r => r.json()),
       fetch(`${base}/roads.geojson?v=32`).then(r => r.json()),
       fetch(`${base}/areas.geojson?v=31`).then(r => r.json()),
-      fetch(`${base}/search-index.json?v=35`).then(r => r.json()),
+      fetch(`${base}/search-index.json?v=37`).then(r => r.json()),
       fetch(`${base}/categories.json`).then(r => r.json()),
-      fetch(`${base}/entrances.json?v=31`).then(r => r.ok ? r.json() : {}).catch(() => ({})),
+      fetch(`${base}/entrances.json?v=39`).then(r => r.ok ? r.json() : {}).catch(() => ({})),
+      fetch(`${base}/berms.geojson?v=1`).then(r => r.ok ? r.json() : { type: 'FeatureCollection', features: [] }).catch(() => ({ type: 'FeatureCollection', features: [] })),
       fetch(`${base}/greens.geojson?v=2`).then(r => r.ok ? r.json() : null).catch(() => null),
     ]);
 
@@ -44,6 +46,7 @@ const IITJData = (() => {
     }
     _categories = categories;
     _entrances  = entrances || {};
+    _berms      = berms || { type: 'FeatureCollection', features: [] };
     _greens     = greens || { type: 'FeatureCollection', features: [] };
 
     // Pre-build search token strings once. `_nameNorm`/`_tokensNorm` are the
@@ -152,7 +155,8 @@ const IITJData = (() => {
   function getBuildings() { return _buildings || { type: 'FeatureCollection', features: [] }; }
   function getRoads()     { return _roads     || { type: 'FeatureCollection', features: [] }; }
   function getAreas()     { return _areas     || { type: 'FeatureCollection', features: [] }; }
-  function getGreens()    { return _greens    || { type: 'FeatureCollection', features: [] }; }
+  function getBerms()    { return _berms    || { type: 'FeatureCollection', features: [] }; }
+  function getGreens()   { return _greens   || { type: 'FeatureCollection', features: [] }; }
   function getCategories(){ return _categories || []; }
 
   // Returns the entry-point coordinates for a destination if one is mapped
@@ -160,6 +164,24 @@ const IITJData = (() => {
   function getEntrance(name) {
     if (!_entrances || !name) return null;
     return _entrances[name] || _entrances[name.trim()] || null;
+  }
+
+  // Berm POIs (W/E codes, societies on the blue wave-berms) route via their
+  // sandstone-gate arch on the campus-facing side, not the rear service road.
+  function isBermDestination(name, lat, lng) {
+    if (!name) return false;
+    const e = getEntrance(name);
+    if (e && e.berm) return true;
+    const n = name.trim();
+    if (/^W-\d+$/i.test(n) || /^E-\d+$/i.test(n)) return true;
+    if (lat == null || lng == null) return false;
+    // West blue berm (ribbon 9748 / shopping row)
+    if (lng < 73.1115 && lat > 26.474 && lat < 26.4772) return true;
+    // East blue berms (ribbons 9743–9745 / 9749–9750)
+    if (lng > 73.1175 && lat > 26.4725 && lat < 26.4775) return true;
+    // SW berm bridge (ribbon 9746)
+    if (lng > 73.1112 && lng < 73.1129 && lat > 26.4700 && lat < 26.4712) return true;
+    return false;
   }
 
   function nearby(lat, lng, radiusM = 500, limit = 10) {
@@ -194,5 +216,5 @@ const IITJData = (() => {
 
   function isReady() { return _ready; }
 
-  return { init, onReady, isReady, search, getPlaces, getBuildings, getRoads, getAreas, getGreens, getCategories, getEntrance, nearby, getPlaceByName, getOpeningHours };
+  return { init, onReady, isReady, search, getPlaces, getBuildings, getRoads, getAreas, getGreens, getBerms, getCategories, getEntrance, isBermDestination, nearby, getPlaceByName, getOpeningHours };
 })();

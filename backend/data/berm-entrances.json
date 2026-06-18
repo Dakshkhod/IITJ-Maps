@@ -1,0 +1,332 @@
+{
+  "W-8": {
+    "lat": 26.4710194,
+    "lng": 73.111326,
+    "gate_name": "sandstone gate",
+    "berm": true
+  },
+  "W7": {
+    "lat": 26.4708145,
+    "lng": 73.1116435,
+    "gate_name": "sandstone gate",
+    "berm": true
+  },
+  "W-6": {
+    "lat": 26.4707062,
+    "lng": 73.1118162,
+    "gate_name": "sandstone gate",
+    "berm": true
+  },
+  "W-5": {
+    "lat": 26.4705941,
+    "lng": 73.1120386,
+    "gate_name": "sandstone gate",
+    "berm": true
+  },
+  "W-4": {
+    "lat": 26.470482,
+    "lng": 73.1122632,
+    "gate_name": "sandstone gate",
+    "berm": true
+  },
+  "W-3": {
+    "lat": 26.470368,
+    "lng": 73.112477,
+    "gate_name": "sandstone gate",
+    "berm": true
+  },
+  "W-2": {
+    "lat": 26.4702674,
+    "lng": 73.1127426,
+    "gate_name": "sandstone gate",
+    "berm": true
+  },
+  "E-9": {
+    "lat": 26.4714537,
+    "lng": 73.1170063,
+    "gate_name": "sandstone gate",
+    "berm": true
+  },
+  "E-10": {
+    "lat": 26.4717032,
+    "lng": 73.1172002,
+    "gate_name": "sandstone gate",
+    "berm": true
+  },
+  "E-11": {
+    "lat": 26.4719214,
+    "lng": 73.1173415,
+    "gate_name": "sandstone gate",
+    "berm": true
+  },
+  "E-12": {
+    "lat": 26.4722155,
+    "lng": 73.1174994,
+    "gate_name": "sandstone gate",
+    "berm": true
+  },
+  "E-13": {
+    "lat": 26.4725129,
+    "lng": 73.1176193,
+    "gate_name": "sandstone gate",
+    "berm": true
+  },
+  "E-14": {
+    "lat": 26.473415,
+    "lng": 73.1178241,
+    "gate_name": "sandstone gate",
+    "berm": true
+  },
+  "E-15": {
+    "lat": 26.4736818,
+    "lng": 73.1178367,
+    "gate_name": "sandstone gate",
+    "berm": true
+  },
+  "Literature Society": {
+    "lat": 26.4737579,
+    "lng": 73.1178508,
+    "gate_name": "sandstone gate",
+    "berm": true
+  },
+  "Quiz Society": {
+    "lat": 26.4738503,
+    "lng": 73.1178587,
+    "gate_name": "sandstone gate",
+    "berm": true
+  },
+  "Senate Room": {
+    "lat": 26.4739187,
+    "lng": 73.1178651,
+    "gate_name": "sandstone gate",
+    "berm": true
+  },
+  "E-16": {
+    "lat": 26.4739931,
+    "lng": 73.1178744,
+    "gate_name": "sandstone gate",
+    "berm": true
+  },
+  "E-17": {
+    "lat": 26.4743067,
+    "lng": 73.1178922,
+    "gate_name": "sandstone gate",
+    "berm": true
+  },
+  "Dance Society": {
+    "lat": 26.4744482,
+    "lng": 73.1179021,
+    "gate_name": "sandstone gate",
+    "berm": true
+  },
+  "Music Society": {
+    "lat": 26.4745189,
+    "lng": 73.117907,
+    "gate_name": "sandstone gate",
+    "berm": true
+  },
+  "Newsletter Society": {
+    "lat": 26.4745883,
+    "lng": 73.1179118,
+    "gate_name": "sandstone gate",
+    "berm": true
+  },
+  "E -18": {
+    "lat": 26.4746403,
+    "lng": 73.1179119,
+    "gate_name": "sandstone gate",
+    "berm": true
+  },
+  "Dramatics Society": {
+    "lat": 26.4746811,
+    "lng": 73.117912,
+    "gate_name": "sandstone gate",
+    "berm": true
+  },
+  "Film Making Society": {
+    "lat": 26.474717,
+    "lng": 73.1179113,
+    "gate_name": "sandstone gate",
+    "berm": true
+  },
+  "Media and Outreach Society": {
+    "lat": 26.474745,
+    "lng": 73.1179101,
+    "gate_name": "sandstone gate",
+    "berm": true
+  },
+  "Inventory Room": {
+    "lat": 26.4747756,
+    "lng": 73.1179089,
+    "gate_name": "sandstone gate",
+    "berm": true
+  },
+  "Photography Club": {
+    "lat": 26.4748009,
+    "lng": 73.1179082,
+    "gate_name": "sandstone gate",
+    "berm": true
+  },
+  "Designing Club": {
+    "lat": 26.4748199,
+    "lng": 73.1179079,
+    "gate_name": "sandstone gate",
+    "berm": true
+  },
+  "W-26": {
+    "lat": 26.4773423,
+    "lng": 73.1118725,
+    "gate_name": "sandstone gate",
+    "berm": true
+  },
+  "W-27": {
+    "lat": 26.4775757,
+    "lng": 73.1121423,
+    "gate_name": "sandstone gate",
+    "berm": true
+  },
+  "W-28": {
+    "lat": 26.4777392,
+    "lng": 73.1123346,
+    "gate_name": "sandstone gate",
+    "berm": true
+  },
+  "W-21": {
+    "lat": 26.4757858,
+    "lng": 73.1104815,
+    "gate_name": "sandstone gate",
+    "berm": true
+  },
+  "State Bank of India": {
+    "lat": 26.4761179,
+    "lng": 73.1106876,
+    "gate_name": "sandstone gate",
+    "berm": true
+  },
+  "W-22": {
+    "lat": 26.4762003,
+    "lng": 73.1107569,
+    "gate_name": "sandstone gate",
+    "berm": true
+  },
+  "W-23": {
+    "lat": 26.4765123,
+    "lng": 73.1110266,
+    "gate_name": "sandstone gate",
+    "berm": true
+  },
+  "W-24": {
+    "lat": 26.4766769,
+    "lng": 73.1111725,
+    "gate_name": "sandstone gate",
+    "berm": true
+  },
+  "W-25": {
+    "lat": 26.4768523,
+    "lng": 73.111324,
+    "gate_name": "sandstone gate",
+    "berm": true
+  },
+  "E-23": {
+    "lat": 26.4766669,
+    "lng": 73.1179142,
+    "gate_name": "sandstone gate",
+    "berm": true
+  },
+  "Centralized Laundry Services": {
+    "lat": 26.4764824,
+    "lng": 73.117915,
+    "gate_name": "sandstone gate",
+    "berm": true
+  },
+  "Man salon shop": {
+    "lat": 26.4760999,
+    "lng": 73.1179074,
+    "gate_name": "sandstone gate",
+    "berm": true
+  },
+  "Woman salon shop": {
+    "lat": 26.4760339,
+    "lng": 73.1179065,
+    "gate_name": "sandstone gate",
+    "berm": true
+  },
+  "E-20": {
+    "lat": 26.4756504,
+    "lng": 73.1179098,
+    "gate_name": "sandstone gate",
+    "berm": true
+  },
+  "E-19": {
+    "lat": 26.4753258,
+    "lng": 73.1179252,
+    "gate_name": "sandstone gate",
+    "berm": true
+  },
+  "W-15": {
+    "lat": 26.4738275,
+    "lng": 73.1098466,
+    "gate_name": "sandstone gate",
+    "berm": true
+  },
+  "W-16": {
+    "lat": 26.4741208,
+    "lng": 73.1098986,
+    "gate_name": "sandstone gate",
+    "berm": true
+  },
+  "W-17": {
+    "lat": 26.4744511,
+    "lng": 73.1099404,
+    "gate_name": "sandstone gate",
+    "berm": true
+  },
+  "W-18": {
+    "lat": 26.4747973,
+    "lng": 73.1100233,
+    "gate_name": "sandstone gate",
+    "berm": true
+  },
+  "W-19": {
+    "lat": 26.4750476,
+    "lng": 73.1101082,
+    "gate_name": "sandstone gate",
+    "berm": true
+  },
+  "W-20": {
+    "lat": 26.4752975,
+    "lng": 73.110193,
+    "gate_name": "sandstone gate",
+    "berm": true
+  },
+  "W-14": {
+    "lat": 26.4733197,
+    "lng": 73.1098273,
+    "gate_name": "sandstone gate",
+    "berm": true
+  },
+  "W-13": {
+    "lat": 26.4730665,
+    "lng": 73.1098597,
+    "gate_name": "sandstone gate",
+    "berm": true
+  },
+  "W-12": {
+    "lat": 26.4727302,
+    "lng": 73.1099353,
+    "gate_name": "sandstone gate",
+    "berm": true
+  },
+  "W-11": {
+    "lat": 26.4723841,
+    "lng": 73.1100843,
+    "gate_name": "sandstone gate",
+    "berm": true
+  },
+  "W-10": {
+    "lat": 26.472129,
+    "lng": 73.1101988,
+    "gate_name": "sandstone gate",
+    "berm": true
+  }
+}

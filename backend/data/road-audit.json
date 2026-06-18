@@ -1,17 +1,15 @@
 {
-  "generated_at": "2026-06-15T20:20:32.137Z",
+  "generated_at": "2026-06-18T16:29:47.275Z",
   "summary": {
     "campus_main_road": 5,
-    "major_vehicle_road": 24,
-    "campus_service_connector": 204,
+    "major_vehicle_road": 13,
+    "campus_service_connector": 145,
     "campus_service_road": 12,
-    "vehicle_connector": 4,
+    "vehicle_connector": 2,
     "pedestrian_path": 59,
     "campus_standard_road": 39,
-    "maintenance_track": 13,
-    "cycle_pedestrian": 18,
-    "local_street": 133,
-    "local_through_road": 13
+    "maintenance_track": 3,
+    "cycle_pedestrian": 18
   },
   "uncertain_vehicle_segments": [
     {
@@ -837,36 +835,6 @@
       "length_m": 4
     },
     {
-      "osm_id": "914984205",
-      "name": "track",
-      "highway_type": "track",
-      "navigation_class": "maintenance_track",
-      "vehicle_access": "no",
-      "drive_confidence": 0.2,
-      "drive_note": "Track/maintenance alignment; excluded from normal vehicle routing.",
-      "length_m": 3423
-    },
-    {
-      "osm_id": "912344420",
-      "name": "track",
-      "highway_type": "track",
-      "navigation_class": "maintenance_track",
-      "vehicle_access": "no",
-      "drive_confidence": 0.2,
-      "drive_note": "Track/maintenance alignment; excluded from normal vehicle routing.",
-      "length_m": 2081
-    },
-    {
-      "osm_id": "914988024",
-      "name": "track",
-      "highway_type": "track",
-      "navigation_class": "maintenance_track",
-      "vehicle_access": "no",
-      "drive_confidence": 0.2,
-      "drive_note": "Track/maintenance alignment; excluded from normal vehicle routing.",
-      "length_m": 1733
-    },
-    {
       "osm_id": "915014171",
       "name": "track",
       "highway_type": "track",
@@ -875,66 +843,6 @@
       "drive_confidence": 0.2,
       "drive_note": "Track/maintenance alignment; excluded from normal vehicle routing.",
       "length_m": 872
-    },
-    {
-      "osm_id": "911105044",
-      "name": "track",
-      "highway_type": "track",
-      "navigation_class": "maintenance_track",
-      "vehicle_access": "no",
-      "drive_confidence": 0.2,
-      "drive_note": "Track/maintenance alignment; excluded from normal vehicle routing.",
-      "length_m": 682
-    },
-    {
-      "osm_id": "911153912",
-      "name": "track",
-      "highway_type": "track",
-      "navigation_class": "maintenance_track",
-      "vehicle_access": "no",
-      "drive_confidence": 0.2,
-      "drive_note": "Track/maintenance alignment; excluded from normal vehicle routing.",
-      "length_m": 648
-    },
-    {
-      "osm_id": "911166039",
-      "name": "track",
-      "highway_type": "track",
-      "navigation_class": "maintenance_track",
-      "vehicle_access": "no",
-      "drive_confidence": 0.2,
-      "drive_note": "Track/maintenance alignment; excluded from normal vehicle routing.",
-      "length_m": 635
-    },
-    {
-      "osm_id": "912356054",
-      "name": "track",
-      "highway_type": "track",
-      "navigation_class": "maintenance_track",
-      "vehicle_access": "no",
-      "drive_confidence": 0.2,
-      "drive_note": "Track/maintenance alignment; excluded from normal vehicle routing.",
-      "length_m": 555
-    },
-    {
-      "osm_id": "911103840",
-      "name": "track",
-      "highway_type": "track",
-      "navigation_class": "maintenance_track",
-      "vehicle_access": "no",
-      "drive_confidence": 0.2,
-      "drive_note": "Track/maintenance alignment; excluded from normal vehicle routing.",
-      "length_m": 512
-    },
-    {
-      "osm_id": "912360821",
-      "name": "track",
-      "highway_type": "track",
-      "navigation_class": "maintenance_track",
-      "vehicle_access": "no",
-      "drive_confidence": 0.2,
-      "drive_note": "Track/maintenance alignment; excluded from normal vehicle routing.",
-      "length_m": 401
     },
     {
       "osm_id": "1528265077",
@@ -955,16 +863,6 @@
       "drive_confidence": 0.2,
       "drive_note": "Track/maintenance alignment; excluded from normal vehicle routing.",
       "length_m": 39
-    },
-    {
-      "osm_id": "912356053",
-      "name": "track",
-      "highway_type": "track",
-      "navigation_class": "maintenance_track",
-      "vehicle_access": "no",
-      "drive_confidence": 0.2,
-      "drive_note": "Track/maintenance alignment; excluded from normal vehicle routing.",
-      "length_m": 37
     }
   ]
 }

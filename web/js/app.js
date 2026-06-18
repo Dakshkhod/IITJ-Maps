@@ -200,6 +200,31 @@ function areaFillOpacity() {
   return 0.1;
 }
 
+function bermFillColor() {
+  return [
+    'match', ['get', 'berm_type'],
+    'landscape', isDark ? '#5a7a48' : '#8aab6e',
+    /* wave */   isDark ? '#5a7a9a' : '#8eb0d0',
+  ];
+}
+
+function bermFillOpacity() {
+  if (isSatellite) return 0.4;
+  return isDark ? 0.78 : 0.85;
+}
+
+function bermOutlineColor() {
+  return [
+    'match', ['get', 'berm_type'],
+    'landscape', isDark ? '#3d5c32' : '#5c7e44',
+    /* wave */   isDark ? '#3a5570' : '#4a6d8a',
+  ];
+}
+
+function bermLayerVisible() {
+  return LAYERS.buildings && !is3D;
+}
+
 function buildingOutlineOpacity() {
   if (isSatellite) return 0.9;
   return 1;
@@ -385,6 +410,13 @@ function refreshBuildingTheme() {
   }
   if (map.getLayer('areas-fill')) {
     map.setPaintProperty('areas-fill', 'fill-opacity', areaFillOpacity());
+  }
+  if (map.getLayer('berms-fill')) {
+    map.setPaintProperty('berms-fill', 'fill-color', bermFillColor());
+    map.setPaintProperty('berms-fill', 'fill-opacity', bermFillOpacity());
+  }
+  if (map.getLayer('berms-outline')) {
+    map.setPaintProperty('berms-outline', 'line-color', bermOutlineColor());
   }
   refreshMapLabelPaint();
 }
@@ -619,12 +651,13 @@ const OVERLAY_LAYER_IDS = [
   'campus-roads-ped', 'campus-roads-walkway', 'campus-roads-cycle', 'campus-roads-mixed',
   'campus-roads-hit', 'campus-roads-labels',
   'areas-fill', 'areas-outline', 'areas-labels',
+  'berms-fill', 'berms-outline',
   'buildings-fill', 'buildings-outline-casing', 'buildings-outline', 'buildings-3d', 'buildings-labels',
   'buildings-highlight-fill', 'buildings-highlight-outline',
   'places-circles', 'places-labels',
 ];
 const OVERLAY_SOURCE_IDS = [
-  'campus-greens', 'campus-roads', 'named-areas', 'area-labels-src', 'buildings', 'places-points',
+  'campus-greens', 'campus-roads', 'named-areas', 'area-labels-src', 'berms', 'buildings', 'places-points',
 ];
 const ROAD_LAYER_IDS = [
   'campus-roads-restricted',
@@ -675,6 +708,7 @@ async function applyMapStyle() {
         addGreensLayer(IITJData.getGreens());
         addRoadsLayer(roadsRes);
         addAreasLayer(areasRes);
+        addBermsLayer(IITJData.getBerms());
         addBuildingsLayer(buildingsRes);
         addPlacesLayer(placesRes.features || []);
         ensureLandmarkLabelsLayer();
@@ -683,6 +717,8 @@ async function applyMapStyle() {
         map.jumpTo({ center: savedCenter, zoom: savedZoom, pitch: savedPitch, bearing: savedBearing });
 
         if (is3D && !isSatellite) {
+          if (map.getLayer('berms-fill'))        map.setLayoutProperty('berms-fill',        'visibility', 'none');
+          if (map.getLayer('berms-outline'))     map.setLayoutProperty('berms-outline',     'visibility', 'none');
           if (map.getLayer('buildings-fill'))    map.setLayoutProperty('buildings-fill',    'visibility', 'none');
           if (map.getLayer('buildings-outline-casing')) map.setLayoutProperty('buildings-outline-casing', 'visibility', 'none');
           if (map.getLayer('buildings-outline')) map.setLayoutProperty('buildings-outline', 'visibility', 'none');
@@ -758,6 +794,7 @@ async function loadMapData() {
     addGreensLayer(IITJData.getGreens());
     addRoadsLayer(roadsRes);
     addAreasLayer(areasRes);
+    addBermsLayer(IITJData.getBerms());
     addBuildingsLayer(buildingsRes);
     addPlacesLayer(placesRes.features || []);
     ensureLandmarkLabelsLayer();
@@ -1277,6 +1314,51 @@ function addRoadsLayer(data) {
 }
 
 // ============================================================
+// Berms Layer: perimeter wave + landscape berm footprints (2D only)
+// ============================================================
+function addBermsLayer(data) {
+  if (!data || !data.features || !data.features.length) return;
+
+  if (map.getSource('berms')) {
+    map.getSource('berms').setData(data);
+    return;
+  }
+
+  map.addSource('berms', { type: 'geojson', data });
+  const polyFilter = ['==', ['geometry-type'], 'Polygon'];
+  const beforeId = map.getLayer('buildings-fill') ? 'buildings-fill' : undefined;
+
+  map.addLayer({
+    id: 'berms-fill',
+    type: 'fill',
+    source: 'berms',
+    filter: polyFilter,
+    layout: { visibility: bermLayerVisible() ? 'visible' : 'none' },
+    paint: {
+      'fill-color': bermFillColor(),
+      'fill-opacity': bermFillOpacity(),
+    },
+  }, beforeId);
+
+  map.addLayer({
+    id: 'berms-outline',
+    type: 'line',
+    source: 'berms',
+    filter: polyFilter,
+    layout: {
+      'line-join': 'round',
+      'line-cap': 'round',
+      visibility: bermLayerVisible() ? 'visible' : 'none',
+    },
+    paint: {
+      'line-color': bermOutlineColor(),
+      'line-width': ['interpolate', ['linear'], ['zoom'], 14, 1.2, 17, 2, 19, 2.6],
+      'line-opacity': isSatellite ? 0.7 : 0.95,
+    },
+  }, beforeId);
+}
+
+// ============================================================
 // Buildings Layer: 2D fill + 3D extrusion + labels
 // ============================================================
 function addBuildingsLayer(data) {
@@ -1597,6 +1679,8 @@ function toggle3D() {
 
   if (is3D) {
     if (!isSatellite && LAYERS.buildings) {
+      if (map.getLayer('berms-fill'))        map.setLayoutProperty('berms-fill',        'visibility', 'none');
+      if (map.getLayer('berms-outline'))     map.setLayoutProperty('berms-outline',     'visibility', 'none');
       if (map.getLayer('buildings-fill'))    map.setLayoutProperty('buildings-fill',    'visibility', 'none');
       if (map.getLayer('buildings-outline-casing')) map.setLayoutProperty('buildings-outline-casing', 'visibility', 'none');
       if (map.getLayer('buildings-outline')) map.setLayoutProperty('buildings-outline', 'visibility', 'none');
@@ -1622,6 +1706,8 @@ function toggle3D() {
     if (map.getLayer('buildings-3d')) map.setLayoutProperty('buildings-3d', 'visibility', 'none');
     if (typeof Landmarks3D !== 'undefined') Landmarks3D.hide();
     if (!isSatellite && LAYERS.buildings) {
+      if (map.getLayer('berms-fill'))        map.setLayoutProperty('berms-fill',        bermLayerVisible() ? 'visible' : 'none');
+      if (map.getLayer('berms-outline'))     map.setLayoutProperty('berms-outline',     bermLayerVisible() ? 'visible' : 'none');
       if (map.getLayer('buildings-fill'))    map.setLayoutProperty('buildings-fill',    'visibility', 'visible');
       if (map.getLayer('buildings-outline-casing')) map.setLayoutProperty('buildings-outline-casing', 'visibility', 'visible');
       if (map.getLayer('buildings-outline'))    map.setLayoutProperty('buildings-outline',    'visibility', 'visible');
@@ -1656,7 +1742,7 @@ function toggleLayer(layerName) {
   const layerMap = {
     buildings: is3D
       ? ['buildings-3d', 'buildings-labels', 'landmark-labels']
-      : ['buildings-fill', 'buildings-outline-casing', 'buildings-outline', 'buildings-labels', 'landmark-labels'],
+      : ['berms-fill', 'berms-outline', 'buildings-fill', 'buildings-outline-casing', 'buildings-outline', 'buildings-labels', 'landmark-labels'],
     roads: ROAD_LAYER_IDS,
     markers: ['places-circles', 'places-labels'],
   };
@@ -2449,7 +2535,8 @@ async function calculateDirectionsRoute() {
     const route = IITJRouter.computeRoute(
       routeFromLat, routeFromLng,
       routeToLat,   routeToLng,
-      directionsMode
+      directionsMode,
+      { preferCampusSideTo: IITJData.isBermDestination(directionsTo.name, routeToLat, routeToLng) }
     );
 
     hideLoadingToast();

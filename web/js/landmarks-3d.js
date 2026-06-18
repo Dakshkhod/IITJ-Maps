@@ -4803,6 +4803,7 @@ var Landmarks3D = (() => {
   let _treeData = null;       // { full:[lng,lat,...], bush:[lng,lat,...] }
   let _treesBuilt = false;
   let _bermsBuilt = false;
+  let _bermLayout = null;
   // Scene build is split so it can be warmed incrementally at idle (prewarm)
   // and still finish synchronously if 3D is opened before warming completes.
   let _sceneShellReady = false;   // lights + camera + origin frame in place
@@ -5154,6 +5155,13 @@ var Landmarks3D = (() => {
       arc.push(arc[i-1] + Math.hypot(local[i][0]-local[i-1][0], local[i][1]-local[i-1][1]));
     const total = arc[arc.length-1];
     const at = (s) => {
+      if (s > total && local.length >= 2) {
+        const a = local[local.length - 2], b = local[local.length - 1];
+        let tx = b[0]-a[0], tz = b[1]-a[1];
+        const tl = Math.hypot(tx, tz) || 1; tx /= tl; tz /= tl;
+        const extra = s - total;
+        return { px: b[0] + tx*extra, pz: b[1] + tz*extra, tx, tz };
+      }
       s = Math.max(0, Math.min(total, s));
       let seg = 0;
       while (seg < arc.length-2 && arc[seg+1] <= s) seg++;
@@ -5191,18 +5199,20 @@ var Landmarks3D = (() => {
     const parapetY = wallH, peakY = wallH + peak, dipY = wallH - dip;
     const cc = _lngLatToLocal(_CAMPUS_CENTER[0], _CAMPUS_CENTER[1]);
 
-    const n = Math.max(1, Math.round(total / moduleW));
-    const stepW = total / n;
-    const mw = stepW * 0.995;
+    const minModules = opts.minModules || 0;
+    const moduleArcs = opts.moduleArcs;
+    const useArcs = moduleArcs && moduleArcs.length >= 1;
+    const n = useArcs
+      ? moduleArcs.length
+      : Math.max(minModules, Math.max(1, Math.round(total / moduleW)));
+    const defaultStep = total / n;
 
     // ── per-module component geometries (instanced) ──
-    const campusWall = _boxAt(mw, wallH, 0.55, 0, wallH/2, zCampus + 0.275);
-    // Blind-arch applique sits just proud of the campus face (z = zCampus)
-    // so the arcade motif reads; two stacked bays per module.
-    const archPanel  = _archPanelGeo(mw*0.72, wallH*0.40, wallH*0.86, zCampus - 0.04, cols);
-    const archPanel2 = _archPanelGeo(mw*0.72, wallH*0.06, wallH*0.34, zCampus - 0.04, cols);
-    const roadWall   = _scallopWallGeo(mw, dipY, peakY, zRoad - 0.05, cols);
-    const roofStrip  = _roofStripGeo(mw, zRoad - 0.05, zCampus + 0.05, parapetY, dipY, peakY, vault, cols);
+    const campusWall = _boxAt(7.5, wallH, 0.55, 0, wallH/2, zCampus + 0.275);
+    const archPanel  = _archPanelGeo(7.5*0.72, wallH*0.40, wallH*0.86, zCampus - 0.04, cols);
+    const archPanel2 = _archPanelGeo(7.5*0.72, wallH*0.06, wallH*0.34, zCampus - 0.04, cols);
+    const roadWall   = _scallopWallGeo(7.5, dipY, peakY, zRoad - 0.05, cols);
+    const roofStrip  = _roofStripGeo(7.5, zRoad - 0.05, zCampus + 0.05, parapetY, dipY, peakY, vault, cols);
     const ribGeo     = _boxAt(0.7, wallH + peak + 0.3, 1.1, 0, (wallH+peak+0.3)/2, zRoad - 0.2);
 
     const mCampus = new THREE.InstancedMesh(campusWall, BMAT.waveInt,  n);
@@ -5215,6 +5225,7 @@ var Landmarks3D = (() => {
     all.forEach(m => { m.frustumCulled = false; });
 
     const M = new THREE.Matrix4();
+    const S = new THREE.Matrix4();
     const X = new THREE.Vector3(), Y = new THREE.Vector3(0, 1, 0), Z = new THREE.Vector3();
     // Per-station basis following the curve. +z (Z) = outward (toward road).
     const setBasis = (st) => {
@@ -5225,23 +5236,50 @@ var Landmarks3D = (() => {
       return M;
     };
 
+    const moduleWidthAt = (k) => {
+      if (!useArcs) return defaultStep * 0.995;
+      const s = moduleArcs[k];
+      const sPrev = k > 0 ? moduleArcs[k - 1] : s - moduleW;
+      const sNext = k < n - 1 ? moduleArcs[k + 1] : s + moduleW;
+      return Math.max(4.5, Math.min(moduleW, Math.min(s - sPrev, sNext - s) * 0.92));
+    };
+
+    const scaleModule = (mw) => {
+      const sx = mw / 7.5;
+      S.makeScale(sx, 1, 1);
+      M.multiply(S);
+      return M;
+    };
+
     for (let k = 0; k < n; k++) {
-      setBasis(at((k + 0.5) * stepW));
+      const s = useArcs ? moduleArcs[k] : (k + 0.5) * defaultStep;
+      const mw = moduleWidthAt(k);
+      setBasis(at(s));
+      scaleModule(mw);
       mCampus.setMatrixAt(k, M);
       mArch.setMatrixAt(k, M);
       mArch2.setMatrixAt(k, M);
       mRoad.setMatrixAt(k, M);
       mRoof.setMatrixAt(k, M);
     }
-    for (let k = 0; k <= n; k++) {            // ribs on the module JOINTS
-      setBasis(at(k * stepW));
+    const ribAt = (k) => {
+      if (!useArcs) return k * defaultStep;
+      if (k === 0) return 0;
+      if (k >= n) return moduleArcs[n - 1] + moduleWidthAt(n - 1) * 0.5;
+      return (moduleArcs[k - 1] + moduleArcs[k]) * 0.5;
+    };
+    for (let k = 0; k <= n; k++) {
+      setBasis(at(ribAt(k)));
       mRib.setMatrixAt(k, M);
     }
     all.forEach(m => { m.instanceMatrix.needsUpdate = true; });
 
     // ── sandstone end caps (close the open cross-section at both ends) ──
     const capGeo = _boxAt(0.5, wallH, depth, 0, wallH/2, 0);
-    [0, total].forEach((s) => {
+    const endS = useArcs
+      ? [0, moduleArcs[n - 1] + moduleW * 0.5]
+      : [0, total];
+    endS.forEach((s) => {
       const cap = new THREE.Mesh(capGeo, BMAT.waveInt);
       cap.matrixAutoUpdate = false;
       cap.matrix.copy(setBasis(at(s)));
@@ -5539,19 +5577,37 @@ var Landmarks3D = (() => {
   };
 
   // Build every campus berm: 8 hostel wave berms (real footprints) + the three
-  // south-edge green landscape berms.
+  // south-edge green landscape berms. Gate count + centerline come from
+  // berm-layout.json (generated by parse-osm-data.js) so 3D arches match POI snap.
   function _buildBerms() {
     if (!_root || _bermsBuilt) return;
     _bermsBuilt = true;
-    for (const id of BERM_IDS) {
-      const ring = BERM_RINGS[id];
-      if (!ring) continue;
-      const { center, width } = _ribbonCenterline(ring);
-      _root.add(_buildBermSegment(BERM_CL_OVERRIDE[id] || center, width, {
-        wallH: 7.5, vault: 1.7, peak: 1.2, dip: 2.2, moduleW: 7.5,
-      }));
-    }
-    for (const gb of GREEN_BERMS) _root.add(_buildRetainingBerm(gb.path, gb));
+
+    const build = (layout) => {
+      for (const id of BERM_IDS) {
+        const ring = BERM_RINGS[id];
+        if (!ring) continue;
+        const spec = layout && layout[id];
+        const centerPath = spec?.centerline?.length >= 2
+          ? spec.centerline
+          : (BERM_CL_OVERRIDE[id] || _ribbonCenterline(ring).center);
+        const { width } = _ribbonCenterline(ring);
+        const moduleW = spec?.moduleW || 7.5;
+        const minModules = spec?.minModules || 0;
+        const moduleArcs = spec?.moduleArcs;
+        _root.add(_buildBermSegment(centerPath, width, {
+          wallH: 7.5, vault: 1.7, peak: 1.2, dip: 2.2, moduleW, minModules, moduleArcs,
+        }));
+      }
+      for (const gb of GREEN_BERMS) _root.add(_buildRetainingBerm(gb.path, gb));
+      if (_map) _map.triggerRepaint();
+    };
+
+    if (_bermLayout) { build(_bermLayout); return; }
+    fetch('/data/berm-layout.json?v=2')
+      .then(r => r.ok ? r.json() : {})
+      .then(d => { _bermLayout = d || {}; build(_bermLayout); })
+      .catch(() => build({}));
   }
 
   function _buildVegetation() {
