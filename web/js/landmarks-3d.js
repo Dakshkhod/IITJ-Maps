@@ -5155,13 +5155,6 @@ var Landmarks3D = (() => {
       arc.push(arc[i-1] + Math.hypot(local[i][0]-local[i-1][0], local[i][1]-local[i-1][1]));
     const total = arc[arc.length-1];
     const at = (s) => {
-      if (s > total && local.length >= 2) {
-        const a = local[local.length - 2], b = local[local.length - 1];
-        let tx = b[0]-a[0], tz = b[1]-a[1];
-        const tl = Math.hypot(tx, tz) || 1; tx /= tl; tz /= tl;
-        const extra = s - total;
-        return { px: b[0] + tx*extra, pz: b[1] + tz*extra, tx, tz };
-      }
       s = Math.max(0, Math.min(total, s));
       let seg = 0;
       while (seg < arc.length-2 && arc[seg+1] <= s) seg++;
@@ -5179,23 +5172,6 @@ var Landmarks3D = (() => {
    * along the (gently curved) centre-line. InstancedMesh per component, with
    * a per-module basis that follows the curve → a few draw calls/segment.
    */
-  function _densifyLngLatPath(path, perLeg) {
-    perLeg = perLeg || 4;
-    if (path.length < 2) return path.slice();
-    const out = [];
-    for (let i = 0; i < path.length - 1; i++) {
-      for (let k = 0; k < perLeg; k++) {
-        const t = k / perLeg;
-        out.push([
-          path[i][0] + t * (path[i + 1][0] - path[i][0]),
-          path[i][1] + t * (path[i + 1][1] - path[i][1]),
-        ]);
-      }
-    }
-    out.push(path[path.length - 1]);
-    return out;
-  }
-
   function _buildBermSegment(centerPath, widthM, opts) {
     opts = opts || {};
     const wallH   = opts.wallH   ?? 7.5;     // sandstone parapet height
@@ -5206,32 +5182,28 @@ var Landmarks3D = (() => {
     const cols    = 12;
     const g = new THREE.Group();
 
-    const densePath = _densifyLngLatPath(centerPath, 5);
-    const local = densePath.map(([lng,lat]) => _lngLatToLocal(lng, lat));
+    const local = centerPath.map(([lng,lat]) => _lngLatToLocal(lng, lat));
     if (local.length < 2) return g;
     const { at, total } = _polyWalker(local);
     if (total < 2) return g;
-    const clampS = (s) => Math.max(0, Math.min(total, s));
 
     const depth = Math.max(5.0, Math.min(8.5, widthM));   // road↔campus span
     const zRoad = depth/2, zCampus = -depth/2;
     const parapetY = wallH, peakY = wallH + peak, dipY = wallH - dip;
     const cc = _lngLatToLocal(_CAMPUS_CENTER[0], _CAMPUS_CENTER[1]);
 
-    const minModules = opts.minModules || 0;
-    const moduleArcs = opts.moduleArcs;
-    const useArcs = moduleArcs && moduleArcs.length >= 1;
-    const n = useArcs
-      ? moduleArcs.length
-      : Math.max(minModules, Math.max(1, Math.round(total / moduleW)));
-    const defaultStep = total / n;
+    const n = Math.max(1, Math.round(total / moduleW));
+    const stepW = total / n;
+    const mw = stepW * 0.995;
 
     // ── per-module component geometries (instanced) ──
-    const campusWall = _boxAt(7.5, wallH, 0.55, 0, wallH/2, zCampus + 0.275);
-    const archPanel  = _archPanelGeo(7.5*0.72, wallH*0.40, wallH*0.86, zCampus - 0.04, cols);
-    const archPanel2 = _archPanelGeo(7.5*0.72, wallH*0.06, wallH*0.34, zCampus - 0.04, cols);
-    const roadWall   = _scallopWallGeo(7.5, dipY, peakY, zRoad - 0.05, cols);
-    const roofStrip  = _roofStripGeo(7.5, zRoad - 0.05, zCampus + 0.05, parapetY, dipY, peakY, vault, cols);
+    const campusWall = _boxAt(mw, wallH, 0.55, 0, wallH/2, zCampus + 0.275);
+    // Blind-arch applique sits just proud of the campus face (z = zCampus)
+    // so the arcade motif reads; two stacked bays per module.
+    const archPanel  = _archPanelGeo(mw*0.72, wallH*0.40, wallH*0.86, zCampus - 0.04, cols);
+    const archPanel2 = _archPanelGeo(mw*0.72, wallH*0.06, wallH*0.34, zCampus - 0.04, cols);
+    const roadWall   = _scallopWallGeo(mw, dipY, peakY, zRoad - 0.05, cols);
+    const roofStrip  = _roofStripGeo(mw, zRoad - 0.05, zCampus + 0.05, parapetY, dipY, peakY, vault, cols);
     const ribGeo     = _boxAt(0.7, wallH + peak + 0.3, 1.1, 0, (wallH+peak+0.3)/2, zRoad - 0.2);
 
     const mCampus = new THREE.InstancedMesh(campusWall, BMAT.waveInt,  n);
@@ -5255,21 +5227,15 @@ var Landmarks3D = (() => {
     };
 
     for (let k = 0; k < n; k++) {
-      const s = clampS(useArcs ? moduleArcs[k] : (k + 0.5) * defaultStep);
-      setBasis(at(s));
+      setBasis(at((k + 0.5) * stepW));
       mCampus.setMatrixAt(k, M);
       mArch.setMatrixAt(k, M);
       mArch2.setMatrixAt(k, M);
       mRoad.setMatrixAt(k, M);
       mRoof.setMatrixAt(k, M);
     }
-    for (let k = 0; k <= n; k++) {
-      let s;
-      if (!useArcs) s = k * defaultStep;
-      else if (k === 0) s = 0;
-      else if (k >= n) s = total;
-      else s = clampS((moduleArcs[k - 1] + moduleArcs[k]) * 0.5);
-      setBasis(at(s));
+    for (let k = 0; k <= n; k++) {            // ribs on the module JOINTS
+      setBasis(at(k * stepW));
       mRib.setMatrixAt(k, M);
     }
     all.forEach(m => { m.instanceMatrix.needsUpdate = true; });
@@ -5571,49 +5537,23 @@ var Landmarks3D = (() => {
                    [73.1124450,26.4704699],[73.1125275,26.4704338],
                    [73.1126023,26.4704025],[73.1126678,26.4703769],
                    [73.1127229,26.4703576]],
-    // 744 — east hostel berm midline (see parse-osm-data.js).
-    '1412399744': [[73.1178625,26.4732272],[73.1178267,26.4732736],[73.1178357,26.4733457],
-                   [73.1178453,26.4734181],[73.1178549,26.4734906],[73.1178645,26.4735631],
-                   [73.1178741,26.4736355],[73.1178837,26.4737080],[73.1178933,26.4737804],
-                   [73.1179029,26.4738529],[73.1179109,26.4739255],[73.1179182,26.4739981],
-                   [73.1179240,26.4740709],[73.1179289,26.4741437],[73.1179338,26.4742166],
-                   [73.1179388,26.4742894],[73.1179437,26.4743622],[73.1179486,26.4744351],
-                   [73.1179536,26.4745079],[73.1179575,26.4745808],[73.1179599,26.4746537],
-                   [73.1179607,26.4747266],[73.1179766,26.4747872],[73.1180214,26.4748232]],
   };
 
-  // Build every campus berm: 8 hostel wave berms (real footprints) + the three
-  // south-edge green landscape berms. Gate count + centerline come from
-  // berm-layout.json (generated by parse-osm-data.js) so 3D arches match POI snap.
+  // Build every campus berm from the OSM ribbon parabolic centre-line (same
+  // curve as before POI-driven extensions). POI snap uses berm-layout gates.
   function _buildBerms() {
     if (!_root || _bermsBuilt) return;
     _bermsBuilt = true;
-
-    const build = (layout) => {
-      for (const id of BERM_IDS) {
-        const ring = BERM_RINGS[id];
-        if (!ring) continue;
-        const spec = layout && layout[id];
-        const centerPath = spec?.centerline?.length >= 2
-          ? spec.centerline
-          : (BERM_CL_OVERRIDE[id] || _ribbonCenterline(ring).center);
-        const { width } = _ribbonCenterline(ring);
-        const moduleW = spec?.moduleW || 7.5;
-        const minModules = spec?.minModules || 0;
-        const moduleArcs = spec?.moduleArcs;
-        _root.add(_buildBermSegment(centerPath, width, {
-          wallH: 7.5, vault: 1.7, peak: 1.2, dip: 2.2, moduleW, minModules, moduleArcs,
-        }));
-      }
-      for (const gb of GREEN_BERMS) _root.add(_buildRetainingBerm(gb.path, gb));
-      if (_map) _map.triggerRepaint();
-    };
-
-    if (_bermLayout) { build(_bermLayout); return; }
-    fetch('/data/berm-layout.json?v=5')
-      .then(r => r.ok ? r.json() : {})
-      .then(d => { _bermLayout = d || {}; build(_bermLayout); })
-      .catch(() => build({}));
+    for (const id of BERM_IDS) {
+      const ring = BERM_RINGS[id];
+      if (!ring) continue;
+      const { center, width } = _ribbonCenterline(ring);
+      _root.add(_buildBermSegment(BERM_CL_OVERRIDE[id] || center, width, {
+        wallH: 7.5, vault: 1.7, peak: 1.2, dip: 2.2, moduleW: 7.5,
+      }));
+    }
+    for (const gb of GREEN_BERMS) _root.add(_buildRetainingBerm(gb.path, gb));
+    if (_map) _map.triggerRepaint();
   }
 
   function _buildVegetation() {

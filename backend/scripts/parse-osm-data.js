@@ -672,17 +672,6 @@ const BERM_CL_OVERRIDE = {
                  [73.1124450,26.4704699],[73.1125275,26.4704338],
                  [73.1126023,26.4704025],[73.1126678,26.4703769],
                  [73.1127229,26.4703576]],
-  // 744 — east hostel berm midline along the long curved edge (south → NE).
-  // North-cap westward points removed; the centreline extends past NE only when
-  // POI count requires more arches (see _extendCenterlineArc).
-  '1412399744': [[73.1178625,26.4732272],[73.1178267,26.4732736],[73.1178357,26.4733457],
-                 [73.1178453,26.4734181],[73.1178549,26.4734906],[73.1178645,26.4735631],
-                 [73.1178741,26.4736355],[73.1178837,26.4737080],[73.1178933,26.4737804],
-                 [73.1179029,26.4738529],[73.1179109,26.4739255],[73.1179182,26.4739981],
-                 [73.1179240,26.4740709],[73.1179289,26.4741437],[73.1179338,26.4742166],
-                 [73.1179388,26.4742894],[73.1179437,26.4743622],[73.1179486,26.4744351],
-                 [73.1179536,26.4745079],[73.1179575,26.4745808],[73.1179599,26.4746537],
-                 [73.1179607,26.4747266],[73.1179766,26.4747872],[73.1180214,26.4748232]],
 };
 
 // Same ribbon polygons as web/js/landmarks-3d.js BERM_RINGS — keep in sync.
@@ -815,7 +804,14 @@ function _moduleMidpointsFromMetric(samples, cx, cy, mLng, mLat, moduleW) {
   return { gates, centerline, total, moduleW, minModules: nMods };
 }
 
-function _ringMidlineCenterline(ring, K = 48) {
+function _denseMetricSamples(ring, overridePath) {
+  if (overridePath) {
+    let cx = 0, cy = 0;
+    overridePath.forEach(p => { cx += p[0]; cy += p[1]; }); cx /= overridePath.length; cy /= overridePath.length;
+    const mLng = 111320 * Math.cos(cy * Math.PI/180), mLat = 111320;
+    const samples = overridePath.map(p => [(p[0]-cx)*mLng, (p[1]-cy)*mLat]);
+    return { samples, cx, cy, mLng, mLat };
+  }
   const pts = ring.slice(0, ring.length - 1);
   const n = pts.length;
   let cx = 0, cy = 0;
@@ -834,37 +830,23 @@ function _ringMidlineCenterline(ring, K = 48) {
     for (;;) { c.push(P[i]); if (i === to) break; i = (i + 1) % n; }
     return c;
   };
+  const K = 22;
   const ra = _resampleXY(chain(iMin, iMax), K);
   const rb = _resampleXY(chain(iMax, iMin).reverse(), K);
-  const centerline = [];
+  const T = [], W = [];
   for (let i = 0; i < K; i++) {
-    centerline.push([
-      cx + (ra[i][0] + rb[i][0]) / 2 / mLng,
-      cy + (ra[i][1] + rb[i][1]) / 2 / mLat,
-    ]);
+    const mx = (ra[i][0] + rb[i][0]) / 2, my = (ra[i][1] + rb[i][1]) / 2;
+    T.push(mx * ax + my * ay); W.push(mx * bx + my * by);
   }
-  let total = 0;
-  for (let i = 1; i < centerline.length; i++) {
-    total += _distPairM(centerline[i - 1], centerline[i]);
+  const f = _quadFit(T, W);
+  const tMin = Math.min(...T), tMax = Math.max(...T);
+  const dense = 200;
+  const samples = [];
+  for (let i = 0; i < dense; i++) {
+    const tt = tMin + (tMax - tMin) * i / (dense - 1);
+    const ww = f.A * tt * tt + f.B * tt + f.C;
+    samples.push([tt * ax + ww * bx, tt * ay + ww * by]);
   }
-  return { centerline, total, cx, cy, mLng, mLat };
-}
-
-function _distPairM(a, b) {
-  const cosLat = Math.cos(((a[1] + b[1]) / 2) * Math.PI / 180);
-  return Math.hypot((b[0] - a[0]) * 111320 * cosLat, (b[1] - a[1]) * 111320);
-}
-
-function _denseMetricSamples(ring, overridePath) {
-  if (overridePath) {
-    let cx = 0, cy = 0;
-    overridePath.forEach(p => { cx += p[0]; cy += p[1]; }); cx /= overridePath.length; cy /= overridePath.length;
-    const mLng = 111320 * Math.cos(cy * Math.PI/180), mLat = 111320;
-    const samples = overridePath.map(p => [(p[0]-cx)*mLng, (p[1]-cy)*mLat]);
-    return { samples, cx, cy, mLng, mLat };
-  }
-  const { centerline, cx, cy, mLng, mLat } = _ringMidlineCenterline(ring, 56);
-  const samples = centerline.map(p => [(p[0] - cx) * mLng, (p[1] - cy) * mLat]);
   return { samples, cx, cy, mLng, mLat };
 }
 
@@ -942,68 +924,6 @@ function _lngLatAtArcS(s, centerline) {
   const segLen = Math.hypot(dx, dy) || 1;
   const extra = s - total;
   return [(bx + (dx / segLen) * extra) / mLng, (by + (dy / segLen) * extra) / mLat];
-}
-
-// Extend centreline along the end tangent until arc-length need is met.
-function _extendCenterlineArc(centerline, targetS) {
-  const total = _centerlineTotal(centerline);
-  if (targetS <= total + 0.5) return { centerline, lengthM: total };
-  const extended = centerline.slice();
-  let cur = total;
-  const step = 3.5;
-  while (cur < targetS) {
-    cur += step;
-    extended.push(_lngLatAtArcS(cur, extended));
-  }
-  return { centerline: extended, lengthM: cur };
-}
-
-// Uniform arch row for the 3D mesh; POI gates claim the nearest free slot in order.
-function _uniformModuleArcs(total, moduleW, poiBindings) {
-  const arcs = [];
-  for (let s = moduleW * 0.5; s <= total - moduleW * 0.15; s += moduleW) {
-    arcs.push(s);
-  }
-  if (!arcs.length) arcs.push(moduleW * 0.5);
-
-  const sorted = [...poiBindings].sort((a, b) => a.s - b.s);
-  const used = new Set();
-  for (const poi of sorted) {
-    let best = -1, bestD = Infinity;
-    for (let mi = 0; mi < arcs.length; mi++) {
-      if (used.has(mi)) continue;
-      const d = Math.abs(arcs[mi] - poi.s);
-      if (d < bestD) { bestD = d; best = mi; }
-    }
-    if (best < 0) {
-      arcs.push(poi.s);
-      best = arcs.length - 1;
-    }
-    used.add(best);
-    poi.s = arcs[best];
-  }
-  return arcs;
-}
-
-// One dedicated gate per POI; extend the berm when spacing overflows — never compress.
-function _poiGateLayoutFromPOIs(list, centerline, minSpacing = 7.25) {
-  const sorted = list
-    .map((item, idx) => ({ ...item, idx, s: _projectArcS(item.lng, item.lat, centerline) }))
-    .sort((a, b) => a.s - b.s
-      || a.lng - b.lng
-      || (a.cand.place.properties.name || '').localeCompare(b.cand.place.properties.name || ''));
-
-  const poiBindings = [];
-  let lastS = -Infinity;
-  for (const item of sorted) {
-    let s = item.s;
-    if (poiBindings.length) s = Math.max(s, lastS + minSpacing);
-    else s = Math.max(0, s);
-    poiBindings.push({ poiIdx: item.idx, s });
-    lastS = s;
-  }
-
-  return { poiBindings };
 }
 
 // Minimum-cost bipartite matching: n POIs → m gates (n ≤ m). Hungarian
@@ -1143,48 +1063,34 @@ function snapPerimeterCodes(places, osmData) {
     const poiCount = list.length;
     const ring = mergedRings[ribbonId];
     const override = BERM_CL_OVERRIDE[ribbonId];
-    const baseSpec = ribbonGatesForRibbon(ring, override, layout[ribbonId].moduleW, 0);
-    const gateSpacing = baseSpec.moduleW;
-    let centerline = override || baseSpec.centerline;
-    let { poiBindings } = _poiGateLayoutFromPOIs(list, centerline, gateSpacing);
-    const needArc = poiBindings[poiBindings.length - 1].s + gateSpacing * 0.75;
-    if (needArc > _centerlineTotal(centerline)) {
-      centerline = _extendCenterlineArc(centerline, needArc).centerline;
-      ({ poiBindings } = _poiGateLayoutFromPOIs(list, centerline, gateSpacing));
-    }
-    const lengthM = _centerlineTotal(centerline);
-    const moduleArcs = _uniformModuleArcs(lengthM, gateSpacing, poiBindings);
+    const spec = ribbonGatesForRibbon(ring, override, layout[ribbonId].moduleW, poiCount);
 
-    const gates = moduleArcs.map(s => {
-      const [lng, lat] = _lngLatAtArcS(s, centerline);
-      return { lng, lat, s };
-    });
-
-    layout[ribbonId].gates = gates.map(({ lng, lat }) => ({ lng, lat }));
-    layout[ribbonId].centerline = centerline;
-    layout[ribbonId].moduleArcs = moduleArcs;
-    layout[ribbonId].poiGateArcs = poiBindings.map(b => b.s);
-    layout[ribbonId].moduleW = gateSpacing;
-    layout[ribbonId].minModules = moduleArcs.length;
-    layout[ribbonId].lengthM = lengthM;
+    layout[ribbonId].gates = spec.gates.map(([lng, lat]) => ({ lng, lat }));
+    layout[ribbonId].centerline = spec.centerline;
+    layout[ribbonId].moduleW = spec.moduleW;
+    layout[ribbonId].minModules = spec.minModules;
+    layout[ribbonId].lengthM = spec.total;
     layout[ribbonId].poiCount = poiCount;
-    layout[ribbonId].poiDriven = true;
 
-    const listByIdx = list.slice();
-    for (const { poiIdx, s } of poiBindings) {
-      const { cand } = listByIdx[poiIdx];
-      const [lng, lat] = _lngLatAtArcS(s, centerline);
-      cand.place.geometry.coordinates = [lng, lat];
-      if (cand.place.centroid) cand.place.centroid = { lat, lng };
+    const gates = spec.gates.map(([lng, lat], gi) => ({ lng, lat, gi }));
+    const cost = list.map(item => gates.map(g => distM(item.lng, item.lat, g)));
+    const assign = minCostGateAssign(cost);
+    for (let pi = 0; pi < list.length; pi++) {
+      const gi = assign[pi];
+      if (gi < 0) continue;
+      const g = gates[gi];
+      const { cand } = list[pi];
+      cand.place.geometry.coordinates = [g.lng, g.lat];
+      if (cand.place.centroid) cand.place.centroid = { lat: g.lat, lng: g.lng };
       const name = (cand.place.properties.name || '').trim();
       if (name) {
-        bermEntrances[name] = { lat, lng, gate_name: 'sandstone gate', berm: true };
+        bermEntrances[name] = { lat: g.lat, lng: g.lng, gate_name: 'sandstone gate', berm: true };
       }
       snapped++;
     }
   }
 
-  console.log(`  Perimeter layout: ${snapped} berm POIs on dedicated sandstone gates`);
+  console.log(`  Perimeter snap: ${snapped} berm POIs anchored to sandstone gates`);
   return { places, bermEntrances, bermLayout: layout };
 }
 
