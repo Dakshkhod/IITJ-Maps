@@ -5179,6 +5179,23 @@ var Landmarks3D = (() => {
    * along the (gently curved) centre-line. InstancedMesh per component, with
    * a per-module basis that follows the curve → a few draw calls/segment.
    */
+  function _densifyLngLatPath(path, perLeg) {
+    perLeg = perLeg || 4;
+    if (path.length < 2) return path.slice();
+    const out = [];
+    for (let i = 0; i < path.length - 1; i++) {
+      for (let k = 0; k < perLeg; k++) {
+        const t = k / perLeg;
+        out.push([
+          path[i][0] + t * (path[i + 1][0] - path[i][0]),
+          path[i][1] + t * (path[i + 1][1] - path[i][1]),
+        ]);
+      }
+    }
+    out.push(path[path.length - 1]);
+    return out;
+  }
+
   function _buildBermSegment(centerPath, widthM, opts) {
     opts = opts || {};
     const wallH   = opts.wallH   ?? 7.5;     // sandstone parapet height
@@ -5189,10 +5206,12 @@ var Landmarks3D = (() => {
     const cols    = 12;
     const g = new THREE.Group();
 
-    const local = centerPath.map(([lng,lat]) => _lngLatToLocal(lng, lat));
+    const densePath = _densifyLngLatPath(centerPath, 5);
+    const local = densePath.map(([lng,lat]) => _lngLatToLocal(lng, lat));
     if (local.length < 2) return g;
     const { at, total } = _polyWalker(local);
     if (total < 2) return g;
+    const clampS = (s) => Math.max(0, Math.min(total, s));
 
     const depth = Math.max(5.0, Math.min(8.5, widthM));   // road↔campus span
     const zRoad = depth/2, zCampus = -depth/2;
@@ -5225,7 +5244,6 @@ var Landmarks3D = (() => {
     all.forEach(m => { m.frustumCulled = false; });
 
     const M = new THREE.Matrix4();
-    const S = new THREE.Matrix4();
     const X = new THREE.Vector3(), Y = new THREE.Vector3(0, 1, 0), Z = new THREE.Vector3();
     // Per-station basis following the curve. +z (Z) = outward (toward road).
     const setBasis = (st) => {
@@ -5236,50 +5254,29 @@ var Landmarks3D = (() => {
       return M;
     };
 
-    const moduleWidthAt = (k) => {
-      if (!useArcs) return defaultStep * 0.995;
-      const s = moduleArcs[k];
-      const sPrev = k > 0 ? moduleArcs[k - 1] : s - moduleW;
-      const sNext = k < n - 1 ? moduleArcs[k + 1] : s + moduleW;
-      return Math.max(4.5, Math.min(moduleW, Math.min(s - sPrev, sNext - s) * 0.92));
-    };
-
-    const scaleModule = (mw) => {
-      const sx = mw / 7.5;
-      S.makeScale(sx, 1, 1);
-      M.multiply(S);
-      return M;
-    };
-
     for (let k = 0; k < n; k++) {
-      const s = useArcs ? moduleArcs[k] : (k + 0.5) * defaultStep;
-      const mw = moduleWidthAt(k);
+      const s = clampS(useArcs ? moduleArcs[k] : (k + 0.5) * defaultStep);
       setBasis(at(s));
-      scaleModule(mw);
       mCampus.setMatrixAt(k, M);
       mArch.setMatrixAt(k, M);
       mArch2.setMatrixAt(k, M);
       mRoad.setMatrixAt(k, M);
       mRoof.setMatrixAt(k, M);
     }
-    const ribAt = (k) => {
-      if (!useArcs) return k * defaultStep;
-      if (k === 0) return 0;
-      if (k >= n) return moduleArcs[n - 1] + moduleWidthAt(n - 1) * 0.5;
-      return (moduleArcs[k - 1] + moduleArcs[k]) * 0.5;
-    };
     for (let k = 0; k <= n; k++) {
-      setBasis(at(ribAt(k)));
+      let s;
+      if (!useArcs) s = k * defaultStep;
+      else if (k === 0) s = 0;
+      else if (k >= n) s = total;
+      else s = clampS((moduleArcs[k - 1] + moduleArcs[k]) * 0.5);
+      setBasis(at(s));
       mRib.setMatrixAt(k, M);
     }
     all.forEach(m => { m.instanceMatrix.needsUpdate = true; });
 
     // ── sandstone end caps (close the open cross-section at both ends) ──
     const capGeo = _boxAt(0.5, wallH, depth, 0, wallH/2, 0);
-    const endS = useArcs
-      ? [0, moduleArcs[n - 1] + moduleW * 0.5]
-      : [0, total];
-    endS.forEach((s) => {
+    [0, total].forEach((s) => {
       const cap = new THREE.Mesh(capGeo, BMAT.waveInt);
       cap.matrixAutoUpdate = false;
       cap.matrix.copy(setBasis(at(s)));
@@ -5574,7 +5571,7 @@ var Landmarks3D = (() => {
                    [73.1124450,26.4704699],[73.1125275,26.4704338],
                    [73.1126023,26.4704025],[73.1126678,26.4703769],
                    [73.1127229,26.4703576]],
-    // 744 — east hostel berm midline + north cap (see parse-osm-data.js).
+    // 744 — east hostel berm midline (see parse-osm-data.js).
     '1412399744': [[73.1178625,26.4732272],[73.1178267,26.4732736],[73.1178357,26.4733457],
                    [73.1178453,26.4734181],[73.1178549,26.4734906],[73.1178645,26.4735631],
                    [73.1178741,26.4736355],[73.1178837,26.4737080],[73.1178933,26.4737804],
@@ -5582,9 +5579,7 @@ var Landmarks3D = (() => {
                    [73.1179240,26.4740709],[73.1179289,26.4741437],[73.1179338,26.4742166],
                    [73.1179388,26.4742894],[73.1179437,26.4743622],[73.1179486,26.4744351],
                    [73.1179536,26.4745079],[73.1179575,26.4745808],[73.1179599,26.4746537],
-                   [73.1179607,26.4747266],[73.1179766,26.4747872],[73.1180214,26.4748232],
-                   [73.1179940,26.4748215],[73.1179665,26.4748202],[73.1179390,26.4748199],
-                   [73.1179079,26.4748199]],
+                   [73.1179607,26.4747266],[73.1179766,26.4747872],[73.1180214,26.4748232]],
   };
 
   // Build every campus berm: 8 hostel wave berms (real footprints) + the three
@@ -5615,7 +5610,7 @@ var Landmarks3D = (() => {
     };
 
     if (_bermLayout) { build(_bermLayout); return; }
-    fetch('/data/berm-layout.json?v=4')
+    fetch('/data/berm-layout.json?v=5')
       .then(r => r.ok ? r.json() : {})
       .then(d => { _bermLayout = d || {}; build(_bermLayout); })
       .catch(() => build({}));

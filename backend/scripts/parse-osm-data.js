@@ -672,9 +672,9 @@ const BERM_CL_OVERRIDE = {
                  [73.1124450,26.4704699],[73.1125275,26.4704338],
                  [73.1126023,26.4704025],[73.1126678,26.4703769],
                  [73.1127229,26.4703576]],
-  // 744 — east hostel berm: OSM ribbon midline (not a single parabolic fit) so the
-  // 3D wave follows the real curved footprint; north cap extended to the NW
-  // vertex so Designing / Photography clubs sit on arches, not past the berm.
+  // 744 — east hostel berm midline along the long curved edge (south → NE).
+  // North-cap westward points removed; the centreline extends past NE only when
+  // POI count requires more arches (see _extendCenterlineArc).
   '1412399744': [[73.1178625,26.4732272],[73.1178267,26.4732736],[73.1178357,26.4733457],
                  [73.1178453,26.4734181],[73.1178549,26.4734906],[73.1178645,26.4735631],
                  [73.1178741,26.4736355],[73.1178837,26.4737080],[73.1178933,26.4737804],
@@ -682,9 +682,7 @@ const BERM_CL_OVERRIDE = {
                  [73.1179240,26.4740709],[73.1179289,26.4741437],[73.1179338,26.4742166],
                  [73.1179388,26.4742894],[73.1179437,26.4743622],[73.1179486,26.4744351],
                  [73.1179536,26.4745079],[73.1179575,26.4745808],[73.1179599,26.4746537],
-                 [73.1179607,26.4747266],[73.1179766,26.4747872],[73.1180214,26.4748232],
-                 [73.1179940,26.4748215],[73.1179665,26.4748202],[73.1179390,26.4748199],
-                 [73.1179079,26.4748199]],
+                 [73.1179607,26.4747266],[73.1179766,26.4747872],[73.1180214,26.4748232]],
 };
 
 // Same ribbon polygons as web/js/landmarks-3d.js BERM_RINGS — keep in sync.
@@ -946,6 +944,7 @@ function _lngLatAtArcS(s, centerline) {
   return [(bx + (dx / segLen) * extra) / mLng, (by + (dy / segLen) * extra) / mLat];
 }
 
+// Extend centreline along the end tangent until arc-length need is met.
 function _extendCenterlineArc(centerline, targetS) {
   const total = _centerlineTotal(centerline);
   if (targetS <= total + 0.5) return { centerline, lengthM: total };
@@ -959,42 +958,35 @@ function _extendCenterlineArc(centerline, targetS) {
   return { centerline: extended, lengthM: cur };
 }
 
-// Keep every POI gate on the berm arc — shift or compress along the curve
-// instead of extrapolating straight past the OSM footprint.
-function _fitGateArcsToBerm(poiBindings, centerline, minSpacing) {
-  if (!poiBindings.length) return;
-  const total = _centerlineTotal(centerline);
-  const endPad = minSpacing * 0.4;
-  const startPad = minSpacing * 0.25;
-
-  let maxS = poiBindings[poiBindings.length - 1].s;
-  if (maxS > total - endPad) {
-    const shift = maxS - (total - endPad);
-    poiBindings.forEach(b => { b.s = Math.max(startPad, b.s - shift); });
+// Uniform arch row for the 3D mesh; POI gates claim the nearest free slot in order.
+function _uniformModuleArcs(total, moduleW, poiBindings) {
+  const arcs = [];
+  for (let s = moduleW * 0.5; s <= total - moduleW * 0.15; s += moduleW) {
+    arcs.push(s);
   }
+  if (!arcs.length) arcs.push(moduleW * 0.5);
 
-  for (let i = 1; i < poiBindings.length; i++) {
-    if (poiBindings[i].s - poiBindings[i - 1].s < minSpacing * 0.92) {
-      poiBindings[i].s = poiBindings[i - 1].s + minSpacing;
+  const sorted = [...poiBindings].sort((a, b) => a.s - b.s);
+  const used = new Set();
+  for (const poi of sorted) {
+    let best = -1, bestD = Infinity;
+    for (let mi = 0; mi < arcs.length; mi++) {
+      if (used.has(mi)) continue;
+      const d = Math.abs(arcs[mi] - poi.s);
+      if (d < bestD) { bestD = d; best = mi; }
     }
-  }
-
-  maxS = poiBindings[poiBindings.length - 1].s;
-  if (maxS > total - endPad && poiBindings.length > 1) {
-    const span = maxS - poiBindings[0].s;
-    const avail = total - endPad - poiBindings[0].s;
-    if (span > avail) {
-      const scale = avail / span;
-      for (let i = 1; i < poiBindings.length; i++) {
-        poiBindings[i].s = poiBindings[0].s + (poiBindings[i].s - poiBindings[0].s) * scale;
-      }
+    if (best < 0) {
+      arcs.push(poi.s);
+      best = arcs.length - 1;
     }
+    used.add(best);
+    poi.s = arcs[best];
   }
+  return arcs;
 }
 
-// One dedicated gate per POI on the berm centerline; spread clusters so labels
-// never stack, then add filler arches only in wide gaps for a continuous 3D mesh.
-function _poiGateLayoutFromPOIs(list, centerline, minSpacing = 7.25, fillGap = 12) {
+// One dedicated gate per POI; extend the berm when spacing overflows — never compress.
+function _poiGateLayoutFromPOIs(list, centerline, minSpacing = 7.25) {
   const sorted = list
     .map((item, idx) => ({ ...item, idx, s: _projectArcS(item.lng, item.lat, centerline) }))
     .sort((a, b) => a.s - b.s
@@ -1004,36 +996,14 @@ function _poiGateLayoutFromPOIs(list, centerline, minSpacing = 7.25, fillGap = 1
   const poiBindings = [];
   let lastS = -Infinity;
   for (const item of sorted) {
-    const s = poiBindings.length === 0
-      ? Math.max(0, item.s)
-      : Math.max(item.s, lastS + minSpacing);
+    let s = item.s;
+    if (poiBindings.length) s = Math.max(s, lastS + minSpacing);
+    else s = Math.max(0, s);
     poiBindings.push({ poiIdx: item.idx, s });
     lastS = s;
   }
 
-  _fitGateArcsToBerm(poiBindings, centerline, minSpacing);
-
-  const moduleArcs = [];
-  const pushArc = (s) => {
-    if (!moduleArcs.length || Math.abs(s - moduleArcs[moduleArcs.length - 1]) > 0.5) {
-      moduleArcs.push(s);
-    }
-  };
-
-  for (let i = 0; i < poiBindings.length; i++) {
-    if (i > 0) {
-      const gap = poiBindings[i].s - poiBindings[i - 1].s;
-      if (gap > fillGap) {
-        const nFill = Math.max(1, Math.round(gap / minSpacing) - 1);
-        for (let f = 1; f <= nFill; f++) {
-          pushArc(poiBindings[i - 1].s + (gap * f) / (nFill + 1));
-        }
-      }
-    }
-    pushArc(poiBindings[i].s);
-  }
-
-  return { poiBindings, moduleArcs };
+  return { poiBindings };
 }
 
 // Minimum-cost bipartite matching: n POIs → m gates (n ≤ m). Hungarian
@@ -1176,14 +1146,14 @@ function snapPerimeterCodes(places, osmData) {
     const baseSpec = ribbonGatesForRibbon(ring, override, layout[ribbonId].moduleW, 0);
     const gateSpacing = baseSpec.moduleW;
     let centerline = override || baseSpec.centerline;
-    let { poiBindings, moduleArcs } = _poiGateLayoutFromPOIs(list, centerline, gateSpacing);
-    let lengthM = _centerlineTotal(centerline);
-    const maxArc = poiBindings[poiBindings.length - 1].s + gateSpacing * 0.5;
-    if (maxArc > lengthM - gateSpacing * 0.4) {
-      centerline = _extendCenterlineArc(centerline, maxArc).centerline;
-      lengthM = _centerlineTotal(centerline);
-      ({ poiBindings, moduleArcs } = _poiGateLayoutFromPOIs(list, centerline, gateSpacing));
+    let { poiBindings } = _poiGateLayoutFromPOIs(list, centerline, gateSpacing);
+    const needArc = poiBindings[poiBindings.length - 1].s + gateSpacing * 0.75;
+    if (needArc > _centerlineTotal(centerline)) {
+      centerline = _extendCenterlineArc(centerline, needArc).centerline;
+      ({ poiBindings } = _poiGateLayoutFromPOIs(list, centerline, gateSpacing));
     }
+    const lengthM = _centerlineTotal(centerline);
+    const moduleArcs = _uniformModuleArcs(lengthM, gateSpacing, poiBindings);
 
     const gates = moduleArcs.map(s => {
       const [lng, lat] = _lngLatAtArcS(s, centerline);
