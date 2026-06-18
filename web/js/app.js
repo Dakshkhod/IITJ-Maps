@@ -160,25 +160,35 @@ function scheduleLandmarks3DPrewarm() {
 
 function buildingFillOpacity() {
   if (isSatellite) return 0;
-  // F4map: solid white footprints in day vector mode.
-  if (!isDark) return ['interpolate', ['linear'], ['zoom'], 14, 0.78, 17, 0.92];
-  return ['interpolate', ['linear'], ['zoom'], 14, 0.55, 17, 0.72];
+  if (isDark) return ['interpolate', ['linear'], ['zoom'], 14, 0.72, 17, 0.9];
+  return ['interpolate', ['linear'], ['zoom'], 14, 0.78, 17, 0.92];
 }
 
-/** F4-style extrusion opacity — fully opaque in 3D for crisp white blocks. */
+/** Warm window-lit tone for 3D extrusions after dark. */
+function buildingNightGlowColor() {
+  return '#c8daf4';
+}
+
+function buildingFillColor() {
+  if (isSatellite) return isDark ? '#475569' : '#f1f5f9';
+  if (isDark) {
+    if (is3D && !isSatellite) return buildingNightGlowColor();
+    return '#9aa8bc';
+  }
+  return '#fafaf8';
+}
+
 function buildingExtrusionOpacity() {
   if (is3D && !isSatellite) return 1;
   return 0.82;
 }
 
-function buildingFillColor() {
-  if (isSatellite) return isDark ? '#475569' : '#f1f5f9';
-  // F4map vector (2D + 3D): bright sunlit walls in day, muted blue-grey at night.
-  return isDark ? '#7a8494' : '#fafaf8';
+function buildingGlowLayerVisible() {
+  return isDark && is3D && LAYERS.buildings && !isSatellite;
 }
 
-function buildingOutlineColor() {
-  return categoryColorExpr();
+function roadLampVisibility() {
+  return isDark && !isSatellite && LAYERS.roads ? 'visible' : 'none';
 }
 
 function buildingOutlineCasingColor() {
@@ -435,7 +445,9 @@ function applyBuildingViewMode() {
   set('buildings-outline-casing', showFlat ? 'visible' : 'none');
   set('buildings-outline', showFlat ? 'visible' : 'none');
   set('buildings-3d', show3d ? 'visible' : 'none');
+  set('buildings-3d-glow', buildingGlowLayerVisible() ? 'visible' : 'none');
   set('buildings-labels', LAYERS.buildings ? 'visible' : 'none');
+  syncRoadLamps();
 }
 
 /** Live-update F4 cartography when 2D/3D / theme toggles (no style reload). */
@@ -447,6 +459,12 @@ function refreshBuildingTheme() {
   if (map.getLayer('buildings-3d')) {
     map.setPaintProperty('buildings-3d', 'fill-extrusion-color', color);
     map.setPaintProperty('buildings-3d', 'fill-extrusion-opacity', extrusionOpacity);
+    if (map.getPaintProperty('buildings-3d', 'fill-extrusion-ambient-occlusion-intensity') != null) {
+      map.setPaintProperty('buildings-3d', 'fill-extrusion-ambient-occlusion-intensity', isDark ? 0.04 : 0.22);
+    }
+  }
+  if (map.getLayer('buildings-3d-glow')) {
+    map.setLayoutProperty('buildings-3d-glow', 'visibility', buildingGlowLayerVisible() ? 'visible' : 'none');
   }
   if (map.getLayer('buildings-fill')) {
     map.setPaintProperty('buildings-fill', 'fill-color', color);
@@ -472,6 +490,7 @@ function refreshBuildingTheme() {
     map.setPaintProperty('berms-outline', 'line-color', bermOutlineColor());
   }
   refreshMapLabelPaint();
+  syncRoadLamps();
 }
 
 function refreshMapLabelPaint() {
@@ -715,14 +734,15 @@ const OVERLAY_LAYER_IDS = [
   'campus-roads-service', 'campus-roads-line', 'campus-roads-narrow',
   'campus-roads-ped', 'campus-roads-walkway', 'campus-roads-cycle', 'campus-roads-mixed',
   'campus-roads-hit', 'campus-roads-labels',
+  'road-lamps-glow', 'road-lamps-pole', 'road-lamps',
   'areas-fill', 'areas-outline', 'areas-labels',
   'berms-fill', 'berms-outline',
-  'buildings-fill', 'buildings-outline-casing', 'buildings-outline', 'buildings-3d', 'buildings-labels',
+  'buildings-fill', 'buildings-outline-casing', 'buildings-outline', 'buildings-3d-glow', 'buildings-3d', 'buildings-labels',
   'buildings-highlight-fill', 'buildings-highlight-outline',
   'places-circles', 'places-labels',
 ];
 const OVERLAY_SOURCE_IDS = [
-  'campus-greens', 'campus-roads', 'named-areas', 'area-labels-src', 'berms', 'buildings', 'places-points',
+  'campus-greens', 'campus-roads', 'road-lamps', 'named-areas', 'area-labels-src', 'berms', 'buildings', 'places-points',
 ];
 const ROAD_LAYER_IDS = [
   'campus-roads-restricted',
@@ -983,6 +1003,7 @@ function addAreasLayer(data) {
         'recreation', '#d1fae5',
         'residential','#fef3c7',
         'academic',   '#dbeafe',
+        'parking',    '#bae6fd',
         '#e5e7eb'
       ],
       'fill-opacity': areaFillOpacity()
@@ -1001,6 +1022,7 @@ function addAreasLayer(data) {
         'recreation', '#059669',
         'residential','#d97706',
         'academic',   '#2563eb',
+        'parking',    '#0369a1',
         '#6b7280'
       ],
       'line-width': 1,
@@ -1080,6 +1102,7 @@ function addRoadsLayer(data) {
 
   if (map.getSource('campus-roads')) {
     map.getSource('campus-roads').setData(data);
+    addRoadLampLayers(data);
     return;
   }
 
@@ -1373,6 +1396,141 @@ function addRoadsLayer(data) {
     },
     paint: labelPaint()
   });
+
+  addRoadLampLayers(data);
+}
+
+// ============================================================
+// Road lamps — warm pools of light along drivable roads at night
+// ============================================================
+const ROAD_LAMP_DRIVE_CLASSES = new Set([
+  'major_vehicle_road', 'vehicle_connector', 'campus_main_road',
+  'local_through_road', 'campus_standard_road', 'vehicle_road',
+  'campus_service_road', 'local_street',
+]);
+
+function segmentBearingDeg(lat1, lng1, lat2, lng2) {
+  const dl = (lng2 - lng1) * Math.PI / 180;
+  const y = Math.sin(dl) * Math.cos(lat2 * Math.PI / 180);
+  const x = Math.cos(lat1 * Math.PI / 180) * Math.sin(lat2 * Math.PI / 180)
+    - Math.sin(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.cos(dl);
+  return ((Math.atan2(y, x) * 180 / Math.PI) + 360) % 360;
+}
+
+function offsetPointM(lat, lng, bearingDeg, distM) {
+  const br = bearingDeg * Math.PI / 180;
+  const dLat = (distM * Math.cos(br) / 6371000) * (180 / Math.PI);
+  const dLng = (distM * Math.sin(br) / (6371000 * Math.cos(lat * Math.PI / 180))) * (180 / Math.PI);
+  return [lng + dLng, lat + dLat];
+}
+
+function buildRoadLampGeoJSON(roadsFc) {
+  const features = [];
+  const SPACING_M = 38;
+  const OFFSET_M = 3.8;
+  for (const f of roadsFc.features || []) {
+    const nc = f.properties?.navigation_class;
+    if (!ROAD_LAMP_DRIVE_CLASSES.has(nc)) continue;
+    let coords = null;
+    if (f.geometry?.type === 'LineString') coords = f.geometry.coordinates;
+    else if (f.geometry?.type === 'MultiLineString') {
+      for (const line of f.geometry.coordinates) {
+        _sampleLampLine(line, features, SPACING_M, OFFSET_M);
+      }
+      continue;
+    }
+    if (!coords || coords.length < 2) continue;
+    _sampleLampLine(coords, features, SPACING_M, OFFSET_M);
+  }
+  return { type: 'FeatureCollection', features };
+}
+
+function _sampleLampLine(coords, features, spacingM, offsetM) {
+  let carried = 0;
+  for (let i = 0; i < coords.length - 1; i++) {
+    const [lng1, lat1] = coords[i];
+    const [lng2, lat2] = coords[i + 1];
+    const segM = haversine(lat1, lng1, lat2, lng2);
+    if (segM < 1) continue;
+    const bearing = segmentBearingDeg(lat1, lng1, lat2, lng2);
+    const side = i % 2 === 0 ? 1 : -1;
+    let d = spacingM - carried;
+    while (d < segM) {
+      const t = d / segM;
+      const lat = lat1 + (lat2 - lat1) * t;
+      const lng = lng1 + (lng2 - lng1) * t;
+      const [olng, olat] = offsetPointM(lat, lng, bearing + 90 * side, offsetM);
+      features.push({
+        type: 'Feature',
+        geometry: { type: 'Point', coordinates: [olng, olat] },
+        properties: {},
+      });
+      d += spacingM;
+    }
+    carried = (carried + segM) % spacingM;
+  }
+}
+
+function addRoadLampLayers(roadsData) {
+  const lampData = buildRoadLampGeoJSON(roadsData);
+  if (map.getSource('road-lamps')) {
+    map.getSource('road-lamps').setData(lampData);
+    syncRoadLamps();
+    return;
+  }
+  map.addSource('road-lamps', { type: 'geojson', data: lampData });
+  const lampVis = roadLampVisibility();
+  const beforeLabels = map.getLayer('campus-roads-labels') ? 'campus-roads-labels' : undefined;
+
+  map.addLayer({
+    id: 'road-lamps-glow',
+    type: 'circle',
+    source: 'road-lamps',
+    minzoom: 14,
+    layout: { visibility: lampVis },
+    paint: {
+      'circle-radius': ['interpolate', ['linear'], ['zoom'], 14, 3.5, 17, 7, 19, 11],
+      'circle-color': '#ffe6a3',
+      'circle-opacity': 0.38,
+      'circle-blur': 0.85,
+    },
+  }, beforeLabels);
+
+  map.addLayer({
+    id: 'road-lamps-pole',
+    type: 'circle',
+    source: 'road-lamps',
+    minzoom: 15,
+    layout: { visibility: lampVis },
+    paint: {
+      'circle-radius': ['interpolate', ['linear'], ['zoom'], 15, 0.7, 17, 1.4, 19, 2],
+      'circle-color': '#64748b',
+      'circle-opacity': 0.85,
+    },
+  }, beforeLabels);
+
+  map.addLayer({
+    id: 'road-lamps',
+    type: 'circle',
+    source: 'road-lamps',
+    minzoom: 14,
+    layout: { visibility: lampVis },
+    paint: {
+      'circle-radius': ['interpolate', ['linear'], ['zoom'], 14, 1.2, 17, 2.2, 19, 3],
+      'circle-color': '#fff8e1',
+      'circle-opacity': 0.95,
+      'circle-stroke-width': 0.4,
+      'circle-stroke-color': '#fde68a',
+    },
+  }, beforeLabels);
+}
+
+function syncRoadLamps() {
+  if (!map) return;
+  const vis = roadLampVisibility();
+  for (const id of ['road-lamps-glow', 'road-lamps-pole', 'road-lamps']) {
+    if (map.getLayer(id)) map.setLayoutProperty(id, 'visibility', vis);
+  }
 }
 
 // ============================================================
@@ -1491,6 +1649,21 @@ function addBuildingsLayer(data) {
     : polyFilter;
 
   map.addLayer({
+    id: 'buildings-3d-glow',
+    type: 'fill-extrusion',
+    source: 'buildings',
+    filter: extrusionFilter,
+    layout: { visibility: buildingGlowLayerVisible() ? 'visible' : 'none' },
+    paint: {
+      'fill-extrusion-color': '#ffe8b8',
+      'fill-extrusion-height': buildingHeightExpr(),
+      'fill-extrusion-base': 0,
+      'fill-extrusion-opacity': 0.22,
+      'fill-extrusion-vertical-gradient': true,
+    },
+  });
+
+  map.addLayer({
     id: 'buildings-3d',
     type: 'fill-extrusion',
     source: 'buildings',
@@ -1501,7 +1674,8 @@ function addBuildingsLayer(data) {
       'fill-extrusion-height': buildingHeightExpr(),
       'fill-extrusion-base': 0,
       'fill-extrusion-opacity': buildingExtrusionOpacity(),
-      'fill-extrusion-vertical-gradient': true
+      'fill-extrusion-vertical-gradient': true,
+      'fill-extrusion-ambient-occlusion-intensity': isDark ? 0.04 : 0.22,
     }
   });
 
@@ -3266,7 +3440,7 @@ function applyImmersiveBuildingFade(coord) {
   const fillLayer   = map.getLayer('buildings-3d');
 
   // Base solid color matches what addBuildingsLayer originally used.
-  const baseColor = isDark ? '#475569' : '#f1f5f9';
+  const baseColor = buildingFillColor();
   const fadeColor = isDark ? 'rgba(71,85,105,0.18)' : 'rgba(241,245,249,0.18)';
 
   if (!coord) {

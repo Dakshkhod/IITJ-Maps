@@ -604,6 +604,17 @@
     "is_proposed": false
   },
   {
+    "id": "1417522082",
+    "name": "Tapri",
+    "category": "dining",
+    "description": "",
+    "keywords": [],
+    "lat": 26.48039916,
+    "lng": 73.11703888,
+    "source": "osm",
+    "is_proposed": false
+  },
+  {
     "id": "1419313442",
     "name": "LHC 2",
     "category": "building",
@@ -650,6 +661,28 @@
     "is_proposed": false
   },
   {
+    "id": "773587404",
+    "name": "Parking",
+    "category": "parking",
+    "description": "Parking",
+    "keywords": [],
+    "lat": 26.468933305555556,
+    "lng": 73.11567329444443,
+    "source": "osm",
+    "is_proposed": false
+  },
+  {
+    "id": "773690899",
+    "name": "Parking",
+    "category": "parking",
+    "description": "Parking",
+    "keywords": [],
+    "lat": 26.47293168,
+    "lng": 73.11237024,
+    "source": "osm",
+    "is_proposed": false
+  },
+  {
     "id": "1412399746",
     "name": "W Berms",
     "category": "building",
@@ -679,6 +712,83 @@
     "keywords": [],
     "lat": 26.476673240000004,
     "lng": 73.11427463999999,
+    "source": "osm",
+    "is_proposed": false
+  },
+  {
+    "id": "1524213399",
+    "name": "Parking",
+    "category": "parking",
+    "description": "Parking",
+    "keywords": [],
+    "lat": 26.476808500000004,
+    "lng": 73.11446685714286,
+    "source": "osm",
+    "is_proposed": false
+  },
+  {
+    "id": "1528715816",
+    "name": "Parking",
+    "category": "parking",
+    "description": "Parking",
+    "keywords": [],
+    "lat": 26.473467899999996,
+    "lng": 73.11014983999999,
+    "source": "osm",
+    "is_proposed": false
+  },
+  {
+    "id": "1528715817",
+    "name": "Parking",
+    "category": "parking",
+    "description": "Parking",
+    "keywords": [],
+    "lat": 26.473192160000004,
+    "lng": 73.11017439999999,
+    "source": "osm",
+    "is_proposed": false
+  },
+  {
+    "id": "1529629582",
+    "name": "Parking",
+    "category": "parking",
+    "description": "Parking",
+    "keywords": [],
+    "lat": 26.466292385714286,
+    "lng": 73.11112525714286,
+    "source": "osm",
+    "is_proposed": false
+  },
+  {
+    "id": "1529657253",
+    "name": "Parking",
+    "category": "parking",
+    "description": "Parking",
+    "keywords": [],
+    "lat": 26.476791416666668,
+    "lng": 73.11027045,
+    "source": "osm",
+    "is_proposed": false
+  },
+  {
+    "id": "1529657255",
+    "name": "Parking",
+    "category": "parking",
+    "description": "Parking",
+    "keywords": [],
+    "lat": 26.48063024,
+    "lng": 73.11546726,
+    "source": "osm",
+    "is_proposed": false
+  },
+  {
+    "id": "1529657261",
+    "name": "Parking",
+    "category": "parking",
+    "description": "Parking",
+    "keywords": [],
+    "lat": 26.4704734,
+    "lng": 73.11410788333332,
     "source": "osm",
     "is_proposed": false
   },
@@ -1306,6 +1416,39 @@
     "is_proposed": false
   },
   {
+    "id": "773839452",
+    "name": "Faculty Housing",
+    "category": "hostel",
+    "description": "",
+    "keywords": [],
+    "lat": 26.473522042857144,
+    "lng": 73.11064082142856,
+    "source": "osm",
+    "is_proposed": false
+  },
+  {
+    "id": "773839460",
+    "name": "Faculty Housing",
+    "category": "hostel",
+    "description": "",
+    "keywords": [],
+    "lat": 26.46714939230769,
+    "lng": 73.11231475384615,
+    "source": "osm",
+    "is_proposed": false
+  },
+  {
+    "id": "773839461",
+    "name": "Faculty Housing",
+    "category": "hostel",
+    "description": "",
+    "keywords": [],
+    "lat": 26.467126269230768,
+    "lng": 73.11262487692306,
+    "source": "osm",
+    "is_proposed": false
+  },
+  {
     "id": "1025144735",
     "name": "Electrical Dept",
     "category": "academic",
@@ -1328,6 +1471,17 @@
     "is_proposed": false
   },
   {
+    "id": "1412677770",
+    "name": "Faculty Housing",
+    "category": "hostel",
+    "description": "",
+    "keywords": [],
+    "lat": 26.46697155,
+    "lng": 73.11134504285714,
+    "source": "osm",
+    "is_proposed": false
+  },
+  {
     "id": "1419313443",
     "name": "General Quaters",
     "category": "residential",
@@ -1335,6 +1489,39 @@
     "keywords": [],
     "lat": 26.475340021428572,
     "lng": 73.11181750714285,
+    "source": "osm",
+    "is_proposed": false
+  },
+  {
+    "id": "1419313444",
+    "name": "General Quaters",
+    "category": "residential",
+    "description": "",
+    "keywords": [],
+    "lat": 26.47539836875,
+    "lng": 73.11125535625,
+    "source": "osm",
+    "is_proposed": false
+  },
+  {
+    "id": "1419313446",
+    "name": "General Quaters",
+    "category": "residential",
+    "description": "",
+    "keywords": [],
+    "lat": 26.475678528571425,
+    "lng": 73.11126067142858,
+    "source": "osm",
+    "is_proposed": false
+  },
+  {
+    "id": "1419313447",
+    "name": "General Quaters",
+    "category": "residential",
+    "description": "",
+    "keywords": [],
+    "lat": 26.475639657142853,
+    "lng": 73.11182989285713,
     "source": "osm",
     "is_proposed": false
   },
@@ -1357,6 +1544,17 @@
     "keywords": [],
     "lat": 26.47675896,
     "lng": 73.11429484,
+    "source": "osm",
+    "is_proposed": false
+  },
+  {
+    "id": "1528715814",
+    "name": "Bicycle parking",
+    "category": "parking",
+    "description": "Bicycle parking",
+    "keywords": [],
+    "lat": 26.472900279999998,
+    "lng": 73.11363770000001,
     "source": "osm",
     "is_proposed": false
   },
@@ -1390,6 +1588,17 @@
     "keywords": [],
     "lat": 26.477274949999998,
     "lng": 73.11220141666668,
+    "source": "osm",
+    "is_proposed": false
+  },
+  {
+    "id": "1412404073",
+    "name": "General Quarters",
+    "category": "residential",
+    "description": "",
+    "keywords": [],
+    "lat": 26.477097666666666,
+    "lng": 73.11316983333332,
     "source": "osm",
     "is_proposed": false
   },
@@ -1461,6 +1670,22 @@
     "lat": 26.46720364486844,
     "lng": 73.1104431348062,
     "source": "kml",
+    "is_proposed": false
+  },
+  {
+    "id": "curated_7",
+    "name": "Visitor's Hostel",
+    "category": "hostel",
+    "description": "Guest accommodation for campus visitors",
+    "keywords": [
+      "visitor",
+      "guest house",
+      "accommodation",
+      "visitors hostel"
+    ],
+    "lat": 26.4682,
+    "lng": 73.1127,
+    "source": "curated",
     "is_proposed": false
   },
   {
@@ -1894,6 +2119,17 @@
     "is_proposed": false
   },
   {
+    "id": "1529899556",
+    "name": "Clean  Room & Service Block",
+    "category": "building",
+    "description": "",
+    "keywords": [],
+    "lat": 26.465512060000002,
+    "lng": 73.12138686,
+    "source": "osm",
+    "is_proposed": false
+  },
+  {
     "id": "Skating ring and open stage",
     "name": "Skating ring and open stage",
     "category": "recreation",
@@ -1996,6 +2232,17 @@
     "is_proposed": false
   },
   {
+    "id": "603118969",
+    "name": "Indian Institute of Technology Jodhpur",
+    "category": "academic",
+    "description": "university",
+    "keywords": [],
+    "lat": 26.472548055882346,
+    "lng": 73.11299638529411,
+    "source": "osm",
+    "is_proposed": false
+  },
+  {
     "id": "773587401",
     "name": "Cricket Ground",
     "category": "sports",
@@ -2025,6 +2272,17 @@
     "keywords": [],
     "lat": 26.471010184615388,
     "lng": 73.11461546923077,
+    "source": "osm",
+    "is_proposed": false
+  },
+  {
+    "id": "1266941060",
+    "name": "Hockey Ground",
+    "category": "sports",
+    "description": "pitch",
+    "keywords": [],
+    "lat": 26.473909683333332,
+    "lng": 73.11946024999999,
     "source": "osm",
     "is_proposed": false
   },
@@ -2062,6 +2320,39 @@
     "is_proposed": false
   },
   {
+    "id": "1412392568",
+    "name": "Basketball Court",
+    "category": "sports",
+    "description": "pitch",
+    "keywords": [],
+    "lat": 26.476589139999998,
+    "lng": 73.1214737,
+    "source": "osm",
+    "is_proposed": false
+  },
+  {
+    "id": "1412392569",
+    "name": "Basketball Court",
+    "category": "sports",
+    "description": "pitch",
+    "keywords": [],
+    "lat": 26.476574140000004,
+    "lng": 73.12166898,
+    "source": "osm",
+    "is_proposed": false
+  },
+  {
+    "id": "1412392570",
+    "name": "Basketball Court",
+    "category": "sports",
+    "description": "pitch",
+    "keywords": [],
+    "lat": 26.47655944,
+    "lng": 73.12184494,
+    "source": "osm",
+    "is_proposed": false
+  },
+  {
     "id": "1412392571",
     "name": "Tennis Court",
     "category": "sports",
@@ -2073,6 +2364,39 @@
     "is_proposed": false
   },
   {
+    "id": "1412392572",
+    "name": "Tennis Court",
+    "category": "sports",
+    "description": "pitch",
+    "keywords": [],
+    "lat": 26.47698692,
+    "lng": 73.1215195,
+    "source": "osm",
+    "is_proposed": false
+  },
+  {
+    "id": "1412392573",
+    "name": "Tennis Court",
+    "category": "sports",
+    "description": "pitch",
+    "keywords": [],
+    "lat": 26.476970919999996,
+    "lng": 73.1217053,
+    "source": "osm",
+    "is_proposed": false
+  },
+  {
+    "id": "1412392574",
+    "name": "Tennis Court",
+    "category": "sports",
+    "description": "pitch",
+    "keywords": [],
+    "lat": 26.476954240000005,
+    "lng": 73.12189699999999,
+    "source": "osm",
+    "is_proposed": false
+  },
+  {
     "id": "1412392575",
     "name": "Volleyball",
     "category": "sports",
@@ -2080,6 +2404,39 @@
     "keywords": [],
     "lat": 26.47733384,
     "lng": 73.12117686,
+    "source": "osm",
+    "is_proposed": false
+  },
+  {
+    "id": "1412392576",
+    "name": "Volleyball",
+    "category": "sports",
+    "description": "pitch",
+    "keywords": [],
+    "lat": 26.47729738,
+    "lng": 73.12155536,
+    "source": "osm",
+    "is_proposed": false
+  },
+  {
+    "id": "1412392577",
+    "name": "Volleyball",
+    "category": "sports",
+    "description": "pitch",
+    "keywords": [],
+    "lat": 26.477285799999997,
+    "lng": 73.12170106,
+    "source": "osm",
+    "is_proposed": false
+  },
+  {
+    "id": "1412392578",
+    "name": "Volleyball",
+    "category": "sports",
+    "description": "pitch",
+    "keywords": [],
+    "lat": 26.4772704,
+    "lng": 73.12184546,
     "source": "osm",
     "is_proposed": false
   },

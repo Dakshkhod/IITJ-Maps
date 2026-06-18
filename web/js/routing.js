@@ -196,15 +196,16 @@ const IITJRouter = (() => {
   // so a gate on the south perimeter doesn't snap to the outer service road
   // behind it when the campus entry road is right ahead.
   function _nodeSnapScore(lat, lng, coords, distM, opts = {}) {
-    const towardLat = opts.towardLat;
-    const towardLng = opts.towardLng;
     let dLng, dLat;
-    if (towardLat != null && towardLng != null) {
-      dLng = towardLng - lng;
-      dLat = towardLat - lat;
-    } else if (opts.preferCampusSide) {
+    // Berm destinations must snap to the campus-facing road — never let a
+    // toward-origin vector override that (it picks the rear service road on
+    // east/west perimeter ribbons when coming from a gate).
+    if (opts.preferCampusSide) {
       dLng = CAMPUS_CENTER.lng - lng;
       dLat = CAMPUS_CENTER.lat - lat;
+    } else if (opts.towardLat != null && opts.towardLng != null) {
+      dLng = opts.towardLng - lng;
+      dLat = opts.towardLat - lat;
     } else {
       return distM;
     }
@@ -214,6 +215,46 @@ const IITJRouter = (() => {
     if (dot <= 0) return distM + 120;
     const align = dot / (Math.sqrt(magSq) * Math.max(distM, 1));
     return distM - align * 20;
+  }
+
+  // India keeps left — on the final approach the destination should sit on the
+  // driver's left, not the right-hand (outer) carriageway / berm backside.
+  function _isDestOnLeft(travelBearingDeg, atLat, atLng, destLat, destLng) {
+    const rad = travelBearingDeg * Math.PI / 180;
+    const fx = Math.sin(rad);
+    const fy = Math.cos(rad);
+    const dLng = (destLng - atLng) * Math.cos(atLat * Math.PI / 180);
+    const dLat = destLat - atLat;
+    return (fx * dLat - fy * dLng) > 0;
+  }
+
+  // True when a graph node lies on the campus-interior side of the destination
+  // (west of east-berm POIs, east of west-berm POIs, etc.).
+  function _nodeOnCampusSideOf(coords, destLat, destLng) {
+    const toCampusLng = CAMPUS_CENTER.lng - destLng;
+    const toCampusLat = CAMPUS_CENTER.lat - destLat;
+    const nodeLng = coords[0] - destLng;
+    const nodeLat = coords[1] - destLat;
+    return (nodeLng * toCampusLng + nodeLat * toCampusLat) > 0;
+  }
+
+  function _pathArrivalPenalty(pathNodes, destLat, destLng, mode, preferCampusSide) {
+    if (mode !== 'drive' || pathNodes.length < 2) return 0;
+    const prev = _nodeCoords[pathNodes[pathNodes.length - 2]];
+    const last = _nodeCoords[pathNodes[pathNodes.length - 1]];
+    if (!prev || !last) return 0;
+
+    const bearing = getBearing(prev[1], prev[0], last[1], last[0]);
+    const endPt = projectOntoSegment(destLat, destLng, prev[1], prev[0], last[1], last[0]);
+    let penalty = 0;
+
+    if (!_isDestOnLeft(bearing, endPt.lat, endPt.lng, destLat, destLng)) {
+      penalty += 280;
+    }
+    if (preferCampusSide && !_nodeOnCampusSideOf(last, destLat, destLng)) {
+      penalty += 450;
+    }
+    return penalty;
   }
 
   // Nearest node that participates in at least one edge allowed by the mode.
@@ -378,15 +419,16 @@ const IITJRouter = (() => {
       towardLng: toLng,
       preferCampusSide: southGateOrigin,
     };
-    const toSnapOpts = {
-      towardLat: fromLat,
-      towardLng: fromLng,
-      preferCampusSide: preferCampusSideTo,
-    };
+    const toSnapOpts = preferCampusSideTo
+      ? { preferCampusSide: true }
+      : { towardLat: fromLat, towardLng: fromLng };
 
     function tryMode(m, opts = {}) {
-      const toNode = findNearestNode(toLat, toLng, 400, m, { ...opts, ...toSnapOpts });
-      if (!toNode) return null;
+      const toCandidates = findCandidateNodes(
+        toLat, toLng, 400, m, { ...opts, ...toSnapOpts }, preferCampusSideTo ? 8 : 6
+      );
+      if (!toCandidates.length) return null;
+      const toPool = toCandidates;
 
       const routeOpts = {
         ...opts,
@@ -424,23 +466,36 @@ const IITJRouter = (() => {
       let best = null;
       let fallback = null;
       for (const cand of pool) {
-        if (cand.id === toNode) continue;
-        const path = dijkstra(cand.id, toNode, m, routeOpts);
-        if (!path || path.nodes.length < 2) continue;
-        const progress = _departureProgress(cand.id, path.nodes, toLat, toLng);
-        const hopMis = _firstHopMisalignment(cand.id, path.nodes, fromLat, fromLng, toLat, toLng);
-        // Rank on physical road distance — path.cost carries departure-bias
-        // multipliers that are only meaningful within a single Dijkstra run.
-        const rank = path.distance
-          + (cand.dist - nearestDist) * 4
-          + cand.score * 0.2
-          + (progress < 0 ? hopMis * 12 : 0)
-          - progress * 25;
-        const entry = { path, fromNode: cand.id, toNode, opts: routeOpts, rank, progress, hopMis };
-        if (hopMis <= 95 && progress >= -0.00002) {
-          if (!best || rank < best.rank) best = entry;
-        } else if (!fallback || rank < fallback.rank) {
-          fallback = entry;
+        for (const toCand of toPool) {
+          if (cand.id === toCand.id) continue;
+          const path = dijkstra(cand.id, toCand.id, m, routeOpts);
+          if (!path || path.nodes.length < 2) continue;
+          const progress = _departureProgress(cand.id, path.nodes, toLat, toLng);
+          const hopMis = _firstHopMisalignment(cand.id, path.nodes, fromLat, fromLng, toLat, toLng);
+          const arrivalPenalty = _pathArrivalPenalty(path.nodes, toLat, toLng, m, preferCampusSideTo);
+          const toNodeCoords = _nodeCoords[toCand.id];
+          const campusSnapPenalty = (preferCampusSideTo && toNodeCoords &&
+            !_nodeOnCampusSideOf(toNodeCoords, toLat, toLng)) ? 200 : 0;
+          // Rank on physical road distance — path.cost carries departure-bias
+          // multipliers that are only meaningful within a single Dijkstra run.
+          const rank = path.distance
+            + (cand.dist - nearestDist) * 4
+            + cand.score * 0.2
+            + toCand.score * 0.25
+            + toCand.dist * 0.15
+            + arrivalPenalty
+            + campusSnapPenalty
+            + (progress < 0 ? hopMis * 12 : 0)
+            - progress * 25;
+          const entry = {
+            path, fromNode: cand.id, toNode: toCand.id, opts: routeOpts, rank, progress, hopMis,
+            arrivalPenalty,
+          };
+          if (hopMis <= 95 && progress >= -0.00002 && arrivalPenalty < 200) {
+            if (!best || rank < best.rank) best = entry;
+          } else if (!fallback || rank < fallback.rank) {
+            fallback = entry;
+          }
         }
       }
       return best || fallback;

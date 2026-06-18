@@ -495,6 +495,142 @@
     {
       "type": "Feature",
       "properties": {
+        "osm_id": "773587404",
+        "name": "Parking",
+        "area_type": "parking",
+        "category": "parking",
+        "source": "osm",
+        "description": "Parking"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              73.1151091,
+              26.4691398
+            ],
+            [
+              73.1147122,
+              26.4683053
+            ],
+            [
+              73.1149614,
+              26.4672477
+            ],
+            [
+              73.1150668,
+              26.4672552
+            ],
+            [
+              73.1153229,
+              26.4675711
+            ],
+            [
+              73.115542,
+              26.468234
+            ],
+            [
+              73.1158306,
+              26.4686606
+            ],
+            [
+              73.1160505,
+              26.4690819
+            ],
+            [
+              73.1163112,
+              26.4693076
+            ],
+            [
+              73.1164252,
+              26.469419
+            ],
+            [
+              73.1164222,
+              26.46951
+            ],
+            [
+              73.1163563,
+              26.4695942
+            ],
+            [
+              73.1162584,
+              26.4697008
+            ],
+            [
+              73.1160561,
+              26.4699247
+            ],
+            [
+              73.1157706,
+              26.4697739
+            ],
+            [
+              73.1155176,
+              26.4695766
+            ],
+            [
+              73.1152971,
+              26.4693573
+            ],
+            [
+              73.1151091,
+              26.4691398
+            ]
+          ]
+        ]
+      },
+      "centroid": {
+        "lat": 26.468933305555556,
+        "lng": 73.11567329444443
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "osm_id": "773690899",
+        "name": "Parking",
+        "area_type": "parking",
+        "category": "parking",
+        "source": "osm",
+        "description": "Parking"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              73.1122032,
+              26.4731726
+            ],
+            [
+              73.1129147,
+              26.4729926
+            ],
+            [
+              73.1126131,
+              26.4725703
+            ],
+            [
+              73.111917,
+              26.4727503
+            ],
+            [
+              73.1122032,
+              26.4731726
+            ]
+          ]
+        ]
+      },
+      "centroid": {
+        "lat": 26.47293168,
+        "lng": 73.11237024
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
         "osm_id": "773818311",
         "name": "Football Field",
         "area_type": "pitch",
@@ -1988,6 +2124,56 @@
     {
       "type": "Feature",
       "properties": {
+        "osm_id": "1524213399",
+        "name": "Parking",
+        "area_type": "parking",
+        "category": "parking",
+        "source": "osm",
+        "description": "Parking"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              73.1144162,
+              26.476793
+            ],
+            [
+              73.1143851,
+              26.4767407
+            ],
+            [
+              73.114501,
+              26.4767095
+            ],
+            [
+              73.1145556,
+              26.4769203
+            ],
+            [
+              73.1145165,
+              26.4769273
+            ],
+            [
+              73.1144774,
+              26.4767757
+            ],
+            [
+              73.1144162,
+              26.476793
+            ]
+          ]
+        ]
+      },
+      "centroid": {
+        "lat": 26.476808500000004,
+        "lng": 73.11446685714286
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
         "osm_id": "1525109576",
         "name": "Tank at Shaurya Sthal",
         "area_type": "military",
@@ -2177,6 +2363,316 @@
       "centroid": {
         "lat": 26.46504407575758,
         "lng": 73.10939518181819
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "osm_id": "1528715814",
+        "name": "Bicycle parking",
+        "area_type": "bicycle_parking",
+        "category": "parking",
+        "source": "osm",
+        "description": "Bicycle parking"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              73.1136207,
+              26.4732122
+            ],
+            [
+              73.1135845,
+              26.4724331
+            ],
+            [
+              73.1136695,
+              26.4724275
+            ],
+            [
+              73.1136931,
+              26.4732164
+            ],
+            [
+              73.1136207,
+              26.4732122
+            ]
+          ]
+        ]
+      },
+      "centroid": {
+        "lat": 26.472900279999998,
+        "lng": 73.11363770000001
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "osm_id": "1528715816",
+        "name": "Parking",
+        "area_type": "parking",
+        "category": "parking",
+        "source": "osm",
+        "description": "Parking"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              73.1099878,
+              26.4735404
+            ],
+            [
+              73.1103663,
+              26.4735801
+            ],
+            [
+              73.1103914,
+              26.4733552
+            ],
+            [
+              73.1100159,
+              26.4733234
+            ],
+            [
+              73.1099878,
+              26.4735404
+            ]
+          ]
+        ]
+      },
+      "centroid": {
+        "lat": 26.473467899999996,
+        "lng": 73.11014983999999
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "osm_id": "1528715817",
+        "name": "Parking",
+        "area_type": "parking",
+        "category": "parking",
+        "source": "osm",
+        "description": "Parking"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              73.1100292,
+              26.4732546
+            ],
+            [
+              73.1100677,
+              26.4730641
+            ],
+            [
+              73.110384,
+              26.4730905
+            ],
+            [
+              73.1103619,
+              26.473297
+            ],
+            [
+              73.1100292,
+              26.4732546
+            ]
+          ]
+        ]
+      },
+      "centroid": {
+        "lat": 26.473192160000004,
+        "lng": 73.11017439999999
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "osm_id": "1529629582",
+        "name": "Parking",
+        "area_type": "parking",
+        "category": "parking",
+        "source": "osm",
+        "description": "Parking"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              73.1110359,
+              26.4664838
+            ],
+            [
+              73.1113369,
+              26.4664145
+            ],
+            [
+              73.1112612,
+              26.4661797
+            ],
+            [
+              73.1111721,
+              26.4661616
+            ],
+            [
+              73.1110914,
+              26.4661391
+            ],
+            [
+              73.1109434,
+              26.4661842
+            ],
+            [
+              73.1110359,
+              26.4664838
+            ]
+          ]
+        ]
+      },
+      "centroid": {
+        "lat": 26.466292385714286,
+        "lng": 73.11112525714286
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "osm_id": "1529657253",
+        "name": "Parking",
+        "area_type": "parking",
+        "category": "parking",
+        "source": "osm",
+        "description": "Parking"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              73.1100962,
+              26.4772758
+            ],
+            [
+              73.1110322,
+              26.4773319
+            ],
+            [
+              73.1107306,
+              26.4768972
+            ],
+            [
+              73.1100766,
+              26.4760067
+            ],
+            [
+              73.1095909,
+              26.4759611
+            ],
+            [
+              73.1100962,
+              26.4772758
+            ]
+          ]
+        ]
+      },
+      "centroid": {
+        "lat": 26.476791416666668,
+        "lng": 73.11027045
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "osm_id": "1529657255",
+        "name": "Parking",
+        "area_type": "parking",
+        "category": "parking",
+        "source": "osm",
+        "description": "Parking"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              73.1155079,
+              26.4808026
+            ],
+            [
+              73.1152069,
+              26.48046
+            ],
+            [
+              73.1154655,
+              26.4803736
+            ],
+            [
+              73.1156481,
+              26.4807124
+            ],
+            [
+              73.1155079,
+              26.4808026
+            ]
+          ]
+        ]
+      },
+      "centroid": {
+        "lat": 26.48063024,
+        "lng": 73.11546726
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "osm_id": "1529657261",
+        "name": "Parking",
+        "area_type": "parking",
+        "category": "parking",
+        "source": "osm",
+        "description": "Parking"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              73.1141423,
+              26.4706066
+            ],
+            [
+              73.1142497,
+              26.4705732
+            ],
+            [
+              73.1140956,
+              26.4702747
+            ],
+            [
+              73.1139723,
+              26.4703081
+            ],
+            [
+              73.1140451,
+              26.4704712
+            ],
+            [
+              73.1141423,
+              26.4706066
+            ]
+          ]
+        ]
+      },
+      "centroid": {
+        "lat": 26.4704734,
+        "lng": 73.11410788333332
       }
     },
     {

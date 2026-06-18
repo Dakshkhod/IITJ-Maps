@@ -6049,15 +6049,38 @@ var Landmarks3D = (() => {
     tryAdd();
   }
 
+  function _applyNightEmissive(dark) {
+    if (!_root) return;
+    _root.traverse(obj => {
+      if (!obj.isMesh || !obj.material) return;
+      const apply = (m) => {
+        if (!m.emissive) return;
+        if (!m.userData._nightSaved) {
+          m.userData._nightSaved = { e: m.emissive.getHex(), i: m.emissiveIntensity ?? 1 };
+        }
+        if (dark) {
+          const c = m.color?.getHex?.() ?? 0xc4b5a0;
+          m.emissive.setHex(c);
+          m.emissiveIntensity = Math.max(0.16, (m.userData._nightSaved.i || 1) * 0.28 + 0.14);
+        } else {
+          m.emissive.setHex(m.userData._nightSaved.e);
+          m.emissiveIntensity = m.userData._nightSaved.i;
+        }
+      };
+      if (Array.isArray(obj.material)) obj.material.forEach(apply);
+      else apply(obj.material);
+    });
+  }
+
   function syncSceneLighting(dark) {
     if (!_sunLight) return;
     if (dark) {
-      _sunLight.intensity = 0.38;
-      _sunLight.color.setHex(0xa8b8d8);
-      _fillLight.intensity = 0.2;
-      _fillLight.color.setHex(0x8899aa);
-      _ambientLight.intensity = 0.24;
-      _ambientLight.color.setHex(0x8899aa);
+      _sunLight.intensity = 0.32;
+      _sunLight.color.setHex(0x9cb0d8);
+      _fillLight.intensity = 0.16;
+      _fillLight.color.setHex(0x6a7a94);
+      _ambientLight.intensity = 0.28;
+      _ambientLight.color.setHex(0x8899b8);
     } else {
       _sunLight.intensity = 1.05;
       _sunLight.color.setHex(0xffffff);
@@ -6066,6 +6089,7 @@ var Landmarks3D = (() => {
       _ambientLight.intensity = 0.35;
       _ambientLight.color.setHex(0xffffff);
     }
+    _applyNightEmissive(dark);
     if (_map) _map.triggerRepaint();
   }
 

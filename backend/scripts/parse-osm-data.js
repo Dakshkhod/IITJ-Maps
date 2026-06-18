@@ -221,7 +221,16 @@ function extractFeatures(osmData) {
         centroid
       };
       buildings.push(feature);
-      if (name) allPlaces.push(feature);
+      if (name) {
+        allPlaces.push(feature);
+      } else if (category === 'parking') {
+        allPlaces.push({
+          type: 'Feature',
+          properties: buildPoiProperties(way.id, tags),
+          geometry: { type: 'Point', coordinates: [centroid.lng, centroid.lat] },
+          centroid
+        });
+      }
     }
 
     // Roads and paths
@@ -287,12 +296,39 @@ function extractFeatures(osmData) {
         centroid
       });
     }
+
+    // Parking polygons — often unnamed in OSM (amenity=parking / bicycle_parking).
+    if (isParkingPoi(tags) && !tags.highway && isClosed && coords.length >= 4 &&
+        !(tags.building && !NON_BUILDING_TYPES.has(tags.building) && !isBerm)) {
+      const centroid = computeCentroid(coords);
+      const props = buildPoiProperties(way.id, tags);
+      allPlaces.push({
+        type: 'Feature',
+        properties: props,
+        geometry: { type: 'Point', coordinates: [centroid.lng, centroid.lat] },
+        centroid
+      });
+      areas.push({
+        type: 'Feature',
+        properties: {
+          osm_id: way.id,
+          name: props.name,
+          area_type: tags.amenity || 'parking',
+          category: 'parking',
+          source: 'osm',
+          description: props.description || describePoi(tags)
+        },
+        geometry: { type: 'Polygon', coordinates: [coords] },
+        centroid
+      });
+    }
   }
 
-  // Point POIs (named nodes)
+  // Point POIs (named nodes, plus unnamed parking nodes)
   for (const [id, node] of Object.entries(nodes)) {
     const tags = node.tags;
-    if (!tags.name || skipPoi(tags)) continue;
+    if (skipPoi(tags)) continue;
+    if (!tags.name && !isParkingPoi(tags)) continue;
     allPlaces.push({
       type: 'Feature',
       properties: buildPoiProperties(id, tags),
@@ -303,6 +339,34 @@ function extractFeatures(osmData) {
 
   console.log(`  Extracted: ${buildings.length} buildings, ${roads.length} roads, ${areas.length} areas, ${allPlaces.length} named places`);
   return { buildings, roads, areas, allPlaces };
+}
+
+// Pull parking from a secondary OSM export (e.g. map-new.osm) when it has
+// features not yet present in the primary campus extract.
+function mergeSupplementalParking(allPlaces, areas, supplementalData) {
+  const existing = new Set([
+    ...allPlaces.map(p => String(p.properties.osm_id || '')).filter(Boolean),
+    ...areas.map(a => String(a.properties.osm_id || '')).filter(Boolean),
+  ]);
+  const extra = extractFeatures(supplementalData);
+  let added = 0;
+  for (const p of extra.allPlaces) {
+    if (p.properties.category !== 'parking') continue;
+    const id = String(p.properties.osm_id || '');
+    if (!id || existing.has(id)) continue;
+    existing.add(id);
+    allPlaces.push(p);
+    added++;
+  }
+  for (const a of extra.areas) {
+    if (a.properties.category !== 'parking') continue;
+    const id = String(a.properties.osm_id || '');
+    if (!id || existing.has(id)) continue;
+    existing.add(id);
+    areas.push(a);
+    added++;
+  }
+  if (added) console.log(`  Supplemental parking: +${added} from secondary OSM`);
 }
 
 function classifyBuilding(tags) {
@@ -331,6 +395,22 @@ function classifyBuilding(tags) {
 // nodes (redundant with the hostel/facility they front + entrances.json
 // routing) and off-campus settlement labels. Indoor rooms are kept — they're
 // useful destinations, just rendered at high zoom only (see label_priority).
+function isParkingPoi(tags) {
+  return tags.amenity === 'parking' || tags.amenity === 'bicycle_parking' ||
+    tags.amenity === 'motorcycle_parking' || tags.building === 'parking';
+}
+
+function parkingDisplayName(tags) {
+  if (tags.amenity === 'bicycle_parking') {
+    const cap = tags.capacity ? ` (${tags.capacity})` : '';
+    return `Bicycle parking${cap}`;
+  }
+  if (tags.amenity === 'motorcycle_parking') return 'Motorcycle parking';
+  if (tags.parking === 'multi-storey') return 'Multi-storey parking';
+  if (tags.parking === 'underground') return 'Underground parking';
+  return 'Parking';
+}
+
 function skipPoi(tags) {
   const name = (tags.name || '').trim();
   if (tags.place === 'village' || tags.place === 'hamlet' || tags.place === 'town') return true;
@@ -377,7 +457,7 @@ function describePoi(tags) {
     const m = { restaurant: 'Restaurant', cafe: 'Café', fast_food: 'Fast food', food_court: 'Food court',
       bank: 'Bank', atm: 'ATM', community_centre: 'Community centre', place_of_worship: 'Place of worship',
       fountain: 'Fountain', pharmacy: 'Pharmacy', hospital: 'Hospital', clinic: 'Clinic', library: 'Library',
-      parking: 'Parking' };
+      parking: 'Parking', bicycle_parking: 'Bicycle parking', motorcycle_parking: 'Motorcycle parking' };
     const base = m[tags.amenity] || titleize(tags.amenity);
     return tags.cuisine ? `${base} · ${titleize(tags.cuisine.split(';')[0])}` : base;
   }
@@ -406,7 +486,8 @@ function describePoi(tags) {
 
 // Build enriched place properties shared by node POIs and named POI-ways.
 function buildPoiProperties(id, tags) {
-  const { name, ref } = bestName(tags);
+  let { name, ref } = bestName(tags);
+  if (!name && isParkingPoi(tags)) name = parkingDisplayName(tags);
   const keywords = [];
   for (const k of [tags.name, tags['name:en'], tags.alt_name, ref, tags.ref]) {
     const v = (k || '').trim();
@@ -438,7 +519,8 @@ function classifyAmenity(tags) {
   if (tags.room === 'laboratory' || tags.room === 'classroom' || tags.healthcare === 'laboratory') return 'academic';
   if (tags.amenity === 'restaurant' || tags.amenity === 'cafe' || tags.amenity === 'fast_food' || tags.amenity === 'food_court') return 'dining';
   if (tags.amenity === 'hospital' || tags.amenity === 'clinic' || tags.amenity === 'pharmacy') return 'medical';
-  if (tags.amenity === 'parking') return 'parking';
+  if (tags.amenity === 'parking' || tags.amenity === 'bicycle_parking' ||
+      tags.amenity === 'motorcycle_parking' || tags.building === 'parking') return 'parking';
   if (tags.amenity === 'bank' || tags.amenity === 'atm') return 'bank';
   if (tags.amenity === 'place_of_worship') return 'place_of_worship';
   if (tags.police === 'checkpoint') return 'gate';
@@ -454,6 +536,7 @@ function classifyAmenity(tags) {
 }
 
 function classifyArea(tags) {
+  if (isParkingPoi(tags)) return 'parking';
   if (tags.leisure === 'pitch' || tags.sport) return 'sports';
   if (tags.leisure === 'garden' || tags.leisure === 'park') return 'recreation';
   if (tags.leisure === 'sports_centre') return 'sports';
@@ -610,8 +693,10 @@ function deduplicatePlaces(places) {
     const lng = place.centroid?.lng ||
       (place.geometry.type === 'Point' ? place.geometry.coordinates[0] : 0);
 
-    // ~100m grid so nearby duplicates collide even if not exactly co-located
-    const key = `${normalizeForDedup(rawName)}_${Math.round(lat * 1000)}_${Math.round(lng * 1000)}`;
+    // Parking lots often share generic names — keep each OSM feature distinct.
+    const key = (place.properties.category === 'parking' && place.properties.osm_id)
+      ? `parking_${place.properties.osm_id}`
+      : `${normalizeForDedup(rawName)}_${Math.round(lat * 1000)}_${Math.round(lng * 1000)}`;
 
     if (!seen.has(key)) {
       seen.set(key, result.length);
@@ -1186,9 +1271,12 @@ function main() {
   // 1. Parse OSM
   console.log('📖 OSM source:', osmPath);
   const osmData = parseOSM(osmPath);
-  const { buildings, roads, areas, allPlaces } = extractFeatures(osmData);
   const bermOsmPath = (!process.argv[2] && fs.existsSync(mapNewPath)) ? mapNewPath : osmPath;
   const bermOsmData = bermOsmPath === osmPath ? osmData : parseOSM(bermOsmPath);
+  let { buildings, roads, areas, allPlaces } = extractFeatures(osmData);
+  if (bermOsmPath !== osmPath) {
+    mergeSupplementalParking(allPlaces, areas, bermOsmData);
+  }
   const berms = buildBermsGeoJSON(bermOsmData);
   if (bermOsmPath !== osmPath) {
     console.log(`  Berm layout OSM  : ${bermOsmPath} (${berms.features.filter(f => f.properties.source === 'osm').length} ways + BERM_RINGS fill)`);
@@ -1266,10 +1354,12 @@ function main() {
     is_proposed: f.properties.is_proposed || false
   })).filter(p => p.lat && p.lng);
 
-  // Deduplicate search index by name
+  // Deduplicate search index — generic names like "Parking" need a geo/osm key.
   const siSeen = new Set();
   const dedupedIndex = searchIndex.filter(p => {
-    const k = p.name.toLowerCase().trim();
+    const k = p.id
+      ? String(p.id)
+      : `${p.name.toLowerCase().trim()}_${Math.round(p.lat * 10000)}_${Math.round(p.lng * 10000)}`;
     if (siSeen.has(k)) return false;
     siSeen.add(k);
     return true;

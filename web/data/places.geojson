@@ -1668,6 +1668,48 @@
     {
       "type": "Feature",
       "properties": {
+        "osm_id": "773587404",
+        "name": "Parking",
+        "category": "parking",
+        "source": "osm",
+        "description": "Parking"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          73.11567329444443,
+          26.468933305555556
+        ]
+      },
+      "centroid": {
+        "lat": 26.468933305555556,
+        "lng": 73.11567329444443
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "osm_id": "773690899",
+        "name": "Parking",
+        "category": "parking",
+        "source": "osm",
+        "description": "Parking"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          73.11237024,
+          26.47293168
+        ]
+      },
+      "centroid": {
+        "lat": 26.47293168,
+        "lng": 73.11237024
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
         "osm_id": "1412399746",
         "name": "W Berms",
         "category": "building",
@@ -1812,6 +1854,153 @@
       "centroid": {
         "lat": 26.476673240000004,
         "lng": 73.11427463999999
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "osm_id": "1524213399",
+        "name": "Parking",
+        "category": "parking",
+        "source": "osm",
+        "description": "Parking"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          73.11446685714286,
+          26.476808500000004
+        ]
+      },
+      "centroid": {
+        "lat": 26.476808500000004,
+        "lng": 73.11446685714286
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "osm_id": "1528715816",
+        "name": "Parking",
+        "category": "parking",
+        "source": "osm",
+        "description": "Parking"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          73.11014983999999,
+          26.473467899999996
+        ]
+      },
+      "centroid": {
+        "lat": 26.473467899999996,
+        "lng": 73.11014983999999
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "osm_id": "1528715817",
+        "name": "Parking",
+        "category": "parking",
+        "source": "osm",
+        "description": "Parking"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          73.11017439999999,
+          26.473192160000004
+        ]
+      },
+      "centroid": {
+        "lat": 26.473192160000004,
+        "lng": 73.11017439999999
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "osm_id": "1529629582",
+        "name": "Parking",
+        "category": "parking",
+        "source": "osm",
+        "description": "Parking"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          73.11112525714286,
+          26.466292385714286
+        ]
+      },
+      "centroid": {
+        "lat": 26.466292385714286,
+        "lng": 73.11112525714286
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "osm_id": "1529657253",
+        "name": "Parking",
+        "category": "parking",
+        "source": "osm",
+        "description": "Parking"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          73.11027045,
+          26.476791416666668
+        ]
+      },
+      "centroid": {
+        "lat": 26.476791416666668,
+        "lng": 73.11027045
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "osm_id": "1529657255",
+        "name": "Parking",
+        "category": "parking",
+        "source": "osm",
+        "description": "Parking"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          73.11546726,
+          26.48063024
+        ]
+      },
+      "centroid": {
+        "lat": 26.48063024,
+        "lng": 73.11546726
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "osm_id": "1529657261",
+        "name": "Parking",
+        "category": "parking",
+        "source": "osm",
+        "description": "Parking"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          73.11410788333332,
+          26.4704734
+        ]
+      },
+      "centroid": {
+        "lat": 26.4704734,
+        "lng": 73.11410788333332
       }
     },
     {
@@ -6295,6 +6484,27 @@
       "centroid": {
         "lat": 26.47675896,
         "lng": 73.11429484
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "osm_id": "1528715814",
+        "name": "Bicycle parking",
+        "category": "parking",
+        "source": "osm",
+        "description": "Bicycle parking"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          73.11363770000001,
+          26.472900279999998
+        ]
+      },
+      "centroid": {
+        "lat": 26.472900279999998,
+        "lng": 73.11363770000001
       }
     },
     {
