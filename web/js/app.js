@@ -2747,7 +2747,31 @@ function setDirectionsPoint(target, point, autoRoute = true) {
 }
 
 function updateDirectionsGoButton() {
-  document.getElementById('dir-go').disabled = !(directionsFrom && directionsTo);
+  const fromOk = directionsFrom || document.getElementById('dir-from').value.trim();
+  const toOk = directionsTo || document.getElementById('dir-to').value.trim();
+  document.getElementById('dir-go').disabled = !(fromOk && toOk);
+}
+
+/** Resolve a directions field from its stored point or typed search text. */
+function resolveDirectionsEndpoint(target) {
+  const existing = target === 'from' ? directionsFrom : directionsTo;
+  if (existing) return existing;
+
+  const input = document.getElementById(`dir-${target}`).value.trim();
+  if (!input) return null;
+
+  if (/^your\s+location$/i.test(input)) {
+    if (!userLocation) return null;
+    return { lat: userLocation.lat, lng: userLocation.lng, name: 'Your location' };
+  }
+
+  const place = IITJData.getPlaceByName(input);
+  if (place) return { lat: place.lat, lng: place.lng, name: place.name };
+
+  const hits = IITJData.search(input, 1);
+  if (hits.length) return { lat: hits[0].lat, lng: hits[0].lng, name: hits[0].name };
+
+  return null;
 }
 
 function setDirectionsPickMode(target) {
@@ -2924,10 +2948,24 @@ function setupDirectionsPanel() {
 }
 
 async function calculateDirectionsRoute() {
-  if (!directionsFrom || !directionsTo) {
-    showToast('Set both starting point and destination', 'warn');
+  const fromResolved = resolveDirectionsEndpoint('from');
+  const toResolved = resolveDirectionsEndpoint('to');
+  if (!fromResolved || !toResolved) {
+    if (!fromResolved && document.getElementById('dir-from').value.trim()) {
+      showToast('Could not find starting point — pick from search results', 'warn');
+    } else if (!toResolved && document.getElementById('dir-to').value.trim()) {
+      showToast('Could not find destination — pick from search results', 'warn');
+    } else {
+      showToast('Set both starting point and destination', 'warn');
+    }
     return;
   }
+  directionsFrom = fromResolved;
+  directionsTo = toResolved;
+  document.getElementById('dir-from').value = directionsFrom.name;
+  document.getElementById('dir-to').value = directionsTo.name;
+  updateDirectionsMarkers();
+  updateDirectionsGoButton();
 
   closePlaceSheet();
   clearDirectionsPickMode();
@@ -2944,15 +2982,10 @@ async function calculateDirectionsRoute() {
     navEntrance = toEntry || null;   // surfaced on arrival (visual + spoken)
     let routeFromLat = fromEntry ? fromEntry.lat : directionsFrom.lat;
     let routeFromLng = fromEntry ? fromEntry.lng : directionsFrom.lng;
-    // Route from the live puck when the user picked "Your location", or when
-    // GPS is clearly somewhere else than the search-picked origin (e.g. puck
-    // at Security Checkpost but "Indian Institute of Technology" in the box).
-    if (userLocation) {
-      const gpsGap = haversine(userLocation.lat, userLocation.lng, routeFromLat, routeFromLng);
-      if (directionsFrom.name === 'Your location' || gpsGap > 100) {
-        routeFromLat = userLocation.lat;
-        routeFromLng = userLocation.lng;
-      }
+    // Use live GPS only when the user explicitly chose "Your location".
+    if (userLocation && directionsFrom.name === 'Your location') {
+      routeFromLat = userLocation.lat;
+      routeFromLng = userLocation.lng;
     }
     const routeToLat   = toEntry   ? toEntry.lat   : directionsTo.lat;
     const routeToLng   = toEntry   ? toEntry.lng   : directionsTo.lng;
@@ -3042,8 +3075,10 @@ async function reRoute() {
   _resetNavVoiceState();
   NavVoice.speak('Rerouting');
   if (directionsFrom && directionsTo) {
-    // Update from-point to current GPS if available
-    if (userLocation) directionsFrom = { lat: userLocation.lat, lng: userLocation.lng, name: 'Your location' };
+    // Mid-nav reroute always recalculates from the live puck.
+    if (userLocation && navigationActive) {
+      directionsFrom = { lat: userLocation.lat, lng: userLocation.lng, name: 'Your location' };
+    }
     await calculateDirectionsRoute();
   } else if (userLocation) {
     selectedPlace = navDestination;
