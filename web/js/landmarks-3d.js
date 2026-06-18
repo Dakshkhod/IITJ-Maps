@@ -6193,23 +6193,29 @@ var Landmarks3D = (() => {
   }
 
   const CATEGORY_HIGHLIGHT_COLORS = {
-    academic: 0x3b82f6, hostel: 0xf97316, dining: 0xef4444, sports: 0x22c55e,
-    medical: 0xec4899, administrative: 0x8b5cf6, residential: 0xeab308,
+    academic: 0x5b8fd4, hostel: 0xd08040, dining: 0xd06060, sports: 0x3d9a5c,
+    medical: 0xd06090, administrative: 0x7a68c8, residential: 0xc8a030,
   };
   let _highlightCategoryId = null;
   let _highlightLandmarkIds = null;
 
+  function _cloneMeshMaterials(mesh) {
+    if (!mesh.material || mesh.userData._hlOrigMats) return;
+    mesh.userData._hlOrigMats = mesh.material;
+    mesh.material = Array.isArray(mesh.material)
+      ? mesh.material.map((m) => m.clone())
+      : mesh.material.clone();
+  }
+
+  function _restoreMeshMaterials(mesh) {
+    if (!mesh.userData._hlOrigMats) return;
+    mesh.material = mesh.userData._hlOrigMats;
+    delete mesh.userData._hlOrigMats;
+  }
+
   function _restoreLandmarkEmissive(group) {
-    group.traverse(obj => {
-      if (!obj.isMesh || !obj.material) return;
-      const restore = (m) => {
-        if (!m.emissive || !m.userData._catSaved) return;
-        m.emissive.setHex(m.userData._catSaved.e);
-        m.emissiveIntensity = m.userData._catSaved.i;
-        delete m.userData._catSaved;
-      };
-      if (Array.isArray(obj.material)) obj.material.forEach(restore);
-      else restore(obj.material);
+    group.traverse((obj) => {
+      if (obj.isMesh) _restoreMeshMaterials(obj);
     });
   }
 
@@ -6242,6 +6248,7 @@ var Landmarks3D = (() => {
       if (!_highlightLandmarkIds.has(group.userData?.landmarkId)) return;
       group.traverse((obj) => {
         if (!obj.isMesh || !obj.material) return;
+        _cloneMeshMaterials(obj);
         const apply = (m) => {
           if (!m.emissive) return;
           if (!m.userData._catSaved) {
@@ -6250,8 +6257,8 @@ var Landmarks3D = (() => {
           m.emissive.setHex(colorHex);
           const base = m.userData._catSaved.i;
           m.emissiveIntensity = high
-            ? Math.max(0.55, base * 0.9 + 0.35)
-            : Math.max(0.12, base * 0.35 + 0.08);
+            ? Math.max(0.22, base * 0.45 + 0.1)
+            : Math.max(0.06, base * 0.2 + 0.03);
         };
         if (Array.isArray(obj.material)) obj.material.forEach(apply);
         else apply(obj.material);

@@ -369,6 +369,18 @@ function mergeSupplementalParking(allPlaces, areas, supplementalData) {
   if (added) console.log(`  Supplemental parking: +${added} from secondary OSM`);
 }
 
+function isCampusAthletics(tags) {
+  const sport = (tags.sport || '').toLowerCase();
+  if (/chess|board_game|carrom|snooker|billiard|darts/.test(sport)) return false;
+  if (tags.leisure === 'sports_centre' || tags.leisure === 'stadium' ||
+      tags.leisure === 'fitness_centre' || tags.leisure === 'swimming_pool' ||
+      tags.leisure === 'pitch') return true;
+  if (sport && /cricket|football|soccer|badminton|tennis|basketball|hockey|swim|squash|table_tennis|volleyball|athletics|gymnastics/.test(sport)) {
+    return true;
+  }
+  return tags.club === 'sport' && sport && !/chess/.test(sport);
+}
+
 function classifyBuilding(tags) {
   // Name-based hints for buildings whose OSM tags lack a category-defining amenity
   const nameLower = (tags.name || tags['name:en'] || '').toLowerCase();
@@ -381,7 +393,7 @@ function classifyBuilding(tags) {
   if (tags.amenity === 'restaurant' || tags.amenity === 'cafe' || tags.amenity === 'food_court') return 'dining';
   if (tags.amenity === 'hospital' || tags.amenity === 'clinic' || tags.amenity === 'pharmacy') return 'medical';
   if (tags.amenity === 'parking' || tags.building === 'parking') return 'parking';
-  if (tags.leisure === 'sports_centre' || tags.leisure === 'stadium' || tags.leisure === 'fitness_centre') return 'sports';
+  if (isCampusAthletics(tags)) return 'sports';
   if (tags.building === 'temple' || tags.amenity === 'place_of_worship') return 'place_of_worship';
   if (tags.building === 'commercial' || tags.shop) return 'dining';
   if (tags.amenity === 'library') return 'academic';
@@ -524,7 +536,7 @@ function classifyAmenity(tags) {
   if (tags.amenity === 'bank' || tags.amenity === 'atm') return 'bank';
   if (tags.amenity === 'place_of_worship') return 'place_of_worship';
   if (tags.police === 'checkpoint') return 'gate';
-  if (tags.leisure === 'sports_centre' || tags.sport || tags.club === 'sport' || tags.leisure === 'stadium' || tags.leisure === 'swimming_pool') return 'sports';
+  if (isCampusAthletics(tags)) return 'sports';
   if (tags.leisure === 'garden' || tags.leisure === 'park') return 'recreation';
   if (tags.club || tags.tourism === 'artwork') return 'recreation';
   if (tags.tourism === 'hostel' || tags.tourism === 'hotel') return 'hostel';

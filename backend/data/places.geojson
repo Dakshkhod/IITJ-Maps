@@ -817,7 +817,7 @@
       "properties": {
         "osm_id": "13878739755",
         "name": "E-15",
-        "category": "sports",
+        "category": "recreation",
         "source": "osm",
         "alt_name": "Chess Club",
         "description": "Chess club",
@@ -1534,7 +1534,7 @@
       "properties": {
         "osm_id": "1419313442",
         "name": "LHC 2",
-        "category": "building",
+        "category": "academic",
         "source": "osm",
         "building_type": "school",
         "amenity": null,
@@ -5034,7 +5034,7 @@
       "properties": {
         "osm_id": "1529899558",
         "name": "Animal House",
-        "category": "building",
+        "category": "academic",
         "source": "osm",
         "building_type": "house",
         "amenity": null,
@@ -5414,7 +5414,7 @@
       "properties": {
         "osm_id": "773563492",
         "name": "Fresh and Green",
-        "category": "dining",
+        "category": "utility",
         "source": "osm",
         "building_type": "commercial",
         "amenity": null,
@@ -5512,7 +5512,7 @@
       "properties": {
         "osm_id": "773839450",
         "name": "Faculty Housing",
-        "category": "hostel",
+        "category": "residential",
         "source": "osm",
         "building_type": "yes",
         "amenity": null,
@@ -5595,7 +5595,7 @@
       "properties": {
         "osm_id": "773839452",
         "name": "Faculty Housing",
-        "category": "hostel",
+        "category": "residential",
         "source": "osm",
         "building_type": "yes",
         "amenity": null,
@@ -5674,7 +5674,7 @@
       "properties": {
         "osm_id": "773839460",
         "name": "Faculty Housing",
-        "category": "hostel",
+        "category": "residential",
         "source": "osm",
         "building_type": "yes",
         "amenity": null,
@@ -5749,7 +5749,7 @@
       "properties": {
         "osm_id": "773839461",
         "name": "Faculty Housing",
-        "category": "hostel",
+        "category": "residential",
         "source": "osm",
         "building_type": "yes",
         "amenity": null,
@@ -5946,7 +5946,7 @@
       "properties": {
         "osm_id": "1412677770",
         "name": "Faculty Housing",
-        "category": "hostel",
+        "category": "residential",
         "source": "osm",
         "building_type": "yes",
         "amenity": null,
@@ -7071,7 +7071,7 @@
       "properties": {
         "osm_id": "1412443820",
         "name": "Security Checking",
-        "category": "administrative",
+        "category": "gate",
         "source": "osm",
         "building_type": "security_booth",
         "amenity": null,
@@ -7191,7 +7191,7 @@
       "properties": {
         "osm_id": "1521877041",
         "name": "Academic Building",
-        "category": "building",
+        "category": "academic",
         "source": "osm",
         "building_type": "school",
         "amenity": null,
@@ -7238,7 +7238,7 @@
       "properties": {
         "osm_id": "1523529514",
         "name": "B.R cycle service",
-        "category": "dining",
+        "category": "utility",
         "source": "osm",
         "building_type": "yes",
         "amenity": null,
@@ -7436,7 +7436,7 @@
       "properties": {
         "osm_id": "773563508",
         "name": "Office Of Students",
-        "category": "academic",
+        "category": "administrative",
         "source": "osm",
         "building_type": "university",
         "amenity": null,
@@ -7495,7 +7495,7 @@
       "properties": {
         "osm_id": "1412504080",
         "name": "Ess 09 Sub Station",
-        "category": "academic",
+        "category": "utility",
         "source": "osm",
         "building_type": "college",
         "amenity": null,
@@ -7862,7 +7862,7 @@
       "properties": {
         "osm_id": "773563532",
         "name": "Guest House (Visitor)",
-        "category": "building",
+        "category": "residential",
         "source": "osm",
         "building_type": "yes",
         "amenity": null,
@@ -8086,7 +8086,7 @@
       "properties": {
         "osm_id": "773563509",
         "name": "Office of Administration",
-        "category": "academic",
+        "category": "administrative",
         "source": "osm",
         "building_type": "university",
         "amenity": null,
@@ -8450,7 +8450,7 @@
       "properties": {
         "osm_id": "1529899555",
         "name": "Clean  Room & Service Block",
-        "category": "building",
+        "category": "academic",
         "source": "osm",
         "building_type": "yes",
         "amenity": null,
@@ -8509,7 +8509,7 @@
       "properties": {
         "osm_id": "1529899556",
         "name": "Clean  Room & Service Block",
-        "category": "building",
+        "category": "academic",
         "source": "osm",
         "building_type": "yes",
         "amenity": null,

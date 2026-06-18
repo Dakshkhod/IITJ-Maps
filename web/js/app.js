@@ -1773,7 +1773,7 @@ function addBuildingsLayer(data) {
       'fill-extrusion-color': categoryHighlightColorExpr(),
       'fill-extrusion-height': buildingHeightExpr(),
       'fill-extrusion-base': 0,
-      'fill-extrusion-opacity': 0.88,
+      'fill-extrusion-opacity': 0.42,
       'fill-extrusion-vertical-gradient': true,
     },
   });
@@ -1788,7 +1788,7 @@ function addBuildingsLayer(data) {
       'fill-extrusion-color': categoryHighlightColorExpr(),
       'fill-extrusion-height': buildingGlowHeightExpr(),
       'fill-extrusion-base': buildingGlowBaseExpr(),
-      'fill-extrusion-opacity': 0.5,
+      'fill-extrusion-opacity': 0.22,
       'fill-extrusion-vertical-gradient': true,
     },
   });
@@ -1849,14 +1849,14 @@ function addBuildingsLayer(data) {
 // Returns a MapLibre match expression: category → bright highlight colour
 function categoryHighlightColorExpr() {
   return ['match', ['get', 'category'],
-    'academic',       '#3b82f6',   // blue
-    'hostel',         '#f97316',   // orange
-    'dining',         '#ef4444',   // red
-    'sports',         '#22c55e',   // green
-    'medical',        '#ec4899',   // pink
-    'administrative', '#8b5cf6',   // purple
-    'residential',    '#eab308',   // yellow
-    '#6366f1'                      // fallback indigo
+    'academic',       '#5b8fd4',   // muted blue
+    'hostel',         '#d08040',   // muted orange
+    'dining',         '#d06060',   // muted red
+    'sports',         '#3d9a5c',   // muted green
+    'medical',        '#d06090',   // muted pink
+    'administrative', '#7a68c8',   // muted purple
+    'residential',    '#c8a030',   // muted yellow
+    '#6068c8'                      // fallback indigo
   ];
 }
 
@@ -1883,17 +1883,17 @@ function buildingHighlight3dFilter(categoryId) {
 function _pulseBuildingHighlight(high) {
   if (buildingHighlightUses3D()) {
     if (map.getLayer('buildings-highlight-3d')) {
-      map.setPaintProperty('buildings-highlight-3d', 'fill-extrusion-opacity', high ? 0.88 : 0.34);
+      map.setPaintProperty('buildings-highlight-3d', 'fill-extrusion-opacity', high ? 0.42 : 0.14);
     }
     if (map.getLayer('buildings-highlight-3d-glow')) {
-      map.setPaintProperty('buildings-highlight-3d-glow', 'fill-extrusion-opacity', high ? 0.52 : 0.14);
+      map.setPaintProperty('buildings-highlight-3d-glow', 'fill-extrusion-opacity', high ? 0.22 : 0.06);
     }
     if (typeof Landmarks3D !== 'undefined') Landmarks3D.pulseCategoryHighlight(high);
     return;
   }
   if (!map.getLayer('buildings-highlight-fill')) return;
-  map.setPaintProperty('buildings-highlight-fill', 'fill-opacity', high ? 0.55 : 0.18);
-  map.setPaintProperty('buildings-highlight-outline', 'line-opacity', high ? 1.0 : 0.35);
+  map.setPaintProperty('buildings-highlight-fill', 'fill-opacity', high ? 0.38 : 0.12);
+  map.setPaintProperty('buildings-highlight-outline', 'line-opacity', high ? 0.72 : 0.22);
   map.setPaintProperty('buildings-highlight-outline', 'line-width',
     ['interpolate', ['linear'], ['zoom'], 14, high ? 2 : 1, 17, high ? 4.5 : 2.5]);
 }
@@ -1954,8 +1954,8 @@ function stopBuildingHighlight() {
   if (map.getLayer('buildings-highlight-3d')) {
     map.setFilter('buildings-highlight-3d', NEVER_BUILDING_FILTER);
     map.setFilter('buildings-highlight-3d-glow', NEVER_BUILDING_FILTER);
-    map.setPaintProperty('buildings-highlight-3d', 'fill-extrusion-opacity', 0.88);
-    map.setPaintProperty('buildings-highlight-3d-glow', 'fill-extrusion-opacity', 0.52);
+    map.setPaintProperty('buildings-highlight-3d', 'fill-extrusion-opacity', 0.42);
+    map.setPaintProperty('buildings-highlight-3d-glow', 'fill-extrusion-opacity', 0.22);
     setVis('buildings-highlight-3d', 'none');
     setVis('buildings-highlight-3d-glow', 'none');
   }
