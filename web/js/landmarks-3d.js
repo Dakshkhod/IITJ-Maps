@@ -5604,7 +5604,7 @@ var Landmarks3D = (() => {
     };
 
     if (_bermLayout) { build(_bermLayout); return; }
-    fetch('/data/berm-layout.json?v=2')
+    fetch('/data/berm-layout.json?v=3')
       .then(r => r.ok ? r.json() : {})
       .then(d => { _bermLayout = d || {}; build(_bermLayout); })
       .catch(() => build({}));

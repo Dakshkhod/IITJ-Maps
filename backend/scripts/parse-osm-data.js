@@ -935,52 +935,46 @@ function _extendCenterlineArc(centerline, targetS) {
   return { centerline: extended, lengthM: cur };
 }
 
-// One 3D arch per POI at its OSM-projected arc position; spread clusters along
-// the berm and fill wide gaps so the mesh stays continuous.
-function _moduleArcsFromPOIs(list, centerline, minSpacing = 5.5, fillGap = 11) {
+// One dedicated gate per POI on the berm centerline; spread clusters so labels
+// never stack, then add filler arches only in wide gaps for a continuous 3D mesh.
+function _poiGateLayoutFromPOIs(list, centerline, minSpacing = 7.25, fillGap = 12) {
   const sorted = list
     .map((item, idx) => ({ ...item, idx, s: _projectArcS(item.lng, item.lat, centerline) }))
-    .sort((a, b) => a.s - b.s || a.lng - b.lng);
+    .sort((a, b) => a.s - b.s
+      || a.lng - b.lng
+      || (a.cand.place.properties.name || '').localeCompare(b.cand.place.properties.name || ''));
 
-  const poiArcs = [];
+  const poiBindings = [];
   let lastS = -Infinity;
   for (const item of sorted) {
-    let s = poiArcs.length === 0 ? Math.max(0, item.s) : Math.max(item.s, lastS + minSpacing);
-    poiArcs.push(s);
+    const s = poiBindings.length === 0
+      ? Math.max(0, item.s)
+      : Math.max(item.s, lastS + minSpacing);
+    poiBindings.push({ poiIdx: item.idx, s });
     lastS = s;
   }
 
   const moduleArcs = [];
-  const pushUnique = (s) => {
-    if (!moduleArcs.length || s - moduleArcs[moduleArcs.length - 1] >= minSpacing * 0.85) {
+  const pushArc = (s) => {
+    if (!moduleArcs.length || Math.abs(s - moduleArcs[moduleArcs.length - 1]) > 0.5) {
       moduleArcs.push(s);
     }
   };
 
-  for (let i = 0; i < poiArcs.length; i++) {
+  for (let i = 0; i < poiBindings.length; i++) {
     if (i > 0) {
-      const gap = poiArcs[i] - poiArcs[i - 1];
+      const gap = poiBindings[i].s - poiBindings[i - 1].s;
       if (gap > fillGap) {
-        const nFill = Math.max(1, Math.round(gap / 7.5) - 1);
+        const nFill = Math.max(1, Math.round(gap / minSpacing) - 1);
         for (let f = 1; f <= nFill; f++) {
-          pushUnique(poiArcs[i - 1] + (gap * f) / (nFill + 1));
+          pushArc(poiBindings[i - 1].s + (gap * f) / (nFill + 1));
         }
       }
     }
-    pushUnique(poiArcs[i]);
+    pushArc(poiBindings[i].s);
   }
 
-  const poiModuleIdx = sorted.map((item, i) => {
-    const target = poiArcs[i];
-    let best = 0, bestD = Infinity;
-    moduleArcs.forEach((s, mi) => {
-      const d = Math.abs(s - target);
-      if (d < bestD) { bestD = d; best = mi; }
-    });
-    return { poiIdx: item.idx, moduleIdx: best, arcS: moduleArcs[best] };
-  });
-
-  return { moduleArcs, poiModuleIdx, poiArcs };
+  return { poiBindings, moduleArcs };
 }
 
 // Minimum-cost bipartite matching: n POIs → m gates (n ≤ m). Hungarian
@@ -1121,9 +1115,12 @@ function snapPerimeterCodes(places, osmData) {
     const ring = mergedRings[ribbonId];
     const override = BERM_CL_OVERRIDE[ribbonId];
     const baseSpec = ribbonGatesForRibbon(ring, override, layout[ribbonId].moduleW, 0);
+    const gateSpacing = baseSpec.moduleW;
 
-    const { moduleArcs, poiModuleIdx } = _moduleArcsFromPOIs(list, baseSpec.centerline);
-    const maxArc = moduleArcs[moduleArcs.length - 1] + 4;
+    const { poiBindings, moduleArcs } = _poiGateLayoutFromPOIs(
+      list, baseSpec.centerline, gateSpacing,
+    );
+    const maxArc = poiBindings[poiBindings.length - 1].s + gateSpacing;
     const { centerline, lengthM } = _extendCenterlineArc(baseSpec.centerline, maxArc);
 
     const gates = moduleArcs.map(s => {
@@ -1134,17 +1131,18 @@ function snapPerimeterCodes(places, osmData) {
     layout[ribbonId].gates = gates.map(({ lng, lat }) => ({ lng, lat }));
     layout[ribbonId].centerline = centerline;
     layout[ribbonId].moduleArcs = moduleArcs;
-    layout[ribbonId].moduleW = baseSpec.moduleW;
+    layout[ribbonId].poiGateArcs = poiBindings.map(b => b.s);
+    layout[ribbonId].moduleW = gateSpacing;
     layout[ribbonId].minModules = moduleArcs.length;
     layout[ribbonId].lengthM = lengthM;
     layout[ribbonId].poiCount = poiCount;
     layout[ribbonId].poiDriven = true;
 
-    // Keep exact OSM coordinates on labels; 3D arches follow moduleArcs above.
     const listByIdx = list.slice();
-    for (const bind of poiModuleIdx) {
-      const { cand } = listByIdx[bind.poiIdx];
-      const [lng, lat] = cand.place.geometry.coordinates;
+    for (const { poiIdx, s } of poiBindings) {
+      const { cand } = listByIdx[poiIdx];
+      const [lng, lat] = _lngLatAtArcS(s, centerline);
+      cand.place.geometry.coordinates = [lng, lat];
       if (cand.place.centroid) cand.place.centroid = { lat, lng };
       const name = (cand.place.properties.name || '').trim();
       if (name) {
@@ -1154,7 +1152,7 @@ function snapPerimeterCodes(places, osmData) {
     }
   }
 
-  console.log(`  Perimeter layout: ${snapped} berm POIs at OSM coords, POI-driven 3D arches`);
+  console.log(`  Perimeter layout: ${snapped} berm POIs on dedicated sandstone gates`);
   return { places, bermEntrances, bermLayout: layout };
 }
 
