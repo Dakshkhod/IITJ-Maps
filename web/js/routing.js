@@ -131,73 +131,26 @@ const IITJRouter = (() => {
     return delta;
   }
 
-  // India keeps left — penalise right turns (especially at roundabouts) so routes
-  // circulate around the island instead of cutting across the ring.
-  const ROUNDABOUTS = [
-    { lat: 26.4692796, lng: 73.1141633, radiusM: 68 }, // Brain Tree
-  ];
+  // India keeps left — Brain Tree roundabout must be circled on the west side
+  // when approaching from the south gate toward north-campus destinations.
+  const BRAIN_TREE_CENTER = { lat: 26.4692796, lng: 73.1141633 };
+  const BRAIN_TREE_WEST_VIA = '26.469129,73.113752'; // west ring, ~270° from centre
   // Short cuts across the ring that skip the left-side circulation (both directions).
   const ROUNDABOUT_CHORDS = new Set([
     '26.468769,73.114261|26.468827,73.114328',
     '26.468827,73.114328|26.468769,73.114261',
   ]);
-  const BEARING_BUCKET_DEG = 10;
 
   function _isRoundaboutChord(curId, nbId) {
     return ROUNDABOUT_CHORDS.has(`${curId}|${nbId}`);
   }
 
-  function _bearingStateKey(bearingDeg) {
-    if (bearingDeg == null) return 'start';
-    return String(Math.round(bearingDeg / BEARING_BUCKET_DEG));
-  }
-
-  function _inRoundabout(lat, lng) {
-    for (const r of ROUNDABOUTS) {
-      if (haversine(r.lat, r.lng, lat, lng) <= r.radiusM) return true;
-    }
-    return false;
-  }
-
-  function _lhtTurnPenalty(turnDeg, lat, lng, junctionDegree) {
-    if (Math.abs(turnDeg) <= 12) return 0;
-    if (Math.abs(turnDeg) > 150) return 600;
-
-    const inRound = _inRoundabout(lat, lng);
-    if (inRound) {
-      if (turnDeg > 35) return 350 + turnDeg * 8;
-      if (turnDeg > 22) return 80 + turnDeg * 4;
-      if (turnDeg < -50) return 50 + Math.abs(turnDeg);
-      if (turnDeg < -20) return -25;
-      return 0;
-    }
-
-    const isJunction = junctionDegree >= 3;
-    if (turnDeg > 0) {
-      let penalty = turnDeg * 1.2;
-      if (turnDeg > 35) penalty += 25;
-      if (isJunction) penalty *= 1.5;
-      return penalty;
-    }
-    if (turnDeg < -75) return 20;
-    return Math.abs(turnDeg) * 0.1;
-  }
-
-  function _pathRoundaboutPenalty(pathNodes, mode) {
-    if (mode !== 'drive' || pathNodes.length < 3) return 0;
-    let penalty = 0;
-    for (let i = 1; i < pathNodes.length - 1; i++) {
-      const prev = _nodeCoords[pathNodes[i - 1]];
-      const cur = _nodeCoords[pathNodes[i]];
-      const next = _nodeCoords[pathNodes[i + 1]];
-      if (!prev || !cur || !next) continue;
-      if (!_inRoundabout(cur[1], cur[0])) continue;
-      const inB = getBearing(prev[1], prev[0], cur[1], cur[0]);
-      const outB = getBearing(cur[1], cur[0], next[1], next[0]);
-      const turn = ((outB - inB + 540) % 360) - 180;
-      if (turn > 22) penalty += turn * 8;
-    }
-    return penalty;
+  function _needsBrainTreeWestArc(fromLat, fromLng, toLat, toLng) {
+    if (fromLat >= BRAIN_TREE_CENTER.lat - 0.0008) return false;
+    if (toLat <= BRAIN_TREE_CENTER.lat + 0.0012) return false;
+    const dFrom = haversine(fromLat, fromLng, BRAIN_TREE_CENTER.lat, BRAIN_TREE_CENTER.lng);
+    const dTo = haversine(toLat, toLng, BRAIN_TREE_CENTER.lat, BRAIN_TREE_CENTER.lng);
+    return dFrom > 75 && dTo > 75;
   }
 
   // Penalise the first graph hop when it points away from the destination.
@@ -216,7 +169,7 @@ const IITJRouter = (() => {
   }
 
   // ── Dijkstra ──────────────────────────────────────────────────
-  function dijkstraSimple(startId, endId, mode = 'drive', opts = {}) {
+  function dijkstra(startId, endId, mode = 'drive', opts = {}) {
     const dist = { [startId]: 0 };
     const physicalDist = { [startId]: 0 };
     const prev = {};
@@ -233,6 +186,7 @@ const IITJRouter = (() => {
 
       for (const edge of (_graph[cur] || [])) {
         if (!isAllowedEdge(edge, mode, opts)) continue;
+        if (mode === 'drive' && _isRoundaboutChord(cur, edge.id)) continue;
         const nb = edge.id;
         if (visited.has(nb)) continue;
         let step = edgeCost(edge, mode, cur, nb);
@@ -258,87 +212,20 @@ const IITJRouter = (() => {
     return { nodes, distance: physicalDist[endId] ?? dist[endId], cost: dist[endId] };
   }
 
-  function dijkstraDrive(startId, endId, opts = {}) {
-    const dist = {};
-    const physicalDist = {};
-    const prev = {};
-    const visited = new Set();
-    const heap = new MinHeap();
-    const startState = `${startId}:start`;
-    dist[startState] = 0;
-    physicalDist[startState] = 0;
-    heap.push({ id: startId, inBearing: null, dist: 0 });
-    const departBias = opts.departFromLat != null && opts.departToLat != null;
+  // Route through the Brain Tree west ring when driving from south gate to north campus.
+  function routeGraph(startId, endId, mode, opts, fromLat, fromLng, toLat, toLng) {
+    const useWestArc = mode === 'drive' && _needsBrainTreeWestArc(fromLat, fromLng, toLat, toLng);
+    if (!useWestArc) return dijkstra(startId, endId, mode, opts);
 
-    let bestEndState = null;
-    let bestEndDist = Infinity;
+    const leg1 = dijkstra(startId, BRAIN_TREE_WEST_VIA, mode, opts);
+    const leg2 = dijkstra(BRAIN_TREE_WEST_VIA, endId, mode, opts);
+    if (!leg1 || !leg2) return dijkstra(startId, endId, mode, opts);
 
-    while (heap.size > 0) {
-      const { id: cur, inBearing, dist: curDist } = heap.pop();
-      const stateKey = `${cur}:${_bearingStateKey(inBearing)}`;
-      if (visited.has(stateKey)) continue;
-      visited.add(stateKey);
-
-      if (cur === endId && curDist < bestEndDist) {
-        bestEndDist = curDist;
-        bestEndState = stateKey;
-      }
-      if (bestEndState !== null && curDist >= bestEndDist) continue;
-
-      const allowedEdges = (_graph[cur] || []).filter(e => isAllowedEdge(e, 'drive', opts));
-      const junctionDegree = allowedEdges.length;
-
-      for (const edge of allowedEdges) {
-        const nb = edge.id;
-        if (_isRoundaboutChord(cur, nb)) continue;
-        let step = edgeCost(edge, 'drive', cur, nb);
-        if (departBias && cur === startId) {
-          step *= _departHopMultiplier(
-            cur, nb, opts.departFromLat, opts.departFromLng, opts.departToLat, opts.departToLng
-          );
-        }
-
-        const curC = _nodeCoords[cur];
-        const nbC = _nodeCoords[nb];
-        if (!curC || !nbC) continue;
-        const outBearing = getBearing(curC[1], curC[0], nbC[1], nbC[0]);
-
-        if (inBearing != null) {
-          const turn = ((outBearing - inBearing + 540) % 360) - 180;
-          step += _lhtTurnPenalty(turn, curC[1], curC[0], junctionDegree);
-        }
-        const prevEntry = prev[stateKey];
-        if (prevEntry && prevEntry.node === nb) step += 500;
-
-        const nbState = `${nb}:${_bearingStateKey(outBearing)}`;
-        const nd = curDist + step;
-        if (nd < (dist[nbState] ?? Infinity)) {
-          dist[nbState] = nd;
-          physicalDist[nbState] = (physicalDist[stateKey] ?? 0) + edge.dist;
-          prev[nbState] = { node: cur, stateKey };
-          heap.push({ id: nb, inBearing: outBearing, dist: nd });
-        }
-      }
-    }
-
-    if (bestEndState === null) return null;
-    const nodes = [];
-    let state = bestEndState;
-    nodes.unshift(state.split(':')[0]);
-    while (prev[state]) {
-      nodes.unshift(prev[state].node);
-      state = prev[state].stateKey;
-    }
     return {
-      nodes,
-      distance: physicalDist[bestEndState] ?? bestEndDist,
-      cost: dist[bestEndState] ?? bestEndDist,
+      nodes: [...leg1.nodes, ...leg2.nodes.slice(1)],
+      distance: leg1.distance + leg2.distance,
+      cost: leg1.distance + leg2.distance,
     };
-  }
-
-  function dijkstra(startId, endId, mode = 'drive', opts = {}) {
-    if (mode === 'drive') return dijkstraDrive(startId, endId, opts);
-    return dijkstraSimple(startId, endId, mode, opts);
   }
 
   // Campus centroid — berm shops must be approached from the campus-facing
@@ -461,6 +348,21 @@ const IITJRouter = (() => {
     return merged;
   }
 
+  // Always include the closest drivable snap so destinations like E-15 don't
+  // land on a distant road node just because it has a cheaper graph path.
+  function ensureNearestSnap(candidates, lat, lng, mode, opts, withinM = 20) {
+    let nearest = null, nearestD = Infinity;
+    for (const [id, coords] of Object.entries(_nodeCoords)) {
+      const edges = _graph[id] || [];
+      if (!edges.some(e => isAllowedEdge(e, mode, opts))) continue;
+      const d = haversine(lat, lng, coords[1], coords[0]);
+      if (d < nearestD) { nearestD = d; nearest = { id, dist: d, score: _nodeSnapScore(lat, lng, coords, d, opts) }; }
+    }
+    if (!nearest || nearestD > withinM) return candidates;
+    if (candidates.some(c => c.id === nearest.id)) return candidates;
+    return [nearest, ...candidates];
+  }
+
   // Smallest outbound bearing error from a node toward the destination.
   function _minDepartDelta(nodeId, fromLat, fromLng, toLat, toLng, mode, opts) {
     const c0 = _nodeCoords[nodeId];
@@ -578,11 +480,13 @@ const IITJRouter = (() => {
       : { towardLat: fromLat, towardLng: fromLng };
 
     function tryMode(m, opts = {}) {
-      const toCandidates = findCandidateNodes(
+      let toCandidates = findCandidateNodes(
         toLat, toLng, 400, m, { ...opts, ...toSnapOpts }, preferCampusSideTo ? 8 : 6
       );
+      toCandidates = ensureNearestSnap(toCandidates, toLat, toLng, m, { ...opts, ...toSnapOpts });
       if (!toCandidates.length) return null;
       const toPool = toCandidates;
+      const nearestToDist = Math.min(...toPool.map(c => c.dist));
 
       const routeOpts = {
         ...opts,
@@ -622,26 +526,25 @@ const IITJRouter = (() => {
       for (const cand of pool) {
         for (const toCand of toPool) {
           if (cand.id === toCand.id) continue;
-          const path = dijkstra(cand.id, toCand.id, m, routeOpts);
+          const path = routeGraph(
+            cand.id, toCand.id, m, routeOpts, fromLat, fromLng, toLat, toLng
+          );
           if (!path || path.nodes.length < 2) continue;
           const progress = _departureProgress(cand.id, path.nodes, toLat, toLng);
           const hopMis = _firstHopMisalignment(cand.id, path.nodes, fromLat, fromLng, toLat, toLng);
           const arrivalPenalty = _pathArrivalPenalty(path.nodes, toLat, toLng, m, preferCampusSideTo);
-          const roundaboutPenalty = _pathRoundaboutPenalty(path.nodes, m);
           const toNodeCoords = _nodeCoords[toCand.id];
           const campusSnapPenalty = (preferCampusSideTo && toNodeCoords &&
             !_nodeOnCampusSideOf(toNodeCoords, toLat, toLng)) ? 200 : 0;
-          // Rank on penalised path cost so LHT / roundabout logic affects snap choice.
-          const rank = path.cost
+          const rank = path.distance
             + (cand.dist - nearestDist) * 4
-            + cand.score * 0.2
-            + toCand.score * 0.25
-            + toCand.dist * 0.15
+            + (toCand.dist - nearestToDist) * 40
+            + cand.score * 0.15
+            + toCand.score * 0.1
             + arrivalPenalty
-            + roundaboutPenalty
             + campusSnapPenalty
             + (progress < 0 ? hopMis * 12 : 0)
-            - progress * 25;
+            - progress * 20;
           const entry = {
             path, fromNode: cand.id, toNode: toCand.id, opts: routeOpts, rank, progress, hopMis,
             arrivalPenalty,
@@ -702,6 +605,11 @@ const IITJRouter = (() => {
         if (c) coords.push(c);
       }
       coords.push([endPt.lng, endPt.lat]);
+
+      const destGap = haversine(endPt.lat, endPt.lng, toLat, toLng);
+      if (destGap > 6 && destGap < 160) {
+        coords.push([toLng, toLat]);
+      }
 
       // Drop consecutive duplicate / near-duplicate vertices (avoids zero-length u-turn legs).
       coords = coords.filter((c, i) => {
