@@ -485,8 +485,11 @@ const IITJRouter = (() => {
       );
       toCandidates = ensureNearestSnap(toCandidates, toLat, toLng, m, { ...opts, ...toSnapOpts });
       if (!toCandidates.length) return null;
-      const toPool = toCandidates;
-      const nearestToDist = Math.min(...toPool.map(c => c.dist));
+      const nearestToDist = Math.min(...toCandidates.map(c => c.dist));
+      // Prefer snaps within ~35 m of the destination; avoids overshooting to a
+      // campus-interior node past the building (e.g. E-15 berm).
+      const nearDest = toCandidates.filter(c => c.dist <= 35);
+      const toPool = nearDest.length ? nearDest : toCandidates;
 
       const routeOpts = {
         ...opts,
@@ -538,7 +541,7 @@ const IITJRouter = (() => {
             !_nodeOnCampusSideOf(toNodeCoords, toLat, toLng)) ? 200 : 0;
           const rank = path.distance
             + (cand.dist - nearestDist) * 4
-            + (toCand.dist - nearestToDist) * 40
+            + toCand.dist * 25
             + cand.score * 0.15
             + toCand.score * 0.1
             + arrivalPenalty
@@ -605,11 +608,6 @@ const IITJRouter = (() => {
         if (c) coords.push(c);
       }
       coords.push([endPt.lng, endPt.lat]);
-
-      const destGap = haversine(endPt.lat, endPt.lng, toLat, toLng);
-      if (destGap > 6 && destGap < 160) {
-        coords.push([toLng, toLat]);
-      }
 
       // Drop consecutive duplicate / near-duplicate vertices (avoids zero-length u-turn legs).
       coords = coords.filter((c, i) => {
