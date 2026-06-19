@@ -862,7 +862,10 @@ async function applyMapStyle() {
         addBuildingsLayer(buildingsRes);
         addPlacesLayer(placesRes.features || []);
         ensureLandmarkLabelsLayer();
-        if (currentRoute) drawRoute(currentRoute.geometry, /*animate=*/false);
+        if (currentRoute) {
+          const dest = navDestination ? [navDestination.lng, navDestination.lat] : null;
+          drawRoute(currentRoute.geometry, /*animate=*/false, dest);
+        }
 
         map.jumpTo({ center: savedCenter, zoom: savedZoom, pitch: savedPitch, bearing: savedBearing });
 
@@ -2990,7 +2993,7 @@ async function calculateDirectionsRoute() {
     const routeToLat   = toEntry   ? toEntry.lat   : directionsTo.lat;
     const routeToLng   = toEntry   ? toEntry.lng   : directionsTo.lng;
 
-    const route = IITJRouter.computeRoute(
+    let route = IITJRouter.computeRoute(
       routeFromLat, routeFromLng,
       routeToLat,   routeToLng,
       directionsMode,
@@ -3000,12 +3003,15 @@ async function calculateDirectionsRoute() {
     hideLoadingToast();
     if (route.error) { showToast(route.error, 'error'); return; }
 
+    // Road graph may end at a gate node; always draw through to the POI label.
+    route = _extendRouteToPoi(route, directionsTo.lat, directionsTo.lng);
+
     currentRoute        = route;
     navInstructionIndex = 0;
     navigationActive    = wasImmersive;   // routes are previews unless we're already navigating
     navDestination      = { ...directionsTo };
 
-    drawRoute(route.geometry);
+    drawRoute(route.geometry, true, [directionsTo.lng, directionsTo.lat]);
 
     // Mid-nav reroute: just refresh the line + ETA in the nav-panel; skip
     // the preview UI, the fitBounds, and the "best route" toast.
@@ -3102,6 +3108,27 @@ async function startNavigation() {
   }
 }
 
+function _extendRouteToPoi(route, poiLat, poiLng) {
+  if (!route?.geometry?.coordinates?.length || poiLat == null || poiLng == null) return route;
+  const coords = route.geometry.coordinates.map(c => [...c]);
+  const last = coords[coords.length - 1];
+  const gap = haversine(last[1], last[0], poiLat, poiLng);
+  if (gap <= 5 || gap > 200) return route;
+  coords.push([poiLng, poiLat]);
+  let dist = 0;
+  for (let i = 0; i < coords.length - 1; i++) {
+    dist += haversine(coords[i][1], coords[i][0], coords[i + 1][1], coords[i + 1][0]);
+  }
+  const speed = route.profile === 'driving' ? 7 : 1.4;
+  return {
+    ...route,
+    geometry: { type: 'LineString', coordinates: coords },
+    distance: Math.round(dist),
+    duration: Math.round(dist / speed),
+    eta_minutes: Math.max(1, Math.round(dist / speed / 60)),
+  };
+}
+
 function _removeRouteMarkers() {
   if (routeOriginMarker) { routeOriginMarker.remove(); routeOriginMarker = null; }
   if (routeDestMarker)   { routeDestMarker.remove();   routeDestMarker   = null; }
@@ -3127,7 +3154,7 @@ function _addRouteMarkers(startCoord, endCoord) {
     .setLngLat(endCoord).addTo(map);
 }
 
-function drawRoute(geometry, animate = true) {
+function drawRoute(geometry, animate = true, destMarker = null) {
   const data = { type: 'Feature', geometry };
 
   // Cancel any in-flight draw animation from a previous route.
@@ -3181,7 +3208,7 @@ function drawRoute(geometry, animate = true) {
 
   // Place start/end markers
   const coords = geometry.coordinates;
-  _addRouteMarkers(coords[0], coords[coords.length - 1]);
+  _addRouteMarkers(coords[0], destMarker || coords[coords.length - 1]);
 
   if (doAnimate) _animateRouteDraw(geometry.coordinates);
 }

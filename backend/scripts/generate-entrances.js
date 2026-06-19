@@ -111,7 +111,8 @@ try {
   }
 } catch (_) {}
 
-// 4. Berm sandstone-gate entrances (Shopping centre, W/E codes, berm societies).
+// 4. Berm sandstone-gate entrances override gate/ring/curated entries — these
+// are hand-placed on the campus-facing road and match the POI coordinates.
 let bermMerged = 0;
 for (const bermPath of [
   path.join(WEB_DATA, 'berm-entrances.json'),
@@ -120,7 +121,10 @@ for (const bermPath of [
   if (!fs.existsSync(bermPath)) continue;
   const berm = JSON.parse(fs.readFileSync(bermPath, 'utf8'));
   for (const [k, v] of Object.entries(berm)) {
-    if (!out[k]) { out[k] = v; bermMerged++; report.push(`berm   ${k.padEnd(22)} ← sandstone gate`); }
+    const replaced = !!out[k];
+    out[k] = v;
+    bermMerged++;
+    report.push(`${replaced ? 'berm!' : 'berm  '} ${k.padEnd(22)} ← sandstone gate`);
   }
   break;
 }

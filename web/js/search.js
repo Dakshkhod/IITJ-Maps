@@ -28,7 +28,7 @@ const IITJData = (() => {
       fetch(`${base}/areas.geojson?v=32`).then(r => r.json()),
       fetch(`${base}/search-index.json?v=38`).then(r => r.json()),
       fetch(`${base}/categories.json`).then(r => r.json()),
-      fetch(`${base}/entrances.json?v=39`).then(r => r.ok ? r.json() : {}).catch(() => ({})),
+      fetch(`${base}/entrances.json?v=40`).then(r => r.ok ? r.json() : {}).catch(() => ({})),
       fetch(`${base}/berms.geojson?v=1`).then(r => r.ok ? r.json() : { type: 'FeatureCollection', features: [] }).catch(() => ({ type: 'FeatureCollection', features: [] })),
       fetch(`${base}/greens.geojson?v=2`).then(r => r.ok ? r.json() : null).catch(() => null),
     ]);
