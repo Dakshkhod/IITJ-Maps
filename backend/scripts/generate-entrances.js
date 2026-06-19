@@ -100,6 +100,7 @@ for (const b of buildings) {
 const CURATED_ENTRANCE_SKIP = new Set([
   'Gate 1 (Main Gate - NH62)',
   'Gate 2 (South Gate)',
+  'Photography Club',  // merged into Designing Club (OSC 2026-06)
 ]);
 let carried = 0;
 try {

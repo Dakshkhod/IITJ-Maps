@@ -422,13 +422,13 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          73.114562,
-          26.4702127
+          73.11450944828991,
+          26.47020081558125
         ]
       },
       "centroid": {
-        "lat": 26.4702127,
-        "lng": 73.114562
+        "lat": 26.47020081558125,
+        "lng": 73.11450944828991
       }
     },
     {
@@ -445,13 +445,13 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          73.1149697,
-          26.4702837
+          73.1148845111212,
+          26.47025943603966
         ]
       },
       "centroid": {
-        "lat": 26.4702837,
-        "lng": 73.1149697
+        "lat": 26.47025943603966,
+        "lng": 73.1148845111212
       }
     },
     {
@@ -468,13 +468,13 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          73.1153832,
-          26.4703871
+          73.11518073789433,
+          26.47033064911153
         ]
       },
       "centroid": {
-        "lat": 26.4703871,
-        "lng": 73.1153832
+        "lat": 26.47033064911153,
+        "lng": 73.11518073789433
       }
     },
     {
@@ -491,13 +491,13 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          73.1157193,
-          26.4705239
+          73.11547590289175,
+          26.470425853851644
         ]
       },
       "centroid": {
-        "lat": 26.4705239,
-        "lng": 73.1157193
+        "lat": 26.470425853851644,
+        "lng": 73.11547590289175
       }
     },
     {
@@ -514,13 +514,13 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          73.1160235,
-          26.470676
+          73.1157695925683,
+          26.470553690041445
         ]
       },
       "centroid": {
-        "lat": 26.470676,
-        "lng": 73.1160235
+        "lat": 26.470553690041445,
+        "lng": 73.1157695925683
       }
     },
     {
@@ -537,13 +537,13 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          73.1162936,
-          26.4708343
+          73.11607024515882,
+          26.470710320502118
         ]
       },
       "centroid": {
-        "lat": 26.4708343,
-        "lng": 73.1162936
+        "lat": 26.470710320502118,
+        "lng": 73.11607024515882
       }
     },
     {
@@ -560,13 +560,13 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          73.1165963,
-          26.4710369
+          73.11634001399264,
+          26.470876990053352
         ]
       },
       "centroid": {
-        "lat": 26.4710369,
-        "lng": 73.1165963
+        "lat": 26.470876990053352,
+        "lng": 73.11634001399264
       }
     },
     {
@@ -873,13 +873,13 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          73.11792292727097,
-          26.474126331001308
+          73.11792918886849,
+          26.47419285018416
         ]
       },
       "centroid": {
-        "lat": 26.474126331001308,
-        "lng": 73.11792292727097
+        "lat": 26.47419285018416,
+        "lng": 73.11792918886849
       }
     },
     {
@@ -1135,13 +1135,13 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          73.11794455405091,
-          26.476681152985645
+          73.11794211103336,
+          26.476481447211277
         ]
       },
       "centroid": {
-        "lat": 26.476681152985645,
-        "lng": 73.11794455405091
+        "lat": 26.476481447211277,
+        "lng": 73.11794211103336
       }
     },
     {
@@ -1156,13 +1156,13 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          73.11795416807712,
-          26.47568269694846
+          73.11795674906827,
+          26.47561616422957
         ]
       },
       "centroid": {
-        "lat": 26.47568269694846,
-        "lng": 73.11795416807712
+        "lat": 26.47561616422957,
+        "lng": 73.11795674906827
       }
     },
     {
@@ -1445,6 +1445,48 @@
     {
       "type": "Feature",
       "properties": {
+        "osm_id": "13943828018",
+        "name": "E-21",
+        "category": "utility",
+        "source": "osm",
+        "description": "Shop"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          73.11794626812627,
+          26.475948892542704
+        ]
+      },
+      "centroid": {
+        "lat": 26.475948892542704,
+        "lng": 73.11794626812627
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "osm_id": "13943828019",
+        "name": "E-22",
+        "category": "utility",
+        "source": "osm",
+        "description": "Shop"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          73.11794288963146,
+          26.476148587391144
+        ]
+      },
+      "centroid": {
+        "lat": 26.476148587391144,
+        "lng": 73.11794288963146
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
         "osm_id": "1412504085",
         "name": "Tapri",
         "category": "dining",
@@ -1534,7 +1576,7 @@
       "properties": {
         "osm_id": "1419313442",
         "name": "LHC 2",
-        "category": "academic",
+        "category": "building",
         "source": "osm",
         "building_type": "school",
         "amenity": null,
@@ -1635,13 +1677,13 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          73.11794782625259,
-          26.47439241879971
+          73.11795398951702,
+          26.474458945340672
         ]
       },
       "centroid": {
-        "lat": 26.47439241879971,
-        "lng": 73.11794782625259
+        "lat": 26.474458945340672,
+        "lng": 73.11795398951702
       }
     },
     {
@@ -5034,7 +5076,7 @@
       "properties": {
         "osm_id": "1529899558",
         "name": "Animal House",
-        "category": "academic",
+        "category": "building",
         "source": "osm",
         "building_type": "house",
         "amenity": null,
@@ -5061,6 +5103,10 @@
               26.4715666
             ],
             [
+              73.11845645537363,
+              26.471614791020848
+            ],
+            [
               73.1183461,
               26.4716786
             ]
@@ -5068,8 +5114,8 @@
         ]
       },
       "centroid": {
-        "lat": 26.47154638,
-        "lng": 73.11836384
+        "lat": 26.471557781836808,
+        "lng": 73.1183792758956
       }
     },
     {
@@ -5084,13 +5130,13 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          73.11789763501463,
-          26.473860272924295
+          73.11789125050869,
+          26.47379376310343
         ]
       },
       "centroid": {
-        "lat": 26.473860272924295,
-        "lng": 73.11789763501463
+        "lat": 26.47379376310343,
+        "lng": 73.11789125050869
       }
     },
     {
@@ -5238,13 +5284,13 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          73.11793542589257,
-          26.474259371216792
+          73.11794163836626,
+          26.47432589409016
         ]
       },
       "centroid": {
-        "lat": 26.474259371216792,
-        "lng": 73.11793542589257
+        "lat": 26.47432589409016,
+        "lng": 73.11794163836626
       }
     },
     {
@@ -5259,13 +5305,13 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          73.11792918886849,
-          26.47419285018416
+          73.11793542589257,
+          26.474259371216792
         ]
       },
       "centroid": {
-        "lat": 26.47419285018416,
-        "lng": 73.11792918886849
+        "lat": 26.474259371216792,
+        "lng": 73.11793542589257
       }
     },
     {
@@ -5345,8 +5391,8 @@
         "name": "Designing Club",
         "category": "recreation",
         "source": "osm",
+        "description": "Photography Club",
         "alt_name": "Designerds",
-        "description": "Club / Society",
         "keywords": [
           "Designerds"
         ]
@@ -5375,13 +5421,13 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          73.11797233188236,
-          26.474658535856168
+          73.11797839681662,
+          26.47472506963776
         ]
       },
       "centroid": {
-        "lat": 26.474658535856168,
-        "lng": 73.11797233188236
+        "lat": 26.47472506963776,
+        "lng": 73.11797839681662
       }
     },
     {
@@ -5414,7 +5460,7 @@
       "properties": {
         "osm_id": "773563492",
         "name": "Fresh and Green",
-        "category": "utility",
+        "category": "dining",
         "source": "osm",
         "building_type": "commercial",
         "amenity": null,
@@ -5512,7 +5558,7 @@
       "properties": {
         "osm_id": "773839450",
         "name": "Faculty Housing",
-        "category": "residential",
+        "category": "hostel",
         "source": "osm",
         "building_type": "yes",
         "amenity": null,
@@ -5595,7 +5641,7 @@
       "properties": {
         "osm_id": "773839452",
         "name": "Faculty Housing",
-        "category": "residential",
+        "category": "hostel",
         "source": "osm",
         "building_type": "yes",
         "amenity": null,
@@ -5674,7 +5720,7 @@
       "properties": {
         "osm_id": "773839460",
         "name": "Faculty Housing",
-        "category": "residential",
+        "category": "hostel",
         "source": "osm",
         "building_type": "yes",
         "amenity": null,
@@ -5749,7 +5795,7 @@
       "properties": {
         "osm_id": "773839461",
         "name": "Faculty Housing",
-        "category": "residential",
+        "category": "hostel",
         "source": "osm",
         "building_type": "yes",
         "amenity": null,
@@ -5946,7 +5992,7 @@
       "properties": {
         "osm_id": "1412677770",
         "name": "Faculty Housing",
-        "category": "residential",
+        "category": "hostel",
         "source": "osm",
         "building_type": "yes",
         "amenity": null,
@@ -6800,31 +6846,6 @@
     {
       "type": "Feature",
       "properties": {
-        "osm_id": "13906296455",
-        "name": "Photography Club",
-        "category": "recreation",
-        "source": "osm",
-        "alt_name": "ShutterBugs",
-        "description": "Club / Society",
-        "keywords": [
-          "ShutterBugs"
-        ]
-      },
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          73.11797839681662,
-          26.47472506963776
-        ]
-      },
-      "centroid": {
-        "lat": 26.47472506963776,
-        "lng": 73.11797839681662
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
         "osm_id": "13929549763",
         "name": "Woman salon shop",
         "category": "utility",
@@ -7071,7 +7092,7 @@
       "properties": {
         "osm_id": "1412443820",
         "name": "Security Checking",
-        "category": "gate",
+        "category": "administrative",
         "source": "osm",
         "building_type": "security_booth",
         "amenity": null,
@@ -7191,7 +7212,7 @@
       "properties": {
         "osm_id": "1521877041",
         "name": "Academic Building",
-        "category": "academic",
+        "category": "building",
         "source": "osm",
         "building_type": "school",
         "amenity": null,
@@ -7238,7 +7259,7 @@
       "properties": {
         "osm_id": "1523529514",
         "name": "B.R cycle service",
-        "category": "utility",
+        "category": "dining",
         "source": "osm",
         "building_type": "yes",
         "amenity": null,
@@ -7288,13 +7309,13 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          73.11795398951702,
-          26.474458945340672
+          73.11796012822701,
+          26.474525473700698
         ]
       },
       "centroid": {
-        "lat": 26.474458945340672,
-        "lng": 73.11795398951702
+        "lat": 26.474525473700698,
+        "lng": 73.11796012822701
       }
     },
     {
@@ -7436,7 +7457,7 @@
       "properties": {
         "osm_id": "773563508",
         "name": "Office Of Students",
-        "category": "administrative",
+        "category": "academic",
         "source": "osm",
         "building_type": "university",
         "amenity": null,
@@ -7495,7 +7516,7 @@
       "properties": {
         "osm_id": "1412504080",
         "name": "Ess 09 Sub Station",
-        "category": "utility",
+        "category": "academic",
         "source": "osm",
         "building_type": "college",
         "amenity": null,
@@ -7506,35 +7527,35 @@
         "coordinates": [
           [
             [
-              73.1181494,
-              26.476638
+              73.11813391118048,
+              26.47662809686741
             ],
             [
-              73.1180755,
-              26.4765224
+              73.11806001118049,
+              26.476512496857477
             ],
             [
-              73.1182101,
-              26.4764748
+              73.11819461118047,
+              26.476464896853365
             ],
             [
-              73.1182832,
-              26.4765827
+              73.11826771118047,
+              26.476572796862673
             ],
             [
-              73.1181989,
-              26.4766176
+              73.11818341118048,
+              26.47660769686566
             ],
             [
-              73.1181494,
-              26.476638
+              73.11813391118048,
+              26.47662809686741
             ]
           ]
         ]
       },
       "centroid": {
-        "lat": 26.476578916666668,
-        "lng": 73.11817774999999
+        "lat": 26.476569013529,
+        "lng": 73.11816226118049
       }
     },
     {
@@ -7620,13 +7641,13 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          73.11794163836626,
-          26.47432589409016
+          73.11794782625259,
+          26.47439241879971
         ]
       },
       "centroid": {
-        "lat": 26.47432589409016,
-        "lng": 73.11794163836626
+        "lat": 26.47439241879971,
+        "lng": 73.11794782625259
       }
     },
     {
@@ -7728,13 +7749,13 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          73.11796012822701,
-          26.474525473700698
+          73.11796624238124,
+          26.47459200387259
         ]
       },
       "centroid": {
-        "lat": 26.474525473700698,
-        "lng": 73.11796012822701
+        "lat": 26.47459200387259,
+        "lng": 73.11796624238124
       }
     },
     {
@@ -7862,7 +7883,7 @@
       "properties": {
         "osm_id": "773563532",
         "name": "Guest House (Visitor)",
-        "category": "residential",
+        "category": "building",
         "source": "osm",
         "building_type": "yes",
         "amenity": null,
@@ -8086,7 +8107,7 @@
       "properties": {
         "osm_id": "773563509",
         "name": "Office of Administration",
-        "category": "administrative",
+        "category": "academic",
         "source": "osm",
         "building_type": "university",
         "amenity": null,
@@ -8267,13 +8288,13 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          73.11796624238124,
-          26.47459200387259
+          73.11797233188236,
+          26.474658535856168
         ]
       },
       "centroid": {
-        "lat": 26.47459200387259,
-        "lng": 73.11796624238124
+        "lat": 26.474658535856168,
+        "lng": 73.11797233188236
       }
     },
     {
@@ -8450,7 +8471,7 @@
       "properties": {
         "osm_id": "1529899555",
         "name": "Clean  Room & Service Block",
-        "category": "academic",
+        "category": "building",
         "source": "osm",
         "building_type": "yes",
         "amenity": null,
@@ -8509,7 +8530,7 @@
       "properties": {
         "osm_id": "1529899556",
         "name": "Clean  Room & Service Block",
-        "category": "academic",
+        "category": "building",
         "source": "osm",
         "building_type": "yes",
         "amenity": null,
@@ -8605,13 +8626,13 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          73.11794211103336,
-          26.476481447211277
+          73.11794185036788,
+          26.47628172960091
         ]
       },
       "centroid": {
-        "lat": 26.476481447211277,
-        "lng": 73.11794211103336
+        "lat": 26.47628172960091,
+        "lng": 73.11794185036788
       }
     },
     {

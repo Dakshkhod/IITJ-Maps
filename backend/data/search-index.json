@@ -82,8 +82,8 @@
     "category": "academic",
     "description": "Civil Department laboratory",
     "keywords": [],
-    "lat": 26.4702127,
-    "lng": 73.114562,
+    "lat": 26.47020081558125,
+    "lng": 73.11450944828991,
     "source": "osm",
     "is_proposed": false
   },
@@ -93,8 +93,8 @@
     "category": "academic",
     "description": "Civil Department laboratory",
     "keywords": [],
-    "lat": 26.4702837,
-    "lng": 73.1149697,
+    "lat": 26.47025943603966,
+    "lng": 73.1148845111212,
     "source": "osm",
     "is_proposed": false
   },
@@ -104,8 +104,8 @@
     "category": "academic",
     "description": "Civil Department laboratory",
     "keywords": [],
-    "lat": 26.4703871,
-    "lng": 73.1153832,
+    "lat": 26.47033064911153,
+    "lng": 73.11518073789433,
     "source": "osm",
     "is_proposed": false
   },
@@ -115,8 +115,8 @@
     "category": "academic",
     "description": "Laboratory",
     "keywords": [],
-    "lat": 26.4705239,
-    "lng": 73.1157193,
+    "lat": 26.470425853851644,
+    "lng": 73.11547590289175,
     "source": "osm",
     "is_proposed": false
   },
@@ -126,8 +126,8 @@
     "category": "academic",
     "description": "JCKC engineering laboratory",
     "keywords": [],
-    "lat": 26.470676,
-    "lng": 73.1160235,
+    "lat": 26.470553690041445,
+    "lng": 73.1157695925683,
     "source": "osm",
     "is_proposed": false
   },
@@ -137,8 +137,8 @@
     "category": "academic",
     "description": "JJM Department laboratory",
     "keywords": [],
-    "lat": 26.4708343,
-    "lng": 73.1162936,
+    "lat": 26.470710320502118,
+    "lng": 73.11607024515882,
     "source": "osm",
     "is_proposed": false
   },
@@ -148,8 +148,8 @@
     "category": "academic",
     "description": "Laboratory",
     "keywords": [],
-    "lat": 26.4710369,
-    "lng": 73.1165963,
+    "lat": 26.470876990053352,
+    "lng": 73.11634001399264,
     "source": "osm",
     "is_proposed": false
   },
@@ -299,8 +299,8 @@
     "category": "recreation",
     "description": "Cultural club",
     "keywords": [],
-    "lat": 26.474126331001308,
-    "lng": 73.11792292727097,
+    "lat": 26.47419285018416,
+    "lng": 73.11792918886849,
     "source": "osm",
     "is_proposed": false
   },
@@ -431,8 +431,8 @@
     "category": "academic",
     "description": "Mechanical Engineering laboratory",
     "keywords": [],
-    "lat": 26.476681152985645,
-    "lng": 73.11794455405091,
+    "lat": 26.476481447211277,
+    "lng": 73.11794211103336,
     "source": "osm",
     "is_proposed": false
   },
@@ -442,8 +442,8 @@
     "category": "utility",
     "description": "Shop",
     "keywords": [],
-    "lat": 26.47568269694846,
-    "lng": 73.11795416807712,
+    "lat": 26.47561616422957,
+    "lng": 73.11795674906827,
     "source": "osm",
     "is_proposed": false
   },
@@ -593,6 +593,28 @@
     "is_proposed": false
   },
   {
+    "id": "13943828018",
+    "name": "E-21",
+    "category": "utility",
+    "description": "Shop",
+    "keywords": [],
+    "lat": 26.475948892542704,
+    "lng": 73.11794626812627,
+    "source": "osm",
+    "is_proposed": false
+  },
+  {
+    "id": "13943828019",
+    "name": "E-22",
+    "category": "utility",
+    "description": "Shop",
+    "keywords": [],
+    "lat": 26.476148587391144,
+    "lng": 73.11794288963146,
+    "source": "osm",
+    "is_proposed": false
+  },
+  {
     "id": "1412504085",
     "name": "Tapri",
     "category": "dining",
@@ -617,7 +639,7 @@
   {
     "id": "1419313442",
     "name": "LHC 2",
-    "category": "academic",
+    "category": "building",
     "description": "",
     "keywords": [],
     "lat": 26.480015633333327,
@@ -644,8 +666,8 @@
     "keywords": [
       "Fine arts Club"
     ],
-    "lat": 26.47439241879971,
-    "lng": 73.11794782625259,
+    "lat": 26.474458945340672,
+    "lng": 73.11795398951702,
     "source": "osm",
     "is_proposed": false
   },
@@ -1202,11 +1224,11 @@
   {
     "id": "1529899558",
     "name": "Animal House",
-    "category": "academic",
+    "category": "building",
     "description": "",
     "keywords": [],
-    "lat": 26.47154638,
-    "lng": 73.11836384,
+    "lat": 26.471557781836808,
+    "lng": 73.1183792758956,
     "source": "osm",
     "is_proposed": false
   },
@@ -1216,8 +1238,8 @@
     "category": "recreation",
     "description": "Club / Society",
     "keywords": [],
-    "lat": 26.473860272924295,
-    "lng": 73.11789763501463,
+    "lat": 26.47379376310343,
+    "lng": 73.11789125050869,
     "source": "osm",
     "is_proposed": false
   },
@@ -1271,8 +1293,8 @@
     "category": "recreation",
     "description": "Club / Society",
     "keywords": [],
-    "lat": 26.474259371216792,
-    "lng": 73.11793542589257,
+    "lat": 26.47432589409016,
+    "lng": 73.11794163836626,
     "source": "osm",
     "is_proposed": false
   },
@@ -1282,8 +1304,8 @@
     "category": "recreation",
     "description": "Club / Society",
     "keywords": [],
-    "lat": 26.47419285018416,
-    "lng": 73.11792918886849,
+    "lat": 26.474259371216792,
+    "lng": 73.11793542589257,
     "source": "osm",
     "is_proposed": false
   },
@@ -1313,7 +1335,7 @@
     "id": "13906296453",
     "name": "Designing Club",
     "category": "recreation",
-    "description": "Club / Society",
+    "description": "Photography Club",
     "keywords": [
       "Designerds"
     ],
@@ -1328,8 +1350,8 @@
     "category": "community_centre",
     "description": "Community centre",
     "keywords": [],
-    "lat": 26.474658535856168,
-    "lng": 73.11797233188236,
+    "lat": 26.47472506963776,
+    "lng": 73.11797839681662,
     "source": "osm",
     "is_proposed": false
   },
@@ -1349,7 +1371,7 @@
   {
     "id": "773563492",
     "name": "Fresh and Green",
-    "category": "utility",
+    "category": "dining",
     "description": "Convenience store",
     "keywords": [
       "Fresh and green"
@@ -1373,7 +1395,7 @@
   {
     "id": "773839450",
     "name": "Faculty Housing",
-    "category": "residential",
+    "category": "hostel",
     "description": "",
     "keywords": [],
     "lat": 26.47321932,
@@ -1384,7 +1406,7 @@
   {
     "id": "773839452",
     "name": "Faculty Housing",
-    "category": "residential",
+    "category": "hostel",
     "description": "",
     "keywords": [],
     "lat": 26.473522042857144,
@@ -1395,7 +1417,7 @@
   {
     "id": "773839460",
     "name": "Faculty Housing",
-    "category": "residential",
+    "category": "hostel",
     "description": "",
     "keywords": [],
     "lat": 26.46714939230769,
@@ -1406,7 +1428,7 @@
   {
     "id": "773839461",
     "name": "Faculty Housing",
-    "category": "residential",
+    "category": "hostel",
     "description": "",
     "keywords": [],
     "lat": 26.467126269230768,
@@ -1439,7 +1461,7 @@
   {
     "id": "1412677770",
     "name": "Faculty Housing",
-    "category": "residential",
+    "category": "hostel",
     "description": "",
     "keywords": [],
     "lat": 26.46697155,
@@ -1602,19 +1624,6 @@
     "is_proposed": false
   },
   {
-    "id": "13906296455",
-    "name": "Photography Club",
-    "category": "recreation",
-    "description": "Club / Society",
-    "keywords": [
-      "ShutterBugs"
-    ],
-    "lat": 26.47472506963776,
-    "lng": 73.11797839681662,
-    "source": "osm",
-    "is_proposed": false
-  },
-  {
     "id": "13929549763",
     "name": "Woman salon shop",
     "category": "utility",
@@ -1679,7 +1688,7 @@
   {
     "id": "1412443820",
     "name": "Security Checking",
-    "category": "gate",
+    "category": "administrative",
     "description": "",
     "keywords": [],
     "lat": 26.4666777125,
@@ -1690,7 +1699,7 @@
   {
     "id": "1521877041",
     "name": "Academic Building",
-    "category": "academic",
+    "category": "building",
     "description": "",
     "keywords": [],
     "lat": 26.476047766666667,
@@ -1701,7 +1710,7 @@
   {
     "id": "1523529514",
     "name": "B.R cycle service",
-    "category": "utility",
+    "category": "dining",
     "description": "",
     "keywords": [],
     "lat": 26.475252639999997,
@@ -1715,8 +1724,8 @@
     "category": "recreation",
     "description": "Club / Society",
     "keywords": [],
-    "lat": 26.474458945340672,
-    "lng": 73.11795398951702,
+    "lat": 26.474525473700698,
+    "lng": 73.11796012822701,
     "source": "osm",
     "is_proposed": false
   },
@@ -1745,7 +1754,7 @@
   {
     "id": "773563508",
     "name": "Office Of Students",
-    "category": "administrative",
+    "category": "academic",
     "description": "",
     "keywords": [],
     "lat": 26.471139444444447,
@@ -1756,11 +1765,11 @@
   {
     "id": "1412504080",
     "name": "Ess 09 Sub Station",
-    "category": "utility",
+    "category": "academic",
     "description": "",
     "keywords": [],
-    "lat": 26.476578916666668,
-    "lng": 73.11817774999999,
+    "lat": 26.476569013529,
+    "lng": 73.11816226118049,
     "source": "osm",
     "is_proposed": false
   },
@@ -1796,8 +1805,8 @@
     "category": "recreation",
     "description": "Club / Society",
     "keywords": [],
-    "lat": 26.47432589409016,
-    "lng": 73.11794163836626,
+    "lat": 26.47439241879971,
+    "lng": 73.11794782625259,
     "source": "osm",
     "is_proposed": false
   },
@@ -1842,8 +1851,8 @@
     "keywords": [
       "Frame X"
     ],
-    "lat": 26.474525473700698,
-    "lng": 73.11796012822701,
+    "lat": 26.47459200387259,
+    "lng": 73.11796624238124,
     "source": "osm",
     "is_proposed": false
   },
@@ -1894,7 +1903,7 @@
   {
     "id": "773563532",
     "name": "Guest House (Visitor)",
-    "category": "residential",
+    "category": "building",
     "description": "",
     "keywords": [],
     "lat": 26.47291519285714,
@@ -1938,7 +1947,7 @@
   {
     "id": "773563509",
     "name": "Office of Administration",
-    "category": "administrative",
+    "category": "academic",
     "description": "",
     "keywords": [],
     "lat": 26.47114722857143,
@@ -1985,8 +1994,8 @@
     "category": "recreation",
     "description": "Club / Society",
     "keywords": [],
-    "lat": 26.47459200387259,
-    "lng": 73.11796624238124,
+    "lat": 26.474658535856168,
+    "lng": 73.11797233188236,
     "source": "osm",
     "is_proposed": false
   },
@@ -2026,7 +2035,7 @@
   {
     "id": "1529899555",
     "name": "Clean  Room & Service Block",
-    "category": "academic",
+    "category": "building",
     "description": "",
     "keywords": [],
     "lat": 26.465720977777778,
@@ -2037,7 +2046,7 @@
   {
     "id": "1529899556",
     "name": "Clean  Room & Service Block",
-    "category": "academic",
+    "category": "building",
     "description": "",
     "keywords": [],
     "lat": 26.465512060000002,
@@ -2065,8 +2074,8 @@
       "E-22",
       "E-21"
     ],
-    "lat": 26.476481447211277,
-    "lng": 73.11794211103336,
+    "lat": 26.47628172960091,
+    "lng": 73.11794185036788,
     "source": "osm",
     "is_proposed": false
   },

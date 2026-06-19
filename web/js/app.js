@@ -3003,15 +3003,21 @@ async function calculateDirectionsRoute() {
     hideLoadingToast();
     if (route.error) { showToast(route.error, 'error'); return; }
 
-    // Road graph may end at a gate node; always draw through to the POI label.
-    route = _extendRouteToPoi(route, directionsTo.lat, directionsTo.lng);
+    // Road graph may end at a gate node; extend to the POI label only when we
+    // have no registered entrance (otherwise the line cuts through the building).
+    if (!toEntry) {
+      route = _extendRouteToPoi(route, directionsTo.lat, directionsTo.lng);
+    }
 
     currentRoute        = route;
     navInstructionIndex = 0;
     navigationActive    = wasImmersive;   // routes are previews unless we're already navigating
     navDestination      = { ...directionsTo };
 
-    drawRoute(route.geometry, true, [directionsTo.lng, directionsTo.lat]);
+    const routeDestMarker = toEntry
+      ? [toEntry.lng, toEntry.lat]
+      : [directionsTo.lng, directionsTo.lat];
+    drawRoute(route.geometry, true, routeDestMarker);
 
     // Mid-nav reroute: just refresh the line + ETA in the nav-panel; skip
     // the preview UI, the fitBounds, and the "best route" toast.

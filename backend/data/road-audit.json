@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-18T20:37:33.789Z",
+  "generated_at": "2026-06-19T11:25:19.018Z",
   "summary": {
     "campus_main_road": 5,
     "major_vehicle_road": 13,
@@ -7,7 +7,7 @@
     "campus_service_road": 12,
     "vehicle_connector": 2,
     "pedestrian_path": 59,
-    "campus_standard_road": 39,
+    "campus_standard_road": 20,
     "maintenance_track": 3,
     "cycle_pedestrian": 18
   },

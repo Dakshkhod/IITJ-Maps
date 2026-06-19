@@ -90,14 +90,14 @@
     "berm": true
   },
   "E-17": {
-    "lat": 26.474126331001308,
-    "lng": 73.11792292727097,
+    "lat": 26.47419285018416,
+    "lng": 73.11792918886849,
     "gate_name": "sandstone gate",
     "berm": true
   },
   "E -18": {
-    "lat": 26.47439241879971,
-    "lng": 73.11794782625259,
+    "lat": 26.474458945340672,
+    "lng": 73.11795398951702,
     "gate_name": "sandstone gate",
     "berm": true
   },
@@ -108,20 +108,20 @@
     "berm": true
   },
   "Quiz Society": {
-    "lat": 26.473860272924295,
-    "lng": 73.11789763501463,
+    "lat": 26.47379376310343,
+    "lng": 73.11789125050869,
     "gate_name": "sandstone gate",
     "berm": true
   },
   "Music Society": {
-    "lat": 26.474259371216792,
-    "lng": 73.11793542589257,
+    "lat": 26.47432589409016,
+    "lng": 73.11794163836626,
     "gate_name": "sandstone gate",
     "berm": true
   },
   "Dance Society": {
-    "lat": 26.47419285018416,
-    "lng": 73.11792918886849,
+    "lat": 26.474259371216792,
+    "lng": 73.11793542589257,
     "gate_name": "sandstone gate",
     "berm": true
   },
@@ -132,26 +132,20 @@
     "berm": true
   },
   "Inventory Room": {
-    "lat": 26.474658535856168,
-    "lng": 73.11797233188236,
-    "gate_name": "sandstone gate",
-    "berm": true
-  },
-  "Photography Club": {
     "lat": 26.47472506963776,
     "lng": 73.11797839681662,
     "gate_name": "sandstone gate",
     "berm": true
   },
   "Dramatics Society": {
-    "lat": 26.474458945340672,
-    "lng": 73.11795398951702,
+    "lat": 26.474525473700698,
+    "lng": 73.11796012822701,
     "gate_name": "sandstone gate",
     "berm": true
   },
   "Newsletter Society": {
-    "lat": 26.47432589409016,
-    "lng": 73.11794163836626,
+    "lat": 26.47439241879971,
+    "lng": 73.11794782625259,
     "gate_name": "sandstone gate",
     "berm": true
   },
@@ -162,14 +156,14 @@
     "berm": true
   },
   "Film Making Society": {
-    "lat": 26.474525473700698,
-    "lng": 73.11796012822701,
+    "lat": 26.47459200387259,
+    "lng": 73.11796624238124,
     "gate_name": "sandstone gate",
     "berm": true
   },
   "Media and Outreach Society": {
-    "lat": 26.47459200387259,
-    "lng": 73.11796624238124,
+    "lat": 26.474658535856168,
+    "lng": 73.11797233188236,
     "gate_name": "sandstone gate",
     "berm": true
   },
@@ -234,14 +228,26 @@
     "berm": true
   },
   "E-23": {
-    "lat": 26.476681152985645,
-    "lng": 73.11794455405091,
+    "lat": 26.476481447211277,
+    "lng": 73.11794211103336,
     "gate_name": "sandstone gate",
     "berm": true
   },
   "E-20": {
-    "lat": 26.47568269694846,
-    "lng": 73.11795416807712,
+    "lat": 26.47561616422957,
+    "lng": 73.11795674906827,
+    "gate_name": "sandstone gate",
+    "berm": true
+  },
+  "E-21": {
+    "lat": 26.475948892542704,
+    "lng": 73.11794626812627,
+    "gate_name": "sandstone gate",
+    "berm": true
+  },
+  "E-22": {
+    "lat": 26.476148587391144,
+    "lng": 73.11794288963146,
     "gate_name": "sandstone gate",
     "berm": true
   },
@@ -258,8 +264,8 @@
     "berm": true
   },
   "Centralized Laundry Services": {
-    "lat": 26.476481447211277,
-    "lng": 73.11794211103336,
+    "lat": 26.47628172960091,
+    "lng": 73.11794185036788,
     "gate_name": "sandstone gate",
     "berm": true
   },
