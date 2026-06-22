@@ -1068,6 +1068,36 @@ function addAreasLayer(data) {
     }
   });
 
+  // Category highlight (active filter chip) — glowing fill + border for the
+  // matching areas. Parking, recreation and most sports live as area polygons,
+  // not buildings, so the building-highlight layers never touch them; without
+  // these, clicking those chips would visibly do nothing. Hidden by default.
+  map.addLayer({
+    id: 'areas-highlight-fill',
+    type: 'fill',
+    source: 'named-areas',
+    filter: NEVER_BUILDING_FILTER,
+    layout: { visibility: 'none' },
+    paint: {
+      'fill-color': categoryHighlightColorExpr(),
+      'fill-opacity': 0.5,
+    }
+  });
+
+  map.addLayer({
+    id: 'areas-highlight-outline',
+    type: 'line',
+    source: 'named-areas',
+    filter: NEVER_BUILDING_FILTER,
+    layout: { visibility: 'none' },
+    paint: {
+      'line-color': categoryHighlightColorExpr(),
+      'line-width': ['interpolate', ['linear'], ['zoom'], 13, 2, 17, 4.5, 19, 6],
+      'line-opacity': 1.0,
+      'line-blur': 1.2,
+    }
+  });
+
   // One label per unique area name (deduped centroids)
   map.addSource('area-labels-src', { type: 'geojson', data: labelData });
 
@@ -1867,13 +1897,25 @@ function _pulseBuildingHighlight(high) {
       map.setPaintProperty('buildings-highlight-3d-glow', 'fill-extrusion-opacity', high ? 0.36 : 0.10);
     }
     if (typeof Landmarks3D !== 'undefined') Landmarks3D.pulseCategoryHighlight(high);
+    _pulseAreaHighlight(high);
     return;
   }
-  if (!map.getLayer('buildings-highlight-fill')) return;
-  map.setPaintProperty('buildings-highlight-fill', 'fill-opacity', high ? 0.48 : 0.16);
-  map.setPaintProperty('buildings-highlight-outline', 'line-opacity', high ? 0.88 : 0.28);
-  map.setPaintProperty('buildings-highlight-outline', 'line-width',
-    ['interpolate', ['linear'], ['zoom'], 14, high ? 2 : 1, 17, high ? 4.5 : 2.5]);
+  if (map.getLayer('buildings-highlight-fill')) {
+    map.setPaintProperty('buildings-highlight-fill', 'fill-opacity', high ? 0.48 : 0.16);
+    map.setPaintProperty('buildings-highlight-outline', 'line-opacity', high ? 0.88 : 0.28);
+    map.setPaintProperty('buildings-highlight-outline', 'line-width',
+      ['interpolate', ['linear'], ['zoom'], 14, high ? 2 : 1, 17, high ? 4.5 : 2.5]);
+  }
+  _pulseAreaHighlight(high);
+}
+
+// Pulse the active-category area highlight (parking/recreation/sports areas).
+function _pulseAreaHighlight(high) {
+  if (!map.getLayer('areas-highlight-fill')) return;
+  map.setPaintProperty('areas-highlight-fill', 'fill-opacity', high ? 0.5 : 0.16);
+  map.setPaintProperty('areas-highlight-outline', 'line-opacity', high ? 0.95 : 0.3);
+  map.setPaintProperty('areas-highlight-outline', 'line-width',
+    ['interpolate', ['linear'], ['zoom'], 13, high ? 2 : 1, 17, high ? 4.5 : 2.5]);
 }
 
 function startBuildingHighlight(categoryId) {
@@ -1910,6 +1952,15 @@ function startBuildingHighlight(categoryId) {
     if (typeof Landmarks3D !== 'undefined') Landmarks3D.clearCategoryHighlight();
   }
 
+  // Area-polygon categories (parking, recreation, most sports) live in the
+  // named-areas source, so highlight them too — flat fill works in 2D and 3D.
+  if (map.getLayer('areas-highlight-fill')) {
+    map.setFilter('areas-highlight-fill', polyFilter);
+    map.setFilter('areas-highlight-outline', polyFilter);
+    setVis('areas-highlight-fill', 'visible');
+    setVis('areas-highlight-outline', 'visible');
+  }
+
   _pulseHigh = true;
   _pulseBuildingHighlight(_pulseHigh);
   _pulseTimer = setInterval(() => {
@@ -1936,6 +1987,14 @@ function stopBuildingHighlight() {
     map.setPaintProperty('buildings-highlight-3d-glow', 'fill-extrusion-opacity', 0.36);
     setVis('buildings-highlight-3d', 'none');
     setVis('buildings-highlight-3d-glow', 'none');
+  }
+  if (map.getLayer('areas-highlight-fill')) {
+    map.setFilter('areas-highlight-fill', NEVER_BUILDING_FILTER);
+    map.setFilter('areas-highlight-outline', NEVER_BUILDING_FILTER);
+    map.setPaintProperty('areas-highlight-fill', 'fill-opacity', 0.5);
+    map.setPaintProperty('areas-highlight-outline', 'line-opacity', 1.0);
+    setVis('areas-highlight-fill', 'none');
+    setVis('areas-highlight-outline', 'none');
   }
   if (typeof Landmarks3D !== 'undefined') Landmarks3D.clearCategoryHighlight();
 }
