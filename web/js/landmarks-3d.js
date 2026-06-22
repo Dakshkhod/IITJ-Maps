@@ -4041,6 +4041,230 @@ var Landmarks3D = (() => {
   }
 
   // ─────────────────────────────────────────────────────────────────────
+  // SCHOOL OF AI & DATA SCIENCE — closed two-storey (G+1) sandstone ring
+  // around a central open courtyard, matching the drone reference photos.
+  // The signature feature is the white concrete egg-crate PERGOLA that
+  // projects forward over the entrance forecourt, carried on four tall
+  // square columns, with two planted beds flanking the central glazed
+  // entrance. Mesh-local: +X = right, +Y = up, +Z = front (entrance).
+  // The LANDMARKS entry uses bearingOffset = 90° so +Z faces EAST, which
+  // is where the OSM entrance node (13905508756) sits on the footprint.
+  // ─────────────────────────────────────────────────────────────────────
+  function buildAIDSSchool() {
+    const g = new THREE.Group();
+    const STONE  = MAT.deptStone;        // warm coursed sandstone / brick
+    const STONED = MAT.deptStoneDark;    // darker stone (steps / shadow)
+    const ROOF   = MAT.messRoof;         // white waterproofed roof deck
+    const PINK   = new THREE.MeshStandardMaterial({ color: 0xe0b49b, metalness: 0.03, roughness: 0.85 }); // salmon plaster band
+    const PINKD  = new THREE.MeshStandardMaterial({ color: 0xc8917a, metalness: 0.03, roughness: 0.88 }); // shaded plaster
+    const WHITE  = new THREE.MeshStandardMaterial({ color: 0xf4f1e8, metalness: 0.02, roughness: 0.55 }); // bright white pergola / pilaster
+    const REVEAL = new THREE.MeshStandardMaterial({ color: 0xefe7d6, metalness: 0.03, roughness: 0.70 }); // window reveal / frame
+    const GLASS  = new THREE.MeshStandardMaterial({ color: 0x3c4b52, metalness: 0.55, roughness: 0.28 }); // glazing
+    const LOUVER = new THREE.MeshStandardMaterial({ color: 0xb59a6b, metalness: 0.04, roughness: 0.80 }); // window pane / shutter
+    const TANK   = new THREE.MeshStandardMaterial({ color: 0xded6c8, metalness: 0.10, roughness: 0.60 }); // grey water tank
+    const YTANK  = new THREE.MeshStandardMaterial({ color: 0xe6c23a, metalness: 0.10, roughness: 0.55 }); // yellow Sintex tank
+    const AC     = new THREE.MeshStandardMaterial({ color: 0xc4c4c0, metalness: 0.20, roughness: 0.55 }); // AC condenser
+    const RED    = new THREE.MeshStandardMaterial({ color: 0xb0402e, metalness: 0.10, roughness: 0.70 }); // fire box
+    const GREEN  = new THREE.MeshStandardMaterial({ color: 0x4f7a3a, metalness: 0.02, roughness: 0.95 }); // planter shrubs
+    const PAVE   = new THREE.MeshStandardMaterial({ color: 0x9c6f55, metalness: 0.03, roughness: 0.92 }); // brick-paver forecourt
+    const SIGN   = new THREE.MeshStandardMaterial({ color: 0x6e2f2a, metalness: 0.05, roughness: 0.65 }); // dark signage band
+
+    // Footprint: ~36 m (front, N-S after rotation) × ~28 m (depth, E-W).
+    const W = 36, D = 28, H = 8.4, t = 8.5, FLOORS = 2;
+    const HX = W / 2, HZ = D / 2;
+
+    function faceInfo(cx, cz, w, d, side) {
+      const ax = (side === '+x' || side === '-x');
+      return { ax, len: ax ? d : w,
+        fX: side === '+x' ? cx + w/2 : (side === '-x' ? cx - w/2 : cx),
+        fZ: side === '+z' ? cz + d/2 : (side === '-z' ? cz - d/2 : cz),
+        os: (side === '+x' || side === '+z') ? 1 : -1 };
+    }
+
+    // White pilasters + pink plinth/string-courses/parapet + a grid of
+    // framed windows, drawn on one face.
+    function addFacade(cx, cz, w, d, h, side, opt) {
+      opt = opt || {};
+      const fi = faceInfo(cx, cz, w, d, side);
+      const bays = Math.max(2, Math.round(fi.len / 3.4));
+      const bw = fi.len / bays;
+      const place = (mesh, t2, off, y) => {
+        if (fi.ax) mesh.position.set(fi.fX + fi.os*off, y, cz + t2);
+        else       mesh.position.set(cx + t2, y, fi.fZ + fi.os*off);
+        g.add(mesh);
+      };
+      const along = (thick, ht, off, y, mat) => place(
+        fi.ax ? new THREE.Mesh(new THREE.BoxGeometry(thick, ht, fi.len), mat)
+              : new THREE.Mesh(new THREE.BoxGeometry(fi.len, ht, thick), mat), 0, off, y);
+      // white pilasters between bays (also form quoins at the corners)
+      for (let i = 0; i <= bays; i++) {
+        const t2 = -fi.len/2 + i*bw;
+        const p = fi.ax ? new THREE.Mesh(new THREE.BoxGeometry(0.4, h, 0.55), WHITE)
+                        : new THREE.Mesh(new THREE.BoxGeometry(0.55, h, 0.4), WHITE);
+        place(p, t2, 0.05, h/2);
+      }
+      along(0.22, 0.9, 0.06, 0.5, PINK);                  // pink plinth band
+      for (let f = 1; f < FLOORS; f++) along(0.16, 0.40, 0.07, h*f/FLOORS, PINK); // floor string course
+      along(0.26, 0.8, 0.08, h + 0.4, PINK);              // pink parapet band
+      // framed windows
+      const winH = (h/FLOORS)*0.46, pw = Math.min(bw*0.55, 1.9);
+      for (let f = 0; f < FLOORS; f++) {
+        const cy = h*(f+0.5)/FLOORS;
+        for (let b = 0; b < bays; b++) {
+          const t2 = -fi.len/2 + (b+0.5)*bw;
+          const wx = fi.ax ? cz + t2 : cx + t2;
+          if (f === 0 && opt.skipX && wx > opt.skipX[0] && wx < opt.skipX[1]) continue;
+          const fr = fi.ax ? new THREE.Mesh(new THREE.BoxGeometry(0.1, winH+0.26, pw+0.26), REVEAL)
+                           : new THREE.Mesh(new THREE.BoxGeometry(pw+0.26, winH+0.26, 0.1), REVEAL);
+          const pn = fi.ax ? new THREE.Mesh(new THREE.BoxGeometry(0.07, winH, pw), LOUVER)
+                           : new THREE.Mesh(new THREE.BoxGeometry(pw, winH, 0.07), LOUVER);
+          place(fr, t2, 0.06, cy); place(pn, t2, 0.09, cy);
+        }
+      }
+    }
+
+    // ── Ground slab / plinth under the whole footprint (courtyard floor too)
+    const slab = new THREE.Mesh(new THREE.BoxGeometry(W+0.8, 0.5, D+0.8), MAT.deptStoneLight);
+    slab.position.set(0, 0.25, 0); g.add(slab);
+
+    // ── Four wings forming the hollow ring (courtyard = (W-2t) × (D-2t))
+    const fcz =  HZ - t/2, lcx = -(HX - t/2);
+    const wings = [
+      [0,  fcz, W, t],        // front (+Z, entrance)
+      [0, -fcz, W, t],        // back  (-Z)
+      [lcx, 0, t, D-2*t],     // left  (-X)
+      [-lcx, 0, t, D-2*t],    // right (+X)
+    ];
+    wings.forEach(([cx, cz, w, d]) => {
+      const m = new THREE.Mesh(new THREE.BoxGeometry(w, H, d), STONE);
+      m.position.set(cx, H/2, cz); g.add(m);
+      const r = new THREE.Mesh(new THREE.BoxGeometry(w-0.7, 0.2, d-0.7), ROOF);
+      r.position.set(cx, H+0.05, cz); g.add(r);
+    });
+
+    // ── Outer facades (entrance bays skipped on the front)
+    addFacade(0, fcz, W, t, H, '+z', { skipX: [-8, 8] });  // front (entrance)
+    addFacade(0, -fcz, W, t, H, '-z', {});                  // back
+    addFacade(-lcx, 0, t, D, H, '+x', {});                  // right end
+    addFacade(lcx, 0, t, D, H, '-x', {});                   // left end
+    // ── Inner courtyard facades (protrude inward)
+    addFacade(0, fcz, W-2*t, t, H, '-z', {});   // front wing, court side
+    addFacade(0, -fcz, W-2*t, t, H, '+z', {});  // back wing, court side
+    addFacade(lcx, 0, t, D-2*t, H, '+x', {});   // left wing, court side
+    addFacade(-lcx, 0, t, D-2*t, H, '-x', {});  // right wing, court side
+
+    // ── Front entrance bay: recessed two-storey portico with glazed doors,
+    //    a signage band, and steps — set into the centre of the front face.
+    {
+      const ez = HZ;                       // front face plane
+      const ebw = 12;                      // entrance bay width
+      // pink-plastered entrance backdrop (recessed, full height)
+      const back = new THREE.Mesh(new THREE.BoxGeometry(ebw, H, 0.6), PINKD);
+      back.position.set(0, H/2, ez - 0.6); g.add(back);
+      // tall glazed double-door wall (ground floor)
+      const door = new THREE.Mesh(new THREE.BoxGeometry(5.4, 3.6, 0.3), GLASS);
+      door.position.set(0, 1.95, ez - 0.18); g.add(door);
+      const dfr = new THREE.Mesh(new THREE.BoxGeometry(5.9, 4.0, 0.12), WHITE);
+      dfr.position.set(0, 2.1, ez - 0.05); g.add(dfr);
+      // first-floor strip windows above the entrance
+      for (const sx of [-3.4, 0, 3.4]) {
+        const w2 = new THREE.Mesh(new THREE.BoxGeometry(2.4, 1.9, 0.2), GLASS);
+        w2.position.set(sx, H*0.74, ez - 0.12); g.add(w2);
+        const f2 = new THREE.Mesh(new THREE.BoxGeometry(2.7, 2.2, 0.1), WHITE);
+        f2.position.set(sx, H*0.74, ez - 0.02); g.add(f2);
+      }
+      // signage band ("SCHOOL OF AI & DATA SCIENCE" / foundation) at lintel
+      const sgn = new THREE.Mesh(new THREE.BoxGeometry(ebw - 0.6, 0.7, 0.12), SIGN);
+      sgn.position.set(0, H*0.5, ez + 0.02); g.add(sgn);
+      // steps up to the doors
+      for (let i = 0; i < 3; i++) {
+        const st = new THREE.Mesh(new THREE.BoxGeometry(6.5, 0.2, 0.6), STONED);
+        st.position.set(0, 0.1 + i*0.2, ez + 0.6 - i*0.55); g.add(st);
+      }
+    }
+
+    // ── Signature white egg-crate PERGOLA over the forecourt ──────────────
+    {
+      const P  = 8.5;                 // projection forward from the face
+      const PW = 19;                  // pergola / forecourt width
+      const yT = H - 0.6;             // top of beams (~roof level)
+      const zMid = HZ + P/2;
+      // brick-paver forecourt
+      const pave = new THREE.Mesh(new THREE.BoxGeometry(PW + 1.5, 0.16, P + 1.2), PAVE);
+      pave.position.set(0, 0.06, HZ + (P + 1.2)/2 - 0.3); g.add(pave);
+      // two planted beds (raised white kerb + shrubs) flanking the walkway
+      for (const bx of [-PW/2 + 3.4, PW/2 - 3.4]) {
+        const kerb = new THREE.Mesh(new THREE.BoxGeometry(4.7, 0.5, P - 1.2), WHITE);
+        kerb.position.set(bx, 0.27, zMid); g.add(kerb);
+        const bed = new THREE.Mesh(new THREE.BoxGeometry(4.2, 0.5, P - 1.6), GREEN);
+        bed.position.set(bx, 0.42, zMid); g.add(bed);
+      }
+      // four tall square columns at the front edge (outer pair wider)
+      const colZ = HZ + P - 0.6;
+      const cols = [[-PW/2 + 1.1, 1.1], [-3.2, 0.7], [3.2, 0.7], [PW/2 - 1.1, 1.1]];
+      cols.forEach(([cx, cw]) => {
+        const col = new THREE.Mesh(new THREE.BoxGeometry(cw, yT, 0.75), WHITE);
+        col.position.set(cx, yT/2, colZ); g.add(col);
+      });
+      // perimeter fascia frame of the pergola
+      const fasFront = new THREE.Mesh(new THREE.BoxGeometry(PW, 0.55, 0.35), WHITE);
+      fasFront.position.set(0, yT, HZ + P); g.add(fasFront);
+      [-PW/2 + 0.18, PW/2 - 0.18].forEach((sx) => {
+        const side = new THREE.Mesh(new THREE.BoxGeometry(0.35, 0.55, P), WHITE);
+        side.position.set(sx, yT, zMid); g.add(side);
+      });
+      // egg-crate: longitudinal beams (run front-to-edge, spaced across width)
+      for (let x = -PW/2 + 2.2; x <= PW/2 - 2.2 + 0.01; x += 2.3) {
+        const b = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.5, P), WHITE);
+        b.position.set(x, yT, zMid); g.add(b);
+      }
+      // egg-crate: transverse beams (run across width, spaced front-to-edge)
+      for (let z = HZ + 1.2; z <= HZ + P - 0.5; z += 2.0) {
+        const b = new THREE.Mesh(new THREE.BoxGeometry(PW, 0.5, 0.28), WHITE);
+        b.position.set(0, yT, z); g.add(b);
+      }
+    }
+
+    // ── Roof clutter: AC condensers ringing the courtyard, water tanks,
+    //    stair-head tower, fire boxes ──────────────────────────────────────
+    // AC condenser rows along the inner (courtyard) parapet of each wing
+    const innerF = fcz - t/2 + 0.7, innerB = -fcz + t/2 - 0.7;
+    const innerL = lcx + t/2 - 0.7, innerR = -lcx - t/2 + 0.7;
+    for (let x = -W/2 + 6; x <= W/2 - 6; x += 2.6) {
+      const a1 = new THREE.Mesh(new THREE.BoxGeometry(1.1, 0.6, 0.7), AC);
+      a1.position.set(x, H + 0.35, innerF); g.add(a1);
+      const a2 = new THREE.Mesh(new THREE.BoxGeometry(1.1, 0.6, 0.7), AC);
+      a2.position.set(x, H + 0.35, innerB); g.add(a2);
+    }
+    for (let z = -D/2 + 9; z <= D/2 - 9; z += 2.6) {
+      const a1 = new THREE.Mesh(new THREE.BoxGeometry(0.7, 0.6, 1.1), AC);
+      a1.position.set(innerL, H + 0.35, z); g.add(a1);
+      const a2 = new THREE.Mesh(new THREE.BoxGeometry(0.7, 0.6, 1.1), AC);
+      a2.position.set(innerR, H + 0.35, z); g.add(a2);
+    }
+    // yellow Sintex tanks (clustered on the back wing) + grey tanks
+    [[-6, -fcz, YTANK], [-3.4, -fcz, YTANK], [9, -fcz, TANK], [lcx, -7, TANK]].forEach(([rx, rz, mt]) => {
+      const tk = new THREE.Mesh(new THREE.CylinderGeometry(0.95, 0.95, 1.4, 14), mt);
+      tk.position.set(rx, H + 0.9, rz); g.add(tk);
+    });
+    // stair / lift head tower at the back-left corner (taller block w/ cap)
+    {
+      const tw = 5.5, td = 5.0, th = 3.4, tx = -HX + tw/2 + 0.6, tz = -fcz;
+      const tower = new THREE.Mesh(new THREE.BoxGeometry(tw, th, td), STONE);
+      tower.position.set(tx, H + th/2, tz); g.add(tower);
+      const cap = new THREE.Mesh(new THREE.BoxGeometry(tw + 0.4, 0.5, td + 0.4), PINK);
+      cap.position.set(tx, H + th + 0.2, tz); g.add(cap);
+    }
+    // fire / utility boxes on a couple of wings
+    [[lcx, 6], [-lcx, -5]].forEach(([rx, rz]) => {
+      const rb = new THREE.Mesh(new THREE.BoxGeometry(0.7, 1.1, 0.7), RED);
+      rb.position.set(rx, H + 0.55, rz); g.add(rb);
+    });
+
+    return g;
+  }
+
+  // ─────────────────────────────────────────────────────────────────────
   // SHAMIYANA FOOD COURT — shipping-container restaurants laid out around
   // a central open-air plaza, with concrete tube seating pods along the
   // west edge, two tensile-fabric shade canopies, and a small round
@@ -5124,6 +5348,24 @@ var Landmarks3D = (() => {
       rotateMeshToUp: Y_UP_TO_Z_UP,
       bearingOffset: -104.2 * Math.PI / 180,
       replacesOsmBuildings: ['1025147053'],
+    },
+
+    {
+      // School of AI & Data Science — closed two-storey sandstone courtyard
+      // ring with the signature white egg-crate pergola over the entrance.
+      // bearingOffset = 90° points the mesh +Z front EAST, where the OSM
+      // entrance node sits on the footprint (polygon 1412399752).
+      id: 'aids-school-3d',
+      label: 'School of AI & Data Science',
+      labelOffsetY: -0.5,
+      labelOffsetY3d: -2.0,
+      format: 'procedural',
+      build: buildAIDSSchool,
+      lng: 73.1107227, lat: 26.4611585,
+      heightMeters: null,
+      rotateMeshToUp: Y_UP_TO_Z_UP,
+      bearingOffset: 90 * Math.PI / 180,
+      replacesOsmBuildings: ['1412399752'],
     },
 
     // Shamiyana — open-air food court of container restaurants. The eight
