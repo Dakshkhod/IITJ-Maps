@@ -1,18 +1,11 @@
 {
-  "name": "iitj-maps-backend",
-  "version": "2.0.0",
-  "description": "IITJ Maps Campus Navigation Backend — Express + Dijkstra road-network routing",
-  "main": "src/index.js",
+  "name": "iitj-maps-pipeline",
+  "version": "3.0.0",
+  "description": "IITJ Maps — OSM/KML → GeoJSON + road-graph data pipeline",
   "scripts": {
-    "start": "node src/index.js",
-    "dev": "node --watch src/index.js",
-    "parse-data": "node scripts/parse-osm-data.js",
-    "setup": "node scripts/parse-osm-data.js && node src/index.js"
+    "parse-data": "node scripts/parse-osm-data.js"
   },
   "dependencies": {
-    "express": "^4.21.0",
-    "cors": "^2.8.5",
-    "compression": "^1.7.4",
     "@xmldom/xmldom": "^0.9.5"
   }
 }

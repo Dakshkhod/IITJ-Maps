@@ -10,3 +10,15 @@ Thumbs.db
 # Local archives / duplicates (not needed for deploy)
 iitj-maps-extracted/
 iitj-maps.zip
+
+# Local scratch / one-off working files
+tmp_*
+_backup_*/
+*.osc
+
+# Editor / tooling
+.claude/
+.mimocode/
+
+# Local pipeline source (not deployed)
+Copy of Phase 3B.kml

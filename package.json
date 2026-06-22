@@ -4,8 +4,7 @@
   "description": "IITJ Campus Navigation — fully frontend, no backend required",
   "scripts": {
     "dev": "npx serve web -p 3000 --cors",
-    "start": "npx serve web -p 3000 --cors",
-    "dev:backend": "node backend/src/index.js"
+    "start": "npx serve web -p 3000 --cors"
   },
   "devDependencies": {
     "serve": "^14.0.0"
