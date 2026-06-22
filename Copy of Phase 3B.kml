@@ -992,23 +992,6 @@
 			</outerBoundaryIs>
 		</Polygon>
 	</Placemark>
-	<Placemark id="0FD4E56BFA39DCCBD231">
-		<name>Dining hall 2</name>
-		<LookAt>
-			<longitude>73.11675566117488</longitude>
-			<latitude>26.47466767510426</latitude>
-			<altitude>261.1383324237927</altitude>
-			<heading>0</heading>
-			<tilt>0</tilt>
-			<gx:fovy>35</gx:fovy>
-			<range>548.6077043147088</range>
-			<altitudeMode>absolute</altitudeMode>
-		</LookAt>
-		<styleUrl>#__managed_style_281096CFBF3F84D00B90</styleUrl>
-		<Point>
-			<coordinates>73.11737822760072,26.4745341244339,259.0815351110682</coordinates>
-		</Point>
-	</Placemark>
 	<Placemark id="07DAD2934339DCCDA160">
 		<name>Proposed Hostel</name>
 		<LookAt>
