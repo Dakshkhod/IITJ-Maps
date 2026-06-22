@@ -278,9 +278,10 @@ body.map-dark .category-chip:not(.active) {
 }
 
 .category-chip.active {
-  background: var(--accent);
-  color: var(--accent-inverse);
-  border-color: var(--accent);
+  background: var(--chip-color, var(--accent));
+  color: #ffffff;
+  border-color: var(--chip-color, var(--accent));
+  box-shadow: var(--shadow-sm), 0 0 0 3px color-mix(in srgb, var(--chip-color, var(--accent)) 25%, transparent);
 }
 
 /* ============================================================

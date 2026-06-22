@@ -1578,7 +1578,7 @@
       "properties": {
         "osm_id": "1419313442",
         "name": "LHC 2",
-        "category": "building",
+        "category": "academic",
         "source": "osm",
         "building_type": "school",
         "amenity": null,
@@ -1781,7 +1781,7 @@
       "properties": {
         "osm_id": "1412399746",
         "name": "W Berms",
-        "category": "building",
+        "category": "administrative",
         "source": "osm",
         "building_type": "public",
         "amenity": null,
@@ -5028,7 +5028,7 @@
       "properties": {
         "osm_id": "1266941055",
         "name": "Jodhpur Club",
-        "category": "academic",
+        "category": "building",
         "source": "osm",
         "building_type": "college",
         "amenity": null,
@@ -5585,7 +5585,7 @@
       "properties": {
         "osm_id": "773839450",
         "name": "Faculty Housing",
-        "category": "hostel",
+        "category": "residential",
         "source": "osm",
         "building_type": "yes",
         "amenity": null,
@@ -5668,7 +5668,7 @@
       "properties": {
         "osm_id": "773839452",
         "name": "Faculty Housing",
-        "category": "hostel",
+        "category": "residential",
         "source": "osm",
         "building_type": "yes",
         "amenity": null,
@@ -5747,7 +5747,7 @@
       "properties": {
         "osm_id": "773839460",
         "name": "Faculty Housing",
-        "category": "hostel",
+        "category": "residential",
         "source": "osm",
         "building_type": "yes",
         "amenity": null,
@@ -5822,7 +5822,7 @@
       "properties": {
         "osm_id": "773839461",
         "name": "Faculty Housing",
-        "category": "hostel",
+        "category": "residential",
         "source": "osm",
         "building_type": "yes",
         "amenity": null,
@@ -6019,7 +6019,7 @@
       "properties": {
         "osm_id": "1412677770",
         "name": "Faculty Housing",
-        "category": "hostel",
+        "category": "residential",
         "source": "osm",
         "building_type": "yes",
         "amenity": null,
@@ -6832,7 +6832,7 @@
       "properties": {
         "osm_id": "1521877042",
         "name": "Visitor's Hostel",
-        "category": "hostel",
+        "category": "residential",
         "source": "osm",
         "building_type": "yes",
         "amenity": null,
@@ -7543,7 +7543,7 @@
       "properties": {
         "osm_id": "1412504080",
         "name": "Ess 09 Sub Station",
-        "category": "academic",
+        "category": "building",
         "source": "osm",
         "building_type": "college",
         "amenity": null,

@@ -640,7 +640,7 @@
   {
     "id": "1419313442",
     "name": "LHC 2",
-    "category": "building",
+    "category": "academic",
     "description": "",
     "keywords": [],
     "lat": 26.480015633333327,
@@ -721,7 +721,7 @@
   {
     "id": "1412399746",
     "name": "W Berms",
-    "category": "building",
+    "category": "administrative",
     "description": "",
     "keywords": [],
     "lat": 26.470524849999997,
@@ -1227,7 +1227,7 @@
   {
     "id": "1266941055",
     "name": "Jodhpur Club",
-    "category": "academic",
+    "category": "building",
     "description": "",
     "keywords": [],
     "lat": 26.478259992307695,
@@ -1409,7 +1409,7 @@
   {
     "id": "773839450",
     "name": "Faculty Housing",
-    "category": "hostel",
+    "category": "residential",
     "description": "",
     "keywords": [],
     "lat": 26.47321932,
@@ -1420,7 +1420,7 @@
   {
     "id": "773839452",
     "name": "Faculty Housing",
-    "category": "hostel",
+    "category": "residential",
     "description": "",
     "keywords": [],
     "lat": 26.473522042857144,
@@ -1431,7 +1431,7 @@
   {
     "id": "773839460",
     "name": "Faculty Housing",
-    "category": "hostel",
+    "category": "residential",
     "description": "",
     "keywords": [],
     "lat": 26.46714939230769,
@@ -1442,7 +1442,7 @@
   {
     "id": "773839461",
     "name": "Faculty Housing",
-    "category": "hostel",
+    "category": "residential",
     "description": "",
     "keywords": [],
     "lat": 26.467126269230768,
@@ -1475,7 +1475,7 @@
   {
     "id": "1412677770",
     "name": "Faculty Housing",
-    "category": "hostel",
+    "category": "residential",
     "description": "",
     "keywords": [],
     "lat": 26.46697155,
@@ -1629,7 +1629,7 @@
   {
     "id": "1521877042",
     "name": "Visitor's Hostel",
-    "category": "hostel",
+    "category": "residential",
     "description": "",
     "keywords": [],
     "lat": 26.477586019999997,
@@ -1779,7 +1779,7 @@
   {
     "id": "1412504080",
     "name": "Ess 09 Sub Station",
-    "category": "academic",
+    "category": "building",
     "description": "",
     "keywords": [],
     "lat": 26.476569013529,
