@@ -21,6 +21,7 @@ Then run this script. Each polygon is tagged with a colour class `g`
 (forest | pitch | grass) consumed by the greens-fill layer in app.js.
 """
 import json
+import math
 
 
 def cls(t):
@@ -62,6 +63,32 @@ for e in elements.values():
         'properties': {'g': cls(e.get('tags', {}))},
         'geometry': {'type': 'Polygon', 'coordinates': [ring]},
     })
+
+# ── Manual green patches (not in OSM): hand-added landscaping requested by the
+#    user. Kept here so they survive every greens rebuild. The greens layer sits
+#    at the bottom of the map stack, so roads/buildings/area tints render on top
+#    — generous coverage only fills the bare cream gaps, it can't overwrite them.
+def _circle(lng, lat, r_m, n=40):
+    mlat = 111132.0
+    mlng = 111320.0 * math.cos(math.radians(lat))
+    ring = [[round(lng + (r_m * math.cos(2 * math.pi * i / n)) / mlng, 6),
+             round(lat + (r_m * math.sin(2 * math.pi * i / n)) / mlat, 6)]
+            for i in range(n)]
+    ring.append(ring[0])
+    return ring
+
+
+MANUAL = [
+    # Brain Tree roundabout island — green the white ring inside the circle.
+    ('grass', _circle(73.1141633, 26.4692796, 30)),
+    # NOTE: a hand-added "ring-road median / berm strip" by IITJ Fountain &
+    # Informal Grounds used to live here. It spilled south past the ring road and
+    # bled into Informal Grounds, so it was removed — the OSM grass polygons + the
+    # area fills already cover the arc without overflowing.
+]
+for _g, _ring in MANUAL:
+    feats.append({'type': 'Feature', 'properties': {'g': _g},
+                  'geometry': {'type': 'Polygon', 'coordinates': [_ring]}})
 
 json.dump({'type': 'FeatureCollection', 'features': feats},
           open('web/data/greens.geojson', 'w'))

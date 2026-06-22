@@ -153,6 +153,21 @@ const IITJRouter = (() => {
     return dFrom > 75 && dTo > 75;
   }
 
+  // Prithvi Missile roundabout — India keeps left, so a car entering from the
+  // south gate / Security Checkpost and heading north must circle the monument
+  // CLOCKWISE (south-west / left side), not cut counter-clockwise up the
+  // east/right side. The route enters the ring at its SE node and would short-
+  // cut up the east; forcing the ring's SW node as a via makes leg 1 take the
+  // short clockwise (left) arc, and leg 2 carries on clockwise to the NW exit.
+  const PRITHVI_CENTER = { lat: 26.4669087, lng: 73.1147901 };
+  const PRITHVI_WEST_VIA = '26.466828,73.114663'; // SW node of the missile ring (node 5729732486)
+  function _needsPrithviWestArc(fromLat, fromLng, toLat, toLng) {
+    if (fromLat >= PRITHVI_CENTER.lat + 0.0003) return false;     // start at/south of missile
+    if (toLat <= PRITHVI_CENTER.lat + 0.0009) return false;       // destination clearly north
+    const dFrom = haversine(fromLat, fromLng, PRITHVI_CENTER.lat, PRITHVI_CENTER.lng);
+    return dFrom < 180;                                           // only when starting by the missile
+  }
+
   // Penalise the first graph hop when it points away from the destination.
   // Without this, Dijkstra leaves a gate via a cheaper service spur toward a
   // monument (Prithvi) even though the trunk road is right ahead.
@@ -212,20 +227,33 @@ const IITJRouter = (() => {
     return { nodes, distance: physicalDist[endId] ?? dist[endId], cost: dist[endId] };
   }
 
-  // Route through the Brain Tree west ring when driving from south gate to north campus.
+  // Force keep-left circulation through the south-campus rings when driving
+  // from the south gate / Security Checkpost to north campus. A trip can pass
+  // BOTH the Prithvi Missile roundabout (first, nearer the gate) and the Brain
+  // Tree ring (further north), so chain the via-waypoints south→north in order.
   function routeGraph(startId, endId, mode, opts, fromLat, fromLng, toLat, toLng) {
-    const useWestArc = mode === 'drive' && _needsBrainTreeWestArc(fromLat, fromLng, toLat, toLng);
-    if (!useWestArc) return dijkstra(startId, endId, mode, opts);
+    const vias = [];
+    if (mode === 'drive') {
+      if (_needsPrithviWestArc(fromLat, fromLng, toLat, toLng)) vias.push(PRITHVI_WEST_VIA);
+      if (_needsBrainTreeWestArc(fromLat, fromLng, toLat, toLng)) vias.push(BRAIN_TREE_WEST_VIA);
+    }
+    if (!vias.length) return dijkstra(startId, endId, mode, opts);
 
-    const leg1 = dijkstra(startId, BRAIN_TREE_WEST_VIA, mode, opts);
-    const leg2 = dijkstra(BRAIN_TREE_WEST_VIA, endId, mode, opts);
-    if (!leg1 || !leg2) return dijkstra(startId, endId, mode, opts);
+    const waypoints = [startId, ...vias, endId];
+    const legs = [];
+    for (let i = 0; i < waypoints.length - 1; i++) {
+      const leg = dijkstra(waypoints[i], waypoints[i + 1], mode, opts);
+      if (!leg) return dijkstra(startId, endId, mode, opts); // any leg fails → plain route
+      legs.push(leg);
+    }
 
-    return {
-      nodes: [...leg1.nodes, ...leg2.nodes.slice(1)],
-      distance: leg1.distance + leg2.distance,
-      cost: leg1.distance + leg2.distance,
-    };
+    let nodes = legs[0].nodes;
+    let distance = legs[0].distance;
+    for (let i = 1; i < legs.length; i++) {
+      nodes = [...nodes, ...legs[i].nodes.slice(1)];
+      distance += legs[i].distance;
+    }
+    return { nodes, distance, cost: distance };
   }
 
   // Campus centroid — berm shops must be approached from the campus-facing
@@ -602,8 +630,16 @@ const IITJRouter = (() => {
         : { lat: lastNc[1], lng: lastNc[0], t: 0 };
 
       const startNodeIdx = secondNc && startPt.t > 0.35 ? 1 : 0;
+      // Symmetric to the start: when the destination projects before the last
+      // graph node (the snap node sits past the building, e.g. a berm POI
+      // between two road nodes), end at the projection instead of routing all
+      // the way to that node and visibly backtracking to it. Drop the node only
+      // when keeping it would add a noticeable (>4 m) overshoot/backtrack.
+      const lastSegLen = prevNc ? haversine(prevNc[1], prevNc[0], lastNc[1], lastNc[0]) : 0;
+      const endNodeIdx = (prevNc && nodeList.length >= 3 && (1 - endPt.t) * lastSegLen > 4)
+        ? nodeList.length - 2 : nodeList.length - 1;
       coords = [[startPt.lng, startPt.lat]];
-      for (let i = startNodeIdx; i < nodeList.length; i++) {
+      for (let i = startNodeIdx; i <= endNodeIdx; i++) {
         const c = _nodeCoords[nodeList[i]];
         if (c) coords.push(c);
       }

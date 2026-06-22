@@ -699,15 +699,23 @@ async function init() {
 
   map.dragRotate.enable();
 
-  // Disable auto-follow when user manually pans
-  map.on('dragstart', () => {
-    if (autoFollow) {
-      setAutoFollow(false);
-      document.getElementById('btn-locate').classList.remove('location-follow');
-    }
+  // Any manual gesture — pan, zoom, rotate, or pitch — hands control back to
+  // the user: exit auto-follow so the camera stops snapping back to the GPS
+  // fix (and, in nav, stops re-forcing zoom/pitch every frame), letting the
+  // user freely adjust and zoom while the puck still tracks live position.
+  // The `originalEvent` guard is essential: the follow easeTo itself moves /
+  // rotates / zooms the camera and fires these same events, but WITHOUT an
+  // originalEvent — so only genuine user input cancels follow.
+  function _exitFollowOnGesture(e) {
+    if (e && e.originalEvent == null) return;   // programmatic camera move
+    if (autoFollow) setAutoFollow(false);
     // In immersive nav, surface a Re-centre chip so the user can snap back
     if (immersiveNav) showRecenterBtn();
-  });
+  }
+  map.on('dragstart', _exitFollowOnGesture);
+  map.on('zoomstart', _exitFollowOnGesture);
+  map.on('rotatestart', _exitFollowOnGesture);
+  map.on('pitchstart', _exitFollowOnGesture);
 
   map.on('error', (e) => console.error('MapLibre error:', e.error?.message || e));
 

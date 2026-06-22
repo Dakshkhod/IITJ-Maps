@@ -29,8 +29,8 @@ const IITJData = (() => {
       fetch(`${base}/search-index.json?v=39`).then(r => r.json()),
       fetch(`${base}/categories.json`).then(r => r.json()),
       fetch(`${base}/entrances.json?v=41`).then(r => r.ok ? r.json() : {}).catch(() => ({})),
-      fetch(`${base}/berms.geojson?v=1`).then(r => r.ok ? r.json() : { type: 'FeatureCollection', features: [] }).catch(() => ({ type: 'FeatureCollection', features: [] })),
-      fetch(`${base}/greens.geojson?v=2`).then(r => r.ok ? r.json() : null).catch(() => null),
+      fetch(`${base}/berms.geojson?v=3`).then(r => r.ok ? r.json() : { type: 'FeatureCollection', features: [] }).catch(() => ({ type: 'FeatureCollection', features: [] })),
+      fetch(`${base}/greens.geojson?v=4`).then(r => r.ok ? r.json() : null).catch(() => null),
     ]);
 
     // Apply admin-approved OSM overlay (bundled + this browser's localStorage)

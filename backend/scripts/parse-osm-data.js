@@ -781,6 +781,14 @@ const BERM_RINGS = {
   '1412399757': [[73.1107668,26.4715451],[73.1112284,26.4711812],[73.111584,26.4709459],[73.1113248,26.4707369],[73.1110033,26.4709451],[73.1108141,26.4711119],[73.1105554,26.4713678],[73.1107668,26.4715451]],
 };
 
+// East perimeter ribbons whose POI dots use exact surveyed positions (the
+// "E-14 - 23" coordinate sheet: E-14..E-23, CETSD and the berm societies)
+// rather than the even-spacing gate snap. Every named POI near these two
+// ribbons is on that sheet, so the whole ribbon opts in. POIs are projected
+// onto the rendered centerline (only cross-ribbon drift is removed), keeping
+// each unit at its true, unevenly-spaced along-berm position.
+const EXACT_BERM_RIBBONS = new Set(['1412399744', '1412399745']);
+
 function _resampleXY(chain, K) {
   if (chain.length === 1) return new Array(K).fill(chain[0]);
   const arc = [0];
@@ -870,6 +878,30 @@ function pathGateCenters(path, moduleW = 7.5) {
   return _moduleMidpointsFromMetric(samples, cx, cy, mLng, mLat, moduleW).gates;
 }
 
+// Densify + box-smooth a lng/lat polyline. Mirrors _smoothLngLatPath in
+// web/js/landmarks-3d.js so backend arch-gate positions match the rendered
+// arcade exactly. Keep density/passes in sync (the green berms use 6 / 5).
+function _smoothPath(path, density = 6, passes = 5) {
+  let d = [];
+  for (let i = 0; i < path.length - 1; i++) {
+    for (let k = 0; k < density; k++) {
+      const t = k / density;
+      d.push([path[i][0] + t * (path[i + 1][0] - path[i][0]),
+              path[i][1] + t * (path[i + 1][1] - path[i][1])]);
+    }
+  }
+  d.push(path[path.length - 1]);
+  for (let p = 0; p < passes; p++) {
+    const e = d.map(q => q.slice());
+    for (let i = 1; i < d.length - 1; i++) {
+      e[i][0] = (d[i - 1][0] + 2 * d[i][0] + d[i + 1][0]) / 4;
+      e[i][1] = (d[i - 1][1] + 2 * d[i][1] + d[i + 1][1]) / 4;
+    }
+    d = e;
+  }
+  return d;
+}
+
 function _moduleMidpointsFromMetric(samples, cx, cy, mLng, mLat, moduleW) {
   let total = 0;
   const arc = [0];
@@ -940,6 +972,73 @@ function _denseMetricSamples(ring, overridePath) {
     samples.push([tt * ax + ww * bx, tt * ay + ww * by]);
   }
   return { samples, cx, cy, mLng, mLat };
+}
+
+// Polygon medial-axis centerline (lng/lat polyline) WITHOUT the parabolic
+// smoothing that _denseMetricSamples applies, so east-berm dots track the
+// actual rendered 2D berm curve. Slices the ribbon perpendicular to its PCA
+// long axis and takes each cross-section's mid-width — locally centred to ~0 in
+// the body. The narrow end-cap slices (whose centre kinks toward a corner) are
+// trimmed; a dot pushed onto the tip then rides the straight body direction via
+// _lngLatAtArcS's own end extrapolation, staying aligned with the rest.
+function _ribbonMedialCenterline(ring) {
+  const pts = ring.slice(0, ring.length - 1);
+  const n = pts.length;
+  let cx = 0, cy = 0;
+  pts.forEach(p => { cx += p[0]; cy += p[1]; }); cx /= n; cy /= n;
+  const mLng = 111320 * Math.cos(cy * Math.PI / 180), mLat = 111320;
+  const P = pts.map(p => [(p[0] - cx) * mLng, (p[1] - cy) * mLat]);
+  let sxx = 0, sxy = 0, syy = 0;
+  P.forEach(([x, y]) => { sxx += x * x; sxy += x * y; syy += y * y; });
+  const theta = 0.5 * Math.atan2(2 * sxy, sxx - syy);
+  const ax = Math.cos(theta), ay = Math.sin(theta), bx = -ay, by = ax;
+  const TW = P.map(([x, y]) => [x * ax + y * ay, x * bx + y * by]);
+  const ts = TW.map(p => p[0]);
+  const tMin = Math.min(...ts), tMax = Math.max(...ts);
+  const span = tMax - tMin || 1;
+  const eps = Math.min(0.4, span * 0.02);   // skip the degenerate exact-tip slices
+  const SAMP = 80;
+  const samples = [];
+  for (let k = 0; k < SAMP; k++) {
+    const t = (tMin + eps) + (span - 2 * eps) * k / (SAMP - 1);
+    let wLo = Infinity, wHi = -Infinity;
+    for (let i = 0; i < n; i++) {
+      const [t1, w1] = TW[i], [t2, w2] = TW[(i + 1) % n];
+      if ((t1 <= t && t <= t2) || (t2 <= t && t <= t1)) {
+        if (t2 !== t1) {
+          const w = w1 + (t - t1) / (t2 - t1) * (w2 - w1);
+          if (w < wLo) wLo = w;
+          if (w > wHi) wHi = w;
+        }
+      }
+    }
+    if (wLo === Infinity) continue;
+    const wMid = (wLo + wHi) / 2;
+    const mx = t * ax + wMid * bx, my = t * ay + wMid * by;
+    samples.push({ pt: [cx + mx / mLng, cy + my / mLat], width: wHi - wLo });
+  }
+  // Trim the narrow end-cap slices (their centre kinks toward a corner)…
+  let body = samples.map(s => s.pt);
+  if (samples.length > 6) {
+    const sorted = samples.map(s => s.width).slice().sort((a, b) => a - b);
+    const minW = 0.6 * sorted[sorted.length >> 1];
+    let lo = 0, hi = samples.length - 1;
+    while (lo < hi && samples[lo].width < minW) lo++;
+    while (hi > lo && samples[hi].width < minW) hi--;
+    body = samples.slice(lo, hi + 1).map(s => s.pt);
+  }
+  // …then cap each end with the end-cap's true centre (midpoint of its two
+  // corners) so the line reaches the tips while staying centred — lets a tip
+  // dot sit near the end without drifting to a corner.
+  let iMin = 0, iMax = 0;
+  for (let i = 0; i < n; i++) { if (ts[i] < ts[iMin]) iMin = i; if (ts[i] > ts[iMax]) iMax = i; }
+  const capCenter = (iExt) => {
+    const tE = ts[iExt];
+    const a = (iExt + 1) % n, b = (iExt - 1 + n) % n;
+    const nb = Math.abs(ts[a] - tE) < Math.abs(ts[b] - tE) ? a : b;
+    return [(pts[iExt][0] + pts[nb][0]) / 2, (pts[iExt][1] + pts[nb][1]) / 2];
+  };
+  return [capCenter(iMin), ...body, capCenter(iMax)];
 }
 
 function ribbonGatesForRibbon(ring, overridePath, moduleW = 7.5, minCount = 0) {
@@ -1016,6 +1115,29 @@ function _lngLatAtArcS(s, centerline) {
   const segLen = Math.hypot(dx, dy) || 1;
   const extra = s - total;
   return [(bx + (dx / segLen) * extra) / mLng, (by + (dy / segLen) * extra) / mLat];
+}
+
+// Spread sorted 1-D positions so consecutive points are >= gap apart while
+// moving each as little as possible (least-squares). Pool-Adjacent-Violators
+// on y[i] = s[i] - i*gap (isotonic non-decreasing fit), then x[i] = y[i] + i*gap.
+// Points already >= gap apart are left untouched; only overlapping clusters move.
+function _spreadMinGap(s, gap) {
+  const n = s.length;
+  if (n <= 1) return s.slice();
+  const y = s.map((v, i) => v - i * gap);
+  const val = [], cnt = [];
+  for (let i = 0; i < n; i++) {
+    let v = y[i], c = 1;
+    while (val.length && val[val.length - 1] >= v) {
+      const pv = val.pop(), pc = cnt.pop();
+      v = (v * c + pv * pc) / (c + pc);
+      c += pc;
+    }
+    val.push(v); cnt.push(c);
+  }
+  const out = [];
+  for (let b = 0; b < val.length; b++) for (let j = 0; j < cnt[b]; j++) out.push(val[b]);
+  return out.map((v, i) => v + i * gap);
 }
 
 // Minimum-cost bipartite matching: n POIs → m gates (n ≤ m). Hungarian
@@ -1164,6 +1286,54 @@ function snapPerimeterCodes(places, osmData) {
     layout[ribbonId].lengthM = spec.total;
     layout[ribbonId].poiCount = poiCount;
 
+    // East berms (E-14..E-23 + societies): honour the surveyed positions from
+    // the "E-14 - 23" sheet. Project each onto the rendered centerline at its
+    // true along-berm position, then nudge only the overlapping ones apart to a
+    // minimum spacing so no two dots collide — never moving any POI more than
+    // MAX_DEV_M from its surveyed point. Already-separated POIs stay exact.
+    if (EXACT_BERM_RIBBONS.has(ribbonId)) {
+      const MIN_GAP_M = 6.0;   // along-berm spacing that keeps adjacent dots distinct
+      const MAX_DEV_M = 5.0;   // soft cap on how far a POI may move from its survey point
+      // Follow the berm's true medial axis (not the straightened parabola) so the
+      // dots track the rendered 2D curve along the whole ribbon.
+      const END_MARGIN_M = 2.0; // keep tip dots just inside the berm end, not on the edge
+      const cl = _ribbonMedialCenterline(mergedRings[ribbonId]);
+      const total = _centerlineTotal(cl);
+      const loB = Math.min(END_MARGIN_M, total / 2);
+      const hiB = Math.max(total - END_MARGIN_M, loB);
+      const items = list.map(it => ({ cand: it.cand, s: _projectArcS(it.lng, it.lat, cl) }));
+      items.sort((a, b) => a.s - b.s);
+      const sTrue = items.map(it => it.s);
+      const spread = _spreadMinGap(sTrue, MIN_GAP_M);
+      for (let k = 0; k < spread.length; k++) {
+        if (spread[k] - sTrue[k] > MAX_DEV_M) spread[k] = sTrue[k] + MAX_DEV_M;
+        else if (sTrue[k] - spread[k] > MAX_DEV_M) spread[k] = sTrue[k] - MAX_DEV_M;
+      }
+      // Keep every dot inside the berm body [loB, hiB] (no past-the-tip
+      // placement), cascading from each end so a cluster near a tip shifts
+      // inward instead of a dot sliding onto the end edge — and stays centred.
+      for (let k = spread.length - 1; k >= 0; k--) {
+        const ub = (k === spread.length - 1) ? hiB : spread[k + 1] - MIN_GAP_M;
+        if (spread[k] > ub) spread[k] = ub;
+      }
+      for (let k = 0; k < spread.length; k++) {
+        const lb = (k === 0) ? loB : spread[k - 1] + MIN_GAP_M;
+        if (spread[k] < lb) spread[k] = lb;
+      }
+      for (let k = 0; k < items.length; k++) {
+        const [glng, glat] = _lngLatAtArcS(spread[k], cl);
+        const { cand } = items[k];
+        cand.place.geometry.coordinates = [glng, glat];
+        if (cand.place.centroid) cand.place.centroid = { lat: glat, lng: glng };
+        const name = (cand.place.properties.name || '').trim();
+        if (name) {
+          bermEntrances[name] = { lat: glat, lng: glng, gate_name: 'sandstone gate', berm: true };
+        }
+        snapped++;
+      }
+      continue;
+    }
+
     const gates = spec.gates.map(([lng, lat], gi) => ({ lng, lat, gi }));
     const cost = list.map(item => gates.map(g => distM(item.lng, item.lat, g)));
     const assign = minCostGateAssign(cost);
@@ -1182,6 +1352,45 @@ function snapPerimeterCodes(places, osmData) {
     }
   }
 
+  // South-east landscape berm (ring 1412399742): its E-codes belong on the
+  // CAMPUS-FACING arched sandstone wall (the "sandstone gates"), like every
+  // other berm code. Green berms are excluded from the gate layout so the snap
+  // never touches them. Project onto the retaining-wall centerline — that's the
+  // arch line; the ring medial would drop them mid-slope toward the road. Keep
+  // in sync with the GREEN_BERMS "East part" path in web/js/landmarks-3d.js.
+  const SE_GREEN_BERM_CL = [
+    [73.1139592, 26.4701471], [73.1141907, 26.4701516], [73.1147332, 26.4702038],
+    [73.1152486, 26.4703093], [73.1157409, 26.4704867], [73.1161642, 26.4707136],
+    [73.1165918, 26.4710085], [73.1168349, 26.4712561],
+  ];
+  const SE_GREEN_BERM_CODES = new Set(['E-1', 'E-2', 'E-3', 'E-4', 'E-5', 'E-6', 'E-7', 'E-8']);
+  const seList = candidates.filter(c => SE_GREEN_BERM_CODES.has((c.place.properties.name || '').trim()));
+  if (seList.length) {
+    // Lock each code to a unique arch-opening centre: step gate centres along
+    // the SAME smoothed path + moduleW (7.5 m) the 3D arcade uses, then assign
+    // each POI to its nearest free arch (globally-optimal 1:1 match).
+    const gates = pathGateCenters(_smoothPath(SE_GREEN_BERM_CL, 6, 5), 7.5)
+      .map(([lng, lat]) => ({ lng, lat }));
+    const cost = seList.map(c => {
+      const [lng, lat] = c.place.geometry.coordinates;
+      return gates.map(g => distM(lng, lat, g));
+    });
+    const assign = minCostGateAssign(cost);
+    for (let pi = 0; pi < seList.length; pi++) {
+      const gi = assign[pi];
+      if (gi < 0) continue;
+      const g = gates[gi];
+      const { place } = seList[pi];
+      place.geometry.coordinates = [g.lng, g.lat];
+      if (place.centroid) place.centroid = { lat: g.lat, lng: g.lng };
+      const name = (place.properties.name || '').trim();
+      if (name) {
+        bermEntrances[name] = { lat: g.lat, lng: g.lng, gate_name: 'sandstone gate', berm: true };
+      }
+      snapped++;
+    }
+  }
+
   console.log(`  Perimeter snap: ${snapped} berm POIs anchored to sandstone gates`);
   return { places, bermEntrances, bermLayout: layout };
 }
@@ -1193,6 +1402,19 @@ const WAVE_BERM_IDS = new Set([
 ]);
 // South-edge green terraced landscape berms (not blue wave ribbons).
 const LANDSCAPE_BERM_IDS = new Set(['1412399742', '1412399756', '1412399757']);
+
+// Slim 2D-fill override for the green landscape berms. Their raw OSM polygons are
+// ~25-37 m wide and bulged past the ring road into the bare ground south of
+// campus, so the 2D fill overflowed the road. The 3D arcade renders these as a
+// slim ~8.5 m-deep berm hugging the road (landmarks-3d.js GREEN_BERMS centre-
+// lines); these rings are those same centre-lines buffered 5.5 m so the 2D fill
+// matches the 3D footprint and stays a tidy verge along the road. Regenerate by
+// buffering the GREEN_BERMS paths if those lines change (keep the two in sync).
+const GREEN_BERM_FILL = {
+  '1412399742': [[73.1141872,26.470201],[73.1147241,26.4702527],[73.1152321,26.4703567],[73.1157163,26.4705312],[73.1161331,26.4707546],[73.1165539,26.4710448],[73.1167935,26.4712888],[73.1168763,26.4712234],[73.1166332,26.4709758],[73.1166295,26.4709724],[73.1166254,26.4709693],[73.1161978,26.4706744],[73.1161925,26.4706711],[73.1157692,26.4704442],[73.1157654,26.4704424],[73.1157615,26.4704408],[73.1152692,26.4702634],[73.1152651,26.4702621],[73.1152609,26.4702611],[73.1147455,26.4701556],[73.1147391,26.4701546],[73.1141966,26.4701024],[73.1141919,26.4701021],[73.1139604,26.4700976],[73.113958,26.4701966],[73.1141872,26.470201]],
+  '1412399756': [[73.1131363,26.4703189],[73.1132968,26.4702735],[73.1134862,26.470237],[73.1137174,26.470209],[73.1137026,26.470111],[73.1134693,26.4701392],[73.1134651,26.4701398],[73.1132711,26.4701772],[73.1132661,26.4701784],[73.1131021,26.4702248],[73.1131002,26.4702254],[73.1127187,26.470347],[73.1127557,26.4704402],[73.1131363,26.4703189]],
+  '1412399757': [[73.1105739,26.4718043],[73.1107607,26.4716171],[73.1111672,26.4712802],[73.1115045,26.4710537],[73.1114383,26.4709745],[73.1110987,26.4712025],[73.1110943,26.4712058],[73.1106838,26.4715461],[73.1106802,26.4715494],[73.1104882,26.4717418],[73.1104849,26.4717454],[73.110482,26.4717493],[73.1103456,26.4719527],[73.1104402,26.4720037],[73.1105739,26.4718043]],
+};
 
 function bermTypeForId(id) {
   if (LANDSCAPE_BERM_IDS.has(id)) return 'landscape';
@@ -1220,7 +1442,9 @@ function buildBermsGeoJSON(osmData) {
     if (coords.length < 4) continue;
     const closed = coords[0][0] === coords[coords.length - 1][0]
       && coords[0][1] === coords[coords.length - 1][1];
-    const ring = closed ? coords : [...coords, coords[0]];
+    // Green landscape berms use a slim road-hugging fill (see GREEN_BERM_FILL)
+    // instead of their over-wide OSM polygon, which spilled past the ring road.
+    const ring = GREEN_BERM_FILL[way.id] || (closed ? coords : [...coords, coords[0]]);
 
     seen.add(way.id);
     features.push({
