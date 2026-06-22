@@ -1954,9 +1954,12 @@ function startBuildingHighlight(categoryId) {
 
   // Area-polygon categories (parking, recreation, most sports) live in the
   // named-areas source, so highlight them too — flat fill works in 2D and 3D.
+  // Exclude the campus-boundary polygons (area_type=university): they're tagged
+  // academic but span the whole campus, so highlighting them lit up everything.
   if (map.getLayer('areas-highlight-fill')) {
-    map.setFilter('areas-highlight-fill', polyFilter);
-    map.setFilter('areas-highlight-outline', polyFilter);
+    const areaFilter = ['all', polyFilter, ['!=', ['get', 'area_type'], 'university']];
+    map.setFilter('areas-highlight-fill', areaFilter);
+    map.setFilter('areas-highlight-outline', areaFilter);
     setVis('areas-highlight-fill', 'visible');
     setVis('areas-highlight-outline', 'visible');
   }
