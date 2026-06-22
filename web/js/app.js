@@ -164,52 +164,16 @@ function buildingFillOpacity() {
   return ['interpolate', ['linear'], ['zoom'], 14, 0.78, 17, 0.92];
 }
 
-/** Subtle category tint for 3D night extrusions — muted so campus stays readable. */
-function buildingNightGlowColorExpr() {
-  return ['match', ['get', 'category'],
-    'academic',       '#6b8fb8',
-    'hostel',         '#b8956a',
-    'dining',         '#b87070',
-    'sports',         '#6a9a78',
-    'medical',        '#b87a9a',
-    'gate',           '#7a84b8',
-    'parking',        '#5a8aa8',
-    'utility',        '#8a919a',
-    'administrative', '#707a88',
-    'transport',      '#5a9088',
-    'recreation',     '#9a82b0',
-    'residential',    '#a08868',
-    'bank',           '#a89050',
-    'university',     '#6b8fb8',
-    '#8a9cb0',
-  ];
-}
-
+/** Neutral white crown glow for 3D night extrusions (no category tint). */
 function buildingGlowColorExpr() {
-  return ['match', ['get', 'category'],
-    'academic',       '#c8b890',
-    'hostel',         '#c0a880',
-    'dining',         '#c09890',
-    'sports',         '#a8c0a0',
-    'medical',        '#c0a0b0',
-    'gate',           '#a8b0c8',
-    'parking',        '#98b8c8',
-    'utility',        '#b0b4b8',
-    'administrative', '#a8acb4',
-    'transport',      '#98b8b0',
-    'recreation',     '#b8a8c8',
-    'residential',    '#c0b098',
-    'bank',           '#c8b888',
-    'university',     '#c8b890',
-    '#c8b890',
-  ];
+  return '#eef1f5';
 }
 
 function buildingExtrusionColorExpr() {
   if (isSatellite) return isDark ? '#475569' : '#f1f5f9';
-  if (isDark && is3D && !isSatellite) return buildingNightGlowColorExpr();
+  // Non-custom 3D buildings render plain white (softened a touch at night).
+  if (is3D && !isSatellite) return isDark ? '#e9ebef' : '#ffffff';
   if (isDark) return '#9aa8bc';
-  if (is3D && !isSatellite) return categoryColorExpr();
   return '#fafaf8';
 }
 
