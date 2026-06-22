@@ -520,9 +520,6 @@ function refreshBuildingTheme() {
   if (map.getLayer('buildings-3d')) {
     map.setPaintProperty('buildings-3d', 'fill-extrusion-color', extrusionColor);
     map.setPaintProperty('buildings-3d', 'fill-extrusion-opacity', extrusionOpacity);
-    if (map.getPaintProperty('buildings-3d', 'fill-extrusion-ambient-occlusion-intensity') != null) {
-      map.setPaintProperty('buildings-3d', 'fill-extrusion-ambient-occlusion-intensity', isDark ? 0.02 : 0.22);
-    }
   }
   if (map.getLayer('buildings-3d-glow')) {
     map.setLayoutProperty('buildings-3d-glow', 'visibility', buildingGlowLayerVisible() ? 'visible' : 'none');
@@ -1753,7 +1750,6 @@ function addBuildingsLayer(data) {
       'fill-extrusion-base': 0,
       'fill-extrusion-opacity': buildingExtrusionOpacity(),
       'fill-extrusion-vertical-gradient': true,
-      'fill-extrusion-ambient-occlusion-intensity': isDark ? 0.02 : 0.22,
     }
   });
 
