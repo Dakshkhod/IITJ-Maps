@@ -2290,7 +2290,7 @@ function renderCategoryChips(categoriesData) {
 
 function createChip(name, categoryId, isActive, color) {
   const chip = document.createElement('div');
-  chip.className = `category-chip${isActive ? ' active' : ''}`;
+  chip.className = `category-chip${categoryId ? '' : ' chip-all'}${isActive ? ' active' : ''}`;
   if (color) chip.style.setProperty('--chip-color', color);
   chip.textContent = name;
   chip.addEventListener('click', () => filterByCategory(categoryId, chip));

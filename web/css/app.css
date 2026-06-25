@@ -284,6 +284,13 @@ body.map-dark .category-chip:not(.active) {
   box-shadow: var(--shadow-sm), 0 0 0 3px color-mix(in srgb, var(--chip-color, var(--accent)) 25%, transparent);
 }
 
+/* The "All" chip has no --chip-color, so its active background falls back to
+   --accent — which is near-white in dark mode, making the hardcoded white text
+   invisible. Use the inverse accent so it reads in both themes. */
+.category-chip.chip-all.active {
+  color: var(--accent-inverse);
+}
+
 /* ============================================================
    Directions Panel
    ============================================================ */
