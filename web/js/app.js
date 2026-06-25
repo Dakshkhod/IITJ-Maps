@@ -4635,6 +4635,7 @@ async function toggleSatellite() {
     // re-add hook doesn't bring them back over the imagery.
     if (typeof Landmarks3D !== 'undefined') Landmarks3D.hide();
   } else {
+    setSatCalibration(false);
     map.setMaxZoom(19);
     if (!nightModeManual) isDark = isCampusNight();
     document.documentElement.setAttribute('data-theme', isDark ? 'dark' : '');
@@ -4757,14 +4758,61 @@ function setupEventListeners() {
   });
 }
 
-// Calibrate the satellite imagery offset live: in satellite view, Alt+Shift+
-// Arrows nudge the imagery 1 m in that direction (hold Alt so MapLibre's own
-// keyboard handler ignores the event); Alt+Shift+0 resets. The chosen value
-// persists in localStorage and is logged so it can be baked into
+// Calibrate the satellite imagery offset live. In satellite view, press "O" to
+// toggle calibration mode; while it's on, the plain Arrow keys nudge the
+// imagery 1 m in that direction (Shift = fine 0.25 m steps) and "0" resets.
+// (We avoid OS-reserved combos like Alt+Shift, which Windows hijacks to switch
+// keyboard layout.) The map's own arrow-pan is disabled while calibrating, and
+// the chosen value persists in localStorage + logs so it can be baked into
 // SAT_OFFSET_DEFAULT for everyone.
+let satCalibrating = false;
+
+function isTypingTarget(el) {
+  return el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.isContentEditable);
+}
+
+function setSatCalibration(on) {
+  satCalibrating = on && isSatellite;
+  if (!map) return;
+  if (satCalibrating) map.keyboard.disable(); else map.keyboard.enable();
+  let badge = document.getElementById('sat-calib-badge');
+  if (satCalibrating) {
+    if (!badge) {
+      badge = document.createElement('div');
+      badge.id = 'sat-calib-badge';
+      badge.style.cssText = 'position:fixed;left:50%;bottom:88px;transform:translateX(-50%);z-index:9999;'
+        + 'background:rgba(20,20,22,.92);color:#fff;font:600 13px/1.4 system-ui,sans-serif;'
+        + 'padding:8px 14px;border-radius:10px;box-shadow:0 4px 16px rgba(0,0,0,.35);pointer-events:none;text-align:center';
+      document.body.appendChild(badge);
+    }
+    updateSatCalibBadge();
+  } else if (badge) {
+    badge.remove();
+  }
+}
+
+function updateSatCalibBadge() {
+  const badge = document.getElementById('sat-calib-badge');
+  if (badge) {
+    badge.innerHTML = `Imagery calibration · x:${satOffset.x.toFixed(2)} y:${satOffset.y.toFixed(2)} m`
+      + `<br><span style="opacity:.7;font-weight:400">Arrows move · Shift=fine · 0=reset · O=exit</span>`;
+  }
+}
+
 function handleSatOffsetCalibration(e) {
-  if (!isSatellite || !e.altKey || !e.shiftKey) return;
-  const step = 1; // metres per nudge
+  if (isTypingTarget(document.activeElement)) return;
+
+  // Toggle calibration mode with "O" (only meaningful in satellite view).
+  if ((e.key === 'o' || e.key === 'O') && !e.ctrlKey && !e.metaKey && !e.altKey) {
+    if (!isSatellite) return;
+    e.preventDefault();
+    setSatCalibration(!satCalibrating);
+    showToast(satCalibrating ? 'Imagery calibration ON' : 'Imagery calibration off', 'info', 1600);
+    return;
+  }
+
+  if (!satCalibrating || !isSatellite) return;
+  const step = e.shiftKey ? 0.25 : 1; // metres per nudge
   let handled = true;
   switch (e.key) {
     case 'ArrowRight': satOffset.x -= step; break; // move imagery east
@@ -4778,7 +4826,7 @@ function handleSatOffsetCalibration(e) {
   e.preventDefault();
   saveSatOffset();
   refreshSatelliteTiles();
-  showToast(`Imagery offset  x:${satOffset.x.toFixed(0)}  y:${satOffset.y.toFixed(0)} m`, 'info', 1500);
+  updateSatCalibBadge();
   console.log('[sat-offset] SAT_OFFSET_DEFAULT =', JSON.stringify(satOffset));
 }
 
