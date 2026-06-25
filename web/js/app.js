@@ -704,7 +704,9 @@ async function init() {
 // imagery through a custom protocol that re-requests it from a bbox shifted by
 // `satOffset` (Web-Mercator/EPSG:3857 metres added to the requested bbox).
 // Calibrate live with Alt+Shift+Arrows in satellite view (see keydown handler).
-const SAT_OFFSET_DEFAULT = { x: 0, y: 0 };
+// Calibrated against OSM building footprints + roads (Esri imagery sat ~6 m
+// north of our data here); EPSG:3857 metres added to the requested bbox.
+const SAT_OFFSET_DEFAULT = { x: 0, y: 7 };
 const SAT_OFFSET_KEY = 'iitj_sat_offset';
 const SAT_MERC_HALF = 20037508.342789244; // half the Web-Mercator world span (m)
 
