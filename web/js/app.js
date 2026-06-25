@@ -638,6 +638,8 @@ async function init() {
   isDark = isCampusNight();
   if (isDark) document.documentElement.setAttribute('data-theme', 'dark');
 
+  registerSatelliteOffsetProtocol();
+
   map = new maplibregl.Map({
     container: 'map',
     style: getMapStyle(),
@@ -694,6 +696,77 @@ async function init() {
 }
 
 // ============================================================
+// Satellite imagery offset correction
+// ============================================================
+// Esri World Imagery is georeferenced a few metres off from our OSM-derived
+// footprints / 3D models in this region, so the raw imagery doesn't line up
+// with the buildings. MapLibre can't nudge a raster XYZ layer, so we serve the
+// imagery through a custom protocol that re-requests it from a bbox shifted by
+// `satOffset` (Web-Mercator/EPSG:3857 metres added to the requested bbox).
+// Calibrate live with Alt+Shift+Arrows in satellite view (see keydown handler).
+const SAT_OFFSET_DEFAULT = { x: 0, y: 0 };
+const SAT_OFFSET_KEY = 'iitj_sat_offset';
+const SAT_MERC_HALF = 20037508.342789244; // half the Web-Mercator world span (m)
+
+let satOffset = (function loadSatOffset() {
+  try {
+    const s = JSON.parse(localStorage.getItem(SAT_OFFSET_KEY));
+    if (s && isFinite(s.x) && isFinite(s.y)) return { x: s.x, y: s.y };
+  } catch (e) {}
+  return { ...SAT_OFFSET_DEFAULT };
+})();
+
+function saveSatOffset() {
+  try { localStorage.setItem(SAT_OFFSET_KEY, JSON.stringify(satOffset)); } catch (e) {}
+}
+
+// The offset is baked into the tile URL so changing it busts MapLibre's cache
+// and the (stateless) protocol can read it back per-request.
+function satelliteTilesUrl() {
+  return `esrioffset://${satOffset.x}/${satOffset.y}/{z}/{x}/{y}`;
+}
+
+let _satProtocolRegistered = false;
+function registerSatelliteOffsetProtocol() {
+  if (_satProtocolRegistered) return;
+  _satProtocolRegistered = true;
+  maplibregl.addProtocol('esrioffset', async (params, abortController) => {
+    const p = params.url.replace('esrioffset://', '').split('/');
+    const ox = parseFloat(p[0]) || 0, oy = parseFloat(p[1]) || 0;
+    const z = +p[2], x = +p[3], y = +p[4];
+    const span = (SAT_MERC_HALF * 2) / Math.pow(2, z);
+    const minx = -SAT_MERC_HALF + x * span + ox;
+    const maxx = -SAT_MERC_HALF + (x + 1) * span + ox;
+    const maxy =  SAT_MERC_HALF - y * span + oy;
+    const miny =  SAT_MERC_HALF - (y + 1) * span + oy;
+    const url = 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/export'
+      + `?bbox=${minx},${miny},${maxx},${maxy}`
+      + '&bboxSR=3857&imageSR=3857&size=256,256&format=jpgpng&transparent=false&f=image';
+    const resp = await fetch(url, { signal: abortController.signal });
+    if (!resp.ok) throw new Error('Esri export failed: ' + resp.status);
+    return { data: await resp.arrayBuffer() };
+  });
+}
+
+// Re-create the satellite source/layer with the current offset so a calibration
+// nudge takes effect immediately (kept at the bottom of the layer stack).
+function refreshSatelliteTiles() {
+  if (!map || !isSatellite) return;
+  const id = 'satellite-tiles';
+  if (map.getLayer(id)) map.removeLayer(id);
+  if (map.getSource(id)) map.removeSource(id);
+  map.addSource(id, {
+    type: 'raster',
+    tiles: [satelliteTilesUrl()],
+    tileSize: 256,
+    maxzoom: 19,
+    attribution: '© Esri, Maxar, Earthstar Geographics, GIS User Community'
+  });
+  const firstLayer = (map.getStyle().layers[0] || {}).id;
+  map.addLayer({ id, type: 'raster', source: id, paint: { 'raster-opacity': 1 } }, firstLayer);
+}
+
+// ============================================================
 // Map Style — streets (light/dark) or satellite imagery
 // ============================================================
 function getMapStyle() {
@@ -704,9 +777,7 @@ function getMapStyle() {
       sources: {
         'satellite-tiles': {
           type: 'raster',
-          tiles: [
-            'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-          ],
+          tiles: [satelliteTilesUrl()],
           tileSize: 256,
           maxzoom: 19,
           attribution: '© Esri, Maxar, Earthstar Geographics, GIS User Community'
@@ -4682,7 +4753,33 @@ function setupEventListeners() {
       e.preventDefault();
       document.getElementById('search-input').focus();
     }
+    handleSatOffsetCalibration(e);
   });
+}
+
+// Calibrate the satellite imagery offset live: in satellite view, Alt+Shift+
+// Arrows nudge the imagery 1 m in that direction (hold Alt so MapLibre's own
+// keyboard handler ignores the event); Alt+Shift+0 resets. The chosen value
+// persists in localStorage and is logged so it can be baked into
+// SAT_OFFSET_DEFAULT for everyone.
+function handleSatOffsetCalibration(e) {
+  if (!isSatellite || !e.altKey || !e.shiftKey) return;
+  const step = 1; // metres per nudge
+  let handled = true;
+  switch (e.key) {
+    case 'ArrowRight': satOffset.x -= step; break; // move imagery east
+    case 'ArrowLeft':  satOffset.x += step; break; // move imagery west
+    case 'ArrowUp':    satOffset.y -= step; break; // move imagery north
+    case 'ArrowDown':  satOffset.y += step; break; // move imagery south
+    case '0': case ')': satOffset = { ...SAT_OFFSET_DEFAULT }; break;
+    default: handled = false;
+  }
+  if (!handled) return;
+  e.preventDefault();
+  saveSatOffset();
+  refreshSatelliteTiles();
+  showToast(`Imagery offset  x:${satOffset.x.toFixed(0)}  y:${satOffset.y.toFixed(0)} m`, 'info', 1500);
+  console.log('[sat-offset] SAT_OFFSET_DEFAULT =', JSON.stringify(satOffset));
 }
 
 function openMenu()  { document.getElementById('side-menu').classList.remove('hidden'); document.getElementById('menu-overlay').classList.remove('hidden'); }
