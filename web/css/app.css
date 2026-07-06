@@ -1203,6 +1203,13 @@ input[type="checkbox"]:checked + .toggle-track .toggle-thumb { transform: transl
   display: flex;
   align-items: center;
   justify-content: center;
+  transform-origin: 50% 50%;
+  transition: transform 0.12s ease-out;
+}
+
+/* Subtle glow while the arrow is live-tracking the walking direction. */
+.nav-arrow-wrap.nav-arrow-live {
+  box-shadow: 0 3px 10px rgba(0,122,255,0.4), 0 0 0 3px rgba(0,122,255,0.18);
 }
 
 .nav-instruction-main {

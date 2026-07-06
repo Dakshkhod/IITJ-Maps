@@ -3643,6 +3643,31 @@ function updateNavInstruction(distToNextTurn) {
   // Progress bar
   const pct = Math.round(navInstructionIndex / Math.max(1, currentRoute.instructions.length - 1) * 100);
   document.getElementById('nav-progress').style.width = `${pct}%`;
+
+  // Sync the live compass arrow with the freshest heading right away so it
+  // isn't stuck at the previous instruction's orientation until the next frame.
+  _updateNavArrowHeading(userLocation?.heading ?? headingDeg);
+}
+
+// Live compass arrow. For the "Head <compass>" departure step the banner arrow
+// rotates in real time to point toward the target bearing relative to the way
+// the user is currently facing: as they turn/walk it swings around until they're
+// aligned and it points straight up. Turn-shaped steps keep their fixed glyph.
+function _updateNavArrowHeading(heading) {
+  const iconEl = document.getElementById('nav-arrow-icon');
+  if (!iconEl) return;
+  const wrap  = document.getElementById('nav-arrow-wrap');
+  const instr = currentRoute?.instructions?.[navInstructionIndex];
+  const live  = navigationActive && instr && instr.type === 'depart' &&
+                instr.bearing != null && heading != null && !isNaN(heading);
+  if (!live) {
+    iconEl.style.transform = '';
+    wrap?.classList.remove('nav-arrow-live');
+    return;
+  }
+  const rel = (((instr.bearing - heading) % 360) + 360) % 360;
+  iconEl.style.transform = `rotate(${rel}deg)`;
+  wrap?.classList.add('nav-arrow-live');
 }
 
 // ============================================================
@@ -4391,6 +4416,9 @@ function onLocationFrame(disp, raw) {
   if (disp.heading != null) headingDeg = disp.heading;
 
   _renderLocationMarker(renderLat, renderLng, disp.accuracy, disp.heading);
+
+  // Swing the departure compass arrow smoothly as the heading interpolates.
+  if (navigationActive) _updateNavArrowHeading(disp.heading);
 
   if (!_firstFixShown) {
     _firstFixShown = true;
