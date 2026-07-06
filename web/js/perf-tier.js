@@ -114,31 +114,40 @@
   tier = Math.max(0, Math.min(2, tier));
 
   // ── Per-tier settings ─────────────────────────────────────────────────
+  // `landmarkModels` is the big one: only flagship-class devices load the
+  // detailed Three.js procedural buildings. Everyone else gets "simplified 3D"
+  // — the cheap MapLibre extruded footprints (real building shapes with height,
+  // just no ornate geometry) + instanced trees. `prewarm3D:false` means we do
+  // NOT build/upload the 3D scene in the background on lower phones (that
+  // background GPU upload is what caused the ~3s stutter after load); those
+  // devices build 3D lazily, only when the user actually taps the 3D button.
   var TIERS = [
     { // 0 — low  (budget Androids: Galaxy M/A, Redmi, Realme entry, etc.)
       name: 'low',
       pixelRatio: 1,
       antialias: false,
       buildingGlow: false,
-      landmarkModels: false,   // skip heavy Three.js procedural buildings
+      landmarkModels: false,   // simplified 3D — extruded boxes, no models
       berms: false,
       vegetationDensity: 0.35,
       maxPitch: 52,
+      prewarm3D: false,
     },
     { // 1 — balanced (mid-range phones: Mali-G76/G77, Adreno 6xx mid, etc.)
-      // Antialiasing is OFF here on purpose — MSAA is one of the biggest costs
-      // on Mali/Adreno mid GPUs, and dropping it (plus a modest resolution cap)
-      // is what keeps these phones smooth while still showing the full 3D scene.
+      // Antialiasing is OFF (MSAA is a big cost on Mali/Adreno mid GPUs) and the
+      // heavy Three.js models are skipped in favour of simplified extruded
+      // buildings, so these phones stay smooth in 3D. Trees + berms remain.
       name: 'balanced',
       pixelRatio: Math.min(dpr, 1.3),
       antialias: false,
       buildingGlow: false,
-      landmarkModels: true,
+      landmarkModels: false,   // simplified 3D — extruded boxes, no models
       berms: true,
       vegetationDensity: 0.55,
       maxPitch: 58,
+      prewarm3D: false,
     },
-    { // 2 — high (flagships, tablets, desktop)
+    { // 2 — high (flagships, tablets, desktop) — full detailed 3D scene
       name: 'high',
       pixelRatio: Math.min(dpr, 2),
       antialias: true,
@@ -147,6 +156,7 @@
       berms: true,
       vegetationDensity: 1,
       maxPitch: 60,
+      prewarm3D: true,
     },
   ];
 
@@ -161,6 +171,7 @@
     PerfTier.berms = c.berms;
     PerfTier.vegetationDensity = c.vegetationDensity;
     PerfTier.maxPitch = c.maxPitch;
+    PerfTier.prewarm3D = c.prewarm3D;
   }
 
   var PerfTier = {

@@ -6952,11 +6952,18 @@ var Landmarks3D = (() => {
   // suppress the plain extrusion under the model.
   function replacedBuildingIds() {
     const ids = [];
-    for (const l of LANDMARKS) {
-      if (Array.isArray(l.replacesOsmBuildings)) ids.push(...l.replacesOsmBuildings);
+    // Only hide a building's plain MapLibre extrusion if something 3D actually
+    // replaces it on this device tier. On simplified-3D tiers (perf-tier.js)
+    // the models aren't built, so we KEEP those extrusions — otherwise the
+    // landmark buildings would be neither modelled nor extruded (holes).
+    if (!window.PerfTier || PerfTier.landmarkModels) {
+      for (const l of LANDMARKS) {
+        if (Array.isArray(l.replacesOsmBuildings)) ids.push(...l.replacesOsmBuildings);
+      }
     }
-    // The 3D berm sweeps stand in for the flat OSM "Berms" footprint polygons.
-    ids.push(...BERM_IDS);
+    // The 3D berm sweeps stand in for the flat OSM "Berms" footprint polygons —
+    // hide those only when the berms are actually built.
+    if (!window.PerfTier || PerfTier.berms) ids.push(...BERM_IDS);
     return ids;
   }
 

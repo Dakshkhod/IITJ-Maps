@@ -141,6 +141,10 @@ function canBackgroundPrewarm3D() {
 function scheduleLandmarks3DPrewarm() {
   if (_landmarks3dPrewarmScheduled || !canBackgroundPrewarm3D()) return;
   if (typeof Landmarks3D === 'undefined') return;
+  // Only flagship-tier devices pre-build + GPU-upload the 3D scene in the
+  // background. On lower phones that background upload is what caused a 1–2s
+  // stutter a few seconds after load, so they build 3D lazily on first tap.
+  if (window.PerfTier && !PerfTier.prewarm3D) return;
   _landmarks3dPrewarmScheduled = true;
 
   const kick = () => {
