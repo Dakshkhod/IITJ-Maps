@@ -5549,6 +5549,7 @@ var Landmarks3D = (() => {
   // uploaded BufferGeometry) survives a setStyle, the scene is also built
   // exactly once and reused — no per-toggle rebuild, no lag.
   let _rendererGl = null;
+  let _canvasW = 0, _canvasH = 0;   // last-synced canvas backing size (see render())
   let _originMcX = 0, _originMcY = 0, _originMcZ = 0;
   let _mercPerMeter = 1;
   let _treeData = null;       // { full:[lng,lat,...], bush:[lng,lat,...] }
@@ -6465,6 +6466,17 @@ var Landmarks3D = (() => {
       },
       render(_gl, matrix) {
         if (!_visible || !_scene || !_renderer) return;
+        // Keep three's viewport matched to the MapLibre canvas backing size.
+        // It changes when the render resolution changes (map.setPixelRatio via
+        // the perf watchdog) or on an orientation/resize — and three caches its
+        // size at construction, so without this the 3D would draw into a stale
+        // sub-rectangle (clipped / mis-scaled). setViewport (not setSize) avoids
+        // reassigning canvas.width, which would clear MapLibre's own buffer.
+        const _cv = _map.getCanvas();
+        if (_cv && (_cv.width !== _canvasW || _cv.height !== _canvasH)) {
+          _canvasW = _cv.width; _canvasH = _cv.height;
+          _renderer.setViewport(0, 0, _canvasW, _canvasH);
+        }
         _scaleVec.set(_mercPerMeter, -_mercPerMeter, _mercPerMeter);
         _localM.makeTranslation(_originMcX, _originMcY, _originMcZ)
                .scale(_scaleVec)

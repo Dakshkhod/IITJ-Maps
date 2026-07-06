@@ -124,7 +124,7 @@
   var TIERS = [
     { // 0 — low  (budget Androids: Galaxy M/A, Redmi, Realme entry, etc.)
       name: 'low',
-      pixelRatio: 1,
+      pixelRatio: Math.min(dpr, 1.5),   // sharp enough without shading full native
       antialias: false,
       buildingGlow: false,
       landmarkModels: false,   // simplified 3D — extruded boxes, no models
@@ -138,7 +138,9 @@
       // heavy Three.js models are skipped in favour of simplified extruded
       // buildings, so these phones stay smooth in 3D. Trees + berms remain.
       name: 'balanced',
-      pixelRatio: Math.min(dpr, 1.3),
+      // Now that the heavy models + MSAA are gone, there's headroom to render
+      // crisp again — near-native resolution so the map isn't soft/blurry.
+      pixelRatio: Math.min(dpr, 2),
       antialias: false,
       buildingGlow: false,
       landmarkModels: false,   // simplified 3D — extruded boxes, no models
