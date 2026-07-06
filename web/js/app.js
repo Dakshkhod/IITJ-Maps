@@ -3644,29 +3644,38 @@ function updateNavInstruction(distToNextTurn) {
   const pct = Math.round(navInstructionIndex / Math.max(1, currentRoute.instructions.length - 1) * 100);
   document.getElementById('nav-progress').style.width = `${pct}%`;
 
-  // Sync the live compass arrow with the freshest heading right away so it
-  // isn't stuck at the previous instruction's orientation until the next frame.
-  _updateNavArrowHeading(userLocation?.heading ?? headingDeg);
+  // Point the departure arrow at the real travel direction right away.
+  _updateNavArrowHeading();
 }
 
 // Live compass arrow. For the "Head <compass>" departure step the banner arrow
-// rotates in real time to point toward the target bearing relative to the way
-// the user is currently facing: as they turn/walk it swings around until they're
-// aligned and it points straight up. Turn-shaped steps keep their fixed glyph.
-function _updateNavArrowHeading(heading) {
+// points at the true travel bearing as it appears on the *currently displayed
+// map*: on a north-up map "Head west" points left; while navigating (the map
+// rotates to your heading) it swings toward straight-up as you face the way to
+// go. Referenced against the map bearing — which is always defined — so it works
+// even before any compass/GPS heading is available. Turn steps keep their glyph.
+let _navArrowAngle = 0;   // continuous (unwrapped) angle so it never spin-flips
+function _updateNavArrowHeading() {
   const iconEl = document.getElementById('nav-arrow-icon');
   if (!iconEl) return;
   const wrap  = document.getElementById('nav-arrow-wrap');
   const instr = currentRoute?.instructions?.[navInstructionIndex];
-  const live  = navigationActive && instr && instr.type === 'depart' &&
-                instr.bearing != null && heading != null && !isNaN(heading);
+  const live  = navigationActive && instr && instr.type === 'depart' && instr.bearing != null;
   if (!live) {
     iconEl.style.transform = '';
     wrap?.classList.remove('nav-arrow-live');
     return;
   }
-  const rel = (((instr.bearing - heading) % 360) + 360) % 360;
-  iconEl.style.transform = `rotate(${rel}deg)`;
+  // Bind a one-time map-rotate listener so the arrow tracks as the camera turns.
+  if (map && !map._navArrowRotateBound) {
+    map._navArrowRotateBound = true;
+    map.on('rotate', _updateNavArrowHeading);
+  }
+  const target = instr.bearing - (map ? map.getBearing() : 0);
+  // Step by the shortest signed delta to keep the CSS transition on the short arc.
+  const delta = (((target - _navArrowAngle) % 360) + 540) % 360 - 180;
+  _navArrowAngle += delta;
+  iconEl.style.transform = `rotate(${_navArrowAngle}deg)`;
   wrap?.classList.add('nav-arrow-live');
 }
 
@@ -4417,8 +4426,8 @@ function onLocationFrame(disp, raw) {
 
   _renderLocationMarker(renderLat, renderLng, disp.accuracy, disp.heading);
 
-  // Swing the departure compass arrow smoothly as the heading interpolates.
-  if (navigationActive) _updateNavArrowHeading(disp.heading);
+  // Swing the departure compass arrow smoothly as the map/heading updates.
+  if (navigationActive) _updateNavArrowHeading();
 
   if (!_firstFixShown) {
     _firstFixShown = true;
