@@ -34,7 +34,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
-  <link rel="stylesheet" href="css/app.css?v=18">
+  <link rel="stylesheet" href="css/app.css?v=19">
 
   <!-- Boot watchdog — last-resort recovery from a wedged service worker / bad
        cache that leaves the app stuck on the splash. Runs independently of
@@ -364,6 +364,13 @@
       <!-- Current instruction (top) -->
       <div class="nav-instruction-bar">
         <div class="nav-arrow-wrap" id="nav-arrow-wrap">
+          <!-- Compass (departure steps): frame rotates with the map so N tracks
+               true north; the needle points at the real travel bearing. -->
+          <div class="nav-compass" id="nav-compass">
+            <span class="nav-compass-n">N</span>
+            <span class="nav-compass-needle" id="nav-compass-needle">↑</span>
+          </div>
+          <!-- Fixed glyph for turn steps -->
           <div class="nav-arrow-icon" id="nav-arrow-icon">↑</div>
         </div>
         <div class="nav-instruction-main">
@@ -458,6 +465,6 @@
   <script src="js/search.js?v=53"></script>
   <script src="js/routing.js?v=49"></script>
   <script src="js/landmarks-3d.js?v=54" defer></script>
-  <script src="js/app.js?v=80"></script>
+  <script src="js/app.js?v=81"></script>
 </body>
 </html>

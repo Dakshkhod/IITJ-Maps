@@ -3648,27 +3648,41 @@ function updateNavInstruction(distToNextTurn) {
   _updateNavArrowHeading();
 }
 
-// Compass arrow. For the "Head <compass>" departure step the banner arrow points
-// at the named compass bearing in a fixed north-up frame — so it visibly matches
-// the words: north → up, east → right, northwest → up-left — independent of how
-// the map is rotated. Turn steps keep their fixed glyph.
-let _navArrowAngle = 0;   // continuous (unwrapped) angle so it never spin-flips
+// Compass for the "Head <compass>" departure step. Two coordinated rotations
+// give us both behaviours at once:
+//   • The frame spins with the map (rotate −mapBearing) so the "N" tick always
+//     points at true north — while navigating (map follows heading) it visibly
+//     turns in real time as you move/rotate.
+//   • The needle points at the true travel bearing (frame-north + instr.bearing),
+//     so it always matches the word ("northwest" reads as up-left on a north-up
+//     map, and stays pinned to real northwest as the frame spins).
+// Turn steps keep their fixed directional glyph.
+let _navCompassAngle = 0;   // continuous (unwrapped) frame angle — never spin-flips
 function _updateNavArrowHeading() {
-  const iconEl = document.getElementById('nav-arrow-icon');
-  if (!iconEl) return;
-  const wrap  = document.getElementById('nav-arrow-wrap');
+  const wrap = document.getElementById('nav-arrow-wrap');
+  if (!wrap) return;
   const instr = currentRoute?.instructions?.[navInstructionIndex];
   const live  = navigationActive && instr && instr.type === 'depart' && instr.bearing != null;
   if (!live) {
-    iconEl.style.transform = '';
-    wrap?.classList.remove('nav-arrow-live');
+    wrap.classList.remove('compass-mode', 'nav-arrow-live');
     return;
   }
-  // Step by the shortest signed delta to keep the CSS transition on the short arc.
-  const delta = (((instr.bearing - _navArrowAngle) % 360) + 540) % 360 - 180;
-  _navArrowAngle += delta;
-  iconEl.style.transform = `rotate(${_navArrowAngle}deg)`;
-  wrap?.classList.add('nav-arrow-live');
+  // Bind a one-time map-rotate listener so the frame tracks as the camera turns.
+  if (map && !map._navArrowRotateBound) {
+    map._navArrowRotateBound = true;
+    map.on('rotate', _updateNavArrowHeading);
+  }
+  wrap.classList.add('compass-mode', 'nav-arrow-live');
+
+  // Frame: rotate opposite the map so N stays on true north. Step by the shortest
+  // signed delta so the CSS transition takes the short arc across the 0/360 seam.
+  const targetFrame = -(map ? map.getBearing() : 0);
+  const delta = (((targetFrame - _navCompassAngle) % 360) + 540) % 360 - 180;
+  _navCompassAngle += delta;
+  document.getElementById('nav-compass').style.transform = `rotate(${_navCompassAngle}deg)`;
+
+  // Needle: travel bearing within the (already north-aligned) frame.
+  document.getElementById('nav-compass-needle').style.transform = `rotate(${instr.bearing}deg)`;
 }
 
 // ============================================================
