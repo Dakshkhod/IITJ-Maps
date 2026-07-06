@@ -25,9 +25,10 @@
 (function () {
   'use strict';
 
-  // v2: tier indices changed (3-tier → 4-tier gradient), so old persisted
-  // maxTier values would mean the wrong tier — start fresh under a new key.
-  var STORE_KEY = 'iitj_perf_v2';
+  // v3: models are now draw-call-merged on every model tier (much cheaper), so
+  // any tier a device got demoted to under the old, heavier scheme is stale —
+  // start fresh so capable phones re-detect instead of being stuck low.
+  var STORE_KEY = 'iitj_perf_v3';
 
   function loadStore() {
     try { return JSON.parse(localStorage.getItem(STORE_KEY)) || {}; }
@@ -105,12 +106,15 @@
     }
 
     // GPU masked/unavailable → lean cautiously on memory + cores. We never
-    // reach `high` here (can't confirm the GPU), and keep models where plausible.
+    // reach `high` here (can't confirm the GPU). Since the models are now
+    // draw-call-merged (cheap), a phone that looks capable gets the LIGHTER
+    // model set (reduced) rather than plain boxes — the watchdog drops it to
+    // low only if it actually can't cope.
     if (isMobile) {
-      if (mem && mem <= 3) return TIER_LOW;
-      if (cores && cores <= 4) return TIER_LOW;
+      if (mem && mem <= 2) return TIER_LOW;             // clearly low-RAM
+      if (cores && cores <= 4) return TIER_LOW;         // few cores
       if (!mem && !cores) return TIER_LOW;              // truly unknown → play it safe
-      if (mem && mem >= 6 && cores >= 8) return TIER_REDUCED;  // capable-ish, keep models
+      if (cores >= 6 || (mem && mem >= 4)) return TIER_REDUCED;  // capable-ish → merged models
       return TIER_LOW;
     }
     return TIER_HIGH;  // desktop/laptop with a masked GPU → assume capable
@@ -180,25 +184,27 @@
     },
     { // 2 — balanced  (capable mid-range: Nord CE5, Mali-G615/G6xx, Adreno 64x+)
       // Small cut only: no MSAA, no glow layer — but the FULL detailed 3D
-      // models at near-native resolution, so it still looks rich.
+      // models (draw-call-merged, so cheap) at near-native resolution.
       name: 'balanced',
       pixelRatio: Math.min(dpr, 2),
       antialias: false,
       buildingGlow: false,
       landmarkModels: true,
-      mergeModels: false,
+      mergeModels: true,       // identical look, ~95% fewer draw calls
       berms: true,
       vegetationDensity: 0.8,
       maxPitch: 60,
       prewarm3D: true,
     },
     { // 3 — high  (flagships, tablets, desktop) — the complete scene
+      // Merge is a pure win (identical geometry, far fewer draw calls), so even
+      // flagships use it — leaves headroom for antialiasing + glow.
       name: 'high',
       pixelRatio: Math.min(dpr, 2),
       antialias: true,
       buildingGlow: true,
       landmarkModels: true,
-      mergeModels: false,
+      mergeModels: true,
       berms: true,
       vegetationDensity: 1,
       maxPitch: 60,
