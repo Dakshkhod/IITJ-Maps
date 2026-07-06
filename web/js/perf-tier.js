@@ -25,7 +25,9 @@
 (function () {
   'use strict';
 
-  var STORE_KEY = 'iitj_perf_v1';
+  // v2: tier indices changed (3-tier → 4-tier gradient), so old persisted
+  // maxTier values would mean the wrong tier — start fresh under a new key.
+  var STORE_KEY = 'iitj_perf_v2';
 
   function loadStore() {
     try { return JSON.parse(localStorage.getItem(STORE_KEY)) || {}; }
@@ -58,7 +60,12 @@
   var gpu   = gpuRenderer();
   var gpuLc = gpu.toLowerCase();
 
-  // ── Classify → 0 low / 1 balanced / 2 high ────────────────────────────
+  // ── Classify → 0 low / 1 reduced / 2 balanced / 3 high ─────────────────
+  // Four tiers so quality lowers GRADUALLY: each step down cuts only what's
+  // needed for smoothness at that level (see TIERS). Crucially, only the LOWEST
+  // tier drops the detailed Three.js models — mid-range phones keep them.
+  var TIER_HIGH = 3, TIER_BALANCED = 2, TIER_REDUCED = 1, TIER_LOW = 0;
+
   function classify() {
     var coarse = window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
     var isMobile = coarse || /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent || '');
@@ -67,42 +74,40 @@
     // proxies for rendering power (plenty of mid-range phones ship 6–8 GB and
     // 8 cores behind a weak GPU). RAM/cores are only a fallback for masked GPUs.
     if (gpuLc) {
-      // ── Known-STRONG → high ──
+      // ── Known-STRONG → high (full detailed scene) ──
       //   Apple GPUs; Adreno 7xx/8xx (2022+ flagships); Mali-G7xx *three-digit*
-      //   (G710/G715/G720) and Immortalis; desktop discrete/integrated-modern.
-      //   NOTE: Mali-G76/G77/G78 are TWO digits after "g7" — deliberately NOT
-      //   matched here (they're 2019–20 upper-mid parts, e.g. Realme 6's G76),
-      //   so they fall through to "balanced" instead of being over-promoted.
-      if (/apple gpu|apple m\d/.test(gpuLc)) return 2;
-      if (/adreno[^\d]*(7\d\d|8\d\d)\b/.test(gpuLc)) return 2;
-      if (/mali-g7\d\d|immortalis/.test(gpuLc)) return 2;
-      if (!isMobile && /nvidia|geforce|radeon|intel.*(arc|iris)/.test(gpuLc)) return 2;
+      //   (G710/G715/G720) and Immortalis; desktop discrete/modern integrated.
+      if (/apple gpu|apple m\d/.test(gpuLc)) return TIER_HIGH;
+      if (/adreno[^\d]*(7\d\d|8\d\d)\b/.test(gpuLc)) return TIER_HIGH;
+      if (/mali-g7\d\d|immortalis/.test(gpuLc)) return TIER_HIGH;
+      if (!isMobile && /nvidia|geforce|radeon|intel.*(arc|iris)/.test(gpuLc)) return TIER_HIGH;
 
-      // ── Known-WEAK → low ──
-      //   Budget Mali (T-series, G31/G5x), entry Adreno (3xx–5xx, 60x/61x),
-      //   PowerVR, software rasterisers.
+      // ── Known-WEAK → low (simplified 3D, no Three.js models) ──
+      //   Budget Mali (T-series, G31/G5x, e.g. Galaxy M32's G52), entry Adreno
+      //   (3xx–5xx, 60x/61x), PowerVR, software rasterisers.
       var weakGpu =
         /mali-(4\d\d|t\d{3}|g3\d|g5\d)\b/.test(gpuLc) ||
         /adreno[^\d]*(3\d\d|4\d\d|5\d\d|60\d|61\d)\b/.test(gpuLc) ||
         /powervr|videocore|swiftshader|llvmpipe|software/.test(gpuLc);
-      if (weakGpu) return 0;
+      if (weakGpu) return TIER_LOW;
 
-      // Known but unrecognised (e.g. Mali-G76/G77, Adreno 620/640/650):
-      // mid-range on mobile, capable on desktop. Never jumped to high via specs.
-      return isMobile ? 1 : 2;
+      // Known but unrecognised (mid-range: Mali-G6xx/G76/G77, Adreno 62x–66x,
+      // etc. — e.g. Nord CE5's Mali-G615, Realme 6's G76). Keep the full models
+      // with only a small cut (balanced). The watchdog steps a specific phone
+      // down further (→ reduced → low) if it can't sustain it.
+      return isMobile ? TIER_BALANCED : TIER_HIGH;
     }
 
     // GPU masked/unavailable → lean cautiously on memory + cores. We never
-    // reach `high` here (can't confirm the GPU), only low ↔ balanced.
+    // reach `high` here (can't confirm the GPU), and keep models where plausible.
     if (isMobile) {
-      if (mem && mem <= 3) return 0;
-      if (cores && cores <= 4) return 0;
-      if (!mem && !cores) return 0;         // truly unknown mobile → play it safe
-      if (mem && mem >= 8 && cores >= 8) return 1;
-      return 0;                             // masked mid Android → start low, let
-                                            // the watchdog promote-by-not-demoting
+      if (mem && mem <= 3) return TIER_LOW;
+      if (cores && cores <= 4) return TIER_LOW;
+      if (!mem && !cores) return TIER_LOW;              // truly unknown → play it safe
+      if (mem && mem >= 6 && cores >= 8) return TIER_REDUCED;  // capable-ish, keep models
+      return TIER_LOW;
     }
-    return 2;  // desktop/laptop with a masked GPU → assume capable
+    return TIER_HIGH;  // desktop/laptop with a masked GPU → assume capable
   }
 
   var detected = classify();
@@ -111,18 +116,26 @@
   var store = loadStore();
   var tier = detected;
   if (typeof store.maxTier === 'number') tier = Math.min(tier, store.maxTier);
-  tier = Math.max(0, Math.min(2, tier));
+  tier = Math.max(0, Math.min(3, tier));
 
-  // ── Per-tier settings ─────────────────────────────────────────────────
-  // `landmarkModels` is the big one: only flagship-class devices load the
-  // detailed Three.js procedural buildings. Everyone else gets "simplified 3D"
-  // — the cheap MapLibre extruded footprints (real building shapes with height,
-  // just no ornate geometry) + instanced trees. `prewarm3D:false` means we do
-  // NOT build/upload the 3D scene in the background on lower phones (that
-  // background GPU upload is what caused the ~3s stutter after load); those
-  // devices build 3D lazily, only when the user actually taps the 3D button.
+  // ── Per-tier settings — a GRADUAL quality gradient ─────────────────────
+  // Each step down cuts only what's necessary for smoothness at that level,
+  // cheapest-visual-impact first:
+  //   high     → full detailed scene (flagships).
+  //   balanced → small cut: drop antialiasing (MSAA is costly on mobile GPUs)
+  //              and the doubled glow layer. KEEPS the detailed 3D models,
+  //              near-native resolution, full-ish trees. (Capable mid-range,
+  //              e.g. OnePlus Nord CE5.)
+  //   reduced  → medium cut: lower resolution + fewer trees. STILL keeps the
+  //              detailed models. (Weaker mid-range / older phones.)
+  //   low      → reasonable cut: the simplified, non-Three.js version — cheap
+  //              MapLibre extruded building boxes instead of models, no berms,
+  //              sparse trees, no background prewarm. (Weak GPUs, e.g. M32.)
+  // The FPS watchdog moves a phone down one notch at a time until it's smooth,
+  // so the model-dropping "low" tier is only reached by devices that truly
+  // need it — mid-range phones keep the full 3D buildings.
   var TIERS = [
-    { // 0 — low  (budget Androids: Galaxy M/A, Redmi, Realme entry, etc.)
+    { // 0 — low  (weak GPUs: Mali-G52/T-series, entry Adreno, PowerVR)
       name: 'low',
       pixelRatio: Math.min(dpr, 1.5),   // sharp enough without shading full native
       antialias: false,
@@ -133,23 +146,31 @@
       maxPitch: 52,
       prewarm3D: false,
     },
-    { // 1 — balanced (mid-range phones: Mali-G76/G77, Adreno 6xx mid, etc.)
-      // Antialiasing is OFF (MSAA is a big cost on Mali/Adreno mid GPUs) and the
-      // heavy Three.js models are skipped in favour of simplified extruded
-      // buildings, so these phones stay smooth in 3D. Trees + berms remain.
-      name: 'balanced',
-      // Now that the heavy models + MSAA are gone, there's headroom to render
-      // crisp again — near-native resolution so the map isn't soft/blurry.
-      pixelRatio: Math.min(dpr, 2),
+    { // 1 — reduced  (weaker mid-range — keeps models, trims resolution/trees)
+      name: 'reduced',
+      pixelRatio: Math.min(dpr, 1.6),
       antialias: false,
       buildingGlow: false,
-      landmarkModels: false,   // simplified 3D — extruded boxes, no models
+      landmarkModels: true,    // full detailed models retained
       berms: true,
       vegetationDensity: 0.55,
       maxPitch: 58,
-      prewarm3D: false,
+      prewarm3D: true,
     },
-    { // 2 — high (flagships, tablets, desktop) — full detailed 3D scene
+    { // 2 — balanced  (capable mid-range: Nord CE5, Mali-G6xx, Adreno 62x–66x)
+      // Small cut only: no MSAA, no glow layer — but the FULL detailed 3D
+      // models at near-native resolution, so it still looks rich.
+      name: 'balanced',
+      pixelRatio: Math.min(dpr, 2),
+      antialias: false,
+      buildingGlow: false,
+      landmarkModels: true,
+      berms: true,
+      vegetationDensity: 0.8,
+      maxPitch: 60,
+      prewarm3D: true,
+    },
+    { // 3 — high  (flagships, tablets, desktop) — the complete scene
       name: 'high',
       pixelRatio: Math.min(dpr, 2),
       antialias: true,
@@ -242,7 +263,7 @@
     // Persist so next load boots here and applies the full lighter profile
     // (AA / models / glow), which live setPixelRatio alone can't change.
     var s = loadStore();
-    s.maxTier = Math.min(typeof s.maxTier === 'number' ? s.maxTier : 2, t);
+    s.maxTier = Math.min(typeof s.maxTier === 'number' ? s.maxTier : 3, t);
     saveStore(s);
     try {
       map.fire('perf-tier-change', { tier: t, tierName: PerfTier.tierName });
