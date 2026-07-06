@@ -3716,6 +3716,11 @@ function startImmersiveNavigation() {
   navigationActive = true;
   immersiveNav     = true;
 
+  // Re-render the instruction now that navigationActive is true, so the compass
+  // switches on immediately (on desktop / before the first GPS fix there's no
+  // _navTick to do it, and the preview render happened while nav was inactive).
+  updateNavInstruction(currentRoute.instructions?.[0]?.distance ?? null);
+
   // Re-evaluate route + directions markers now that navigationActive flipped
   // (so the duplicate-suppression in updateDirectionsMarkers/_addRouteMarkers
   // takes effect).
