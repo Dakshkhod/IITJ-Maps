@@ -91,10 +91,16 @@
         /powervr|videocore|swiftshader|llvmpipe|software/.test(gpuLc);
       if (weakGpu) return TIER_LOW;
 
-      // Known but unrecognised (mid-range: Mali-G6xx/G76/G77, Adreno 62x–66x,
-      // etc. — e.g. Nord CE5's Mali-G615, Realme 6's G76). Keep the full models
-      // with only a small cut (balanced). The watchdog steps a specific phone
-      // down further (→ reduced → low) if it can't sustain it.
+      // Older upper-mid Mali (G76/G77/G78, ~2019–20, e.g. Realme 6) and
+      // older-mid Adreno (620–639) → reduced: the lighter (draw-call-merged)
+      // model set at trimmed resolution, so they're smooth but still show the
+      // real 3D buildings rather than plain boxes.
+      if (/mali-g7[678]\b/.test(gpuLc)) return TIER_REDUCED;
+      if (/adreno[^\d]*6[23]\d\b/.test(gpuLc)) return TIER_REDUCED;
+
+      // Newer/unrecognised mid-range (Mali-G6xx e.g. Nord CE5's G615, Adreno
+      // 640/650/66x): full models with only a small cut (balanced). The
+      // watchdog steps a specific phone down further if it can't sustain it.
       return isMobile ? TIER_BALANCED : TIER_HIGH;
     }
 
@@ -110,12 +116,21 @@
     return TIER_HIGH;  // desktop/laptop with a masked GPU → assume capable
   }
 
-  var detected = classify();
+  // Debug/support override: localStorage.iitj_perf_force = 0..3 pins the tier
+  // (bypasses detection AND the watchdog's persisted cap). Handy for testing a
+  // specific tier on any device; unset to return to automatic.
+  var forced = null;
+  try {
+    var f = localStorage.getItem('iitj_perf_force');
+    if (f != null && f !== '') forced = Math.max(0, Math.min(3, parseInt(f, 10) || 0));
+  } catch (e) {}
+
+  var detected = (forced != null) ? forced : classify();
 
   // Never boot HIGHER than a tier this device has previously measured slow at.
   var store = loadStore();
   var tier = detected;
-  if (typeof store.maxTier === 'number') tier = Math.min(tier, store.maxTier);
+  if (forced == null && typeof store.maxTier === 'number') tier = Math.min(tier, store.maxTier);
   tier = Math.max(0, Math.min(3, tier));
 
   // ── Per-tier settings — a GRADUAL quality gradient ─────────────────────
@@ -141,23 +156,29 @@
       antialias: false,
       buildingGlow: false,
       landmarkModels: false,   // simplified 3D — extruded boxes, no models
+      mergeModels: false,
       berms: false,
       vegetationDensity: 0.35,
       maxPitch: 52,
       prewarm3D: false,
     },
-    { // 1 — reduced  (weaker mid-range — keeps models, trims resolution/trees)
+    { // 1 — reduced  (weaker mid-range — the LIGHTER Three.js model set)
+      // Keeps the real 3D buildings but merges each one's hundreds of little
+      // meshes into a few draw calls (mergeModels), which is the main cost on
+      // these GPUs. Trimmed resolution + fewer trees, and built lazily on first
+      // 3D tap (no background upload → no load-time stutter).
       name: 'reduced',
-      pixelRatio: Math.min(dpr, 1.6),
+      pixelRatio: Math.min(dpr, 1.5),
       antialias: false,
       buildingGlow: false,
-      landmarkModels: true,    // full detailed models retained
+      landmarkModels: true,
+      mergeModels: true,       // ← the "lighter Three.js version"
       berms: true,
-      vegetationDensity: 0.55,
-      maxPitch: 58,
-      prewarm3D: true,
+      vegetationDensity: 0.5,
+      maxPitch: 56,
+      prewarm3D: false,
     },
-    { // 2 — balanced  (capable mid-range: Nord CE5, Mali-G6xx, Adreno 62x–66x)
+    { // 2 — balanced  (capable mid-range: Nord CE5, Mali-G615/G6xx, Adreno 64x+)
       // Small cut only: no MSAA, no glow layer — but the FULL detailed 3D
       // models at near-native resolution, so it still looks rich.
       name: 'balanced',
@@ -165,6 +186,7 @@
       antialias: false,
       buildingGlow: false,
       landmarkModels: true,
+      mergeModels: false,
       berms: true,
       vegetationDensity: 0.8,
       maxPitch: 60,
@@ -176,6 +198,7 @@
       antialias: true,
       buildingGlow: true,
       landmarkModels: true,
+      mergeModels: false,
       berms: true,
       vegetationDensity: 1,
       maxPitch: 60,
@@ -191,6 +214,7 @@
     PerfTier.antialias = c.antialias;
     PerfTier.buildingGlow = c.buildingGlow;
     PerfTier.landmarkModels = c.landmarkModels;
+    PerfTier.mergeModels = c.mergeModels;
     PerfTier.berms = c.berms;
     PerfTier.vegetationDensity = c.vegetationDensity;
     PerfTier.maxPitch = c.maxPitch;

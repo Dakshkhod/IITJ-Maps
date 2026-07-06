@@ -6381,6 +6381,75 @@ var Landmarks3D = (() => {
     if (_map) _map.triggerRepaint();
   }
 
+  // ── Lighter Three.js models (mergeModels tier) ──────────────────────────
+  // The procedural builders emit each building as HUNDREDS of tiny meshes
+  // (windows, slats, cornices…) — hundreds of separate draw calls, which is the
+  // dominant cost on weaker mobile GPUs. Since the scene is static and every
+  // material is an untextured MeshStandardMaterial, we can bake each mesh's
+  // transform into its geometry and concatenate all meshes that share a
+  // material into ONE geometry — identical look, a handful of draw calls per
+  // building. Done PER landmark group so per-landmark fade/highlight (which
+  // traverse a group's meshes) keep working. InstancedMeshes are left as-is.
+  function _concatGeoms(geoms) {
+    if (geoms.length === 1) return geoms[0];
+    let n = 0;
+    for (const g of geoms) n += g.attributes.position.count;
+    const pos = new Float32Array(n * 3), nor = new Float32Array(n * 3);
+    let o = 0;
+    for (const g of geoms) {
+      pos.set(g.attributes.position.array, o * 3);
+      nor.set(g.attributes.normal.array, o * 3);
+      o += g.attributes.position.count;
+      if (g.dispose) g.dispose();
+    }
+    const merged = new THREE.BufferGeometry();
+    merged.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+    merged.setAttribute('normal', new THREE.BufferAttribute(nor, 3));
+    return merged;
+  }
+
+  function _mergeGroupGeometry(group) {
+    if (!group || typeof THREE === 'undefined') return;
+    group.updateMatrixWorld(true);
+    const invRoot = new THREE.Matrix4().copy(group.matrixWorld).invert();
+    const tmp = new THREE.Matrix4();
+    const buckets = new Map();     // material -> [baked geometry, …]
+    const instanced = [];
+    group.traverse((o) => {
+      if (o === group) return;
+      if (o.isInstancedMesh) { instanced.push(o); return; }
+      if (o.isMesh && o.geometry && o.material && !Array.isArray(o.material)) {
+        const src = o.geometry.index ? o.geometry.toNonIndexed() : o.geometry;
+        const g = new THREE.BufferGeometry();
+        g.setAttribute('position', src.attributes.position.clone());
+        if (src.attributes.normal) g.setAttribute('normal', src.attributes.normal.clone());
+        else g.computeVertexNormals();
+        if (o.geometry.index && src.dispose) src.dispose();   // toNonIndexed() temp
+        tmp.copy(invRoot).multiply(o.matrixWorld);
+        g.applyMatrix4(tmp);       // transforms position + normal into group space
+        const key = o.material;
+        if (!buckets.has(key)) buckets.set(key, []);
+        buckets.get(key).push(g);
+      }
+    });
+    if (!buckets.size && !instanced.length) return;
+    const savedInst = instanced.map((im) => {
+      tmp.copy(invRoot).multiply(im.matrixWorld);
+      return { im, mtx: tmp.clone() };
+    });
+    group.clear();
+    buckets.forEach((geoms, material) => {
+      const mesh = new THREE.Mesh(_concatGeoms(geoms), material);
+      mesh.frustumCulled = false;
+      group.add(mesh);
+    });
+    savedInst.forEach(({ im, mtx }) => {
+      mtx.decompose(im.position, im.quaternion, im.scale);
+      im.matrixAutoUpdate = true;
+      group.add(im);
+    });
+  }
+
   function _addLandmark(cfg, originMc) {
     const group = new THREE.Group();
     // Bearing rotates around mesh-Y (= world vertical after Rx flip)
@@ -6419,6 +6488,9 @@ var Landmarks3D = (() => {
       root.position.set(-center.x * s, -bbox.min.y * s, -center.z * s);
       if (cfg.yOffsetMeters) root.position.y += cfg.yOffsetMeters;
       group.add(root);
+      // On the "lighter" tiers, collapse this building's many meshes into a few
+      // merged draw calls (see _mergeGroupGeometry). Same look, far cheaper.
+      if (window.PerfTier && PerfTier.mergeModels) _mergeGroupGeometry(group);
     };
 
     if (cfg.format === 'procedural') {
@@ -7067,10 +7139,34 @@ var Landmarks3D = (() => {
     if (_map) _map.triggerRepaint();
   }
 
+  // Lightweight scene stats — mesh/draw-call count, triangles and bounds.
+  // Used to sanity-check the model merge (triangles + bounds must be preserved
+  // while mesh count drops sharply); handy for support too.
+  function _debugSceneStats() {
+    if (!_root || typeof THREE === 'undefined') return null;
+    let meshes = 0, instanced = 0, tris = 0;
+    const box = new THREE.Box3();
+    _root.traverse((o) => {
+      if (o.isInstancedMesh) { instanced++; return; }
+      if (o.isMesh && o.geometry && o.geometry.attributes.position) {
+        meshes++;
+        box.expandByObject(o);
+        const g = o.geometry;
+        tris += (g.index ? g.index.count : g.attributes.position.count) / 3;
+      }
+    });
+    const c = box.isEmpty() ? { x: 0, y: 0, z: 0 } : box.getCenter(new THREE.Vector3());
+    const s = box.isEmpty() ? { x: 0, y: 0, z: 0 } : box.getSize(new THREE.Vector3());
+    const r = (v) => Math.round(v * 100) / 100;
+    return { meshes, instanced, triangles: Math.round(tris),
+      bbox: { cx: r(c.x), cy: r(c.y), cz: r(c.z), sx: r(s.x), sy: r(s.y), sz: r(s.z) } };
+  }
+
   return {
     init, load, show, hide, isVisible, listIds, replacedBuildingIds, setOpacity, getLandmarks,
     getLabelGeoJSON, landmarkLabelNames, labelLayerId: () => LABEL_LAYER_ID,
     syncLabels, syncSceneLighting, raise: _raise, prewarm,
     setCategoryHighlight, pulseCategoryHighlight, clearCategoryHighlight,
+    _debugSceneStats,
   };
 })();
