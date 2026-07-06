@@ -3648,12 +3648,10 @@ function updateNavInstruction(distToNextTurn) {
   _updateNavArrowHeading();
 }
 
-// Live compass arrow. For the "Head <compass>" departure step the banner arrow
-// points at the true travel bearing as it appears on the *currently displayed
-// map*: on a north-up map "Head west" points left; while navigating (the map
-// rotates to your heading) it swings toward straight-up as you face the way to
-// go. Referenced against the map bearing — which is always defined — so it works
-// even before any compass/GPS heading is available. Turn steps keep their glyph.
+// Compass arrow. For the "Head <compass>" departure step the banner arrow points
+// at the named compass bearing in a fixed north-up frame — so it visibly matches
+// the words: north → up, east → right, northwest → up-left — independent of how
+// the map is rotated. Turn steps keep their fixed glyph.
 let _navArrowAngle = 0;   // continuous (unwrapped) angle so it never spin-flips
 function _updateNavArrowHeading() {
   const iconEl = document.getElementById('nav-arrow-icon');
@@ -3666,14 +3664,8 @@ function _updateNavArrowHeading() {
     wrap?.classList.remove('nav-arrow-live');
     return;
   }
-  // Bind a one-time map-rotate listener so the arrow tracks as the camera turns.
-  if (map && !map._navArrowRotateBound) {
-    map._navArrowRotateBound = true;
-    map.on('rotate', _updateNavArrowHeading);
-  }
-  const target = instr.bearing - (map ? map.getBearing() : 0);
   // Step by the shortest signed delta to keep the CSS transition on the short arc.
-  const delta = (((target - _navArrowAngle) % 360) + 540) % 360 - 180;
+  const delta = (((instr.bearing - _navArrowAngle) % 360) + 540) % 360 - 180;
   _navArrowAngle += delta;
   iconEl.style.transform = `rotate(${_navArrowAngle}deg)`;
   wrap?.classList.add('nav-arrow-live');
