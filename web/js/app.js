@@ -266,7 +266,7 @@ function bermLayerVisible() {
 }
 
 function buildingOutlineOpacity() {
-  if (isSatellite) return 0.9;
+  if (isSatellite) return 0.15;
   return 1;
 }
 
@@ -1793,7 +1793,7 @@ function addBuildingsLayer(data) {
     paint: {
       'line-color': buildingOutlineCasingColor(),
       'line-width': buildingOutlineCasingWidth(),
-      'line-opacity': isSatellite ? 0.55 : (isDark ? 0.75 : 0.75),
+      'line-opacity': isSatellite ? 0.12 : (isDark ? 0.75 : 0.75),
     }
   });
 
