@@ -206,6 +206,9 @@ function buildingOutlineColor() {
 }
 
 function buildingGlowLayerVisible() {
+  // The glow layer re-draws every building extrusion a second time; skip it on
+  // low-tier devices (perf-tier.js) where that doubled overdraw isn't affordable.
+  if (window.PerfTier && !PerfTier.buildingGlow) return false;
   return isDark && is3D && LAYERS.buildings && !isSatellite;
 }
 
@@ -640,6 +643,11 @@ async function init() {
 
   registerSatelliteOffsetProtocol();
 
+  // Device-adaptive rendering: cap the render resolution (and pitch) per the
+  // detected graphics tier so budget phones don't try to shade millions of
+  // extra pixels. Falls back to sensible defaults if perf-tier.js didn't load.
+  const _perf = window.PerfTier || { pixelRatio: Math.min(window.devicePixelRatio || 1, 2), maxPitch: 60 };
+
   map = new maplibregl.Map({
     container: 'map',
     style: getMapStyle(),
@@ -648,6 +656,8 @@ async function init() {
     maxBounds: CAMPUS_BOUNDS,
     minZoom: 13,
     maxZoom: 19,
+    maxPitch: _perf.maxPitch,
+    pixelRatio: _perf.pixelRatio,
     pitch: 0,
     bearing: 0,
     attributionControl: false,
@@ -681,6 +691,10 @@ async function init() {
   map.on('pitchstart', _exitFollowOnGesture);
 
   map.on('error', (e) => console.error('MapLibre error:', e.error?.message || e));
+
+  if (window.PerfTier && typeof PerfTier.attachWatchdog === 'function') {
+    PerfTier.attachWatchdog(map);
+  }
 
   map.on('load', async () => {
     await loadMapData();

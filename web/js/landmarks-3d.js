@@ -5609,6 +5609,13 @@ var Landmarks3D = (() => {
   // across slices/frames, so a landmark is never built twice or skipped.
   function _buildLandmarkChunk(count) {
     if (!_sceneShellReady) _initSceneShell();
+    // Low-tier devices (perf-tier.js) get "simplified 3D": the cheap MapLibre
+    // extruded building boxes + a light dusting of trees, but NOT the heavy
+    // per-building Three.js procedural models. Skip straight to finalize.
+    if (window.PerfTier && !PerfTier.landmarkModels) {
+      _buildIndex = LANDMARKS.length;
+      return false;
+    }
     const end = Math.min(_buildIndex + count, LANDMARKS.length);
     for (; _buildIndex < end; _buildIndex++) _addLandmark(LANDMARKS[_buildIndex], _originMc);
     return _buildIndex < LANDMARKS.length;
@@ -5620,8 +5627,9 @@ var Landmarks3D = (() => {
     // OSM-driven instanced trees (data may already be loaded; otherwise the
     // fetch in init() will call _buildVegetation() when it resolves).
     _buildVegetation();
-    // Perimeter berms — hardcoded geometry.
-    _buildBerms();
+    // Perimeter berms — hardcoded geometry. Skipped on low-tier devices
+    // (perf-tier.js) since they're a chunk of custom geometry + draw calls.
+    if (!window.PerfTier || PerfTier.berms) _buildBerms();
     // If setOpacity was called before the scene existed, apply it now.
     if (_targetOpacity < 0.999) _applyOpacity(_targetOpacity, _targetIds);
     _sceneComplete = true;
@@ -6073,7 +6081,8 @@ var Landmarks3D = (() => {
     const g = new THREE.Group();
     const { at, total } = _polyWalker(localPath);
     const cc = ref || _lngLatToLocal(_CAMPUS_CENTER[0], _CAMPUS_CENTER[1]);
-    const nTree  = Math.max(6, Math.round(total / (density || 7)));
+    let nTree  = Math.max(6, Math.round(total / (density || 7)));
+    if (window.PerfTier) nTree = Math.max(4, PerfTier.veg(nTree));
     const nShrub = nTree * 5;
     let seed = 0x51ab3c7d;
     const rnd = () => { seed = (seed*1664525 + 1013904223) >>> 0; return seed/4294967296; };
@@ -6319,9 +6328,14 @@ var Landmarks3D = (() => {
     const m = new THREE.Matrix4(), q = new THREE.Quaternion();
     const up = new THREE.Vector3(0, 1, 0), sv = new THREE.Vector3(), pv = new THREE.Vector3();
 
+    // Instanced-tree density scales with the device tier (perf-tier.js): budget
+    // phones plant a light dusting, flagships the full baked set. Positions are
+    // uniformly scattered in the baked file, so taking the first N thins evenly.
+    const _vegN = (n) => (window.PerfTier ? PerfTier.veg(n) : n);
+
     // ── Full trees: trunk + icosahedron canopy ──
     const full = _treeData.full || [];
-    const nFull = full.length >> 1;
+    const nFull = _vegN(full.length >> 1);
     if (nFull) {
       const trunkGeo = new THREE.CylinderGeometry(0.12, 0.2, 1.5, 5); trunkGeo.translate(0, 0.75, 0);
       const folGeo   = new THREE.IcosahedronGeometry(1.55, 0);        folGeo.translate(0, 2.45, 0);
@@ -6344,7 +6358,7 @@ var Landmarks3D = (() => {
 
     // ── Scrub bushes: low rounded shrubs, no trunk ──
     const bush = _treeData.bush || [];
-    const nBush = bush.length >> 1;
+    const nBush = _vegN(bush.length >> 1);
     if (nBush) {
       const bGeo = new THREE.IcosahedronGeometry(1.0, 0); bGeo.translate(0, 0.6, 0);
       const bMesh = new THREE.InstancedMesh(bGeo, MAT.canopy, nBush);
@@ -6436,7 +6450,10 @@ var Landmarks3D = (() => {
         // (e.g. after a WebGL context-loss/restore). Creating a second
         // renderer on a live context is what previously blanked the layer.
         if (!_renderer || _rendererGl !== gl) {
-          _renderer = new THREE.WebGLRenderer({ canvas: map.getCanvas(), context: gl, antialias: true });
+          // Antialiasing (MSAA) is a heavy cost on budget mobile GPUs, so the
+          // device tier (perf-tier.js) decides whether we ask for it.
+          const _aa = window.PerfTier ? PerfTier.antialias : true;
+          _renderer = new THREE.WebGLRenderer({ canvas: map.getCanvas(), context: gl, antialias: _aa });
           _renderer.autoClear = false;
           _rendererGl = gl;
         }
