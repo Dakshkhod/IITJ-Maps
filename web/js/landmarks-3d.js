@@ -6951,50 +6951,60 @@ var Landmarks3D = (() => {
   function isVisible() { return _visible; }
   function listIds() { return [LAYER_ID, LABEL_LAYER_ID]; }
 
-  // Per-group fade: materials are shared across many landmarks (the
-  // sandstone palette is reused everywhere), so to fade one landmark
-  // without touching the others we clone its meshes' materials on first
-  // fade and swap them back to the original on restore. The clones live in
-  // group.userData.fadeOriginals so this remains idempotent.
-  function _fadeGroup(group, opacity) {
-    const transparent = opacity < 0.999;
-
-    if (!transparent) {
-      // Restore originals
-      const origs = group.userData.fadeOriginals;
-      if (origs) {
-        origs.forEach(({ mesh, material }) => { mesh.material = material; });
-        delete group.userData.fadeOriginals;
-      }
-      return;
-    }
-
-    if (!group.userData.fadeOriginals) {
-      const origs = [];
-      group.traverse(obj => {
-        if (!obj.isMesh || !obj.material) return;
-        const apply = (mat) => {
-          const clone = mat.clone();
-          clone.transparent = true;
-          clone.depthWrite = false;
-          return clone;
+  // Fade (occluder see-through) and category-highlight both need to tweak one
+  // landmark's materials without disturbing the others — but the sandstone
+  // palette is a handful of SHARED material objects reused across every
+  // building (and the per-building draw-call merge keeps that sharing). So the
+  // first time either effect touches a mesh we give it ONE private clone and
+  // snapshot its pristine visual state. Fade edits opacity/transparent/
+  // depthWrite on that clone; highlight edits emissive on the SAME clone.
+  // Because they write DISJOINT properties (and never swap the material object
+  // out) the two effects compose and each restores independently.
+  //
+  // The previous design had fade and highlight EACH swap mesh.material and
+  // stash their own "original"; interleaving them (fade during navigation +
+  // a category highlight) made one restore hand the other its stale clone,
+  // leaving buildings stuck transparent with depthWrite off — so the plain
+  // extrusion box under the model and the buildings behind it bled through,
+  // i.e. "both the custom and non-custom model showing for the same building".
+  function _ownMaterials(mesh) {
+    if (!mesh.userData._ownMat) {
+      const clone = (m) => {
+        const c = m.clone();
+        c.userData = c.userData || {};
+        c.userData._pristine = {
+          transparent: m.transparent,
+          opacity: m.opacity,
+          depthWrite: m.depthWrite,
+          emissive: m.emissive ? m.emissive.getHex() : null,
+          emissiveIntensity: m.emissiveIntensity ?? 1,
         };
-        if (Array.isArray(obj.material)) {
-          origs.push({ mesh: obj, material: obj.material });
-          obj.material = obj.material.map(apply);
-        } else {
-          origs.push({ mesh: obj, material: obj.material });
-          obj.material = apply(obj.material);
-        }
-      });
-      group.userData.fadeOriginals = origs;
+        return c;
+      };
+      mesh.material = Array.isArray(mesh.material) ? mesh.material.map(clone) : clone(mesh.material);
+      mesh.userData._ownMat = true;
     }
+    return Array.isArray(mesh.material) ? mesh.material : [mesh.material];
+  }
 
-    // Tune the clone opacity (cheap — no new allocation)
+  function _fadeGroup(group, opacity) {
+    const faded = opacity < 0.999;
     group.traverse(obj => {
       if (!obj.isMesh || !obj.material) return;
-      const list = Array.isArray(obj.material) ? obj.material : [obj.material];
-      for (const m of list) m.opacity = opacity;
+      // Nothing to restore on a mesh we never took ownership of.
+      if (!faded && !obj.userData._ownMat) return;
+      for (const m of _ownMaterials(obj)) {
+        if (faded) {
+          m.transparent = true;
+          m.depthWrite = false;
+          m.opacity = opacity;
+        } else {
+          const p = m.userData._pristine;
+          m.transparent = p.transparent;
+          m.depthWrite = p.depthWrite;
+          m.opacity = p.opacity;
+        }
+      }
     });
   }
 
@@ -7054,26 +7064,6 @@ var Landmarks3D = (() => {
   let _highlightCategoryId = null;
   let _highlightLandmarkIds = null;
 
-  function _cloneMeshMaterials(mesh) {
-    if (!mesh.material || mesh.userData._hlOrigMats) return;
-    mesh.userData._hlOrigMats = mesh.material;
-    mesh.material = Array.isArray(mesh.material)
-      ? mesh.material.map((m) => m.clone())
-      : mesh.material.clone();
-  }
-
-  function _restoreMeshMaterials(mesh) {
-    if (!mesh.userData._hlOrigMats) return;
-    mesh.material = mesh.userData._hlOrigMats;
-    delete mesh.userData._hlOrigMats;
-  }
-
-  function _restoreLandmarkEmissive(group) {
-    group.traverse((obj) => {
-      if (obj.isMesh) _restoreMeshMaterials(obj);
-    });
-  }
-
   function setCategoryHighlight(categoryId) {
     clearCategoryHighlight();
     if (!categoryId) return;
@@ -7103,20 +7093,16 @@ var Landmarks3D = (() => {
       if (!_highlightLandmarkIds.has(group.userData?.landmarkId)) return;
       group.traverse((obj) => {
         if (!obj.isMesh || !obj.material) return;
-        _cloneMeshMaterials(obj);
-        const apply = (m) => {
-          if (!m.emissive) return;
-          if (!m.userData._catSaved) {
-            m.userData._catSaved = { e: m.emissive.getHex(), i: m.emissiveIntensity ?? 1 };
-          }
+        // Edit emissive on the mesh's private clone; fade (if any) keeps
+        // editing opacity/depthWrite on the SAME clone — the two compose.
+        for (const m of _ownMaterials(obj)) {
+          if (!m.emissive) continue;
+          const base = m.userData._pristine.emissiveIntensity;
           m.emissive.setHex(colorHex);
-          const base = m.userData._catSaved.i;
           m.emissiveIntensity = high
             ? Math.max(0.38, base * 0.65 + 0.18)
             : Math.max(0.10, base * 0.28 + 0.05);
-        };
-        if (Array.isArray(obj.material)) obj.material.forEach(apply);
-        else apply(obj.material);
+        }
       });
     });
     if (_map) _map.triggerRepaint();
@@ -7125,7 +7111,19 @@ var Landmarks3D = (() => {
   function clearCategoryHighlight() {
     if (_root && _highlightLandmarkIds?.size) {
       _root.children.forEach((group) => {
-        if (_highlightLandmarkIds.has(group.userData?.landmarkId)) _restoreLandmarkEmissive(group);
+        if (!_highlightLandmarkIds.has(group.userData?.landmarkId)) return;
+        group.traverse((obj) => {
+          // Only reset emissive back to pristine; leave any active fade
+          // (opacity/depthWrite) untouched so it doesn't clobber occluder fade.
+          if (!obj.isMesh || !obj.userData._ownMat) return;
+          const list = Array.isArray(obj.material) ? obj.material : [obj.material];
+          for (const m of list) {
+            const p = m.userData?._pristine;
+            if (!m.emissive || !p) continue;
+            m.emissive.setHex(p.emissive ?? 0x000000);
+            m.emissiveIntensity = p.emissiveIntensity;
+          }
+        });
       });
     }
     _highlightCategoryId = null;
