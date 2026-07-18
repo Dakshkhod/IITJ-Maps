@@ -3097,6 +3097,17 @@ async function calculateDirectionsRoute() {
   updateDirectionsMarkers();
   updateDirectionsGoButton();
 
+  // Same start and destination → nothing to route. Catch both an identical
+  // named place ("Hostel G2" → "Hostel G2") and two picks that land on the same
+  // spot, before the router draws a degenerate loop back to the point.
+  const sameNamedPlace = !!directionsFrom.name && directionsFrom.name === directionsTo.name;
+  const sameSpot = haversine(directionsFrom.lat, directionsFrom.lng, directionsTo.lat, directionsTo.lng) < 8;
+  if (sameNamedPlace || sameSpot) {
+    if (!immersiveNav) clearRoute();   // wipe any stale route line/summary/Start
+    showToast('Start and destination are the same place', 'info');
+    return;
+  }
+
   closePlaceSheet();
   clearDirectionsPickMode();
   // A reroute during immersive nav should NOT pop the user back to the
