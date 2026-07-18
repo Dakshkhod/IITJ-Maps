@@ -589,6 +589,7 @@ let locationMarker = null;
 let locationAccuracyMarker = null;   // accuracy circle HTML el
 let headingDeg = null;               // device compass bearing
 let autoFollow = false;              // map pans to keep user centred
+let _followRequested = false;        // user explicitly asked to follow (locate tap); OFF by default
 let watchId = null;                  // geolocation watchPosition handle
 let isDark = false, is3D = false, isSatellite = false;
 let nightModeManual = false;         // true after user taps the dark-mode button
@@ -4443,8 +4444,11 @@ function onLocationFrame(disp, raw) {
   if (!_firstFixShown) {
     _firstFixShown = true;
     showToast('Location found', 'success');
-    setAutoFollow(true);
     document.getElementById('btn-locate').classList.add('location-active');
+    // Follow is OFF by default — the camera only starts tracking once the user
+    // taps the locate button (which arms _followRequested). Until then the blue
+    // dot is shown but the map stays fully under the user's control.
+    if (_followRequested) setAutoFollow(true);
   }
 
   // Drive nav side-effects (instruction advance / reroute / ETA / camera) ONCE
@@ -4520,6 +4524,16 @@ function _cameraFollow(lat, lng, heading, nav) {
   // Skip if a previous ease is still running — overlapping eases are the
   // source of the visible "stutter" the user reported.
   if (_easingTo) return;
+  // While plainly following (not turn-by-turn nav), don't fire a fresh ease
+  // unless the puck has actually drifted from screen centre. A stationary user
+  // otherwise triggers a needless easeTo every frame, which keeps the map in
+  // perpetual animation and makes it feel "frozen" / unresponsive to touch.
+  // The dragstart/zoomstart handlers still release follow the instant the user
+  // grabs the map, so this only removes idle churn.
+  if (!nav && map) {
+    const c = map.getCenter();
+    if (haversine(c.lat, c.lng, lat, lng) < 8) return;   // ~8 m: below GPS jitter
+  }
   _easingTo = true;
   const opts = { center: [lng, lat], duration: nav ? 700 : 400, easing: t => t };
   if (nav) {
@@ -4605,6 +4619,7 @@ function _navTick(lat, lng, snap) {
 
 function setAutoFollow(on) {
   autoFollow = on;
+  _followRequested = on;
   const btn = document.getElementById('btn-locate');
   btn.classList.toggle('location-follow', on);
   if (on && userLocation) {
@@ -4645,6 +4660,9 @@ function _enableCompassWithUX() {
 
 function flyToUserLocation() {
   if (!LocationTracker.watching()) {
+    // Arm follow now so that when the very first fix arrives the camera starts
+    // tracking — one tap = start GPS + follow.
+    _followRequested = true;
     requestUserLocation();
     // First click ever — if we happen to already be in directions, opt the
     // user straight into heading-tracked follow.
