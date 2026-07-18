@@ -3777,16 +3777,19 @@ function startImmersiveNavigation() {
   // context iOS 13+ accepts DeviceOrientationEvent.requestPermission() from.
   _enableCompassWithUX();
 
-  // Spoken guidance: open with the first instruction (+ the maneuver after it).
+  // Spoken guidance: open with the departure heading. The only step after it is
+  // arrival (no turn steps are produced), so we cue the distance to the
+  // destination here rather than announcing "you have arrived" at the start —
+  // the real arrival phrase fires from _voiceGuidance at the end of the route.
   _resetNavVoiceState();
   if (NavVoice.enabled() && currentRoute.instructions && currentRoute.instructions.length) {
     const first  = currentRoute.instructions[0];
     const second = currentRoute.instructions[1];
     let phrase = first?.text || 'Starting navigation';
-    if (second && second.type !== 'arrive' && second.distance) {
+    if (second && second.type === 'arrive' && second.distance) {
+      phrase += `. Continue for ${_spokenDist(second.distance)} to your destination`;
+    } else if (second && second.type !== 'arrive' && second.distance) {
       phrase += `. In ${_spokenDist(second.distance)}, ${_lower1(second.text)}`;
-    } else if (second && second.type === 'arrive') {
-      phrase += '. ' + _arrivalPhrase();
     }
     NavVoice.speak(phrase);
   }
@@ -3977,12 +3980,11 @@ const NavVoice = (() => {
   let _enabled = synth ? (localStorage.getItem(PREF_KEY) !== 'off') : false;
   let _voice = null;
 
-  // Voice guidance is intentionally disabled — with left/right turn steps
-  // removed (see generateInstructions in routing.js) there is nothing reliable
-  // left to announce, so we keep the module inert: speak() no-ops and
-  // setupVoiceToggle hides the button because supported() reports false.
-  const VOICE_DISABLED = true;
-  function supported() { return !VOICE_DISABLED && !!synth; }
+  // Voice announces only the honest steps: the departure heading, arrival, and
+  // reroutes. No left/right is ever spoken because no `turn` steps are produced
+  // (see generateInstructions in routing.js) — the roundabout keep-left routing
+  // makes turn side ambiguous, so it's deliberately omitted.
+  function supported() { return !!synth; }
   function enabled()   { return supported() && _enabled; }
 
   function _pickVoice() {
