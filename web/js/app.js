@@ -3256,12 +3256,25 @@ function _extendRouteToPoi(route, poiLat, poiLng) {
     dist += haversine(coords[i][1], coords[i][0], coords[i + 1][1], coords[i + 1][0]);
   }
   const speed = route.profile === 'driving' ? 7 : 1.4;
+  const newDist = Math.round(dist);
+  // The geometry gained the POI vertex and grew longer, so keep the `arrive`
+  // instruction in lockstep — its distance feeds the spoken "continue for X"
+  // and its coord_index anchors arrival. Leaving it at the pre-extension value
+  // is what made the voice announce a shorter distance than the screen showed.
+  const lastIdx = coords.length - 1;
+  const instructions = Array.isArray(route.instructions)
+    ? route.instructions.map(instr =>
+        instr.type === 'arrive'
+          ? { ...instr, distance: newDist, coord_index: lastIdx }
+          : instr)
+    : route.instructions;
   return {
     ...route,
     geometry: { type: 'LineString', coordinates: coords },
-    distance: Math.round(dist),
+    distance: newDist,
     duration: Math.round(dist / speed),
     eta_minutes: Math.max(1, Math.round(dist / speed / 60)),
+    instructions,
   };
 }
 
@@ -4055,10 +4068,12 @@ const NavVoice = (() => {
   return { supported, enabled, speak, setEnabled, toggle, stop };
 })();
 
-// Spoken-form distance — "90 metres" / "1.2 kilometres" reads better aloud.
+// Spoken-form distance — "835 metres" / "1.1 kilometres" reads better aloud.
+// Mirrors formatDist's rounding exactly (whole metres under 1 km, one decimal
+// km above) so the spoken number always matches the number on screen.
 function _spokenDist(m) {
   if (m == null) return '';
-  if (m < 1000) return `${Math.max(10, Math.round(m / 10) * 10)} metres`;
+  if (m < 1000) return `${Math.round(m)} metres`;
   return `${(m / 1000).toFixed(1)} kilometres`;
 }
 // Lowercase the first letter so "In 90 metres, turn left" flows naturally.
