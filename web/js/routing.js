@@ -463,112 +463,39 @@ const IITJRouter = (() => {
 
   // ── Turn instructions ─────────────────────────────────────────
   //
-  // Turn direction (left/right) is safety-critical, so it is NOT read off a
-  // single pair of adjacent vertices. Campus roads are digitised with many
-  // shape points, and merged-road connectors introduce short jogs; measuring
-  // the turn at one vertex lets a lone noisy point flip the reported side
-  // ("road bends left but it says turn right"). Instead we sample the route by
-  // ARC LENGTH and compare the straight run BEFORE a maneuver against the
-  // straight run AFTER it. A single off-place vertex barely moves those
-  // baselines, so the reported direction reflects the real road geometry.
+  // LEFT/RIGHT turn-by-turn guidance is intentionally NOT produced.
+  //
+  // The campus graph is hand-digitised, and the drive routes are deliberately
+  // forced around the Brain Tree and Prithvi Missile roundabouts with via-
+  // waypoints to keep left (India). That circulation is a loop, and on a loop
+  // the "side" of a maneuver is genuinely ambiguous — the same arc can read as
+  // a left or a right depending on which straight runs you compare. Every
+  // method we tried (adjacent vertices, then arc-length straight-run baselines)
+  // still flipped the reported side on those loops. Rather than announce a
+  // turn direction that might be wrong, guidance is limited to the initial
+  // travel heading + live distance/ETA, then arrival. No `turn` steps are
+  // emitted, so nothing downstream (banner, "Then" line, voice) can announce
+  // a left/right that we can't stand behind.
   function generateInstructions(coords, totalDistance, etaMinutes) {
     if (coords.length < 2) return [{ type: 'arrive', text: 'You have arrived', distance: 0 }];
 
     const n = coords.length;
-    // Cumulative arc length (m) at each vertex.
-    const cum = new Array(n);
-    cum[0] = 0;
+
+    // Initial travel bearing over roughly the first W metres of the route.
+    // This is a compass heading ("Head north-west"), not a left/right turn, so
+    // it stays accurate regardless of the roundabout geometry above.
+    const W = 16;
+    let acc = 0, far = coords[n - 1];
     for (let i = 1; i < n; i++) {
-      cum[i] = cum[i - 1] + haversine(coords[i - 1][1], coords[i - 1][0], coords[i][1], coords[i][0]);
+      acc += haversine(coords[i - 1][1], coords[i - 1][0], coords[i][1], coords[i][0]);
+      if (acc >= W) { far = coords[i]; break; }
     }
-    const routeLen = cum[n - 1];
+    const initBearing = getBearing(coords[0][1], coords[0][0], far[1], far[0]);
 
-    // Interpolate [lng,lat] at arc-length d (binary search — robust, O(log n)).
-    function pointAt(d) {
-      if (d <= 0) return coords[0];
-      if (d >= routeLen) return coords[n - 1];
-      let lo = 1, hi = n - 1;
-      while (lo < hi) { const mid = (lo + hi) >> 1; if (cum[mid] < d) lo = mid + 1; else hi = mid; }
-      const a = coords[lo - 1], b = coords[lo];
-      const span = cum[lo] - cum[lo - 1];
-      const t = span > 0 ? (d - cum[lo - 1]) / span : 0;
-      return [a[0] + t * (b[0] - a[0]), a[1] + t * (b[1] - a[1])];
-    }
-    // Nearest vertex index to arc-length d — used as nav's coord_index anchor.
-    function indexAt(d) {
-      let lo = 0, hi = n - 1;
-      while (lo < hi) { const mid = (lo + hi) >> 1; if (cum[mid] < d) lo = mid + 1; else hi = mid; }
-      if (lo > 0 && Math.abs(cum[lo - 1] - d) <= Math.abs(cum[lo] - d)) return lo - 1;
-      return lo;
-    }
-    function bearingBetween(d1, d2) {
-      const p = pointAt(d1), q = pointAt(d2);
-      return getBearing(p[1], p[0], q[1], q[0]);
-    }
-    // Signed heading change across the point at arc-length d: + right, − left.
-    // W = straight-run baseline each side; G = small gap so the exact junction
-    // point (which may be a rounded corner) doesn't bias either baseline.
-    const W = 16, G = 4;
-    function turnAt(d) {
-      const bIn  = bearingBetween(Math.max(0, d - W - G), Math.max(0.001, d - G));
-      const bOut = bearingBetween(Math.min(routeLen - 0.001, d + G), Math.min(routeLen, d + W + G));
-      return ((bOut - bIn + 540) % 360) - 180;
-    }
-
-    const instructions = [];
-    const initBearing = bearingBetween(0, Math.min(routeLen, W));
-    instructions.push({ type: 'depart', text: `Head ${bearingToCompass(initBearing)}`, distance: 0, bearing: Math.round(initBearing), coord_index: 0 });
-
-    const STEP     = 2.5;   // arc-length sampling resolution (m)
-    const TURN_MIN = 28;    // announce turns whose net heading change exceeds this (deg)
-    const MIN_GAP  = 18;    // don't stack two maneuvers closer than this (m)
-    let lastAt  = 0;        // arc-length of the previous maneuver
-    let lastIdx = 0;        // coord_index of the previous maneuver (kept strictly increasing)
-
-    let d = W + G;
-    const dEnd = routeLen - (W + G);
-    while (d <= dEnd) {
-      const t = turnAt(d);
-      if (Math.abs(t) < TURN_MIN) { d += STEP; continue; }
-
-      // Found a bend. Walk forward while the curvature keeps turning the SAME
-      // way, tracking its apex (sharpest point) — that's the maneuver location.
-      const sign = Math.sign(t);
-      let apexD = d, apexAbs = Math.abs(t), e = d + STEP;
-      while (e <= dEnd) {
-        const te = turnAt(e);
-        if (Math.sign(te) !== sign || Math.abs(te) < TURN_MIN * 0.6) break;
-        if (Math.abs(te) > apexAbs) { apexAbs = Math.abs(te); apexD = e; }
-        e += STEP;
-      }
-
-      // Net turn measured from the straight run BEFORE the bend to the straight
-      // run AFTER it → accurate magnitude and an unambiguous side.
-      const bendIn  = bearingBetween(Math.max(0, d - W - G), Math.max(0.001, d - G));
-      const bendOut = bearingBetween(Math.min(routeLen - 0.001, e + G), Math.min(routeLen, e + W + G));
-      const net = ((bendOut - bendIn + 540) % 360) - 180;
-      const mag = Math.abs(net);
-      let idx = indexAt(apexD);
-      if (idx <= lastIdx) idx = Math.min(lastIdx + 1, n - 2);
-
-      if (mag >= TURN_MIN && apexD - lastAt >= MIN_GAP && idx > lastIdx && idx < n - 1) {
-        const dir   = net > 0 ? 'right' : 'left';
-        const sharp = mag > 95 ? 'Sharp ' : (mag > 48 ? '' : 'Slight ');
-        instructions.push({
-          type: 'turn',
-          text: `${sharp}Turn ${dir}`,
-          distance: Math.round(apexD - lastAt),
-          bearing: Math.round(bearingBetween(apexD, Math.min(routeLen, apexD + W))),
-          coord_index: idx,
-        });
-        lastAt = apexD;
-        lastIdx = idx;
-      }
-      d = Math.max(e, apexD + STEP);
-    }
-
-    instructions.push({ type: 'arrive', text: 'You have arrived', distance: Math.round(totalDistance), bearing: 0, coord_index: n - 1 });
-    return instructions;
+    return [
+      { type: 'depart', text: `Head ${bearingToCompass(initBearing)}`, distance: 0, bearing: Math.round(initBearing), coord_index: 0 },
+      { type: 'arrive', text: 'You have arrived', distance: Math.round(totalDistance), bearing: 0, coord_index: n - 1 },
+    ];
   }
 
   // ── Public: compute route ─────────────────────────────────────

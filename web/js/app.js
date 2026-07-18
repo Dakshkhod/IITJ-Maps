@@ -3977,7 +3977,12 @@ const NavVoice = (() => {
   let _enabled = synth ? (localStorage.getItem(PREF_KEY) !== 'off') : false;
   let _voice = null;
 
-  function supported() { return !!synth; }
+  // Voice guidance is intentionally disabled — with left/right turn steps
+  // removed (see generateInstructions in routing.js) there is nothing reliable
+  // left to announce, so we keep the module inert: speak() no-ops and
+  // setupVoiceToggle hides the button because supported() reports false.
+  const VOICE_DISABLED = true;
+  function supported() { return !VOICE_DISABLED && !!synth; }
   function enabled()   { return supported() && _enabled; }
 
   function _pickVoice() {
