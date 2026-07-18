@@ -19,20 +19,16 @@
   <link rel="icon" type="image/svg+xml" href="/icons/icon.svg">
   <link rel="apple-touch-icon" href="/icons/icon.svg">
 
-  <!-- Pinned CDN deps with Subresource Integrity (SRI) + CORS, so a tampered
-       or substituted file from the CDN is rejected by the browser. -->
-  <link href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" rel="stylesheet"
-        integrity="sha384-MinO0mNliZ3vwppuPOUnGa+iq619pfMhLVUXfC4LHwSCvF9H+6P/KO4Q7qBOYV5V"
-        crossorigin="anonymous" referrerpolicy="no-referrer">
-  <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"
-          integrity="sha384-SYKAG6cglRMN0RVvhNeBY0r3FYKNOJtznwA0v7B5Vp9tr31xAHsZC0DqkQ/pZDmj"
-          crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <!-- MapLibre GL — self-hosted (no third-party CDN). Served same-origin so it
+       is covered by our own CSP/HSTS and exposes no visitor IP to a CDN. -->
+  <link href="/vendor/maplibre/maplibre-gl.css?v=1" rel="stylesheet">
+  <script src="/vendor/maplibre/maplibre-gl.js?v=1"></script>
   <!-- Three.js (for 3D landmark models) is NOT loaded here. It's fetched lazily
        by landmarks-3d.js (see Landmarks3D.load) the first time the user enters
        3D, so 2D-only sessions never download ~600 KB. -->
 
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Self-hosted fonts (no Google Fonts CDN). -->
+  <link rel="stylesheet" href="/fonts/fonts.css?v=1">
 
   <link rel="stylesheet" href="css/app.css?v=19">
 
@@ -42,40 +38,7 @@
        hasn't booted in time, drop the SW + all caches and reload ONCE. The
        sessionStorage guard prevents a reload loop; if it's still stuck after
        that, the splash is force-hidden so the user at least sees the map. -->
-  <script>
-    (function () {
-      var KEY = 'iitj-boot-recovery';
-      window.__iitjBooted = false;
-      // Clear the guard on a clean start so a future wedge can self-heal again.
-      window.addEventListener('iitj-booted', function () {
-        window.__iitjBooted = true;
-        try { sessionStorage.removeItem(KEY); } catch (e) {}
-      });
-      setTimeout(function () {
-        if (window.__iitjBooted) return;
-        var splash = document.getElementById('splash');
-        var stuck = splash && splash.style.opacity !== '0' && splash.style.display !== 'none';
-        if (!stuck) return;
-        var tried = false;
-        try { tried = !!sessionStorage.getItem(KEY); } catch (e) {}
-        if (tried) { if (splash) splash.style.display = 'none'; return; }  // don't loop
-        try { sessionStorage.setItem(KEY, '1'); } catch (e) {}
-        var reload = function () { location.reload(); };
-        var jobs = [];
-        if ('serviceWorker' in navigator) {
-          jobs.push(navigator.serviceWorker.getRegistrations()
-            .then(function (rs) { return Promise.all(rs.map(function (r) { return r.unregister(); })); })
-            .catch(function () {}));
-        }
-        if (window.caches) {
-          jobs.push(caches.keys()
-            .then(function (ks) { return Promise.all(ks.map(function (k) { return caches.delete(k); })); })
-            .catch(function () {}));
-        }
-        Promise.all(jobs).then(reload, reload);
-      }, 15000);
-    })();
-  </script>
+  <script src="js/boot.js?v=1"></script>
 </head>
 <body>
   <!-- Loading Splash -->
@@ -464,7 +427,7 @@
   <script src="js/data-overlay.js"></script>
   <script src="js/search.js?v=53"></script>
   <script src="js/routing.js?v=50"></script>
-  <script src="js/landmarks-3d.js?v=54" defer></script>
+  <script src="js/landmarks-3d.js?v=55" defer></script>
   <script src="js/app.js?v=83"></script>
 </body>
 </html>

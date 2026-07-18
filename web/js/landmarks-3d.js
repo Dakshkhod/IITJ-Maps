@@ -6744,27 +6744,21 @@ var Landmarks3D = (() => {
   // ── Lazy Three.js loader ────────────────────────────────────────────────
   // Three.js + its OBJ/GLTF loaders (~600 KB) are fetched the first time the
   // user enters 3D, not on every page load — a big win for 2D-only sessions and
-  // slow connections. SRI + crossorigin mirror the old static <script> tags so
-  // the CSP and tamper protection are unchanged. Idempotent; callbacks queue
-  // until the loaders are live.
+  // slow connections. Self-hosted (same-origin) so no third-party CDN is
+  // contacted and the files are covered by our own CSP/HSTS. Idempotent;
+  // callbacks queue until the loaders are live.
   const _THREE_SCRIPTS = [
-    { src: 'https://unpkg.com/three@0.144.0/build/three.min.js',
-      integrity: 'sha384-UeYnsImn15wLN2RmvFuufa/wN6Ijws5LkdZpyhjfHnqKY30zmWvm67bpzAz0HLT8' },
-    { src: 'https://unpkg.com/three@0.144.0/examples/js/loaders/OBJLoader.js',
-      integrity: 'sha384-MQumaiEfGDwXNviMfAi7dVi/OySNARdLBSTN9g9G0ZRqzyBjGt+WwjcFUzjY1jRa' },
-    { src: 'https://unpkg.com/three@0.144.0/examples/js/loaders/GLTFLoader.js',
-      integrity: 'sha384-+T7zyJFelhxfE6dSQZg8EjauzcjsATKxdLDTMduCAXFzqTsOqUuYb5sjSTj00Kb3' },
+    { src: '/vendor/three/three.min.js?v=1' },
+    { src: '/vendor/three/OBJLoader.js?v=1' },
+    { src: '/vendor/three/GLTFLoader.js?v=1' },
   ];
   let _threeLoadStarted = false;
   const _threeReadyCbs = [];
 
-  function _injectScript({ src, integrity }) {
+  function _injectScript({ src }) {
     return new Promise((resolve, reject) => {
       const s = document.createElement('script');
       s.src = src;
-      s.integrity = integrity;
-      s.crossOrigin = 'anonymous';
-      s.referrerPolicy = 'no-referrer';
       s.async = false;             // keep execution order deterministic
       s.onload = () => resolve();
       s.onerror = () => reject(new Error('failed to load ' + src));

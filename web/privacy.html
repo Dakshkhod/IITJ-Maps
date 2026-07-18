@@ -71,12 +71,13 @@
 
     <h2>Third-party requests</h2>
     <p>
-      Like any website, loading the map fetches resources from third parties —
-      map tiles (CARTO, Esri), web fonts (Google Fonts, OpenMapTiles), and the
-      MapLibre/Three.js libraries. Those providers necessarily see your IP
-      address and the resource requested, governed by their own privacy policies.
-      We pin these resources with Subresource Integrity so they can’t be tampered
-      with in transit.
+      Application code and fonts are served from this site itself — the MapLibre
+      and Three.js libraries and the web fonts are self-hosted, so no third-party
+      CDN is contacted for them. The only external requests are the
+      <strong>map tiles and label glyphs</strong> (CARTO, Esri, OpenMapTiles),
+      which by their nature are fetched from those providers as you pan the map;
+      they necessarily see your IP address and the tile requested, governed by
+      their own privacy policies.
     </p>
 
     <h2>Permissions</h2>
