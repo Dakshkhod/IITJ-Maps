@@ -602,6 +602,11 @@ let navDestination = null;           // preserved so re-route works after sheet 
 let navEntrance = null;              // registered entrance gate (+floor) of the destination, if any
 let navigationActive = false;
 let navInstructionIndex = 0;
+// True only when the route origin is the user's live GPS position ("Your
+// location"). When the user picked a fixed start that isn't where they are, nav
+// must NOT follow their GPS, flag them off-route, or reroute from their real
+// position — it's a static preview of the chosen A→B route.
+let navFollowsUser = false;
 let immersiveNav = false;            // true while in Google-Maps-style immersive 3D nav view
 let preNavCameraState = null;        // saved pitch/bearing/zoom/center to restore on End
 let pre3DState = false;              // saved is3D flag so we can restore on End
@@ -3200,6 +3205,9 @@ let _rerouteCooldown  = false;  // prevents spam-rerouting
 let _offRouteSince    = 0;      // performance.now() the puck first crossed the off-route threshold; 0 when on-route
 
 async function reRoute() {
+  // Never reroute a fixed-start preview: the chosen origin must be respected,
+  // not silently replaced with the user's live (off-route) position.
+  if (!navFollowsUser) return;
   if (!navDestination || _rerouteCooldown) return;
   _rerouteCooldown = true;
   _offRouteSince   = 0;  // any in-flight off-route streak is now stale
@@ -3716,11 +3724,23 @@ function startImmersiveNavigation() {
 
   navigationActive = true;
   immersiveNav     = true;
+  // Live GPS nav only when the origin IS the user's location. A fixed chosen
+  // start (any origin other than "Your location") is a static route preview:
+  // no GPS follow, no off-route badge, no reroute-to-current-position.
+  navFollowsUser = !!(userLocation && directionsFrom?.name === 'Your location');
 
   // Re-render the instruction now that navigationActive is true, so the compass
   // switches on immediately (on desktop / before the first GPS fix there's no
   // _navTick to do it, and the preview render happened while nav was inactive).
-  updateNavInstruction(currentRoute.instructions?.[0]?.distance ?? null);
+  // For a static preview, _navTick never runs, so seed the distance banner with
+  // the whole-route distance to the destination here.
+  updateNavInstruction(navFollowsUser ? (currentRoute.instructions?.[0]?.distance ?? null) : currentRoute.distance);
+  if (!navFollowsUser) {
+    const verb   = currentRoute.profile === 'driving' ? 'drive' : 'walk';
+    const remMin = Math.max(1, Math.round((currentRoute.eta_minutes ?? (currentRoute.duration ? currentRoute.duration / 60 : 1))));
+    document.getElementById('nav-eta').textContent      = `${remMin} min ${verb}`;
+    document.getElementById('nav-distance').textContent = formatDist(currentRoute.distance);
+  }
 
   // Re-evaluate route + directions markers now that navigationActive flipped
   // (so the duplicate-suppression in updateDirectionsMarkers/_addRouteMarkers
@@ -3760,8 +3780,10 @@ function startImmersiveNavigation() {
   // Bottom padding puts the user puck in the lower third of the screen,
   // matching Google Maps' "look ahead" framing. Set autoFollow directly
   // (don't call setAutoFollow — its built-in flyTo would race this easeTo).
-  autoFollow = true;
-  document.getElementById('btn-locate').classList.add('location-follow');
+  // Only follow when the nav tracks the live puck; a fixed-start preview stays
+  // put at the route start so the user can drag through the 3D view.
+  autoFollow = navFollowsUser;
+  document.getElementById('btn-locate').classList.toggle('location-follow', navFollowsUser);
   map.easeTo({
     center: startCoord,
     zoom: 18,
@@ -3794,8 +3816,15 @@ function startImmersiveNavigation() {
     NavVoice.speak(phrase);
   }
 
-  if (!userLocation) {
-    showToast('Enable GPS for live navigation', 'info');
+  if (!navFollowsUser) {
+    if (directionsFrom?.name === 'Your location') {
+      // The user wanted live nav from their position but there's no GPS fix yet.
+      showToast('Enable GPS for live navigation', 'info');
+    } else {
+      // A fixed start was chosen on purpose — this is a static route preview,
+      // so the camera stays on the route instead of tracking the user.
+      showToast(`Previewing route from ${directionsFrom?.name || 'the chosen start'}`, 'info');
+    }
   }
 }
 
@@ -3940,6 +3969,7 @@ function clearRoute() {
   // Make sure the immersive camera/style is restored before we tear down
   if (immersiveNav) exitImmersiveNavigation();
   navigationActive = false;
+  navFollowsUser   = false;
   // Gyroscope is only ever on during nav — shut it off as soon as nav ends
   // so it doesn't keep firing in the background.
   LocationTracker.disableCompass();
@@ -4460,8 +4490,9 @@ function onLocationFrame(disp, raw) {
 
   // Drive nav side-effects (instruction advance / reroute / ETA / camera) ONCE
   // per frame, using the snapped position so off-road jitter doesn't trigger
-  // false reroutes.
-  if (navigationActive && currentRoute && snapInfo) {
+  // false reroutes. Only when the nav follows the live puck — a fixed-start
+  // preview must not advance/reroute off the user's real (off-route) position.
+  if (navigationActive && currentRoute && snapInfo && navFollowsUser) {
     _navTick(renderLat, renderLng, snapInfo);
   } else if (autoFollow) {
     _cameraFollow(renderLat, renderLng, disp.heading, /*nav=*/false);
