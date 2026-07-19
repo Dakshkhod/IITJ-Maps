@@ -2834,6 +2834,11 @@ var Landmarks3D = (() => {
     // courtyard (e.g. Office of Administration → faces Office of Students)
     // pass 'east' or 'west'.
     const portalSide = opts.portalSide ?? 'south';
+    // Which SHORT end carries the dramatic white angular ramp-wing from the
+    // reference photos. Defaults to the end OPPOSITE the courtyard portico so
+    // the two Chanakya wings bookend the central plaza (OoA→west, OoS→east).
+    const outerEnd = opts.outerEnd ?? (portalSide === 'east' ? 'west'
+                                     : portalSide === 'west' ? 'east' : null);
     const g = new THREE.Group();
 
     // ── Main sandstone block
@@ -2919,6 +2924,79 @@ var Landmarks3D = (() => {
         porticoG.rotation.y = Math.PI / 2;
       }
       g.add(porticoG);
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // Reference-photo detailing (IIT-J main administrative facade):
+    //   (a) a striated elevation of vertical cream fins,
+    //   (b) two deep-red accent panels high on the front wall,
+    //   (c) a WHITE angular end-tower topped by a raking "sail" — the
+    //       signature gesture where the block terminates.
+    // The fins dress both long faces, the red panels the south (front)
+    // face, and the white end-feature caps the outer short end so the two
+    // wings bookend the central plaza.
+    // ─────────────────────────────────────────────────────────────
+    const RED     = new THREE.MeshStandardMaterial({ color: 0xa5382a, metalness: 0.12, roughness: 0.62 });
+    const FIN     = new THREE.MeshStandardMaterial({ color: 0xd6be96, metalness: 0.04, roughness: 0.80 });
+    const WHITE_D = new THREE.MeshStandardMaterial({ color: 0xefe9dc, metalness: 0.05, roughness: 0.60, side: THREE.DoubleSide });
+    const wingSgn = outerEnd === 'east' ? 1 : outerEnd === 'west' ? -1 : 0;
+    const END_W   = Math.min(6, length * 0.16);    // solid white end-tower width
+    const SAIL_L  = Math.min(14, length * 0.34);   // reach of the raking white sail
+
+    // (a) Vertical fins on both long faces — lighter cream pilasters standing
+    //     proud of the wall give the striated main-building elevation.
+    const FIN_W = 0.55, FIN_PROJ = 0.45;
+    const finBot = 1.2, finTop = height - 0.6, finH = finTop - finBot;
+    const finSpan = length - 2;
+    const nFins = Math.max(6, Math.round(finSpan / 1.9));
+    const finStep = finSpan / nFins;
+    for (const faceZ of [depth / 2, -depth / 2]) {
+      const dir = Math.sign(faceZ);            // +1 south face, −1 north face
+      for (let i = 0; i <= nFins; i++) {
+        const x = -finSpan / 2 + i * finStep;
+        // Skip fins that would be buried under the solid white end-tower.
+        if (wingSgn && wingSgn * x > length / 2 - END_W - 0.5) continue;
+        const fin = new THREE.Mesh(new THREE.BoxGeometry(FIN_W, finH, FIN_PROJ), FIN);
+        fin.position.set(x, finBot + finH / 2, faceZ + dir * (FIN_PROJ / 2 - 0.02));
+        g.add(fin);
+      }
+    }
+
+    // (b) Two deep-red accent panels high on the SOUTH facade, kept on the
+    //     courtyard-side half so the end-tower never buries them.
+    const innerSgn = wingSgn ? -wingSgn : 1;   // toward the portico / plaza
+    const RP_W = 3.0, RP_H = 7.4, RP_PROJ = 0.55;
+    [0.14, 0.36].forEach((f) => {
+      const panel = new THREE.Mesh(new THREE.BoxGeometry(RP_W, RP_H, RP_PROJ), RED);
+      panel.position.set(innerSgn * length * f, height - RP_H / 2 - 0.9, depth / 2 + RP_PROJ / 2);
+      g.add(panel);
+    });
+
+    // (c) White angular end-feature: a solid white end-tower flush with the
+    //     roof, topped by a dramatic sloped "sail" that peaks at the very
+    //     outer corner and rakes down over the roofline toward the centre.
+    if (wingSgn) {
+      const xo = wingSgn * (length / 2);
+      // Solid white end-tower (stair/lift core), flush with the roof.
+      const tower = new THREE.Mesh(new THREE.BoxGeometry(END_W, height, depth + 0.3), MAT.portalWhite);
+      tower.position.set(xo - wingSgn * END_W / 2, height / 2, 0);
+      g.add(tower);
+      // Raking sail rising above the roofline, peaking at the outer corner.
+      const peak = height + 6, wDepth = depth + 0.3;
+      const shape = new THREE.Shape();
+      shape.moveTo(xo, height);
+      shape.lineTo(xo, peak);
+      shape.lineTo(xo - wingSgn * SAIL_L, height);
+      shape.closePath();
+      const sailGeo = new THREE.ExtrudeGeometry(shape, { depth: wDepth, bevelEnabled: false });
+      sailGeo.translate(0, 0, -wDepth / 2);    // centre across the depth
+      g.add(new THREE.Mesh(sailGeo, WHITE_D));
+      // Crisp coping blade along the raking top edge of the sail.
+      const bladeLen = Math.hypot(SAIL_L, peak - height);
+      const blade = new THREE.Mesh(new THREE.BoxGeometry(bladeLen, 0.55, wDepth + 0.2), MAT.portalWhite);
+      blade.position.set(xo - wingSgn * SAIL_L / 2, (peak + height) / 2, 0);
+      blade.rotation.z = Math.atan2(height - peak, -wingSgn * SAIL_L);
+      g.add(blade);
     }
 
     return g;
