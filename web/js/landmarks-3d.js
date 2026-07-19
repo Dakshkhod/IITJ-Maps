@@ -2928,20 +2928,15 @@ var Landmarks3D = (() => {
 
     // ─────────────────────────────────────────────────────────────
     // Reference-photo detailing (IIT-J main administrative facade):
-    //   (a) a striated elevation of vertical cream fins,
-    //   (b) two deep-red accent panels high on the front wall,
-    //   (c) a WHITE angular end-tower topped by a raking "sail" — the
-    //       signature gesture where the block terminates.
-    // The fins dress both long faces, the red panels the south (front)
-    // face, and the white end-feature caps the outer short end so the two
-    // wings bookend the central plaza.
+    //   (a) a striated elevation of vertical cream fins, and
+    //   (b) a bold WHITE angular end-wing — a solid white stair-core
+    //       tower topped by a slanted white ramp-roof — where the block
+    //       terminates. Placed on the short end OPPOSITE the courtyard
+    //       portico so the two wings bookend the central plaza.
     // ─────────────────────────────────────────────────────────────
-    const RED     = new THREE.MeshStandardMaterial({ color: 0xa5382a, metalness: 0.12, roughness: 0.62 });
     const FIN     = new THREE.MeshStandardMaterial({ color: 0xd6be96, metalness: 0.04, roughness: 0.80 });
-    const WHITE_D = new THREE.MeshStandardMaterial({ color: 0xefe9dc, metalness: 0.05, roughness: 0.60, side: THREE.DoubleSide });
     const wingSgn = outerEnd === 'east' ? 1 : outerEnd === 'west' ? -1 : 0;
-    const END_W   = Math.min(6, length * 0.16);    // solid white end-tower width
-    const SAIL_L  = Math.min(14, length * 0.34);   // reach of the raking white sail
+    const END_W   = Math.min(7, length * 0.18);    // white end-tower width
 
     // (a) Vertical fins on both long faces — lighter cream pilasters standing
     //     proud of the wall give the striated main-building elevation.
@@ -2962,41 +2957,34 @@ var Landmarks3D = (() => {
       }
     }
 
-    // (b) Two deep-red accent panels high on the SOUTH facade, kept on the
-    //     courtyard-side half so the end-tower never buries them.
-    const innerSgn = wingSgn ? -wingSgn : 1;   // toward the portico / plaza
-    const RP_W = 3.0, RP_H = 7.4, RP_PROJ = 0.55;
-    [0.14, 0.36].forEach((f) => {
-      const panel = new THREE.Mesh(new THREE.BoxGeometry(RP_W, RP_H, RP_PROJ), RED);
-      panel.position.set(innerSgn * length * f, height - RP_H / 2 - 0.9, depth / 2 + RP_PROJ / 2);
-      g.add(panel);
-    });
-
-    // (c) White angular end-feature: a solid white end-tower flush with the
-    //     roof, topped by a dramatic sloped "sail" that peaks at the very
-    //     outer corner and rakes down over the roofline toward the centre.
+    // (b) White angular end-wing: a solid white end-pylon with a RAKED top —
+    //     built as an extruded trapezoid so every face is solid (no thin
+    //     edge-on blade) and the slanted top points up into the overhead sun
+    //     so it always reads bright white. This is the signature diagonal
+    //     gesture where the block terminates. A shallow white ramp-roof then
+    //     carries the diagonal a little further in over the roofline.
     if (wingSgn) {
       const xo = wingSgn * (length / 2);
-      // Solid white end-tower (stair/lift core), flush with the roof.
-      const tower = new THREE.Mesh(new THREE.BoxGeometry(END_W, height, depth + 0.3), MAT.portalWhite);
-      tower.position.set(xo - wingSgn * END_W / 2, height / 2, 0);
-      g.add(tower);
-      // Raking sail rising above the roofline, peaking at the outer corner.
-      const peak = height + 6, wDepth = depth + 0.3;
-      const shape = new THREE.Shape();
-      shape.moveTo(xo, height);
-      shape.lineTo(xo, peak);
-      shape.lineTo(xo - wingSgn * SAIL_L, height);
-      shape.closePath();
-      const sailGeo = new THREE.ExtrudeGeometry(shape, { depth: wDepth, bevelEnabled: false });
-      sailGeo.translate(0, 0, -wDepth / 2);    // centre across the depth
-      g.add(new THREE.Mesh(sailGeo, WHITE_D));
-      // Crisp coping blade along the raking top edge of the sail.
-      const bladeLen = Math.hypot(SAIL_L, peak - height);
-      const blade = new THREE.Mesh(new THREE.BoxGeometry(bladeLen, 0.55, wDepth + 0.2), MAT.portalWhite);
-      blade.position.set(xo - wingSgn * SAIL_L / 2, (peak + height) / 2, 0);
-      blade.rotation.z = Math.atan2(height - peak, -wingSgn * SAIL_L);
-      g.add(blade);
+      const RISE = 5.5, wDepth = depth + 0.2;
+      const xi = xo - wingSgn * END_W;              // inner edge of the pylon
+      const white2 = new THREE.MeshStandardMaterial({ color: 0xeae2d1, metalness: 0.04, roughness: 0.62, side: THREE.DoubleSide });
+      const s = new THREE.Shape();
+      s.moveTo(xo, 0);
+      s.lineTo(xo, height + RISE);                  // tall outer edge
+      s.lineTo(xi, height);                         // rake down to the roofline
+      s.lineTo(xi, 0);
+      s.closePath();
+      const geo = new THREE.ExtrudeGeometry(s, { depth: wDepth, bevelEnabled: false });
+      geo.translate(0, 0, -wDepth / 2);             // centre across the depth
+      g.add(new THREE.Mesh(geo, white2));
+      // Shallow white ramp-roof continuing the diagonal inward over the roof.
+      const RAMP_L = Math.min(11, length * 0.3);
+      const xr = xi - wingSgn * RAMP_L;
+      const rampLen = Math.hypot(RAMP_L, 2.0);
+      const ramp = new THREE.Mesh(new THREE.BoxGeometry(rampLen, 0.6, wDepth), white2);
+      ramp.position.set((xi + xr) / 2, height - 1.0, 0);
+      ramp.rotation.z = Math.atan2(-2.0, xr - xi);
+      g.add(ramp);
     }
 
     return g;
@@ -3010,9 +2998,11 @@ var Landmarks3D = (() => {
   // Sits in the courtyard space between OoA and OoS.
   function buildIITJNameCanopy() {
     const g = new THREE.Group();
-    // Substantial archway spanning most of the OoA<->OoS plaza gap.
-    const SPAN  = 28;                              // column-to-column distance
-    const COL_W = 3.0, COL_D = 5.5, COL_H = 6.5;   // thick stone piers
+    // Broad archway spanning most of the OoA<->OoS plaza gap — widened to
+    // read as the substantial central gateway seen in the reference photos
+    // (kept clear of the flanking porticos: CW≈39 m vs a ~44 m plaza gap).
+    const SPAN  = 34;                              // column-to-column distance
+    const COL_W = 3.4, COL_D = 6.0, COL_H = 7.0;   // thick stone piers
 
     // Two thick sandstone columns
     [-SPAN / 2, SPAN / 2].forEach((x) => {
