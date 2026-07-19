@@ -150,10 +150,17 @@ async function fetchFromOverpass() {
   const body = 'data=' + encodeURIComponent(query);
   const headers = { 'Content-Type': 'application/x-www-form-urlencoded' };
 
+  // Per-mirror timeout so a mirror that accepts the connection but then stalls
+  // can't hang the whole sync (fetch has no default timeout). A dead mirror is
+  // abandoned after this and we fall through to the next one.
+  const PER_MIRROR_TIMEOUT_MS = 30000;
+
   let lastErr = null;
   for (const url of OVERPASS_ENDPOINTS) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), PER_MIRROR_TIMEOUT_MS);
     try {
-      const res = await fetch(url, { method: 'POST', headers, body });
+      const res = await fetch(url, { method: 'POST', headers, body, signal: controller.signal });
       if (!res.ok) {
         // 504 / 429 → try the next mirror instead of giving up
         lastErr = new Error(`HTTP ${res.status} from ${new URL(url).host}`);
@@ -161,9 +168,13 @@ async function fetchFromOverpass() {
       }
       return await res.json();
     } catch (e) {
-      // Network or CORS failure — try the next one
-      lastErr = e;
-      console.warn(`[Overpass] ${new URL(url).host} failed:`, e.message);
+      // Network / CORS failure, or our own timeout abort — try the next one
+      lastErr = e.name === 'AbortError'
+        ? new Error(`timeout after ${PER_MIRROR_TIMEOUT_MS / 1000}s from ${new URL(url).host}`)
+        : e;
+      console.warn(`[Overpass] ${new URL(url).host} failed:`, lastErr.message);
+    } finally {
+      clearTimeout(timer);
     }
   }
   throw new Error(
