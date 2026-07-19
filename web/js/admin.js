@@ -25,6 +25,11 @@ const OVERPASS_ENDPOINTS = [
 const PENDING_KEY  = 'iitj-pending-changes-v1';
 const LAST_SYNC_KEY = 'iitj-last-sync-v1';
 const LAST_PUBLISH_KEY = 'iitj-last-publish-v1';
+// Baseline: change ids that have been "cleared" and must never re-surface on a
+// future sync. Set by "Clear log", it lets an admin wipe the whole review log
+// and treat the current OSM state as the zero point, so only edits made from
+// that moment on appear. Stored as a plain array of change ids.
+const BASELINE_KEY = 'iitj-baseline-v1';
 
 // Stale keys from earlier admin auth designs (client-side passphrase gate,
 // then a browser-stored GitHub PAT). Both stored real secrets in plaintext
@@ -63,6 +68,15 @@ function loadPending() {
 }
 function savePending(arr) {
   localStorage.setItem(PENDING_KEY, JSON.stringify(arr));
+}
+
+// Baseline = the set of change ids we've decided to permanently suppress
+// (see BASELINE_KEY). Returned as a Set for O(1) membership checks in the diff.
+function loadBaseline() {
+  try { return new Set(JSON.parse(localStorage.getItem(BASELINE_KEY) || '[]')); } catch (_) { return new Set(); }
+}
+function saveBaseline(set) {
+  localStorage.setItem(BASELINE_KEY, JSON.stringify([...set]));
 }
 
 // Stable id so re-syncs of unchanged OSM elements don't create duplicates.
@@ -260,9 +274,9 @@ async function computeDiff(osmFeatures) {
   }
 
   const pending = loadPending();
-  const seenIds = new Set(pending.map(p => p.id));
   const decisionByOsm = new Map(); // osm_id|contentHash → most-recent decision row
   for (const p of pending) decisionByOsm.set(`${p.osm_id}|${p.contentHash}`, p);
+  const baseline = loadBaseline(); // change ids permanently cleared via "Clear log"
 
   const newChanges = [];
 
@@ -276,12 +290,16 @@ async function computeDiff(osmFeatures) {
       if (!local) {
         // Net new
         if (decisionByOsm.has(dedupKey)) continue;
-        newChanges.push(makeChange('added', kind, osmF, null, osmHash));
+        const ch = makeChange('added', kind, osmF, null, osmHash);
+        if (baseline.has(ch.id)) continue;
+        newChanges.push(ch);
       } else {
         const localHash = hashFeature(local.properties, local.geometry, kind);
         if (localHash !== osmHash) {
           if (decisionByOsm.has(dedupKey)) continue;
-          newChanges.push(makeChange('modified', kind, osmF, local, osmHash));
+          const ch = makeChange('modified', kind, osmF, local, osmHash);
+          if (baseline.has(ch.id)) continue;
+          newChanges.push(ch);
         }
       }
     }
@@ -295,7 +313,9 @@ async function computeDiff(osmFeatures) {
       const localHash = hashFeature(localF.properties, localF.geometry, kind);
       const dedupKey  = `${id}|del|${localHash}`;
       if (decisionByOsm.has(dedupKey)) continue;
-      newChanges.push(makeChange('deleted', kind, null, localF, 'del-' + localHash));
+      const ch = makeChange('deleted', kind, null, localF, 'del-' + localHash);
+      if (baseline.has(ch.id)) continue;
+      newChanges.push(ch);
     }
   }
 
@@ -353,6 +373,52 @@ function setSyncing(on) {
   const label = document.getElementById('btn-sync-label');
   btn.disabled = on;
   label.textContent = on ? 'Syncing…' : 'Sync from OSM';
+}
+
+// ============================================================
+// Clear log — wipe the entire review log and set the current OSM
+// state as the baseline, so only edits made from now on will appear.
+// ============================================================
+async function resetLog() {
+  const pending = loadPending();
+  const ok = window.confirm(
+    `Clear the review log?\n\n` +
+    `This removes all ${pending.length} logged change${pending.length === 1 ? '' : 's'} ` +
+    `(pending, approved and rejected) and records the current OpenStreetMap state as the ` +
+    `baseline — so only edits made from now on will appear on future syncs.\n\n` +
+    `Accepted changes already written to the overlay are NOT affected.`
+  );
+  if (!ok) return;
+
+  const btn = document.getElementById('btn-clear');
+  if (btn) btn.disabled = true;
+
+  // Everything currently in the log gets permanently suppressed.
+  const baseline = loadBaseline();
+  for (const p of pending) baseline.add(p.id);
+
+  // Best-effort: also snapshot any current OSM-vs-base diffs that were never
+  // logged, so a fresh sync right after clearing doesn't resurface the backlog.
+  // If OSM is unreachable we still clear, baselining only what was logged.
+  try {
+    showToast('Snapshotting current OSM as baseline…', 'info');
+    const data = await fetchFromOverpass();
+    const features = (data.elements || []).map(overpassToFeature).filter(Boolean);
+    const current = await computeDiff(features); // excludes already-logged/baselined
+    for (const c of current) baseline.add(c.id);
+    showToast('Review log cleared — only new OSM changes will appear from now on.', 'success');
+  } catch (e) {
+    console.warn('[Clear log] OSM snapshot skipped:', e.message);
+    showToast('Log cleared (OSM offline — baseline set from logged changes only).', 'warn');
+  }
+
+  saveBaseline(baseline);
+  savePending([]);
+  _selectedId = null;
+  document.getElementById('detail-content').classList.add('hidden');
+  document.getElementById('detail-empty').classList.remove('hidden');
+  render();
+  if (btn) btn.disabled = false;
 }
 
 // ============================================================
@@ -896,6 +962,7 @@ function boot() {
   purgeStaleSecrets();
   document.getElementById('app').classList.remove('hidden');
   document.getElementById('btn-sync').addEventListener('click', runSync);
+  document.getElementById('btn-clear').addEventListener('click', resetLog);
   document.getElementById('btn-export').addEventListener('click', exportOverlay);
   document.getElementById('btn-publish').addEventListener('click', publishOverlay);
   document.getElementById('btn-settings').addEventListener('click', openSettings);
