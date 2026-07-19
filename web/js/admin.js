@@ -257,9 +257,11 @@ function inferCategory(tags) {
 // Diff engine — compare OSM snapshot against the current map
 // ============================================================
 async function computeDiff(osmFeatures) {
-  // We diff against the BASE bundled data (not the overlay) — the admin's
-  // earlier decisions are already captured as "approved" rows. Re-fetching
-  // the same OSM state shouldn't re-surface things they already handled.
+  // We diff OSM against what the APP ACTUALLY RENDERS = the base bundle with the
+  // admin overlay applied on top (bundled overlay.json + this browser's accepted
+  // -but-unpublished changes). Comparing against the raw base alone makes every
+  // feature already accepted into the overlay — i.e. already live in the app —
+  // re-surface as a brand-new "change" on every sync.
   const [places, buildings, roads, areas] = await Promise.all([
     fetch('data/places.geojson').then(r => r.json()),
     fetch('data/buildings.geojson').then(r => r.json()),
@@ -268,12 +270,30 @@ async function computeDiff(osmFeatures) {
   ]);
   const base = { places, buildings, roads, areas };
 
-  // Index local features by osm_id per kind
+  // Effective overlay = bundled overlay.json merged with the local (this-browser)
+  // overlay, local winning. Read fresh each call so just-accepted changes count.
+  const bundledOverlay = await IITJOverlay.loadBundled();
+  const localOverlay   = IITJOverlay.loadLocal();
+  const KINDS = ['buildings', 'places', 'roads', 'areas'];
+  const override = {}, overlayDeleted = {};
+  for (const kind of KINDS) {
+    override[kind] = { ...(bundledOverlay[kind] || {}), ...(localOverlay[kind] || {}) };
+    overlayDeleted[kind] = new Set([
+      ...(bundledOverlay.deleted?.[kind] || []).map(String),
+      ...(localOverlay.deleted?.[kind]   || []).map(String),
+    ]);
+  }
+
+  // Index the EFFECTIVE (base + overlay) features by osm_id per kind.
   const localById = { buildings: {}, places: {}, roads: {}, areas: {} };
-  for (const kind of Object.keys(localById)) {
+  for (const kind of KINDS) {
     for (const f of base[kind].features || []) {
-      const id = f.properties?.osm_id;
-      if (id) localById[kind][String(id)] = f;
+      const id = String(f.properties?.osm_id || '');
+      if (!id || overlayDeleted[kind].has(id)) continue; // admin removed it from the app
+      localById[kind][id] = f;
+    }
+    for (const [id, f] of Object.entries(override[kind])) {  // overrides + net-new accepts
+      localById[kind][String(id)] = f;
     }
   }
 
@@ -294,6 +314,7 @@ async function computeDiff(osmFeatures) {
   // ── Added & Modified ────────────────────────────────────────
   for (const kind of Object.keys(osmById)) {
     for (const [id, osmF] of Object.entries(osmById[kind])) {
+      if (overlayDeleted[kind].has(id)) continue; // admin deleted it in the overlay — don't re-add
       const local = localById[kind][id];
       const osmHash = hashFeature(osmF.properties, osmF.geometry, kind);
       const dedupKey = `${id}|${osmHash}`;
