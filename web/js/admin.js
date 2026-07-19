@@ -393,32 +393,34 @@ async function resetLog() {
   const btn = document.getElementById('btn-clear');
   if (btn) btn.disabled = true;
 
-  // Everything currently in the log gets permanently suppressed.
-  const baseline = loadBaseline();
-  for (const p of pending) baseline.add(p.id);
-
-  // Best-effort: also snapshot any current OSM-vs-base diffs that were never
-  // logged, so a fresh sync right after clearing doesn't resurface the backlog.
-  // If OSM is unreachable we still clear, baselining only what was logged.
   try {
+    // Snapshot the current OSM state FIRST — we can only baseline what we can
+    // see. computeDiff returns every current OSM-vs-base difference (its fresh
+    // ids also cover any log entries written under older hashing). If OSM is
+    // unreachable we abort WITHOUT clearing, rather than wipe the log into a
+    // half-known baseline that would resurface the backlog on the next sync.
     showToast('Snapshotting current OSM as baseline…', 'info');
     const data = await fetchFromOverpass();
     const features = (data.elements || []).map(overpassToFeature).filter(Boolean);
-    const current = await computeDiff(features); // excludes already-logged/baselined
-    for (const c of current) baseline.add(c.id);
+    const current = await computeDiff(features);
+
+    const baseline = loadBaseline();
+    for (const p of pending) baseline.add(p.id);   // everything currently logged
+    for (const c of current) baseline.add(c.id);   // + every current OSM-vs-base diff
+    saveBaseline(baseline);
+    savePending([]);
+
+    _selectedId = null;
+    document.getElementById('detail-content').classList.add('hidden');
+    document.getElementById('detail-empty').classList.remove('hidden');
+    render();
     showToast('Review log cleared — only new OSM changes will appear from now on.', 'success');
   } catch (e) {
-    console.warn('[Clear log] OSM snapshot skipped:', e.message);
-    showToast('Log cleared (OSM offline — baseline set from logged changes only).', 'warn');
+    console.warn('[Clear log] failed:', e.message);
+    showToast(`Couldn't reach OSM to set the baseline — nothing was cleared. Try again in a minute.`, 'error');
+  } finally {
+    if (btn) btn.disabled = false;
   }
-
-  saveBaseline(baseline);
-  savePending([]);
-  _selectedId = null;
-  document.getElementById('detail-content').classList.add('hidden');
-  document.getElementById('detail-empty').classList.remove('hidden');
-  render();
-  if (btn) btn.disabled = false;
 }
 
 // ============================================================
