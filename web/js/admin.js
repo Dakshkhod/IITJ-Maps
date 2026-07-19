@@ -256,7 +256,13 @@ function inferCategory(tags) {
 // ============================================================
 // Diff engine — compare OSM snapshot against the current map
 // ============================================================
-async function computeDiff(osmFeatures) {
+// opts.snapshot === true → return EVERY current OSM-vs-base difference,
+// ignoring the pending log AND the baseline. Used by "Clear log" so the
+// baseline captures the FRESH id of every current diff (the normal pending
+// dedup would otherwise hide already-logged items from the snapshot, leaving
+// their fresh ids un-baselined so the backlog resurfaces on the next sync).
+async function computeDiff(osmFeatures, opts = {}) {
+  const snapshot = opts.snapshot === true;
   // We diff OSM against what the APP ACTUALLY RENDERS = the base bundle with the
   // admin overlay applied on top (bundled overlay.json + this browser's accepted
   // -but-unpublished changes). Comparing against the raw base alone makes every
@@ -321,16 +327,16 @@ async function computeDiff(osmFeatures) {
 
       if (!local) {
         // Net new
-        if (decisionByOsm.has(dedupKey)) continue;
+        if (!snapshot && decisionByOsm.has(dedupKey)) continue;
         const ch = makeChange('added', kind, osmF, null, osmHash);
-        if (baseline.has(ch.id)) continue;
+        if (!snapshot && baseline.has(ch.id)) continue;
         newChanges.push(ch);
       } else {
         const localHash = hashFeature(local.properties, local.geometry, kind);
         if (localHash !== osmHash) {
-          if (decisionByOsm.has(dedupKey)) continue;
+          if (!snapshot && decisionByOsm.has(dedupKey)) continue;
           const ch = makeChange('modified', kind, osmF, local, osmHash);
-          if (baseline.has(ch.id)) continue;
+          if (!snapshot && baseline.has(ch.id)) continue;
           newChanges.push(ch);
         }
       }
@@ -344,9 +350,9 @@ async function computeDiff(osmFeatures) {
       if (osmById[kind][id]) continue;
       const localHash = hashFeature(localF.properties, localF.geometry, kind);
       const dedupKey  = `${id}|del|${localHash}`;
-      if (decisionByOsm.has(dedupKey)) continue;
+      if (!snapshot && decisionByOsm.has(dedupKey)) continue;
       const ch = makeChange('deleted', kind, null, localF, 'del-' + localHash);
-      if (baseline.has(ch.id)) continue;
+      if (!snapshot && baseline.has(ch.id)) continue;
       newChanges.push(ch);
     }
   }
@@ -434,7 +440,10 @@ async function resetLog() {
     showToast('Snapshotting current OSM as baseline…', 'info');
     const data = await fetchFromOverpass();
     const features = (data.elements || []).map(overpassToFeature).filter(Boolean);
-    const current = await computeDiff(features);
+    // snapshot mode: every current OSM-vs-base diff (pending dedup OFF), so the
+    // baseline records each item's FRESH id — otherwise already-logged items are
+    // hidden from the snapshot and resurface on the next sync.
+    const current = await computeDiff(features, { snapshot: true });
 
     const baseline = loadBaseline();
     for (const p of pending) baseline.add(p.id);   // everything currently logged
