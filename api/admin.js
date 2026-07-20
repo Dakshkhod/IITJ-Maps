@@ -63,6 +63,23 @@ function verifyToken(token, secret) {
   } catch (_) { return false; }
 }
 
+// GitHub's own status + error text, trimmed to something safe to show. Surfaced
+// ONLY on the publish path, which is already behind verifyToken — a generic
+// "GitHub read failed" can't tell an expired token from a revoked permission,
+// which leaves the admin with nothing to act on. Never echoes the token itself.
+async function ghErrorDetail(r) {
+  let msg = '';
+  try {
+    const b = await r.json();
+    if (b && typeof b.message === 'string') msg = b.message.slice(0, 200);
+  } catch (_) { /* non-JSON error body — status alone still tells us a lot */ }
+  const hint =
+    r.status === 401 ? ' — GITHUB_TOKEN is invalid or expired; regenerate the PAT and update it in Vercel.' :
+    r.status === 403 ? ' — GITHUB_TOKEN lacks Contents: Read & write on this repo (or is rate-limited).' :
+    r.status === 404 ? ' — check GITHUB_OWNER / GITHUB_REPO / GITHUB_PATH.' : '';
+  return `HTTP ${r.status}${msg ? ': ' + msg : ''}${hint}`;
+}
+
 async function readJsonBody(req) {
   if (req.body && typeof req.body === 'object') return req.body;
   if (typeof req.body === 'string') { try { return JSON.parse(req.body); } catch (_) { return {}; } }
@@ -154,8 +171,11 @@ module.exports = async (req, res) => {
         const meta = await metaRes.json();
         sha = meta && meta.sha;
       } else if (metaRes.status !== 404) {
+        // 404 is fine (file not created yet); anything else is GitHub refusing us.
+        const detail = await ghErrorDetail(metaRes);
+        console.error('[admin/publish] GitHub read failed:', detail);
         res.statusCode = 502;
-        return res.end(JSON.stringify({ error: 'GitHub read failed' }));
+        return res.end(JSON.stringify({ error: `GitHub read failed — ${detail}` }));
       }
 
       // 2. Commit (create or update)
@@ -173,14 +193,18 @@ module.exports = async (req, res) => {
         }),
       });
       if (!putRes.ok) {
+        const detail = await ghErrorDetail(putRes);
+        console.error('[admin/publish] GitHub commit failed:', detail);
         res.statusCode = 502;
-        return res.end(JSON.stringify({ error: 'GitHub commit failed' }));
+        return res.end(JSON.stringify({ error: `GitHub commit failed — ${detail}` }));
       }
       res.statusCode = 200;
       return res.end(JSON.stringify({ ok: true }));
-    } catch (_) {
+    } catch (e) {
+      const detail = (e && e.message) ? String(e.message).slice(0, 200) : 'unknown error';
+      console.error('[admin/publish] upstream error:', detail);
       res.statusCode = 502;
-      return res.end(JSON.stringify({ error: 'Upstream error contacting GitHub' }));
+      return res.end(JSON.stringify({ error: `Upstream error contacting GitHub — ${detail}` }));
     }
   }
 
