@@ -145,7 +145,7 @@ async function fetchFromOverpass() {
       node["tourism"](${CAMPUS_BBOX});
       node["historic"](${CAMPUS_BBOX});
     );
-    out geom;
+    out meta geom;
   `;
   const body = 'data=' + encodeURIComponent(query);
   const headers = { 'Content-Type': 'application/x-www-form-urlencoded' };
@@ -245,7 +245,19 @@ function overpassToFeature(el) {
     properties.category      = inferCategory(tags) || 'recreation';
   }
 
-  return { type: 'Feature', properties, geometry, centroid, _kind: kind };
+  // OSM edit provenance from `out meta` (who last touched this element, when,
+  // and in which changeset). Kept on an internal `_`-prefixed field so it never
+  // reaches the published overlay (stripInternal drops it) and never affects the
+  // content hash (normalizeProps only keeps DIFF_TAGS).
+  const _meta = {
+    user: el.user || null,
+    uid: el.uid || null,
+    timestamp: el.timestamp || null,
+    version: el.version || null,
+    changeset: el.changeset || null,
+  };
+
+  return { type: 'Feature', properties, geometry, centroid, _kind: kind, _meta };
 }
 
 // Best-effort category inference (mirrors backend/scripts/parse-osm-data.js)
@@ -379,6 +391,9 @@ function makeChange(type, kind, after, before, contentHash) {
     id, type, kind, osm_id, contentHash,
     name: name || `(unnamed ${kind.slice(0, -1)})`,
     before, after,
+    // Who made this edit in OSM. Deletions have no incoming OSM element, so
+    // they carry no author — the UI shows "—" rather than inventing one.
+    osm_meta: (after && after._meta) || null,
     status: 'pending',
     fetchedAt: new Date().toISOString(),
     decidedAt: null,
@@ -521,7 +536,7 @@ function markDecision(id, status) {
 // Drop internal fields before writing to the overlay (keeps it portable JSON)
 function stripInternal(f) {
   if (!f) return f;
-  const { _kind, ...rest } = f;
+  const { _kind, _meta, ...rest } = f;
   return rest;
 }
 
@@ -589,6 +604,7 @@ function renderList() {
           <span class="change-row-status ${escapeHtml(c.status)}">${escapeHtml(c.status)}</span>
           <span>· ${timeAgo(c.fetchedAt)}</span>
         </div>
+        <div class="change-row-author">${escapeHtml(osmAuthorLabel(c))}</div>
       </div>
     `;
     row.addEventListener('click', () => showDetail(c));
@@ -596,9 +612,22 @@ function renderList() {
   }
 }
 
+// Compact "who edited this in OSM" label for the list rows. Deletions have no
+// incoming OSM element, and changes logged before provenance was captured have
+// no author stored — say so rather than showing a blank or guessing.
+function osmAuthorLabel(c) {
+  const u = c.osm_meta && c.osm_meta.user;
+  if (u) return `by ${u}`;
+  if (c.type === 'deleted') return 'no OSM author';
+  return 'author unknown — re-sync';
+}
+
 function matchesText(c, text) {
   const t = text.toLowerCase();
-  return (c.name && c.name.toLowerCase().includes(t)) || c.osm_id.includes(t);
+  const author = (c.osm_meta && c.osm_meta.user) || '';
+  return (c.name && c.name.toLowerCase().includes(t)) ||
+    c.osm_id.includes(t) ||
+    author.toLowerCase().includes(t);
 }
 
 function showDetail(change) {
@@ -619,6 +648,8 @@ function showDetail(change) {
   document.getElementById('detail-kind').textContent  = change.kind;
   document.getElementById('detail-osm-id').textContent = `OSM ${change.osm_id}`;
   document.getElementById('detail-fetched').textContent = `fetched ${timeAgo(change.fetchedAt)}`;
+
+  renderAuthor(change);
 
   // Diff table
   renderDiffTable(change);
@@ -645,6 +676,49 @@ function showDetail(change) {
     log.innerHTML = `<strong>${change.status === 'approved' ? 'Accepted' : 'Rejected'}</strong> on ${new Date(change.decidedAt).toLocaleString()}`;
   } else {
     log.classList.add('hidden');
+  }
+}
+
+// Show who made this edit in OSM, with links out to their profile and the
+// changeset so an unfamiliar edit can be checked before it's accepted.
+// Built with DOM nodes + textContent: OSM display names are user-controlled.
+function renderAuthor(change) {
+  const el = document.getElementById('detail-author');
+  if (!el) return;
+  el.innerHTML = '';
+
+  const m = change.osm_meta;
+  if (!m || !m.user) {
+    el.textContent = change.type === 'deleted'
+      ? 'Removed from OSM — no author on the incoming element.'
+      : 'Author not recorded for this change. Re-sync to fetch it from OSM.';
+    el.classList.add('detail-author-muted');
+    return;
+  }
+  el.classList.remove('detail-author-muted');
+
+  el.appendChild(document.createTextNode('Edited in OSM by '));
+  const a = document.createElement('a');
+  a.href = `https://www.openstreetmap.org/user/${encodeURIComponent(m.user)}`;
+  a.target = '_blank';
+  a.rel = 'noopener noreferrer';
+  a.className = 'detail-author-name';
+  a.textContent = m.user;                      // never innerHTML
+  el.appendChild(a);
+
+  if (m.timestamp) {
+    const d = new Date(m.timestamp);
+    if (!isNaN(d)) el.appendChild(document.createTextNode(` on ${d.toLocaleString()}`));
+  }
+  if (m.version) el.appendChild(document.createTextNode(` · v${m.version}`));
+  if (m.changeset) {
+    el.appendChild(document.createTextNode(' · '));
+    const cs = document.createElement('a');
+    cs.href = `https://www.openstreetmap.org/changeset/${encodeURIComponent(m.changeset)}`;
+    cs.target = '_blank';
+    cs.rel = 'noopener noreferrer';
+    cs.textContent = `changeset ${m.changeset}`;
+    el.appendChild(cs);
   }
 }
 
