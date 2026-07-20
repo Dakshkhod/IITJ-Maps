@@ -155,31 +155,42 @@ async function fetchFromOverpass() {
   // abandoned after this and we fall through to the next one.
   const PER_MIRROR_TIMEOUT_MS = 30000;
 
-  let lastErr = null;
+  // Record EVERY mirror's outcome, not just the last one. Overpass mirrors are
+  // flaky and region-dependent (some hosts are blocked on campus/ISP networks),
+  // so "it failed" is useless — the admin needs to see which host did what to
+  // tell a network block apart from a mirror simply being overloaded.
+  const results = [];
   for (const url of OVERPASS_ENDPOINTS) {
+    const host = new URL(url).host;
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), PER_MIRROR_TIMEOUT_MS);
     try {
       const res = await fetch(url, { method: 'POST', headers, body, signal: controller.signal });
       if (!res.ok) {
         // 504 / 429 → try the next mirror instead of giving up
-        lastErr = new Error(`HTTP ${res.status} from ${new URL(url).host}`);
+        results.push(`${host} — HTTP ${res.status}`);
         continue;
       }
       return await res.json();
     } catch (e) {
-      // Network / CORS failure, or our own timeout abort — try the next one
-      lastErr = e.name === 'AbortError'
-        ? new Error(`timeout after ${PER_MIRROR_TIMEOUT_MS / 1000}s from ${new URL(url).host}`)
-        : e;
-      console.warn(`[Overpass] ${new URL(url).host} failed:`, lastErr.message);
+      // Distinguish our own timeout abort from a genuine network/CORS failure.
+      // "Failed to fetch" (a TypeError) means the request never completed at
+      // all: offline, DNS/firewall block, connection refused, or CORS rejection.
+      const reason = e.name === 'AbortError'
+        ? `timed out (>${PER_MIRROR_TIMEOUT_MS / 1000}s)`
+        : (e.message || 'network / CORS error');
+      results.push(`${host} — ${reason}`);
+      console.warn(`[Overpass] ${host} failed:`, e.message || e);
     } finally {
       clearTimeout(timer);
     }
   }
   throw new Error(
-    `All Overpass mirrors failed${lastErr ? ' (last: ' + lastErr.message + ')' : ''}. ` +
-    `Check your internet connection and try again in a minute.`
+    `All ${OVERPASS_ENDPOINTS.length} OpenStreetMap (Overpass) mirrors failed:\n` +
+    results.map(r => '· ' + r).join('\n') +
+    `\n\nThis is almost always a network problem, not the app — you're offline, ` +
+    `or a campus/ISP firewall is blocking these mirrors. Check your connection ` +
+    `and try again in a minute.`
   );
 }
 
@@ -989,13 +1000,43 @@ function timeAgo(iso) {
 }
 function escapeHtml(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
 
-let _toastTimer = null;
+// Persistent status log. Messages stay pinned to the side until the admin
+// dismisses them or they're pushed out of the capped stack — an error or a
+// success no longer flashes past before it can be read. Newest on top.
+const STATUS_MAX = 6;
 function showToast(msg, type = 'info') {
-  const t = document.getElementById('toast');
-  t.className = 'toast visible toast-' + type;
-  t.textContent = msg;
-  clearTimeout(_toastTimer);
-  _toastTimer = setTimeout(() => t.classList.remove('visible'), 2800);
+  const stack = document.getElementById('status-stack');
+  if (!stack) return;
+
+  const card = document.createElement('div');
+  card.className = 'status-card status-' + type;
+
+  const bodyEl = document.createElement('div');
+  bodyEl.className = 'status-body';
+  const msgEl = document.createElement('div');
+  msgEl.className = 'status-msg';
+  msgEl.textContent = msg;              // textContent: never inject markup
+  const timeEl = document.createElement('div');
+  timeEl.className = 'status-time';
+  timeEl.textContent = new Date().toLocaleTimeString();
+  bodyEl.appendChild(msgEl);
+  bodyEl.appendChild(timeEl);
+
+  const close = document.createElement('button');
+  close.className = 'status-close';
+  close.type = 'button';
+  close.setAttribute('aria-label', 'Dismiss');
+  close.textContent = '×';
+  close.addEventListener('click', () => card.remove());
+
+  card.appendChild(bodyEl);
+  card.appendChild(close);
+  stack.prepend(card);                  // newest at the top
+
+  // Cap the stack so messages don't pile up forever; oldest drops off the end.
+  while (stack.children.length > STATUS_MAX) {
+    stack.removeChild(stack.lastElementChild);
+  }
 }
 
 // ============================================================
