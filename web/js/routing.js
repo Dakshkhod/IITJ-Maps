@@ -13,7 +13,144 @@ const IITJRouter = (() => {
     const data = await fetch('/data/road-graph.json?v=35').then(r => r.json());
     _graph = data.graph;
     _nodeCoords = data.nodeCoords;
+    await applyOverlayToGraph();
     _loaded = true;
+  }
+
+  // ── Admin overlay → routing graph ─────────────────────────────
+  // road-graph.json is generated OFFLINE by the pipeline, so an admin-accepted
+  // OSM retag used to change only what the map DREW: the router kept the stale
+  // edge and happily drove cars over ways OSM had retagged to cycleway/footway.
+  // Here the overlay is folded into the in-memory graph at load time.
+  //
+  // The overlay stores raw OSM tags (highway/foot/bicycle) but NOT the derived
+  // routing fields (vehicle_access, drive_confidence, drive_penalty), so those
+  // are re-derived through web/js/road-classifier.js — the very module the
+  // pipeline used to build the graph, so patched edges and baked edges agree.
+  function _nodeId(lng, lat) {
+    return `${Number(lat).toFixed(6)},${Number(lng).toFixed(6)}`;
+  }
+
+  function _isOneWay(v) {
+    const s = String(v == null ? '' : v).trim().toLowerCase();
+    return s === 'yes' || s === '1' || s === 'true';
+  }
+
+  // Mirrors pushEdge() in backend/scripts/road-classifier.js.
+  function _makeEdge(toId, dist, p, onewayReverse) {
+    const t = p.highway_type || p.highway || 'unknown';
+    return {
+      id: toId,
+      dist,
+      osm_id: String(p.osm_id || ''),
+      type: t,
+      highway_type: t,
+      name: p.name || '',
+      navigation_class: p.navigation_class || 'unknown',
+      vehicle_access: p.vehicle_access || 'no',
+      walk_access: p.walk_access || 'yes',
+      drive_confidence: Number(p.drive_confidence || 0),
+      drive_penalty: p.drive_penalty == null ? null : Number(p.drive_penalty),
+      oneway: _isOneWay(p.oneway),
+      oneway_reverse: !!onewayReverse,
+    };
+  }
+
+  async function applyOverlayToGraph() {
+    const stats = { patched: 0, removed: 0, added: 0, isolated: 0, skipped: 0 };
+    if (!_graph || typeof IITJOverlay === 'undefined') return stats;
+
+    const RC = (typeof IITJRoadClassifier !== 'undefined') ? IITJRoadClassifier : null;
+    if (!RC) {
+      // Fail loud but keep routing on the baked graph rather than dying.
+      console.warn('[router] road-classifier.js not loaded — admin overlay NOT applied to routing.');
+      return stats;
+    }
+
+    let overlay;
+    try { overlay = await IITJOverlay.init(); } catch (_) { return stats; }
+    if (!overlay) return stats;
+
+    const overrides = overlay.roads || {};
+    const deleted = new Set(((overlay.deleted && overlay.deleted.roads) || []).map(String));
+    if (!Object.keys(overrides).length && !deleted.size) return stats;
+
+    const classify = (f) => {
+      const cls = RC.classifyRoadFeature(f);
+      return { ...(f.properties || {}), ...cls };
+    };
+
+    // 1. Deleted roads — drop their edges entirely (not routable on foot either).
+    if (deleted.size) {
+      for (const n of Object.keys(_graph)) {
+        const before = _graph[n].length;
+        _graph[n] = _graph[n].filter(e => !deleted.has(String(e.osm_id)));
+        stats.removed += before - _graph[n].length;
+      }
+    }
+
+    // 2. Roads already in the graph — re-classify and patch every edge in place.
+    const present = new Set();
+    for (const n of Object.keys(_graph)) {
+      for (const e of _graph[n]) {
+        const id = String(e.osm_id);
+        const f = overrides[id];
+        if (!f || deleted.has(id)) continue;
+        present.add(id);
+        let p;
+        try { p = classify(f); } catch (_) { stats.skipped++; continue; }
+        const t = p.highway_type || p.highway || e.type;
+        e.type = t;
+        e.highway_type = t;
+        e.navigation_class = p.navigation_class || e.navigation_class;
+        e.vehicle_access = p.vehicle_access || 'no';
+        e.walk_access = p.walk_access || 'yes';
+        e.drive_confidence = Number(p.drive_confidence || 0);
+        e.drive_penalty = p.drive_penalty == null ? null : Number(p.drive_penalty);
+        stats.patched++;
+      }
+    }
+
+    // 3. Net-new roads — splice in using the pipeline's node-id scheme, so a way
+    //    that shares a vertex with an existing road connects to the network.
+    //    One that touches nothing is counted as isolated and reported, never
+    //    silently dropped (it would be unreachable and skew nothing but noise).
+    for (const [id, f] of Object.entries(overrides)) {
+      if (present.has(id) || deleted.has(id)) continue;
+      const g = f && f.geometry;
+      const coords = g && g.type === 'LineString' ? g.coordinates : null;
+      if (!coords || coords.length < 2) { stats.skipped++; continue; }
+
+      let p;
+      try { p = classify(f); } catch (_) { stats.skipped++; continue; }
+      const oneway = _isOneWay(p.oneway);
+      let connects = false;
+
+      for (let i = 0; i < coords.length - 1; i++) {
+        const aId = _nodeId(coords[i][0], coords[i][1]);
+        const bId = _nodeId(coords[i + 1][0], coords[i + 1][1]);
+        if (_graph[aId] || _graph[bId]) connects = true;
+        _nodeCoords[aId] = coords[i];
+        _nodeCoords[bId] = coords[i + 1];
+        if (!_graph[aId]) _graph[aId] = [];
+        if (!_graph[bId]) _graph[bId] = [];
+        const dist = haversine(coords[i][1], coords[i][0], coords[i + 1][1], coords[i + 1][0]);
+        _graph[aId].push(_makeEdge(bId, dist, p, false));
+        _graph[bId].push(_makeEdge(aId, dist, p, oneway));
+        stats.added++;
+      }
+      if (!connects) stats.isolated++;
+    }
+
+    if (stats.patched || stats.removed || stats.added) {
+      console.info('[router] admin overlay applied to routing graph:', stats);
+    }
+    if (stats.isolated) {
+      console.warn(`[router] ${stats.isolated} overlay road(s) share no vertex with the ` +
+        `existing network — they are added but unreachable. Re-run the offline ` +
+        `pipeline (merge-roads.js) to stitch them in properly.`);
+    }
+    return stats;
   }
 
   // ── Geometry helpers ──────────────────────────────────────────
