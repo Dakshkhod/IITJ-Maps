@@ -10,7 +10,7 @@ const IITJRouter = (() => {
   let _loaded = false;
 
   async function init() {
-    const data = await fetch('/data/road-graph.json?v=34').then(r => r.json());
+    const data = await fetch('/data/road-graph.json?v=35').then(r => r.json());
     _graph = data.graph;
     _nodeCoords = data.nodeCoords;
     _loaded = true;
