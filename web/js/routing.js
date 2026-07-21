@@ -778,20 +778,65 @@ const IITJRouter = (() => {
         : { lat: lastNc[1], lng: lastNc[0], t: 0 };
 
       const startNodeIdx = secondNc && startPt.t > 0.35 ? 1 : 0;
+
+      // The destination often sits alongside a road that CONTINUES past the
+      // final graph node rather than the segment the route arrived on, and
+      // projectOntoSegment clamps to that arrival segment — so the line stopped
+      // at the node and visibly fell short of the pin. Look one edge beyond the
+      // end: if the destination projects onto a road the route may legally
+      // carry on along, follow it to that projection. Only a strictly closer
+      // (>1 m) landing wins, so ordinary arrivals are left untouched.
+      // Walk up to TAIL_MAX_HOPS edges: when the projection lands on the far
+      // node the destination is still further along, so traverse it and look
+      // again. Bounded so a bad snap can't send the line wandering the campus.
+      const TAIL_MAX_HOPS = 3;
+      let tailPt = null;
+      const tailCoords = [];
+      let bestGap = haversine(toLat, toLng, endPt.lat, endPt.lng);
+      let tailNodeId = toNode;
+      let tailPrevId = nodeList.length > 1 ? nodeList[nodeList.length - 2] : null;
+      const tailSeen = new Set([toNode]);
+      for (let hop = 0; hop < TAIL_MAX_HOPS; hop++) {
+        const anchor = _nodeCoords[tailNodeId];
+        if (!anchor) break;
+        let step = null;
+        for (const e of (_graph[tailNodeId] || [])) {
+          if (e.id === tailPrevId || tailSeen.has(e.id)) continue;   // never double back
+          if (!isAllowedEdge(e, mode, result.opts || {})) continue;
+          const nb = _nodeCoords[e.id];
+          if (!nb) continue;
+          const p = projectOntoSegment(toLat, toLng, anchor[1], anchor[0], nb[1], nb[0]);
+          if (p.t <= 0) continue;                                    // no progress along it
+          const gap = haversine(toLat, toLng, p.lat, p.lng);
+          if (gap < bestGap - 1 && (!step || gap < step.gap)) step = { gap, p, id: e.id, nb };
+        }
+        if (!step) break;
+        bestGap = step.gap;
+        tailPt = step.p;
+        // Landed short of the far node — that projection is the end of the line.
+        if (step.p.t < 0.999) break;
+        tailCoords.push(step.nb);
+        tailSeen.add(step.id);
+        tailPrevId = tailNodeId;
+        tailNodeId = step.id;
+      }
+
       // Symmetric to the start: when the destination projects before the last
       // graph node (the snap node sits past the building, e.g. a berm POI
       // between two road nodes), end at the projection instead of routing all
       // the way to that node and visibly backtracking to it. Drop the node only
       // when keeping it would add a noticeable (>4 m) overshoot/backtrack.
+      // A tail extension needs that node as its anchor, so keep it in that case.
       const lastSegLen = prevNc ? haversine(prevNc[1], prevNc[0], lastNc[1], lastNc[0]) : 0;
-      const endNodeIdx = (prevNc && nodeList.length >= 3 && (1 - endPt.t) * lastSegLen > 4)
+      const endNodeIdx = (!tailPt && prevNc && nodeList.length >= 3 && (1 - endPt.t) * lastSegLen > 4)
         ? nodeList.length - 2 : nodeList.length - 1;
       coords = [[startPt.lng, startPt.lat]];
       for (let i = startNodeIdx; i <= endNodeIdx; i++) {
         const c = _nodeCoords[nodeList[i]];
         if (c) coords.push(c);
       }
-      coords.push([endPt.lng, endPt.lat]);
+      for (const c of tailCoords) coords.push(c);
+      coords.push(tailPt ? [tailPt.lng, tailPt.lat] : [endPt.lng, endPt.lat]);
 
       // Drop consecutive duplicate / near-duplicate vertices (avoids zero-length u-turn legs).
       coords = coords.filter((c, i) => {
