@@ -1,15 +1,15 @@
 {
-  "generated_at": "2026-06-19T11:25:19.018Z",
+  "generated_at": "2026-07-21T12:17:06.527Z",
   "summary": {
     "campus_main_road": 5,
     "major_vehicle_road": 13,
-    "campus_service_connector": 145,
+    "campus_service_connector": 140,
     "campus_service_road": 12,
     "vehicle_connector": 2,
-    "pedestrian_path": 59,
+    "pedestrian_path": 60,
     "campus_standard_road": 20,
     "maintenance_track": 3,
-    "cycle_pedestrian": 18
+    "cycle_pedestrian": 26
   },
   "uncertain_vehicle_segments": [
     {
@@ -40,7 +40,7 @@
       "vehicle_access": "yes",
       "drive_confidence": 0.64,
       "drive_note": "Drivable campus service road; penalized below main/residential roads.",
-      "length_m": 36
+      "length_m": 38
     },
     {
       "osm_id": "603603477",
@@ -125,6 +125,16 @@
       "length_m": 227
     },
     {
+      "osm_id": "1412392552",
+      "name": "cycleway",
+      "highway_type": "cycleway",
+      "navigation_class": "cycle_pedestrian",
+      "vehicle_access": "no",
+      "drive_confidence": 0,
+      "drive_note": "cycleway is excluded from vehicle routing.",
+      "length_m": 214
+    },
+    {
       "osm_id": "1412392585",
       "name": "cycleway",
       "highway_type": "cycleway",
@@ -143,6 +153,16 @@
       "drive_confidence": 0,
       "drive_note": "cycleway is excluded from vehicle routing.",
       "length_m": 144
+    },
+    {
+      "osm_id": "1412392540",
+      "name": "cycleway",
+      "highway_type": "cycleway",
+      "navigation_class": "cycle_pedestrian",
+      "vehicle_access": "no",
+      "drive_confidence": 0,
+      "drive_note": "cycleway is excluded from vehicle routing.",
+      "length_m": 119
     },
     {
       "osm_id": "1412392587",
@@ -195,6 +215,26 @@
       "length_m": 106
     },
     {
+      "osm_id": "1525719375",
+      "name": "cycleway",
+      "highway_type": "cycleway",
+      "navigation_class": "cycle_pedestrian",
+      "vehicle_access": "no",
+      "drive_confidence": 0,
+      "drive_note": "cycleway is excluded from vehicle routing.",
+      "length_m": 102
+    },
+    {
+      "osm_id": "1412392539",
+      "name": "cycleway",
+      "highway_type": "cycleway",
+      "navigation_class": "cycle_pedestrian",
+      "vehicle_access": "no",
+      "drive_confidence": 0,
+      "drive_note": "cycleway is excluded from vehicle routing.",
+      "length_m": 99
+    },
+    {
       "osm_id": "1529899552",
       "name": "cycleway",
       "highway_type": "cycleway",
@@ -205,6 +245,26 @@
       "length_m": 95
     },
     {
+      "osm_id": "1412392550",
+      "name": "cycleway",
+      "highway_type": "cycleway",
+      "navigation_class": "cycle_pedestrian",
+      "vehicle_access": "no",
+      "drive_confidence": 0,
+      "drive_note": "cycleway is excluded from vehicle routing.",
+      "length_m": 68
+    },
+    {
+      "osm_id": "1541061821",
+      "name": "cycleway",
+      "highway_type": "cycleway",
+      "navigation_class": "cycle_pedestrian",
+      "vehicle_access": "no",
+      "drive_confidence": 0,
+      "drive_note": "cycleway is excluded from vehicle routing.",
+      "length_m": 59
+    },
+    {
       "osm_id": "1412392593",
       "name": "cycleway",
       "highway_type": "cycleway",
@@ -213,6 +273,26 @@
       "drive_confidence": 0,
       "drive_note": "cycleway is excluded from vehicle routing.",
       "length_m": 55
+    },
+    {
+      "osm_id": "1412392551",
+      "name": "cycleway",
+      "highway_type": "cycleway",
+      "navigation_class": "cycle_pedestrian",
+      "vehicle_access": "no",
+      "drive_confidence": 0,
+      "drive_note": "cycleway is excluded from vehicle routing.",
+      "length_m": 47
+    },
+    {
+      "osm_id": "1412392549",
+      "name": "cycleway",
+      "highway_type": "cycleway",
+      "navigation_class": "cycle_pedestrian",
+      "vehicle_access": "no",
+      "drive_confidence": 0,
+      "drive_note": "cycleway is excluded from vehicle routing.",
+      "length_m": 46
     },
     {
       "osm_id": "1412392591",
@@ -272,7 +352,7 @@
       "vehicle_access": "no",
       "drive_confidence": 0,
       "drive_note": "footway is excluded from vehicle routing.",
-      "length_m": 379
+      "length_m": 372
     },
     {
       "osm_id": "1421117916",
@@ -305,7 +385,7 @@
       "length_m": 85
     },
     {
-      "osm_id": "914918549",
+      "osm_id": "1529657262",
       "name": "footway",
       "highway_type": "footway",
       "navigation_class": "pedestrian_path",
@@ -315,14 +395,14 @@
       "length_m": 78
     },
     {
-      "osm_id": "1529657262",
+      "osm_id": "914918549",
       "name": "footway",
       "highway_type": "footway",
       "navigation_class": "pedestrian_path",
       "vehicle_access": "no",
       "drive_confidence": 0,
       "drive_note": "footway is excluded from vehicle routing.",
-      "length_m": 78
+      "length_m": 72
     },
     {
       "osm_id": "795434513",
@@ -545,16 +625,6 @@
       "length_m": 103
     },
     {
-      "osm_id": "1529657256",
-      "name": "path",
-      "highway_type": "path",
-      "navigation_class": "pedestrian_path",
-      "vehicle_access": "no",
-      "drive_confidence": 0,
-      "drive_note": "path is excluded from vehicle routing.",
-      "length_m": 98
-    },
-    {
       "osm_id": "1529641605",
       "name": "path",
       "highway_type": "path",
@@ -573,6 +643,16 @@
       "drive_confidence": 0,
       "drive_note": "path is excluded from vehicle routing.",
       "length_m": 59
+    },
+    {
+      "osm_id": "1530265285",
+      "name": "path",
+      "highway_type": "path",
+      "navigation_class": "pedestrian_path",
+      "vehicle_access": "no",
+      "drive_confidence": 0,
+      "drive_note": "path is excluded from vehicle routing.",
+      "length_m": 55
     },
     {
       "osm_id": "1412392560",
@@ -603,6 +683,16 @@
       "drive_confidence": 0,
       "drive_note": "path is excluded from vehicle routing.",
       "length_m": 36
+    },
+    {
+      "osm_id": "1529657256",
+      "name": "path",
+      "highway_type": "path",
+      "navigation_class": "pedestrian_path",
+      "vehicle_access": "no",
+      "drive_confidence": 0,
+      "drive_note": "path is excluded from vehicle routing.",
+      "length_m": 34
     },
     {
       "osm_id": "1412392562",

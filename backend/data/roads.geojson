@@ -1989,8 +1989,8 @@
             26.4775036
           ],
           [
-            73.1156875,
-            26.47812
+            73.1157555,
+            26.4782169
           ],
           [
             73.1160052,
@@ -2569,8 +2569,8 @@
             26.4712153
           ],
           [
-            73.11874579328418,
-            26.471495665130764
+            73.1187458,
+            26.4714957
           ],
           [
             73.1187694,
@@ -3325,7 +3325,7 @@
         "width": null,
         "source": "osm",
         "is_campus": true,
-        "length_m": 36,
+        "length_m": 38,
         "walk_access": "yes",
         "vehicle_access": "yes",
         "navigation_class": "campus_service_connector",
@@ -3349,8 +3349,8 @@
             26.4656865
           ],
           [
-            73.1157428,
-            26.4656625
+            73.1157609,
+            26.4656665
           ]
         ]
       }
@@ -3409,6 +3409,10 @@
           [
             73.1154275,
             26.4663446
+          ],
+          [
+            73.1155231,
+            26.4664771
           ],
           [
             73.1156218,
@@ -3475,6 +3479,10 @@
           [
             73.1162245,
             26.4669351
+          ],
+          [
+            73.1157932,
+            26.4663307
           ],
           [
             73.115442,
@@ -6237,7 +6245,7 @@
         "width": null,
         "source": "osm",
         "is_campus": true,
-        "length_m": 519,
+        "length_m": 518,
         "walk_access": "yes",
         "vehicle_access": "yes",
         "navigation_class": "campus_service_connector",
@@ -6249,20 +6257,20 @@
         "type": "LineString",
         "coordinates": [
           [
-            73.1156875,
-            26.47812
+            73.1157555,
+            26.4782169
           ],
           [
-            73.1153615,
-            26.4783459
+            73.1153414,
+            26.478391
           ],
           [
-            73.1151373,
-            26.4785131
+            73.1151549,
+            26.4785244
           ],
           [
-            73.1150066,
-            26.4786344
+            73.1150217,
+            26.4786457
           ],
           [
             73.1148852,
@@ -7307,7 +7315,7 @@
         "width": null,
         "source": "osm",
         "is_campus": true,
-        "length_m": 78,
+        "length_m": 72,
         "walk_access": "yes",
         "vehicle_access": "no",
         "navigation_class": "pedestrian_path",
@@ -7329,10 +7337,6 @@
           [
             73.1111491,
             26.4740095
-          ],
-          [
-            73.1110682,
-            26.473989
           ],
           [
             73.1111001,
@@ -11335,8 +11339,8 @@
       "type": "Feature",
       "properties": {
         "osm_id": "1412392539",
-        "name": "service",
-        "highway_type": "service",
+        "name": "cycleway",
+        "highway_type": "cycleway",
         "surface": null,
         "lit": null,
         "lanes": null,
@@ -11346,18 +11350,18 @@
         "vehicle": null,
         "motor_vehicle": null,
         "motorcar": null,
-        "foot": null,
-        "bicycle": null,
+        "foot": "designated",
+        "bicycle": "designated",
         "width": null,
         "source": "osm",
         "is_campus": true,
         "length_m": 99,
         "walk_access": "yes",
-        "vehicle_access": "yes",
-        "navigation_class": "campus_service_connector",
-        "drive_confidence": 0.7,
-        "drive_penalty": 2.5,
-        "drive_note": "Drivable campus service road; penalized below main/residential roads."
+        "vehicle_access": "no",
+        "navigation_class": "cycle_pedestrian",
+        "drive_confidence": 0,
+        "drive_penalty": null,
+        "drive_note": "cycleway is excluded from vehicle routing."
       },
       "geometry": {
         "type": "LineString",
@@ -11393,8 +11397,8 @@
       "type": "Feature",
       "properties": {
         "osm_id": "1412392540",
-        "name": "service",
-        "highway_type": "service",
+        "name": "cycleway",
+        "highway_type": "cycleway",
         "surface": null,
         "lit": null,
         "lanes": null,
@@ -11404,18 +11408,18 @@
         "vehicle": null,
         "motor_vehicle": null,
         "motorcar": null,
-        "foot": null,
-        "bicycle": null,
+        "foot": "designated",
+        "bicycle": "designated",
         "width": null,
         "source": "osm",
         "is_campus": true,
         "length_m": 119,
         "walk_access": "yes",
-        "vehicle_access": "yes",
-        "navigation_class": "campus_service_connector",
-        "drive_confidence": 0.7,
-        "drive_penalty": 2.5,
-        "drive_note": "Drivable campus service road; penalized below main/residential roads."
+        "vehicle_access": "no",
+        "navigation_class": "cycle_pedestrian",
+        "drive_confidence": 0,
+        "drive_penalty": null,
+        "drive_note": "cycleway is excluded from vehicle routing."
       },
       "geometry": {
         "type": "LineString",
@@ -11729,7 +11733,7 @@
         "width": null,
         "source": "osm",
         "is_campus": true,
-        "length_m": 350,
+        "length_m": 291,
         "walk_access": "yes",
         "vehicle_access": "yes",
         "navigation_class": "campus_service_connector",
@@ -11759,10 +11763,6 @@
           [
             73.1149068,
             26.4740821
-          ],
-          [
-            73.114616,
-            26.4736155
           ]
         ]
       }
@@ -11771,8 +11771,8 @@
       "type": "Feature",
       "properties": {
         "osm_id": "1412392549",
-        "name": "service",
-        "highway_type": "service",
+        "name": "cycleway",
+        "highway_type": "cycleway",
         "surface": null,
         "lit": null,
         "lanes": null,
@@ -11782,18 +11782,18 @@
         "vehicle": null,
         "motor_vehicle": null,
         "motorcar": null,
-        "foot": null,
-        "bicycle": null,
+        "foot": "designated",
+        "bicycle": "designated",
         "width": null,
         "source": "osm",
         "is_campus": true,
-        "length_m": 54,
+        "length_m": 46,
         "walk_access": "yes",
-        "vehicle_access": "yes",
-        "navigation_class": "campus_service_connector",
-        "drive_confidence": 0.7,
-        "drive_penalty": 2.5,
-        "drive_note": "Drivable campus service road; penalized below main/residential roads."
+        "vehicle_access": "no",
+        "navigation_class": "cycle_pedestrian",
+        "drive_confidence": 0,
+        "drive_penalty": null,
+        "drive_note": "cycleway is excluded from vehicle routing."
       },
       "geometry": {
         "type": "LineString",
@@ -11805,10 +11805,6 @@
           [
             73.1151442,
             26.4744385
-          ],
-          [
-            73.115071,
-            26.4744702
           ]
         ]
       }
@@ -11817,8 +11813,8 @@
       "type": "Feature",
       "properties": {
         "osm_id": "1412392550",
-        "name": "service",
-        "highway_type": "service",
+        "name": "cycleway",
+        "highway_type": "cycleway",
         "surface": null,
         "lit": null,
         "lanes": null,
@@ -11828,18 +11824,18 @@
         "vehicle": null,
         "motor_vehicle": null,
         "motorcar": null,
-        "foot": null,
-        "bicycle": null,
+        "foot": "designated",
+        "bicycle": "designated",
         "width": null,
         "source": "osm",
         "is_campus": true,
         "length_m": 68,
         "walk_access": "yes",
-        "vehicle_access": "yes",
-        "navigation_class": "campus_service_connector",
-        "drive_confidence": 0.7,
-        "drive_penalty": 2.5,
-        "drive_note": "Drivable campus service road; penalized below main/residential roads."
+        "vehicle_access": "no",
+        "navigation_class": "cycle_pedestrian",
+        "drive_confidence": 0,
+        "drive_penalty": null,
+        "drive_note": "cycleway is excluded from vehicle routing."
       },
       "geometry": {
         "type": "LineString",
@@ -11867,8 +11863,8 @@
       "type": "Feature",
       "properties": {
         "osm_id": "1412392551",
-        "name": "service",
-        "highway_type": "service",
+        "name": "cycleway",
+        "highway_type": "cycleway",
         "surface": null,
         "lit": null,
         "lanes": null,
@@ -11878,18 +11874,18 @@
         "vehicle": null,
         "motor_vehicle": null,
         "motorcar": null,
-        "foot": null,
-        "bicycle": null,
+        "foot": "designated",
+        "bicycle": "designated",
         "width": null,
         "source": "osm",
         "is_campus": true,
         "length_m": 47,
         "walk_access": "yes",
-        "vehicle_access": "yes",
-        "navigation_class": "campus_service_connector",
-        "drive_confidence": 0.7,
-        "drive_penalty": 2.5,
-        "drive_note": "Drivable campus service road; penalized below main/residential roads."
+        "vehicle_access": "no",
+        "navigation_class": "cycle_pedestrian",
+        "drive_confidence": 0,
+        "drive_penalty": null,
+        "drive_note": "cycleway is excluded from vehicle routing."
       },
       "geometry": {
         "type": "LineString",
@@ -11913,8 +11909,8 @@
       "type": "Feature",
       "properties": {
         "osm_id": "1412392552",
-        "name": "service",
-        "highway_type": "service",
+        "name": "cycleway",
+        "highway_type": "cycleway",
         "surface": null,
         "lit": null,
         "lanes": null,
@@ -11924,18 +11920,18 @@
         "vehicle": null,
         "motor_vehicle": null,
         "motorcar": null,
-        "foot": null,
-        "bicycle": null,
+        "foot": "designated",
+        "bicycle": "designated",
         "width": null,
         "source": "osm",
         "is_campus": true,
         "length_m": 214,
         "walk_access": "yes",
-        "vehicle_access": "yes",
-        "navigation_class": "campus_service_connector",
-        "drive_confidence": 0.7,
-        "drive_penalty": 2.5,
-        "drive_note": "Drivable campus service road; penalized below main/residential roads."
+        "vehicle_access": "no",
+        "navigation_class": "cycle_pedestrian",
+        "drive_confidence": 0,
+        "drive_penalty": null,
+        "drive_note": "cycleway is excluded from vehicle routing."
       },
       "geometry": {
         "type": "LineString",
@@ -12425,10 +12421,6 @@
           [
             73.1170592,
             26.4710397
-          ],
-          [
-            73.117096,
-            26.4710863
           ],
           [
             73.1171779,
@@ -13739,10 +13731,6 @@
             26.4740021
           ],
           [
-            73.1110682,
-            26.473989
-          ],
-          [
             73.1111001,
             26.4739848
           ],
@@ -15019,8 +15007,8 @@
         "type": "LineString",
         "coordinates": [
           [
-            73.11818341118048,
-            26.47660769686566
+            73.1181834,
+            26.4766077
           ],
           [
             73.1182719,
@@ -17289,8 +17277,8 @@
       "type": "Feature",
       "properties": {
         "osm_id": "1525719375",
-        "name": "service",
-        "highway_type": "service",
+        "name": "cycleway",
+        "highway_type": "cycleway",
         "surface": null,
         "lit": null,
         "lanes": null,
@@ -17300,18 +17288,18 @@
         "vehicle": null,
         "motor_vehicle": null,
         "motorcar": null,
-        "foot": null,
-        "bicycle": null,
+        "foot": "designated",
+        "bicycle": "designated",
         "width": null,
         "source": "osm",
         "is_campus": true,
         "length_m": 102,
         "walk_access": "yes",
-        "vehicle_access": "yes",
-        "navigation_class": "campus_service_connector",
-        "drive_confidence": 0.7,
-        "drive_penalty": 2.5,
-        "drive_note": "Drivable campus service road; penalized below main/residential roads."
+        "vehicle_access": "no",
+        "navigation_class": "cycle_pedestrian",
+        "drive_confidence": 0,
+        "drive_penalty": null,
+        "drive_note": "cycleway is excluded from vehicle routing."
       },
       "geometry": {
         "type": "LineString",
@@ -18891,7 +18879,7 @@
         "width": null,
         "source": "osm",
         "is_campus": true,
-        "length_m": 98,
+        "length_m": 34,
         "walk_access": "yes",
         "vehicle_access": "no",
         "navigation_class": "pedestrian_path",
@@ -18913,18 +18901,6 @@
           [
             73.1166021,
             26.4718579
-          ],
-          [
-            73.1165115,
-            26.4718925
-          ],
-          [
-            73.1164741,
-            26.4714676
-          ],
-          [
-            73.1164352,
-            26.4714125
           ]
         ]
       }
@@ -19175,7 +19151,7 @@
         "width": null,
         "source": "osm",
         "is_campus": true,
-        "length_m": 379,
+        "length_m": 372,
         "walk_access": "yes",
         "vehicle_access": "no",
         "navigation_class": "pedestrian_path",
@@ -19245,10 +19221,6 @@
           [
             73.1170592,
             26.4710397
-          ],
-          [
-            73.117096,
-            26.4710863
           ]
         ]
       }
@@ -19564,7 +19536,53 @@
     {
       "type": "Feature",
       "properties": {
-        "osm_id": "13943828020",
+        "osm_id": "1530265285",
+        "name": "path",
+        "highway_type": "path",
+        "surface": null,
+        "lit": null,
+        "lanes": null,
+        "oneway": null,
+        "service": null,
+        "access": null,
+        "vehicle": null,
+        "motor_vehicle": null,
+        "motorcar": null,
+        "foot": null,
+        "bicycle": null,
+        "width": null,
+        "source": "osm",
+        "is_campus": true,
+        "length_m": 55,
+        "walk_access": "yes",
+        "vehicle_access": "no",
+        "navigation_class": "pedestrian_path",
+        "drive_confidence": 0,
+        "drive_penalty": null,
+        "drive_note": "path is excluded from vehicle routing."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            73.1165115,
+            26.4718925
+          ],
+          [
+            73.1164741,
+            26.4714676
+          ],
+          [
+            73.1164352,
+            26.4714125
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "osm_id": "1530809138",
         "name": "service",
         "highway_type": "service",
         "surface": null,
@@ -19593,16 +19611,142 @@
         "type": "LineString",
         "coordinates": [
           [
-            73.11845645537363,
-            26.471614791020848
+            73.1184855,
+            26.4715932
           ],
           [
-            73.1185074075991,
-            26.47163942723182
+            73.1185074,
+            26.4716394
           ],
           [
-            73.11874579328418,
-            26.471495665130764
+            73.1187458,
+            26.4714957
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "osm_id": "1541061821",
+        "name": "cycleway",
+        "highway_type": "cycleway",
+        "surface": null,
+        "lit": null,
+        "lanes": null,
+        "oneway": null,
+        "service": null,
+        "access": null,
+        "vehicle": null,
+        "motor_vehicle": null,
+        "motorcar": null,
+        "foot": "designated",
+        "bicycle": "designated",
+        "width": null,
+        "source": "osm",
+        "is_campus": true,
+        "length_m": 59,
+        "walk_access": "yes",
+        "vehicle_access": "no",
+        "navigation_class": "cycle_pedestrian",
+        "drive_confidence": 0,
+        "drive_penalty": null,
+        "drive_note": "cycleway is excluded from vehicle routing."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            73.1149068,
+            26.4740821
+          ],
+          [
+            73.114616,
+            26.4736155
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "osm_id": "1541061822",
+        "name": "service",
+        "highway_type": "service",
+        "surface": null,
+        "lit": null,
+        "lanes": null,
+        "oneway": null,
+        "service": null,
+        "access": null,
+        "vehicle": null,
+        "motor_vehicle": null,
+        "motorcar": null,
+        "foot": null,
+        "bicycle": null,
+        "width": null,
+        "source": "osm",
+        "is_campus": true,
+        "length_m": 8,
+        "walk_access": "yes",
+        "vehicle_access": "yes",
+        "navigation_class": "campus_service_connector",
+        "drive_confidence": 0.7,
+        "drive_penalty": 2.5,
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            73.1151442,
+            26.4744385
+          ],
+          [
+            73.115071,
+            26.4744702
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "osm_id": "1541081486",
+        "name": "service",
+        "highway_type": "service",
+        "surface": null,
+        "lit": null,
+        "lanes": null,
+        "oneway": null,
+        "service": null,
+        "access": null,
+        "vehicle": null,
+        "motor_vehicle": null,
+        "motorcar": null,
+        "foot": null,
+        "bicycle": null,
+        "width": null,
+        "source": "osm",
+        "is_campus": true,
+        "length_m": 31,
+        "walk_access": "yes",
+        "vehicle_access": "yes",
+        "navigation_class": "campus_service_connector",
+        "drive_confidence": 0.7,
+        "drive_penalty": 2.5,
+        "drive_note": "Drivable campus service road; penalized below main/residential roads."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            73.1155231,
+            26.4664771
+          ],
+          [
+            73.1157932,
+            26.4663307
           ]
         ]
       }

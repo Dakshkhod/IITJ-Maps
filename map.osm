@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<osm version="0.6" generator="openstreetmap-cgimap 2.1.0 (1311 spike-06.openstreetmap.org)" copyright="OpenStreetMap and contributors" attribution="http://www.openstreetmap.org/copyright" license="http://opendatacommons.org/licenses/odbl/1-0/" timestamp="2026-06-19T11:25:17Z">
+<osm version="0.6" generator="openstreetmap-cgimap 2.1.0 (908594 spike-06.openstreetmap.org)" copyright="OpenStreetMap and contributors" attribution="http://www.openstreetmap.org/copyright" license="http://opendatacommons.org/licenses/odbl/1-0/">
  <bounds minlat="26.4584700" minlon="73.1076200" maxlat="26.4867500" maxlon="73.1259900"/>
  <node id="1617002812" visible="true" version="4" changeset="84024947" timestamp="2020-04-23T22:12:40Z" user="FvGordon" uid="161619" lat="26.4506192" lon="73.0944446"/>
  <node id="1617002813" visible="true" version="4" changeset="84024947" timestamp="2020-04-23T22:12:40Z" user="FvGordon" uid="161619" lat="26.4513150" lon="73.0956796"/>
@@ -441,7 +441,7 @@
  <node id="7220643231" visible="true" version="4" changeset="116658648" timestamp="2022-01-27T10:11:20Z" user="Ashish_kumar_iitj" uid="14952957" lat="26.4752572" lon="73.1147068"/>
  <node id="7220643232" visible="true" version="3" changeset="168507665" timestamp="2025-07-05T03:21:33Z" user="maskedkd" uid="23067513" lat="26.4768352" lon="73.1151149"/>
  <node id="7220643233" visible="true" version="2" changeset="184129666" timestamp="2026-06-15T10:16:05Z" user="VikasChoudhary" uid="24138550" lat="26.4775036" lon="73.1153051"/>
- <node id="7220643234" visible="true" version="2" changeset="184129666" timestamp="2026-06-15T10:16:05Z" user="VikasChoudhary" uid="24138550" lat="26.4781200" lon="73.1156875"/>
+ <node id="7220643234" visible="true" version="3" changeset="186077421" timestamp="2026-07-20T18:43:59Z" user="VikasChoudhary" uid="24138550" lat="26.4782169" lon="73.1157555"/>
  <node id="7220643235" visible="true" version="4" changeset="184129666" timestamp="2026-06-15T10:16:05Z" user="VikasChoudhary" uid="24138550" lat="26.4789042" lon="73.1161837"/>
  <node id="7220643236" visible="true" version="3" changeset="184129666" timestamp="2026-06-15T10:16:05Z" user="VikasChoudhary" uid="24138550" lat="26.4790851" lon="73.1162954"/>
  <node id="7220643237" visible="true" version="4" changeset="184129666" timestamp="2026-06-15T10:16:05Z" user="VikasChoudhary" uid="24138550" lat="26.4794488" lon="73.1164820"/>
@@ -1059,7 +1059,7 @@
  <node id="7439767610" visible="true" version="2" changeset="100675106" timestamp="2021-03-09T04:58:01Z" user="VLD123" uid="9124228" lat="26.4700107" lon="73.1187582"/>
  <node id="7439767611" visible="true" version="1" changeset="84024947" timestamp="2020-04-23T22:12:38Z" user="FvGordon" uid="161619" lat="26.4699565" lon="73.1186373"/>
  <node id="7439767612" visible="true" version="1" changeset="84024947" timestamp="2020-04-23T22:12:38Z" user="FvGordon" uid="161619" lat="26.4698845" lon="73.1185512"/>
- <node id="7439767613" visible="true" version="2" changeset="100675106" timestamp="2021-03-09T04:58:01Z" user="VLD123" uid="9124228" lat="26.4656625" lon="73.1157428"/>
+ <node id="7439767613" visible="true" version="3" changeset="186077421" timestamp="2026-07-20T18:43:59Z" user="VikasChoudhary" uid="24138550" lat="26.4656665" lon="73.1157609"/>
  <node id="7439767614" visible="true" version="1" changeset="84024947" timestamp="2020-04-23T22:12:38Z" user="FvGordon" uid="161619" lat="26.4657371" lon="73.1155842"/>
  <node id="7439767615" visible="true" version="1" changeset="84024947" timestamp="2020-04-23T22:12:38Z" user="FvGordon" uid="161619" lat="26.4658386" lon="73.1154420"/>
  <node id="7439767616" visible="true" version="1" changeset="84024947" timestamp="2020-04-23T22:12:38Z" user="FvGordon" uid="161619" lat="26.4659228" lon="73.1151229"/>
@@ -1203,10 +1203,6 @@
  <node id="7454519148" visible="true" version="1" changeset="84213324" timestamp="2020-04-27T17:39:02Z" user="Heinz_V" uid="91490" lat="26.4620923" lon="73.1274891"/>
  <node id="7454519149" visible="true" version="1" changeset="84213324" timestamp="2020-04-27T17:39:02Z" user="Heinz_V" uid="91490" lat="26.4616601" lon="73.1270599"/>
  <node id="7454519150" visible="true" version="1" changeset="84213324" timestamp="2020-04-27T17:39:02Z" user="Heinz_V" uid="91490" lat="26.4614008" lon="73.1266308"/>
- <node id="8459998638" visible="true" version="2" changeset="100024908" timestamp="2021-02-26T06:44:03Z" user="VLD134" uid="10352924" lat="26.4879304" lon="73.1199680"/>
- 
- 
- 
  <node id="8460099951" visible="true" version="1" changeset="100023781" timestamp="2021-02-26T06:27:49Z" user="VLD134" uid="10352924" lat="26.4862070" lon="73.1219950"/>
  <node id="8460099952" visible="true" version="1" changeset="100023781" timestamp="2021-02-26T06:27:49Z" user="VLD134" uid="10352924" lat="26.4861662" lon="73.1217674"/>
  <node id="8460099953" visible="true" version="1" changeset="100023781" timestamp="2021-02-26T06:27:49Z" user="VLD134" uid="10352924" lat="26.4861323" lon="73.1215360"/>
@@ -1246,58 +1242,6 @@
  <node id="8460099987" visible="true" version="1" changeset="100023781" timestamp="2021-02-26T06:27:49Z" user="VLD134" uid="10352924" lat="26.4865003" lon="73.1237608"/>
  <node id="8460099988" visible="true" version="1" changeset="100023781" timestamp="2021-02-26T06:27:49Z" user="VLD134" uid="10352924" lat="26.4865099" lon="73.1236455"/>
  <node id="8460099989" visible="true" version="1" changeset="100023781" timestamp="2021-02-26T06:27:49Z" user="VLD134" uid="10352924" lat="26.4864888" lon="73.1234440"/>
- 
- 
- 
- 
- 
- 
- 
- 
- 
- <node id="8460138453" visible="true" version="1" changeset="100024908" timestamp="2021-02-26T06:44:03Z" user="VLD134" uid="10352924" lat="26.4879640" lon="73.1203733"/>
- 
- 
- 
- <node id="8460138482" visible="true" version="1" changeset="100024908" timestamp="2021-02-26T06:44:03Z" user="VLD134" uid="10352924" lat="26.4880289" lon="73.1211568"/>
- 
- <node id="8460138484" visible="true" version="1" changeset="100024908" timestamp="2021-02-26T06:44:03Z" user="VLD134" uid="10352924" lat="26.4880974" lon="73.1219841"/>
- 
- <node id="8460138486" visible="true" version="1" changeset="100024908" timestamp="2021-02-26T06:44:03Z" user="VLD134" uid="10352924" lat="26.4881361" lon="73.1224517"/>
- 
- 
- 
- 
- <node id="8460138492" visible="true" version="1" changeset="100024908" timestamp="2021-02-26T06:44:03Z" user="VLD134" uid="10352924" lat="26.4881781" lon="73.1229596"/>
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
  <node id="8498673341" visible="true" version="1" changeset="100672504" timestamp="2021-03-09T04:17:45Z" user="VLD123" uid="9124228" lat="26.4699291" lon="73.1176572"/>
  <node id="8498673342" visible="true" version="1" changeset="100672504" timestamp="2021-03-09T04:17:45Z" user="VLD123" uid="9124228" lat="26.4703881" lon="73.1169027"/>
  <node id="8498673343" visible="true" version="1" changeset="100672504" timestamp="2021-03-09T04:17:45Z" user="VLD123" uid="9124228" lat="26.4703039" lon="73.1179334"/>
@@ -1602,8 +1546,8 @@
  <node id="8498813819" visible="true" version="1" changeset="100677555" timestamp="2021-03-09T05:35:53Z" user="VLD123" uid="9124228" lat="26.4786956" lon="73.1177424"/>
  <node id="8498813820" visible="true" version="1" changeset="100677555" timestamp="2021-03-09T05:35:53Z" user="VLD123" uid="9124228" lat="26.4793705" lon="73.1180950"/>
  <node id="8498813821" visible="true" version="1" changeset="100677555" timestamp="2021-03-09T05:35:53Z" user="VLD123" uid="9124228" lat="26.4792741" lon="73.1180816"/>
- <node id="8498813822" visible="true" version="1" changeset="100677555" timestamp="2021-03-09T05:35:53Z" user="VLD123" uid="9124228" lat="26.4783459" lon="73.1153615"/>
- <node id="8498813823" visible="true" version="1" changeset="100677555" timestamp="2021-03-09T05:35:53Z" user="VLD123" uid="9124228" lat="26.4785131" lon="73.1151373"/>
+ <node id="8498813822" visible="true" version="2" changeset="186077421" timestamp="2026-07-20T18:43:59Z" user="VikasChoudhary" uid="24138550" lat="26.4783910" lon="73.1153414"/>
+ <node id="8498813823" visible="true" version="2" changeset="186077421" timestamp="2026-07-20T18:43:59Z" user="VikasChoudhary" uid="24138550" lat="26.4785244" lon="73.1151549"/>
  <node id="8498813824" visible="true" version="1" changeset="100677555" timestamp="2021-03-09T05:35:53Z" user="VLD123" uid="9124228" lat="26.4787890" lon="73.1148852"/>
  <node id="8498813825" visible="true" version="1" changeset="100677555" timestamp="2021-03-09T05:35:53Z" user="VLD123" uid="9124228" lat="26.4789939" lon="73.1147918"/>
  <node id="8498813826" visible="true" version="1" changeset="100677555" timestamp="2021-03-09T05:35:53Z" user="VLD123" uid="9124228" lat="26.4819627" lon="73.1162163"/>
@@ -1616,7 +1560,7 @@
  <node id="8498813833" visible="true" version="1" changeset="100677555" timestamp="2021-03-09T05:35:53Z" user="VLD123" uid="9124228" lat="26.4808100" lon="73.1153466"/>
  <node id="8498813834" visible="true" version="1" changeset="100677555" timestamp="2021-03-09T05:35:53Z" user="VLD123" uid="9124228" lat="26.4801256" lon="73.1148603"/>
  <node id="8498813835" visible="true" version="1" changeset="100677555" timestamp="2021-03-09T05:35:53Z" user="VLD123" uid="9124228" lat="26.4812324" lon="73.1158439"/>
- <node id="8498813836" visible="true" version="1" changeset="100677555" timestamp="2021-03-09T05:35:53Z" user="VLD123" uid="9124228" lat="26.4786344" lon="73.1150066"/>
+ <node id="8498813836" visible="true" version="2" changeset="186077421" timestamp="2026-07-20T18:43:59Z" user="VikasChoudhary" uid="24138550" lat="26.4786457" lon="73.1150217"/>
  <node id="8498813837" visible="true" version="1" changeset="100677555" timestamp="2021-03-09T05:35:53Z" user="VLD123" uid="9124228" lat="26.4803559" lon="73.1149949"/>
  <node id="8498813838" visible="true" version="1" changeset="100677555" timestamp="2021-03-09T05:35:53Z" user="VLD123" uid="9124228" lat="26.4796324" lon="73.1178059"/>
  <node id="8498813839" visible="true" version="1" changeset="100677555" timestamp="2021-03-09T05:35:53Z" user="VLD123" uid="9124228" lat="26.4799119" lon="73.1167615"/>
@@ -1716,7 +1660,7 @@
  <node id="8498874511" visible="true" version="2" changeset="168508262" timestamp="2025-07-05T04:50:07Z" user="maskedkd" uid="23067513" lat="26.4736207" lon="73.1099563"/>
  <node id="8498888918" visible="true" version="2" changeset="168508262" timestamp="2025-07-05T04:50:07Z" user="maskedkd" uid="23067513" lat="26.4742136" lon="73.1117940"/>
  <node id="8498888921" visible="true" version="3" changeset="168528214" timestamp="2025-07-05T15:24:33Z" user="ratrun" uid="474183" lat="26.4740021" lon="73.1109794"/>
- <node id="8498888922" visible="true" version="3" changeset="184132010" timestamp="2026-06-15T11:14:39Z" user="VikasChoudhary" uid="24138550" lat="26.4739890" lon="73.1110682"/>
+ <node id="8498888922" visible="true" version="4" changeset="184166865" timestamp="2026-06-16T07:01:16Z" user="BCNorwich" uid="322785" lat="26.4739848" lon="73.1111001"/>
  <node id="8498888923" visible="true" version="2" changeset="168508262" timestamp="2025-07-05T04:50:07Z" user="maskedkd" uid="23067513" lat="26.4739572" lon="73.1113131"/>
  <node id="8498888924" visible="true" version="2" changeset="168508262" timestamp="2025-07-05T04:50:07Z" user="maskedkd" uid="23067513" lat="26.4738975" lon="73.1117184"/>
  <node id="8498888927" visible="true" version="2" changeset="168508262" timestamp="2025-07-05T04:50:07Z" user="maskedkd" uid="23067513" lat="26.4743204" lon="73.1111034"/>
@@ -2658,10 +2602,6 @@
  <node id="12979131795" visible="true" version="1" changeset="168507665" timestamp="2025-07-05T03:21:33Z" user="maskedkd" uid="23067513" lat="26.4703612" lon="73.1152323"/>
  <node id="12979131797" visible="true" version="1" changeset="168507665" timestamp="2025-07-05T03:21:33Z" user="maskedkd" uid="23067513" lat="26.4707595" lon="73.1161327"/>
  <node id="12979131798" visible="true" version="1" changeset="168507665" timestamp="2025-07-05T03:21:33Z" user="maskedkd" uid="23067513" lat="26.4710504" lon="73.1165539"/>
- 
- 
- 
- 
  <node id="12979131803" visible="true" version="1" changeset="168507665" timestamp="2025-07-05T03:21:33Z" user="maskedkd" uid="23067513" lat="26.4709876" lon="73.1171141"/>
  <node id="12979131804" visible="true" version="2" changeset="184132010" timestamp="2026-06-15T11:14:39Z" user="VikasChoudhary" uid="24138550" lat="26.4710397" lon="73.1170592">
   <tag k="highway" v="crossing"/>
@@ -2934,7 +2874,7 @@
  <node id="12979182965" visible="true" version="2" changeset="184129666" timestamp="2026-06-15T10:16:05Z" user="VikasChoudhary" uid="24138550" lat="26.4720088" lon="73.1173964"/>
  <node id="12979182966" visible="true" version="2" changeset="184129666" timestamp="2026-06-15T10:16:05Z" user="VikasChoudhary" uid="24138550" lat="26.4722944" lon="73.1175373"/>
  <node id="12979182967" visible="true" version="2" changeset="184129666" timestamp="2026-06-15T10:16:05Z" user="VikasChoudhary" uid="24138550" lat="26.4725710" lon="73.1176327"/>
- <node id="12979182969" visible="true" version="3" changeset="184129666" timestamp="2026-06-15T10:16:05Z" user="VikasChoudhary" uid="24138550" lat="26.474847722691347" lon="73.11802670240178"/>
+ <node id="12979182969" visible="true" version="3" changeset="184310756" timestamp="2026-06-19T11:12:13Z" user="VikasChoudhary" uid="24138550" lat="26.4748477" lon="73.1180267"/>
  <node id="12979182970" visible="true" version="2" changeset="184129666" timestamp="2026-06-15T10:16:05Z" user="VikasChoudhary" uid="24138550" lat="26.4740122" lon="73.1179683"/>
  <node id="12979182971" visible="true" version="2" changeset="184129666" timestamp="2026-06-15T10:16:05Z" user="VikasChoudhary" uid="24138550" lat="26.4732272" lon="73.1178625"/>
  <node id="12979182972" visible="true" version="2" changeset="184129666" timestamp="2026-06-15T10:16:05Z" user="VikasChoudhary" uid="24138550" lat="26.4732511" lon="73.1177804"/>
@@ -3349,10 +3289,10 @@
  <node id="12979215468" visible="true" version="2" changeset="168526342" timestamp="2025-07-05T14:38:15Z" user="maskedkd" uid="23067513" lat="26.4734218" lon="73.1094277"/>
  <node id="12979215469" visible="true" version="1" changeset="168509380" timestamp="2025-07-05T05:42:55Z" user="maskedkd" uid="23067513" lat="26.4721617" lon="73.1096251"/>
  <node id="12979215470" visible="true" version="1" changeset="168509380" timestamp="2025-07-05T05:42:55Z" user="maskedkd" uid="23067513" lat="26.4720695" lon="73.1088350"/>
- <node id="12979215471" visible="true" version="1" changeset="168509380" timestamp="2025-07-05T05:42:55Z" user="maskedkd" uid="23067513" lat="26.4743780" lon="73.1151830"/>
- <node id="12979215472" visible="true" version="1" changeset="168509380" timestamp="2025-07-05T05:42:55Z" user="maskedkd" uid="23067513" lat="26.4742943" lon="73.1161459"/>
- <node id="12979215473" visible="true" version="1" changeset="168509380" timestamp="2025-07-05T05:42:55Z" user="maskedkd" uid="23067513" lat="26.4739697" lon="73.1160569"/>
- <node id="12979215474" visible="true" version="1" changeset="168509380" timestamp="2025-07-05T05:42:55Z" user="maskedkd" uid="23067513" lat="26.4741005" lon="73.1150362"/>
+ <node id="12979215471" visible="true" version="2" changeset="186077421" timestamp="2026-07-20T18:43:59Z" user="VikasChoudhary" uid="24138550" lat="26.4744096" lon="73.1151705"/>
+ <node id="12979215472" visible="true" version="2" changeset="186077421" timestamp="2026-07-20T18:43:59Z" user="VikasChoudhary" uid="24138550" lat="26.4742962" lon="73.1162041"/>
+ <node id="12979215473" visible="true" version="2" changeset="186077421" timestamp="2026-07-20T18:43:59Z" user="VikasChoudhary" uid="24138550" lat="26.4739418" lon="73.1160839"/>
+ <node id="12979215474" visible="true" version="2" changeset="186077421" timestamp="2026-07-20T18:43:59Z" user="VikasChoudhary" uid="24138550" lat="26.4740893" lon="73.1150009"/>
  <node id="12979215475" visible="true" version="1" changeset="168509380" timestamp="2025-07-05T05:42:55Z" user="maskedkd" uid="23067513" lat="26.4749010" lon="73.1154440"/>
  <node id="12979215476" visible="true" version="1" changeset="168509380" timestamp="2025-07-05T05:42:55Z" user="maskedkd" uid="23067513" lat="26.4747576" lon="73.1164070"/>
  <node id="12979215477" visible="true" version="1" changeset="168509380" timestamp="2025-07-05T05:42:55Z" user="maskedkd" uid="23067513" lat="26.4743752" lon="73.1162127"/>
@@ -3460,7 +3400,7 @@
  <node id="12979215579" visible="true" version="1" changeset="168509380" timestamp="2025-07-05T05:42:55Z" user="maskedkd" uid="23067513" lat="26.4666798" lon="73.1106253"/>
  <node id="12979215580" visible="true" version="1" changeset="168509380" timestamp="2025-07-05T05:42:55Z" user="maskedkd" uid="23067513" lat="26.4668302" lon="73.1101655"/>
  <node id="12979215581" visible="true" version="1" changeset="168509380" timestamp="2025-07-05T05:42:55Z" user="maskedkd" uid="23067513" lat="26.4683815" lon="73.1115510"/>
- <node id="12979215582" visible="true" version="2" changeset="168509380" timestamp="2025-07-05T05:42:55Z" user="maskedkd" uid="23067513" lat="26.467869399999994" lon="73.11257541669792"/>
+ <node id="12979215582" visible="true" version="2" changeset="184310756" timestamp="2026-06-19T11:12:13Z" user="VikasChoudhary" uid="24138550" lat="26.4678694" lon="73.1125754"/>
  <node id="12979215583" visible="true" version="1" changeset="168509380" timestamp="2025-07-05T05:42:55Z" user="maskedkd" uid="23067513" lat="26.4671817" lon="73.1119288"/>
  <node id="12979215584" visible="true" version="1" changeset="168509380" timestamp="2025-07-05T05:42:55Z" user="maskedkd" uid="23067513" lat="26.4685149" lon="73.1130360"/>
  <node id="12979215585" visible="true" version="1" changeset="168509380" timestamp="2025-07-05T05:42:55Z" user="maskedkd" uid="23067513" lat="26.4682562" lon="73.1131171"/>
@@ -3872,11 +3812,10 @@
  <node id="12980144878" visible="true" version="1" changeset="168526342" timestamp="2025-07-05T14:38:15Z" user="maskedkd" uid="23067513" lat="26.4767609" lon="73.1169160"/>
  <node id="12980144879" visible="true" version="1" changeset="168526342" timestamp="2025-07-05T14:38:15Z" user="maskedkd" uid="23067513" lat="26.4770141" lon="73.1170655"/>
  <node id="12980144880" visible="true" version="1" changeset="168526342" timestamp="2025-07-05T14:38:15Z" user="maskedkd" uid="23067513" lat="26.4768900" lon="73.1176491"/>
- <node id="12980144881" visible="true" version="2" changeset="168526342" timestamp="2025-07-05T14:38:15Z" user="maskedkd" uid="23067513" lat="26.47662809686741" lon="73.11813391118048"/>
- <node id="12980144882" visible="true" version="2" changeset="168526342" timestamp="2025-07-05T14:38:15Z" user="maskedkd" uid="23067513" lat="26.476512496857477" lon="73.11806001118049"/>
- <node id="12980144883" visible="true" version="2" changeset="168526342" timestamp="2025-07-05T14:38:15Z" user="maskedkd" uid="23067513" lat="26.476464896853365" lon="73.11819461118047"/>
- <node id="12980144884" visible="true" version="2" changeset="168526342" timestamp="2025-07-05T14:38:15Z" user="maskedkd" uid="23067513" lat="26.476572796862673" lon="73.11826771118047"/>
- 
+ <node id="12980144881" visible="true" version="2" changeset="184310756" timestamp="2026-06-19T11:12:13Z" user="VikasChoudhary" uid="24138550" lat="26.4766281" lon="73.1181339"/>
+ <node id="12980144882" visible="true" version="2" changeset="184310756" timestamp="2026-06-19T11:12:13Z" user="VikasChoudhary" uid="24138550" lat="26.4765125" lon="73.1180600"/>
+ <node id="12980144883" visible="true" version="2" changeset="184310756" timestamp="2026-06-19T11:12:13Z" user="VikasChoudhary" uid="24138550" lat="26.4764649" lon="73.1181946"/>
+ <node id="12980144884" visible="true" version="2" changeset="184310756" timestamp="2026-06-19T11:12:13Z" user="VikasChoudhary" uid="24138550" lat="26.4765728" lon="73.1182677"/>
  <node id="12980144886" visible="true" version="1" changeset="168526342" timestamp="2025-07-05T14:38:15Z" user="maskedkd" uid="23067513" lat="26.4767186" lon="73.1182719"/>
  <node id="12980144887" visible="true" version="2" changeset="184129666" timestamp="2026-06-15T10:16:05Z" user="VikasChoudhary" uid="24138550" lat="26.4703580" lon="73.1127329"/>
  <node id="12980144888" visible="true" version="1" changeset="168526342" timestamp="2025-07-05T14:38:15Z" user="maskedkd" uid="23067513" lat="26.4699581" lon="73.1129220"/>
@@ -4330,37 +4269,31 @@
  <node id="13878739750" visible="true" version="2" changeset="183327451" timestamp="2026-05-28T23:09:25Z" user="VikasChoudhary" uid="24138550" lat="26.4747333" lon="73.1174724"/>
  <node id="13878739751" visible="true" version="1" changeset="183175484" timestamp="2026-05-25T19:55:47Z" user="VikasChoudhary" uid="24138550" lat="26.4747102" lon="73.1177740"/>
  <node id="13878739752" visible="true" version="1" changeset="183175484" timestamp="2026-05-25T19:55:47Z" user="VikasChoudhary" uid="24138550" lat="26.4750167" lon="73.1177991"/>
- <node id="13878739753" visible="true" version="5" changeset="184129666" timestamp="2026-06-15T10:16:05Z" user="VikasChoudhary" uid="24138550" lat="26.4745673" lon="73.1179565">
-  
-  
-  
- <tag k="alt_name" v="Fine arts Club"/><tag k="club" v="art"/><tag k="name" v="E -18"/></node>
- <node id="13878739754" visible="true" version="3" changeset="184129666" timestamp="2026-06-15T10:16:05Z" user="VikasChoudhary" uid="24138550" lat="26.473291" lon="73.117844">
+ <node id="13878739753" visible="true" version="5" changeset="184310756" timestamp="2026-06-19T11:12:13Z" user="VikasChoudhary" uid="24138550" lat="26.4746898" lon="73.1178981">
+  <tag k="alt_name" v="Fine arts Club"/>
+  <tag k="club" v="art"/>
+  <tag k="name" v="E -18"/>
+ </node>
+ <node id="13878739754" visible="true" version="3" changeset="184129666" timestamp="2026-06-15T10:16:05Z" user="VikasChoudhary" uid="24138550" lat="26.4734150" lon="73.1178241">
+  <tag k="alt_name" v="Centre for emerging Technology for Sustainable Development"/>
   <tag k="name" v="E-14"/>
   <tag k="office" v="government"/>
  </node>
- <node id="14000000014" visible="true" version="1" lat="26.473612" lon="73.117894">
-  <tag k="alt_name" v="Centre for emerging Technology for Sustainable Development"/>
-  <tag k="name" v="CETSD"/>
-  <tag k="office" v="government"/>
- </node>
- <node id="13878739755" visible="true" version="3" changeset="184132010" timestamp="2026-06-15T11:14:39Z" user="VikasChoudhary" uid="24138550" lat="26.473640" lon="73.117898">
+ <node id="13878739755" visible="true" version="3" changeset="184132010" timestamp="2026-06-15T11:14:39Z" user="VikasChoudhary" uid="24138550" lat="26.4736818" lon="73.1178367">
   <tag k="alt_name" v="Chess Club"/>
   <tag k="club" v="sport"/>
   <tag k="name" v="E-15"/>
   <tag k="sport" v="chess"/>
  </node>
- <node id="13878739756" visible="true" version="3" changeset="184132010" timestamp="2026-06-15T11:14:39Z" user="VikasChoudhary" uid="24138550" lat="26.473944" lon="73.117904">
+ <node id="13878739756" visible="true" version="3" changeset="184132010" timestamp="2026-06-15T11:14:39Z" user="VikasChoudhary" uid="24138550" lat="26.4739931" lon="73.1178744">
   <tag k="name" v="E-16"/>
-  <tag k="alt_name" v="ANVISA Lab"/>
-  <tag k="description" v="ANVISA Lab"/>
   <tag k="name:en" v="Anand Rathi Tinkering lab"/>
   <tag k="office" v="engineer"/>
  </node>
- <node id="13878739757" visible="true" version="3" changeset="184129666" timestamp="2026-06-15T10:16:05Z" user="VikasChoudhary" uid="24138550" lat="26.474042" lon="73.117913">
-  
-  
- <tag k="club" v="culture"/><tag k="name" v="E-17"/></node>
+ <node id="13878739757" visible="true" version="3" changeset="184310756" timestamp="2026-06-19T11:12:13Z" user="VikasChoudhary" uid="24138550" lat="26.4743747" lon="73.1178828">
+  <tag k="club" v="culture"/>
+  <tag k="name" v="E-17"/>
+ </node>
  <node id="13878739758" visible="true" version="1" changeset="183175484" timestamp="2026-05-25T19:55:47Z" user="VikasChoudhary" uid="24138550" lat="26.4797885" lon="73.1149797"/>
  <node id="13878739759" visible="true" version="1" changeset="183175484" timestamp="2026-05-25T19:55:47Z" user="VikasChoudhary" uid="24138550" lat="26.4796688" lon="73.1149340"/>
  <node id="13878739760" visible="true" version="1" changeset="183175484" timestamp="2026-05-25T19:55:47Z" user="VikasChoudhary" uid="24138550" lat="26.4796436" lon="73.1150184"/>
@@ -4555,13 +4488,13 @@
  <node id="13906296450" visible="true" version="1" changeset="183574293" timestamp="2026-06-03T06:00:24Z" user="VikasChoudhary" uid="24138550" lat="26.4697739" lon="73.1157706"/>
  <node id="13906296451" visible="true" version="1" changeset="183574293" timestamp="2026-06-03T06:00:24Z" user="VikasChoudhary" uid="24138550" lat="26.4693076" lon="73.1163112"/>
  <node id="13906296452" visible="true" version="1" changeset="183574293" timestamp="2026-06-03T06:00:24Z" user="VikasChoudhary" uid="24138550" lat="26.4694190" lon="73.1164252"/>
- <node id="13906296453" visible="true" version="3" changeset="184129666" timestamp="2026-06-15T10:16:05Z" user="VikasChoudhary" uid="24138550" lat="26.4747933" lon="73.1179652">
-  
-  
-  
- <tag k="alt_name" v="Designerds"/><tag k="club" v="yes"/><tag k="name" v="Designing Club"/><tag k="description" v="Photography Club"/></node>
+ <node id="13906296453" visible="true" version="3" changeset="184310756" timestamp="2026-06-19T11:12:13Z" user="VikasChoudhary" uid="24138550" lat="26.4748447" lon="73.1178997">
+  <tag k="alt_name" v="Designerds"/>
+  <tag k="club" v="yes"/>
+  <tag k="description" v="Photography Club"/>
+  <tag k="name" v="Designing Club"/>
+ </node>
  <node id="13906296454" visible="true" version="2" changeset="184129666" timestamp="2026-06-15T10:16:05Z" user="VikasChoudhary" uid="24138550" lat="26.4747850" lon="73.1179085"/>
- 
  <node id="13906313072" visible="true" version="1" changeset="183576387" timestamp="2026-06-03T06:49:34Z" user="VikasChoudhary" uid="24138550" lat="26.4768628" lon="73.1174430"/>
  <node id="13906313073" visible="true" version="1" changeset="183576387" timestamp="2026-06-03T06:49:34Z" user="VikasChoudhary" uid="24138550" lat="26.4765672" lon="73.1174220"/>
  <node id="13906313074" visible="true" version="2" changeset="183690175" timestamp="2026-06-05T11:19:05Z" user="VikasChoudhary" uid="24138550" lat="26.4765508" lon="73.1176671"/>
@@ -4624,45 +4557,45 @@
  <node id="13906726661" visible="true" version="1" changeset="183585616" timestamp="2026-06-03T10:21:25Z" user="VikasChoudhary" uid="24138550" lat="26.4767136" lon="73.1156310"/>
  <node id="13906726662" visible="true" version="1" changeset="183585616" timestamp="2026-06-03T10:21:25Z" user="VikasChoudhary" uid="24138550" lat="26.4767693" lon="73.1155757"/>
  <node id="13906726663" visible="true" version="1" changeset="183585616" timestamp="2026-06-03T10:21:25Z" user="VikasChoudhary" uid="24138550" lat="26.4768085" lon="73.1155158"/>
- <node id="13906909074" visible="true" version="3" changeset="184129666" timestamp="2026-06-15T10:16:05Z" user="VikasChoudhary" uid="24138550" lat="26.4747387" lon="73.1179418">
-  
-  
-  
- <tag k="amenity" v="community_centre"/><tag k="community_centre" v="club_home"/><tag k="name" v="Inventory Room"/></node>
- <node id="13906909075" visible="true" version="4" changeset="184129666" timestamp="2026-06-15T10:16:05Z" user="VikasChoudhary" uid="24138550" lat="26.4746676" lon="73.1179444">
-  
-  
-  
- <tag k="alt_name" v="Frame X"/><tag k="club" v="yes"/><tag k="name" v="Film Making Society"/></node>
- <node id="13906909076" visible="true" version="4" changeset="184129666" timestamp="2026-06-15T10:16:05Z" user="VikasChoudhary" uid="24138550" lat="26.474770338410373" lon="73.11789867332696">
-  
-  
- <tag k="club" v="yes"/><tag k="name" v="Media and Outreach Society"/></node>
- <node id="13906909077" visible="true" version="3" changeset="184129666" timestamp="2026-06-15T10:16:05Z" user="VikasChoudhary" uid="24138550" lat="26.4745643" lon="73.1179532">
-  
-  
- <tag k="club" v="yes"/><tag k="name" v="Dramatics Society"/></node>
- <node id="13906909078" visible="true" version="4" changeset="184129666" timestamp="2026-06-15T10:16:05Z" user="VikasChoudhary" uid="24138550" lat="26.4745259" lon="73.1179602">
-  
-  
- <tag k="club" v="yes"/><tag k="name" v="Newsletter Society"/></node>
- <node id="13906909079" visible="true" version="3" changeset="184129666" timestamp="2026-06-15T10:16:05Z" user="VikasChoudhary" uid="24138550" lat="26.4744236" lon="73.1179817">
-  
-  
- <tag k="club" v="yes"/><tag k="name" v="Music Society"/></node>
- <node id="13906909080" visible="true" version="3" changeset="184129666" timestamp="2026-06-15T10:16:05Z" user="VikasChoudhary" uid="24138550" lat="26.4743432" lon="73.1179384">
-  
-  
- <tag k="club" v="yes"/><tag k="name" v="Dance Society"/></node>
- <node id="13906909081" visible="true" version="2" changeset="184129666" timestamp="2026-06-15T10:16:05Z" user="VikasChoudhary" uid="24138550" lat="26.473828" lon="73.117901">
+ <node id="13906909074" visible="true" version="3" changeset="184310756" timestamp="2026-06-19T11:12:13Z" user="VikasChoudhary" uid="24138550" lat="26.4748037" lon="73.1178985">
+  <tag k="amenity" v="community_centre"/>
+  <tag k="community_centre" v="club_home"/>
+  <tag k="name" v="Inventory Room"/>
+ </node>
+ <node id="13906909075" visible="true" version="4" changeset="184310756" timestamp="2026-06-19T11:12:13Z" user="VikasChoudhary" uid="24138550" lat="26.4747463" lon="73.1178991">
+  <tag k="alt_name" v="Frame X"/>
+  <tag k="club" v="yes"/>
+  <tag k="name" v="Film Making Society"/>
+ </node>
+ <node id="13906909076" visible="true" version="4" changeset="184310756" timestamp="2026-06-19T11:12:13Z" user="VikasChoudhary" uid="24138550" lat="26.4747703" lon="73.1178987">
+  <tag k="club" v="yes"/>
+  <tag k="name" v="Media and Outreach Society"/>
+ </node>
+ <node id="13906909077" visible="true" version="3" changeset="184310756" timestamp="2026-06-19T11:12:13Z" user="VikasChoudhary" uid="24138550" lat="26.4747132" lon="73.1178990">
+  <tag k="club" v="yes"/>
+  <tag k="name" v="Dramatics Society"/>
+ </node>
+ <node id="13906909078" visible="true" version="4" changeset="184310756" timestamp="2026-06-19T11:12:13Z" user="VikasChoudhary" uid="24138550" lat="26.4746527" lon="73.1179010">
+  <tag k="club" v="yes"/>
+  <tag k="name" v="Newsletter Society"/>
+ </node>
+ <node id="13906909079" visible="true" version="3" changeset="184310756" timestamp="2026-06-19T11:12:13Z" user="VikasChoudhary" uid="24138550" lat="26.4746259" lon="73.1179004">
+  <tag k="club" v="yes"/>
+  <tag k="name" v="Music Society"/>
+ </node>
+ <node id="13906909080" visible="true" version="3" changeset="184310756" timestamp="2026-06-19T11:12:13Z" user="VikasChoudhary" uid="24138550" lat="26.4746007" lon="73.1179015">
+  <tag k="club" v="yes"/>
+  <tag k="name" v="Dance Society"/>
+ </node>
+ <node id="13906909081" visible="true" version="2" changeset="184129666" timestamp="2026-06-15T10:16:05Z" user="VikasChoudhary" uid="24138550" lat="26.4739187" lon="73.1178651">
   <tag k="club" v="yes"/>
   <tag k="name" v="Senate Room"/>
  </node>
- <node id="13906909082" visible="true" version="3" changeset="184129666" timestamp="2026-06-15T10:16:05Z" user="VikasChoudhary" uid="24138550" lat="26.473777" lon="73.117904">
-  
-  
- <tag k="club" v="yes"/><tag k="name" v="Quiz Society"/></node>
- <node id="13906909083" visible="true" version="3" changeset="184132010" timestamp="2026-06-15T11:14:39Z" user="VikasChoudhary" uid="24138550" lat="26.473707" lon="73.117894">
+ <node id="13906909082" visible="true" version="3" changeset="184310756" timestamp="2026-06-19T11:12:13Z" user="VikasChoudhary" uid="24138550" lat="26.4738162" lon="73.1178542">
+  <tag k="club" v="yes"/>
+  <tag k="name" v="Quiz Society"/>
+ </node>
+ <node id="13906909083" visible="true" version="3" changeset="184132010" timestamp="2026-06-15T11:14:39Z" user="VikasChoudhary" uid="24138550" lat="26.4737579" lon="73.1178508">
   <tag k="club" v="yes"/>
   <tag k="name" v="Literature Society"/>
  </node>
@@ -4686,74 +4619,74 @@
   <tag k="operator" v="IIT Jodhpur"/>
   <tag k="room" v="laboratory"/>
  </node>
- <node id="13929518205" visible="true" version="3" changeset="184132010" timestamp="2026-06-15T11:14:39Z" user="VikasChoudhary" uid="24138550" lat="26.47020081558125" lon="73.11450944828991">
-  
-  
-  
-  
-  
-  
-  
-  
- <tag k="access" v="students"/><tag k="department" v="Civil Department"/><tag k="indoor" v="room"/><tag k="level" v="0"/><tag k="name" v="E-2"/><tag k="office" v="yes"/><tag k="operator" v="IIT Jodhpur"/><tag k="room" v="laboratory"/></node>
- <node id="13929518206" visible="true" version="3" changeset="184132010" timestamp="2026-06-15T11:14:39Z" user="VikasChoudhary" uid="24138550" lat="26.47025943603966" lon="73.1148845111212">
-  
-  
-  
-  
-  
-  
-  
-  
- <tag k="access" v="students"/><tag k="department" v="Civil Department"/><tag k="indoor" v="room"/><tag k="level" v="0"/><tag k="name" v="E-3"/><tag k="office" v="yes"/><tag k="operator" v="IIT Jodhpur"/><tag k="room" v="laboratory"/></node>
- <node id="13929518207" visible="true" version="3" changeset="184132010" timestamp="2026-06-15T11:14:39Z" user="VikasChoudhary" uid="24138550" lat="26.47033064911153" lon="73.11518073789433">
-  
-  
-  
-  
-  
-  
-  
-  
- <tag k="access" v="students"/><tag k="department" v="Civil Department"/><tag k="indoor" v="room"/><tag k="level" v="0"/><tag k="name" v="E-4"/><tag k="office" v="yes"/><tag k="operator" v="IIT Jodhpur"/><tag k="room" v="laboratory"/></node>
- <node id="13929518208" visible="true" version="3" changeset="184132010" timestamp="2026-06-15T11:14:39Z" user="VikasChoudhary" uid="24138550" lat="26.470425853851644" lon="73.11547590289175">
-  
-  
-  
-  
-  
-  
-  
- <tag k="access" v="students"/><tag k="indoor" v="room"/><tag k="level" v="0"/><tag k="name" v="E-5"/><tag k="office" v="yes"/><tag k="operator" v="IIT Jodhpur"/><tag k="room" v="laboratory"/></node>
- <node id="13929518209" visible="true" version="3" changeset="184132010" timestamp="2026-06-15T11:14:39Z" user="VikasChoudhary" uid="24138550" lat="26.470553690041445" lon="73.1157695925683">
-  
-  
-  
-  
-  
-  
-  
-  
- <tag k="access" v="students"/><tag k="department" v="JCKC engineering"/><tag k="indoor" v="room"/><tag k="level" v="0"/><tag k="name" v="E-6"/><tag k="office" v="yes"/><tag k="operator" v="IIT Jodhpur"/><tag k="room" v="laboratory"/></node>
- <node id="13929518210" visible="true" version="3" changeset="184132010" timestamp="2026-06-15T11:14:39Z" user="VikasChoudhary" uid="24138550" lat="26.470710320502118" lon="73.11607024515882">
-  
-  
-  
-  
-  
-  
-  
-  
- <tag k="access" v="students"/><tag k="department" v="JJM Department"/><tag k="indoor" v="room"/><tag k="level" v="0"/><tag k="name" v="E-7"/><tag k="office" v="yes"/><tag k="operator" v="IIT Jodhpur"/><tag k="room" v="laboratory"/></node>
- <node id="13929518211" visible="true" version="3" changeset="184132010" timestamp="2026-06-15T11:14:39Z" user="VikasChoudhary" uid="24138550" lat="26.470876990053352" lon="73.11634001399264">
-  
-  
-  
-  
-  
-  
-  
- <tag k="access" v="students"/><tag k="indoor" v="room"/><tag k="level" v="0"/><tag k="name" v="E-8"/><tag k="office" v="yes"/><tag k="operator" v="IIT Jodhpur"/><tag k="room" v="laboratory"/></node>
+ <node id="13929518205" visible="true" version="3" changeset="184310756" timestamp="2026-06-19T11:12:13Z" user="VikasChoudhary" uid="24138550" lat="26.4702008" lon="73.1145094">
+  <tag k="access" v="students"/>
+  <tag k="department" v="Civil Department"/>
+  <tag k="indoor" v="room"/>
+  <tag k="level" v="0"/>
+  <tag k="name" v="E-2"/>
+  <tag k="office" v="yes"/>
+  <tag k="operator" v="IIT Jodhpur"/>
+  <tag k="room" v="laboratory"/>
+ </node>
+ <node id="13929518206" visible="true" version="3" changeset="184310756" timestamp="2026-06-19T11:12:13Z" user="VikasChoudhary" uid="24138550" lat="26.4702594" lon="73.1148845">
+  <tag k="access" v="students"/>
+  <tag k="department" v="Civil Department"/>
+  <tag k="indoor" v="room"/>
+  <tag k="level" v="0"/>
+  <tag k="name" v="E-3"/>
+  <tag k="office" v="yes"/>
+  <tag k="operator" v="IIT Jodhpur"/>
+  <tag k="room" v="laboratory"/>
+ </node>
+ <node id="13929518207" visible="true" version="3" changeset="184310756" timestamp="2026-06-19T11:12:13Z" user="VikasChoudhary" uid="24138550" lat="26.4703306" lon="73.1151807">
+  <tag k="access" v="students"/>
+  <tag k="department" v="Civil Department"/>
+  <tag k="indoor" v="room"/>
+  <tag k="level" v="0"/>
+  <tag k="name" v="E-4"/>
+  <tag k="office" v="yes"/>
+  <tag k="operator" v="IIT Jodhpur"/>
+  <tag k="room" v="laboratory"/>
+ </node>
+ <node id="13929518208" visible="true" version="3" changeset="184310756" timestamp="2026-06-19T11:12:13Z" user="VikasChoudhary" uid="24138550" lat="26.4704259" lon="73.1154759">
+  <tag k="access" v="students"/>
+  <tag k="indoor" v="room"/>
+  <tag k="level" v="0"/>
+  <tag k="name" v="E-5"/>
+  <tag k="office" v="yes"/>
+  <tag k="operator" v="IIT Jodhpur"/>
+  <tag k="room" v="laboratory"/>
+ </node>
+ <node id="13929518209" visible="true" version="3" changeset="184310756" timestamp="2026-06-19T11:12:13Z" user="VikasChoudhary" uid="24138550" lat="26.4705537" lon="73.1157696">
+  <tag k="access" v="students"/>
+  <tag k="department" v="JCKC engineering"/>
+  <tag k="indoor" v="room"/>
+  <tag k="level" v="0"/>
+  <tag k="name" v="E-6"/>
+  <tag k="office" v="yes"/>
+  <tag k="operator" v="IIT Jodhpur"/>
+  <tag k="room" v="laboratory"/>
+ </node>
+ <node id="13929518210" visible="true" version="3" changeset="184310756" timestamp="2026-06-19T11:12:13Z" user="VikasChoudhary" uid="24138550" lat="26.4707103" lon="73.1160702">
+  <tag k="access" v="students"/>
+  <tag k="department" v="JJM Department"/>
+  <tag k="indoor" v="room"/>
+  <tag k="level" v="0"/>
+  <tag k="name" v="E-7"/>
+  <tag k="office" v="yes"/>
+  <tag k="operator" v="IIT Jodhpur"/>
+  <tag k="room" v="laboratory"/>
+ </node>
+ <node id="13929518211" visible="true" version="3" changeset="184310756" timestamp="2026-06-19T11:12:13Z" user="VikasChoudhary" uid="24138550" lat="26.4708770" lon="73.1163400">
+  <tag k="access" v="students"/>
+  <tag k="indoor" v="room"/>
+  <tag k="level" v="0"/>
+  <tag k="name" v="E-8"/>
+  <tag k="office" v="yes"/>
+  <tag k="operator" v="IIT Jodhpur"/>
+  <tag k="room" v="laboratory"/>
+ </node>
  <node id="13929541035" visible="true" version="1" changeset="183984781" timestamp="2026-06-11T18:22:52Z" user="VikasChoudhary" uid="24138550" lat="26.4696239" lon="73.1113771"/>
  <node id="13929541036" visible="true" version="1" changeset="183984781" timestamp="2026-06-11T18:22:52Z" user="VikasChoudhary" uid="24138550" lat="26.4697128" lon="73.1114751"/>
  <node id="13929541037" visible="true" version="1" changeset="183984781" timestamp="2026-06-11T18:22:52Z" user="VikasChoudhary" uid="24138550" lat="26.4694115" lon="73.1117786"/>
@@ -4764,36 +4697,41 @@
  <node id="13929541422" visible="true" version="2" changeset="184129666" timestamp="2026-06-15T10:16:05Z" user="VikasChoudhary" uid="24138550" lat="26.4766778" lon="73.1111862"/>
  <node id="13929541423" visible="true" version="2" changeset="184129666" timestamp="2026-06-15T10:16:05Z" user="VikasChoudhary" uid="24138550" lat="26.4765146" lon="73.1110387"/>
  <node id="13929549756" visible="true" version="2" changeset="184129666" timestamp="2026-06-15T10:16:05Z" user="VikasChoudhary" uid="24138550" lat="26.4746993" lon="73.1179120"/>
- <node id="13929549758" visible="true" version="2" changeset="183984642" timestamp="2026-06-11T18:19:17Z" user="VikasChoudhary" uid="24138550" lat="26.475255" lon="73.117969">
-  
-  
-  
- <tag k="leisure" v="common"/><tag k="name" v="E-19"/><tag k="operator" v="IIT Jodhpur"/></node>
- <node id="13929549759" visible="true" version="2" changeset="183984642" timestamp="2026-06-11T18:19:17Z" user="VikasChoudhary" uid="24138550" lat="26.476734" lon="73.117914">
-  
-  
-  
-  
- <tag k="department" v="Mechanical Engineering"/><tag k="healthcare" v="laboratory"/><tag k="name" v="E-23"/><tag k="alt_name" v="SWAHS Lab"/><tag k="description" v="Shock Waves and High Speed Flow Research Lab (SWAHS Lab)"/><tag k="operator" v="IIT jodhpur"/></node>
- <node id="13929549760" visible="true" version="2" changeset="183984642" timestamp="2026-06-11T18:19:17Z" user="VikasChoudhary" uid="24138550" lat="26.476493" lon="73.117915">
-  
-  
-  
- <tag k="alt_name" v="E-22"/><tag k="name" v="Centralized Laundry Services"/><tag k="shop" v="laundry"/></node>
- <node id="13929549762" visible="true" version="1" changeset="183984642" timestamp="2026-06-11T18:19:17Z" user="VikasChoudhary" uid="24138550" lat="26.476082" lon="73.117944">
+ <node id="13929549758" visible="true" version="2" changeset="184310756" timestamp="2026-06-19T11:12:13Z" user="VikasChoudhary" uid="24138550" lat="26.4753335" lon="73.1179218">
+  <tag k="leisure" v="common"/>
+  <tag k="name" v="E-19"/>
+  <tag k="operator" v="IIT Jodhpur"/>
+ </node>
+ <node id="13929549759" visible="true" version="2" changeset="184310756" timestamp="2026-06-19T11:12:13Z" user="VikasChoudhary" uid="24138550" lat="26.4764842" lon="73.1179160">
+  <tag k="department" v="Mechanical Engineering"/>
+  <tag k="healthcare" v="laboratory"/>
+  <tag k="name" v="E-23"/>
+  <tag k="operator" v="IIT jodhpur"/>
+ </node>
+ <node id="13929549760" visible="true" version="2" changeset="184310756" timestamp="2026-06-19T11:12:13Z" user="VikasChoudhary" uid="24138550" lat="26.4762684" lon="73.1179095">
+  <tag k="alt_name" v="E-22"/>
+  <tag k="name" v="Centralized Laundry Services"/>
+  <tag k="shop" v="laundry"/>
+ </node>
+ <node id="13929549761" visible="true" version="1" changeset="183984642" timestamp="2026-06-11T18:19:17Z" user="VikasChoudhary" uid="24138550" lat="26.4762142" lon="73.1179112">
+  <tag k="alt_name" v="E-21"/>
+  <tag k="name" v="Centralized Laundry Services"/>
+  <tag k="shop" v="laundry"/>
+ </node>
+ <node id="13929549762" visible="true" version="1" changeset="183984642" timestamp="2026-06-11T18:19:17Z" user="VikasChoudhary" uid="24138550" lat="26.4760999" lon="73.1179074">
   <tag k="alt_name" v="E-21"/>
   <tag k="name" v="Man salon shop"/>
   <tag k="shop" v="hairdresser"/>
  </node>
- <node id="13929549763" visible="true" version="1" changeset="183984642" timestamp="2026-06-11T18:19:17Z" user="VikasChoudhary" uid="24138550" lat="26.476015" lon="73.117945">
+ <node id="13929549763" visible="true" version="1" changeset="183984642" timestamp="2026-06-11T18:19:17Z" user="VikasChoudhary" uid="24138550" lat="26.4760339" lon="73.1179065">
   <tag k="alt_name" v="E-21"/>
   <tag k="name" v="Woman salon shop"/>
   <tag k="shop" v="hairdresser"/>
  </node>
- <node id="13929549764" visible="true" version="3" changeset="184132010" timestamp="2026-06-15T11:14:39Z" user="VikasChoudhary" uid="24138550" lat="26.475836" lon="73.117946">
-  
-  
- <tag k="name" v="E-20"/><tag k="shop" v="yes"/></node>
+ <node id="13929549764" visible="true" version="3" changeset="184310756" timestamp="2026-06-19T11:12:13Z" user="VikasChoudhary" uid="24138550" lat="26.4756150" lon="73.1179098">
+  <tag k="name" v="E-20"/>
+  <tag k="shop" v="yes"/>
+ </node>
  <node id="13930412881" visible="true" version="2" changeset="184129666" timestamp="2026-06-15T10:16:05Z" user="VikasChoudhary" uid="24138550" lat="26.4757858" lon="73.1104815">
   <tag k="alt_name" v="Shopping centre"/>
   <tag k="name" v="W-21"/>
@@ -5049,9 +4987,9 @@
  </node>
  <node id="13930640135" visible="true" version="1" changeset="184005440" timestamp="2026-06-12T08:35:56Z" user="VikasChoudhary" uid="24138550" lat="26.4760710" lon="73.1149119"/>
  <node id="13930640136" visible="true" version="1" changeset="184005440" timestamp="2026-06-12T08:35:56Z" user="VikasChoudhary" uid="24138550" lat="26.4760602" lon="73.1149523"/>
- <node id="13930640137" visible="true" version="2" changeset="184005440" timestamp="2026-06-12T08:35:56Z" user="VikasChoudhary" uid="24138550" lat="26.47660769686566" lon="73.11818341118048">
-  
- <tag k="entrance" v="yes"/></node>
+ <node id="13930640137" visible="true" version="2" changeset="184310756" timestamp="2026-06-19T11:12:13Z" user="VikasChoudhary" uid="24138550" lat="26.4766077" lon="73.1181834">
+  <tag k="entrance" v="yes"/>
+ </node>
  <node id="13930640138" visible="true" version="2" changeset="184153550" timestamp="2026-06-15T19:55:53Z" user="VikasChoudhary" uid="24138550" lat="26.4728618" lon="73.1137912">
   <tag k="entrance" v="yes"/>
  </node>
@@ -5105,7 +5043,7 @@
  <node id="13942270195" visible="true" version="1" changeset="184129666" timestamp="2026-06-15T10:16:05Z" user="VikasChoudhary" uid="24138550" lat="26.4747544" lon="73.1179098"/>
  <node id="13942270196" visible="true" version="1" changeset="184129666" timestamp="2026-06-15T10:16:05Z" user="VikasChoudhary" uid="24138550" lat="26.4747450" lon="73.1179101"/>
  <node id="13942270197" visible="true" version="1" changeset="184129666" timestamp="2026-06-15T10:16:05Z" user="VikasChoudhary" uid="24138550" lat="26.4747756" lon="73.1179089"/>
- <node id="13942270198" visible="true" version="2" changeset="184129666" timestamp="2026-06-15T10:16:05Z" user="VikasChoudhary" uid="24138550" lat="26.474857606955734" lon="73.11790613255747"/>
+ <node id="13942270198" visible="true" version="2" changeset="184310756" timestamp="2026-06-19T11:12:13Z" user="VikasChoudhary" uid="24138550" lat="26.4748576" lon="73.1179061"/>
  <node id="13942270199" visible="true" version="1" changeset="184129666" timestamp="2026-06-15T10:16:05Z" user="VikasChoudhary" uid="24138550" lat="26.4747910" lon="73.1179084"/>
  <node id="13942270200" visible="true" version="1" changeset="184129666" timestamp="2026-06-15T10:16:05Z" user="VikasChoudhary" uid="24138550" lat="26.4748009" lon="73.1179082"/>
  <node id="13942299801" visible="true" version="1" changeset="184129666" timestamp="2026-06-15T10:16:05Z" user="VikasChoudhary" uid="24138550" lat="26.4734153" lon="73.1148467"/>
@@ -5208,7 +5146,6 @@
  <node id="13942425537" visible="true" version="1" changeset="184132010" timestamp="2026-06-15T11:14:39Z" user="VikasChoudhary" uid="24138550" lat="26.4739028" lon="73.1113974">
   <tag k="entrance" v="yes"/>
  </node>
- <node id="13942425538" visible="true" version="1" changeset="184132010" timestamp="2026-06-15T11:14:39Z" user="VikasChoudhary" uid="24138550" lat="26.4739848" lon="73.1111001"/>
  <node id="13942425539" visible="true" version="1" changeset="184132010" timestamp="2026-06-15T11:14:39Z" user="VikasChoudhary" uid="24138550" lat="26.4739983" lon="73.1114246">
   <tag k="entrance" v="yes"/>
  </node>
@@ -5288,7 +5225,6 @@
  <node id="13942425600" visible="true" version="1" changeset="184132010" timestamp="2026-06-15T11:14:39Z" user="VikasChoudhary" uid="24138550" lat="26.4702782" lon="73.1161398"/>
  <node id="13942438101" visible="true" version="1" changeset="184132010" timestamp="2026-06-15T11:14:39Z" user="VikasChoudhary" uid="24138550" lat="26.4705574" lon="73.1165191"/>
  <node id="13942438102" visible="true" version="1" changeset="184132010" timestamp="2026-06-15T11:14:39Z" user="VikasChoudhary" uid="24138550" lat="26.4709471" lon="73.1169860"/>
- <node id="13942438103" visible="true" version="1" changeset="184132010" timestamp="2026-06-15T11:14:39Z" user="VikasChoudhary" uid="24138550" lat="26.4710863" lon="73.1170960"/>
  <node id="13942438104" visible="true" version="2" changeset="184153550" timestamp="2026-06-15T19:55:53Z" user="VikasChoudhary" uid="24138550" lat="26.4701413" lon="73.1140991"/>
  <node id="13942438105" visible="true" version="2" changeset="184153550" timestamp="2026-06-15T19:55:53Z" user="VikasChoudhary" uid="24138550" lat="26.4701883" lon="73.1145244"/>
  <node id="13942438106" visible="true" version="2" changeset="184153550" timestamp="2026-06-15T19:55:53Z" user="VikasChoudhary" uid="24138550" lat="26.4702593" lon="73.1149321"/>
@@ -5359,10 +5295,10 @@
  <node id="13943787992" visible="true" version="1" changeset="184153550" timestamp="2026-06-15T19:55:53Z" user="VikasChoudhary" uid="24138550" lat="26.4713752" lon="73.1183017"/>
  <node id="13943787993" visible="true" version="1" changeset="184153550" timestamp="2026-06-15T19:55:53Z" user="VikasChoudhary" uid="24138550" lat="26.4713246" lon="73.1182977"/>
  <node id="13943787994" visible="true" version="1" changeset="184153550" timestamp="2026-06-15T19:55:53Z" user="VikasChoudhary" uid="24138550" lat="26.4712153" lon="73.1185547"/>
- <node id="13943787995" visible="true" version="1" changeset="184153550" timestamp="2026-06-15T19:55:53Z" user="VikasChoudhary" uid="24138550" lat="26.4716786" lon="73.1183461"/>
- <node id="13943787996" visible="true" version="1" changeset="184153550" timestamp="2026-06-15T19:55:53Z" user="VikasChoudhary" uid="24138550" lat="26.4714510" lon="73.1182008"/>
- <node id="13943787997" visible="true" version="1" changeset="184153550" timestamp="2026-06-15T19:55:53Z" user="VikasChoudhary" uid="24138550" lat="26.4713571" lon="73.1183864"/>
- <node id="13943787998" visible="true" version="1" changeset="184153550" timestamp="2026-06-15T19:55:53Z" user="VikasChoudhary" uid="24138550" lat="26.4715666" lon="73.1185398"/>
+ <node id="13943787995" visible="true" version="2" changeset="184319196" timestamp="2026-06-19T14:39:17Z" user="VikasChoudhary" uid="24138550" lat="26.4716570" lon="73.1183751"/>
+ <node id="13943787996" visible="true" version="2" changeset="184319196" timestamp="2026-06-19T14:39:17Z" user="VikasChoudhary" uid="24138550" lat="26.4714294" lon="73.1182298"/>
+ <node id="13943787997" visible="true" version="2" changeset="184319196" timestamp="2026-06-19T14:39:17Z" user="VikasChoudhary" uid="24138550" lat="26.4713355" lon="73.1184154"/>
+ <node id="13943787998" visible="true" version="2" changeset="184319196" timestamp="2026-06-19T14:39:17Z" user="VikasChoudhary" uid="24138550" lat="26.4715450" lon="73.1185688"/>
  <node id="13943787999" visible="true" version="1" changeset="184153550" timestamp="2026-06-15T19:55:53Z" user="VikasChoudhary" uid="24138550" lat="26.4679691" lon="73.1158790"/>
  <node id="13943788000" visible="true" version="1" changeset="184153550" timestamp="2026-06-15T19:55:53Z" user="VikasChoudhary" uid="24138550" lat="26.4679048" lon="73.1157971"/>
  <node id="13943828001" visible="true" version="1" changeset="184153550" timestamp="2026-06-15T19:55:53Z" user="VikasChoudhary" uid="24138550" lat="26.4679553" lon="73.1157370"/>
@@ -5378,6 +5314,20 @@
  <node id="13943828011" visible="true" version="1" changeset="184153550" timestamp="2026-06-15T19:55:53Z" user="VikasChoudhary" uid="24138550" lat="26.4756440" lon="73.1127451"/>
  <node id="13943828012" visible="true" version="1" changeset="184153550" timestamp="2026-06-15T19:55:53Z" user="VikasChoudhary" uid="24138550" lat="26.4758989" lon="73.1114290"/>
  <node id="13943828013" visible="true" version="1" changeset="184153550" timestamp="2026-06-15T19:55:53Z" user="VikasChoudhary" uid="24138550" lat="26.4758741" lon="73.1108815"/>
+ <node id="13951869502" visible="true" version="2" changeset="184319196" timestamp="2026-06-19T14:39:17Z" user="VikasChoudhary" uid="24138550" lat="26.4715932" lon="73.1184855"/>
+ <node id="13951869503" visible="true" version="1" changeset="184310756" timestamp="2026-06-19T11:12:13Z" user="VikasChoudhary" uid="24138550" lat="26.4716394" lon="73.1185074"/>
+ <node id="13951869504" visible="true" version="1" changeset="184310756" timestamp="2026-06-19T11:12:13Z" user="VikasChoudhary" uid="24138550" lat="26.4714957" lon="73.1187458"/>
+ <node id="13951869505" visible="true" version="1" changeset="184310756" timestamp="2026-06-19T11:12:13Z" user="VikasChoudhary" uid="24138550" lat="26.4738162" lon="73.1178542"/>
+ <node id="13951869506" visible="true" version="1" changeset="184310756" timestamp="2026-06-19T11:12:13Z" user="VikasChoudhary" uid="24138550" lat="26.4759239" lon="73.1179204">
+  <tag k="name" v="E-21"/>
+  <tag k="shop" v="yes"/>
+ </node>
+ <node id="13951869507" visible="true" version="1" changeset="184310756" timestamp="2026-06-19T11:12:13Z" user="VikasChoudhary" uid="24138550" lat="26.4761601" lon="73.1179110">
+  <tag k="name" v="E-22"/>
+  <tag k="shop" v="yes"/>
+ </node>
+ <node id="14029337436" visible="true" version="1" changeset="186077421" timestamp="2026-07-20T18:43:59Z" user="VikasChoudhary" uid="24138550" lat="26.4664771" lon="73.1155231"/>
+ <node id="14029337437" visible="true" version="1" changeset="186077421" timestamp="2026-07-20T18:43:59Z" user="VikasChoudhary" uid="24138550" lat="26.4663307" lon="73.1157932"/>
  <way id="148619883" visible="true" version="17" changeset="179347921" timestamp="2026-03-04T12:47:54Z" user="Tinetto" uid="14728702">
   <nd ref="5486349836"/>
   <nd ref="7439767912"/>
@@ -5557,7 +5507,7 @@
   <tag k="operator" v="MHRD"/>
   <tag k="wheelchair" v="yes"/>
  </way>
- <way id="603118969" visible="true" version="5" changeset="179347921" timestamp="2026-03-04T12:47:54Z" user="Tinetto" uid="14728702">
+ <way id="603118969" visible="true" version="6" changeset="186077421" timestamp="2026-07-20T18:43:59Z" user="VikasChoudhary" uid="24138550">
   <nd ref="5726494487"/>
   <nd ref="5726494486"/>
   <nd ref="5726494485"/>
@@ -5582,6 +5532,7 @@
   <nd ref="5726494471"/>
   <nd ref="13617684704"/>
   <nd ref="12979117872"/>
+  <nd ref="14029337436"/>
   <nd ref="12979117869"/>
   <nd ref="7439767618"/>
   <nd ref="7439767917"/>
@@ -6406,29 +6357,30 @@
   <nd ref="7220643409"/>
   <tag k="highway" v="service"/>
  </way>
- <way id="773563519" visible="true" version="5" changeset="184153550" timestamp="2026-06-15T19:55:53Z" user="VikasChoudhary" uid="24138550">
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
- <nd ref="5729732717"/><nd ref="12979183034"/><nd ref="7220643420"/><nd ref="7220643421"/><nd ref="7220643422"/><nd ref="7220643423"/><nd ref="13943788000"/><nd ref="13943787999"/><nd ref="7220643424"/><nd ref="13943828006"/><nd ref="7220643425"/><nd ref="7220643426"/><nd ref="7220643427"/><nd ref="8498673341"/><nd ref="7220643428"/><nd ref="8498673343"/><nd ref="13943787994"/><nd ref="13943828016"/><nd ref="7220643429"/><nd ref="7220643430"/><nd ref="5729732665"/><tag k="highway" v="service"/></way>
+ <way id="773563519" visible="true" version="5" changeset="184310756" timestamp="2026-06-19T11:12:13Z" user="VikasChoudhary" uid="24138550">
+  <nd ref="5729732717"/>
+  <nd ref="12979183034"/>
+  <nd ref="7220643420"/>
+  <nd ref="7220643421"/>
+  <nd ref="7220643422"/>
+  <nd ref="7220643423"/>
+  <nd ref="13943788000"/>
+  <nd ref="13943787999"/>
+  <nd ref="7220643424"/>
+  <nd ref="13943828006"/>
+  <nd ref="7220643425"/>
+  <nd ref="7220643426"/>
+  <nd ref="7220643427"/>
+  <nd ref="8498673341"/>
+  <nd ref="7220643428"/>
+  <nd ref="8498673343"/>
+  <nd ref="13943787994"/>
+  <nd ref="13951869504"/>
+  <nd ref="7220643429"/>
+  <nd ref="7220643430"/>
+  <nd ref="5729732665"/>
+  <tag k="highway" v="service"/>
+ </way>
  <way id="773563527" visible="true" version="2" changeset="100675787" timestamp="2021-03-09T05:08:44Z" user="VLD123" uid="9124228">
   <nd ref="5729732651"/>
   <nd ref="7220643286"/>
@@ -7235,13 +7187,14 @@
   <tag k="highway" v="service"/>
   <tag k="lanes" v="1"/>
  </way>
- <way id="795434483" visible="true" version="2" changeset="168507665" timestamp="2025-07-05T03:21:33Z" user="maskedkd" uid="23067513">
+ <way id="795434483" visible="true" version="3" changeset="186077421" timestamp="2026-07-20T18:43:59Z" user="VikasChoudhary" uid="24138550">
   <nd ref="7439767624"/>
   <nd ref="7439767623"/>
   <nd ref="7439767622"/>
   <nd ref="7439767621"/>
   <nd ref="7439767616"/>
   <nd ref="12979117872"/>
+  <nd ref="14029337436"/>
   <nd ref="12979117869"/>
   <nd ref="7439767620"/>
   <nd ref="7439767619"/>
@@ -7249,11 +7202,12 @@
   <tag k="highway" v="trunk_link"/>
   <tag k="oneway" v="yes"/>
  </way>
- <way id="795434484" visible="true" version="1" changeset="84024947" timestamp="2020-04-23T22:12:39Z" user="FvGordon" uid="161619">
+ <way id="795434484" visible="true" version="2" changeset="186077421" timestamp="2026-07-20T18:43:59Z" user="VikasChoudhary" uid="24138550">
   <nd ref="7439767633"/>
   <nd ref="7439767632"/>
   <nd ref="7439767631"/>
   <nd ref="7439767630"/>
+  <nd ref="14029337437"/>
   <nd ref="7439767615"/>
   <nd ref="7439767629"/>
   <nd ref="7439767627"/>
@@ -7368,25 +7322,6 @@
   <nd ref="7454519150"/>
   <tag k="landuse" v="residential"/>
  </way>
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
  <way id="914898755" visible="true" version="1" changeset="100672504" timestamp="2021-03-09T04:17:45Z" user="VLD123" uid="9124228">
   <nd ref="8498673341"/>
   <nd ref="8498673342"/>
@@ -8150,12 +8085,11 @@
   <tag k="highway" v="service"/>
   <tag k="source" v="maxar"/>
  </way>
- <way id="914918549" visible="true" version="4" changeset="184132010" timestamp="2026-06-15T11:14:39Z" user="VikasChoudhary" uid="24138550">
+ <way id="914918549" visible="true" version="5" changeset="184166865" timestamp="2026-06-16T07:01:16Z" user="BCNorwich" uid="322785">
   <nd ref="12979176391"/>
   <nd ref="12979176390"/>
   <nd ref="12979176387"/>
   <nd ref="8498888922"/>
-  <nd ref="13942425538"/>
   <nd ref="7220643288"/>
   <tag k="highway" v="footway"/>
   <tag k="source" v="maxar"/>
@@ -9594,22 +9528,26 @@
   <nd ref="12979131716"/>
   <tag k="highway" v="service"/>
  </way>
- <way id="1412392539" visible="true" version="1" changeset="168507665" timestamp="2025-07-05T03:21:33Z" user="maskedkd" uid="23067513">
+ <way id="1412392539" visible="true" version="2" changeset="186074632" timestamp="2026-07-20T17:45:10Z" user="VikasChoudhary" uid="24138550">
   <nd ref="12979131717"/>
   <nd ref="12979131718"/>
   <nd ref="12979131719"/>
   <nd ref="12979131722"/>
   <nd ref="12979131720"/>
   <nd ref="12979131721"/>
-  <tag k="highway" v="service"/>
+  <tag k="bicycle" v="designated"/>
+  <tag k="foot" v="designated"/>
+  <tag k="highway" v="cycleway"/>
  </way>
- <way id="1412392540" visible="true" version="2" changeset="170512501" timestamp="2025-08-16T08:53:20Z" user="08kiran95" uid="15922987">
+ <way id="1412392540" visible="true" version="3" changeset="186074632" timestamp="2026-07-20T17:45:10Z" user="VikasChoudhary" uid="24138550">
   <nd ref="12979131751"/>
   <nd ref="13073768294"/>
   <nd ref="12979131725"/>
   <nd ref="12979131724"/>
   <nd ref="12979131717"/>
-  <tag k="highway" v="service"/>
+  <tag k="bicycle" v="designated"/>
+  <tag k="foot" v="designated"/>
+  <tag k="highway" v="cycleway"/>
  </way>
  <way id="1412392541" visible="true" version="1" changeset="168507665" timestamp="2025-07-05T03:21:33Z" user="maskedkd" uid="23067513">
   <nd ref="12979131725"/>
@@ -9676,35 +9614,39 @@
   <tag k="informal" v="yes"/>
   <tag k="surface" v="concrete"/>
  </way>
- <way id="1412392548" visible="true" version="1" changeset="168507665" timestamp="2025-07-05T03:21:33Z" user="maskedkd" uid="23067513">
+ <way id="1412392548" visible="true" version="2" changeset="186074632" timestamp="2026-07-20T17:45:10Z" user="VikasChoudhary" uid="24138550">
   <nd ref="7220643326"/>
   <nd ref="12979131742"/>
   <nd ref="12979131743"/>
   <nd ref="12979131744"/>
   <nd ref="12979131745"/>
-  <nd ref="12979131746"/>
   <tag k="highway" v="service"/>
  </way>
- <way id="1412392549" visible="true" version="1" changeset="168507665" timestamp="2025-07-05T03:21:33Z" user="maskedkd" uid="23067513">
+ <way id="1412392549" visible="true" version="2" changeset="186074632" timestamp="2026-07-20T17:45:10Z" user="VikasChoudhary" uid="24138550">
   <nd ref="12979131745"/>
   <nd ref="12979131747"/>
-  <nd ref="5729732633"/>
-  <tag k="highway" v="service"/>
+  <tag k="bicycle" v="designated"/>
+  <tag k="foot" v="designated"/>
+  <tag k="highway" v="cycleway"/>
  </way>
- <way id="1412392550" visible="true" version="2" changeset="184129666" timestamp="2026-06-15T10:16:05Z" user="VikasChoudhary" uid="24138550">
+ <way id="1412392550" visible="true" version="3" changeset="186074632" timestamp="2026-07-20T17:45:10Z" user="VikasChoudhary" uid="24138550">
   <nd ref="12979131746"/>
   <nd ref="12979131748"/>
   <nd ref="13942299803"/>
   <nd ref="12979131749"/>
-  <tag k="highway" v="service"/>
+  <tag k="bicycle" v="designated"/>
+  <tag k="foot" v="designated"/>
+  <tag k="highway" v="cycleway"/>
  </way>
- <way id="1412392551" visible="true" version="2" changeset="170512501" timestamp="2025-08-16T08:53:20Z" user="08kiran95" uid="15922987">
+ <way id="1412392551" visible="true" version="3" changeset="186074632" timestamp="2026-07-20T17:45:10Z" user="VikasChoudhary" uid="24138550">
   <nd ref="12979131749"/>
   <nd ref="13073768295"/>
   <nd ref="12979131751"/>
-  <tag k="highway" v="service"/>
+  <tag k="bicycle" v="designated"/>
+  <tag k="foot" v="designated"/>
+  <tag k="highway" v="cycleway"/>
  </way>
- <way id="1412392552" visible="true" version="1" changeset="168507665" timestamp="2025-07-05T03:21:33Z" user="maskedkd" uid="23067513">
+ <way id="1412392552" visible="true" version="2" changeset="186074632" timestamp="2026-07-20T17:45:10Z" user="VikasChoudhary" uid="24138550">
   <nd ref="12979131747"/>
   <nd ref="12979131752"/>
   <nd ref="12979131762"/>
@@ -9713,7 +9655,9 @@
   <nd ref="12979131754"/>
   <nd ref="12979131768"/>
   <nd ref="12979131755"/>
-  <tag k="highway" v="service"/>
+  <tag k="bicycle" v="designated"/>
+  <tag k="foot" v="designated"/>
+  <tag k="highway" v="cycleway"/>
  </way>
  <way id="1412392555" visible="true" version="2" changeset="168526342" timestamp="2025-07-05T14:38:15Z" user="maskedkd" uid="23067513">
   <nd ref="12979131747"/>
@@ -9796,10 +9740,8 @@
   <nd ref="7220643320"/>
   <tag k="highway" v="service"/>
  </way>
- 
- <way id="1412392565" visible="true" version="3" changeset="184132010" timestamp="2026-06-15T11:14:39Z" user="VikasChoudhary" uid="24138550">
+ <way id="1412392565" visible="true" version="4" changeset="184299426" timestamp="2026-06-19T06:21:00Z" user="BCNorwich" uid="322785">
   <nd ref="12979131804"/>
-  <nd ref="13942438103"/>
   <nd ref="12979131805"/>
   <nd ref="12979131806"/>
   <nd ref="12979131807"/>
@@ -10185,12 +10127,11 @@
   <nd ref="12979176376"/>
   <tag k="highway" v="service"/>
  </way>
- <way id="1412399732" visible="true" version="3" changeset="184132010" timestamp="2026-06-15T11:14:39Z" user="VikasChoudhary" uid="24138550">
+ <way id="1412399732" visible="true" version="4" changeset="184166865" timestamp="2026-06-16T07:01:16Z" user="BCNorwich" uid="322785">
   <nd ref="8498874511"/>
   <nd ref="12979176381"/>
   <nd ref="8498888921"/>
   <nd ref="8498888922"/>
-  <nd ref="13942425538"/>
   <nd ref="8498888923"/>
   <nd ref="8498888924"/>
   <tag k="highway" v="service"/>
@@ -10349,40 +10290,41 @@
   <tag k="department" v="Chemical Engineering"/>
   <tag k="name" v="Berms"/>
  </way>
- <way id="1412399744" visible="true" version="7" changeset="184132010" timestamp="2026-06-15T11:14:39Z" user="VikasChoudhary" uid="24138550">
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
- <nd ref="13942270198"/><nd ref="12979182969"/><nd ref="12979182970"/><nd ref="12979182971"/><nd ref="12979182972"/><nd ref="13942425551"/><nd ref="13942270179"/><nd ref="13943828017"/><nd ref="13942270181"/><nd ref="12979182973"/><nd ref="13942270183"/><nd ref="13942270182"/><nd ref="13942270184"/><nd ref="13942270188"/><nd ref="13942270189"/><nd ref="13942270185"/><nd ref="13942270187"/><nd ref="13942270186"/><nd ref="13942270193"/><nd ref="13942270191"/><nd ref="13929549756"/><nd ref="13942270190"/><nd ref="13942270194"/><nd ref="13942270192"/><nd ref="13942270196"/><nd ref="13942270195"/><nd ref="13942270197"/><nd ref="13906296454"/><nd ref="13942270199"/><nd ref="13942270200"/><nd ref="13942270198"/><tag k="building" v="public"/><tag k="name" v="Berms"/></way>
+ <way id="1412399744" visible="true" version="7" changeset="184310756" timestamp="2026-06-19T11:12:13Z" user="VikasChoudhary" uid="24138550">
+  <nd ref="13942270198"/>
+  <nd ref="12979182969"/>
+  <nd ref="12979182970"/>
+  <nd ref="12979182971"/>
+  <nd ref="12979182972"/>
+  <nd ref="13942425551"/>
+  <nd ref="13942270179"/>
+  <nd ref="13951869505"/>
+  <nd ref="13942270181"/>
+  <nd ref="12979182973"/>
+  <nd ref="13942270183"/>
+  <nd ref="13942270182"/>
+  <nd ref="13942270184"/>
+  <nd ref="13942270188"/>
+  <nd ref="13942270189"/>
+  <nd ref="13942270185"/>
+  <nd ref="13942270187"/>
+  <nd ref="13942270186"/>
+  <nd ref="13942270193"/>
+  <nd ref="13942270191"/>
+  <nd ref="13929549756"/>
+  <nd ref="13942270190"/>
+  <nd ref="13942270194"/>
+  <nd ref="13942270192"/>
+  <nd ref="13942270196"/>
+  <nd ref="13942270195"/>
+  <nd ref="13942270197"/>
+  <nd ref="13906296454"/>
+  <nd ref="13942270199"/>
+  <nd ref="13942270200"/>
+  <nd ref="13942270198"/>
+  <tag k="building" v="public"/>
+  <tag k="name" v="Berms"/>
+ </way>
  <way id="1412399745" visible="true" version="1" changeset="168508262" timestamp="2025-07-05T04:50:07Z" user="maskedkd" uid="23067513">
   <nd ref="12979182975"/>
   <nd ref="12979182976"/>
@@ -11772,11 +11714,11 @@
   <tag k="building" v="college"/>
   <tag k="name" v="Ess 09 Sub Station"/>
  </way>
- <way id="1412504081" visible="true" version="2" changeset="168526342" timestamp="2025-07-05T14:38:15Z" user="maskedkd" uid="23067513">
-  
-  
-  
- <nd ref="13930640137"/><nd ref="12980144886"/><tag k="highway" v="service"/></way>
+ <way id="1412504081" visible="true" version="2" changeset="184310756" timestamp="2026-06-19T11:12:13Z" user="VikasChoudhary" uid="24138550">
+  <nd ref="13930640137"/>
+  <nd ref="12980144886"/>
+  <tag k="highway" v="service"/>
+ </way>
  <way id="1412504082" visible="true" version="5" changeset="184132010" timestamp="2026-06-15T11:14:39Z" user="VikasChoudhary" uid="24138550">
   <nd ref="12979176382"/>
   <nd ref="12980144897"/>
@@ -12743,14 +12685,16 @@
   <tag k="name" v="Technology Innovation and Start-up Center"/>
   <tag k="office" v="it"/>
  </way>
- <way id="1525719375" visible="true" version="1" changeset="183585616" timestamp="2026-06-03T10:21:25Z" user="VikasChoudhary" uid="24138550">
+ <way id="1525719375" visible="true" version="2" changeset="186074632" timestamp="2026-07-20T17:45:10Z" user="VikasChoudhary" uid="24138550">
   <nd ref="12979131755"/>
   <nd ref="13906726660"/>
   <nd ref="13906726661"/>
   <nd ref="13906726662"/>
   <nd ref="13906726663"/>
   <nd ref="12979182914"/>
-  <tag k="highway" v="service"/>
+  <tag k="bicycle" v="designated"/>
+  <tag k="foot" v="designated"/>
+  <tag k="highway" v="cycleway"/>
  </way>
  <way id="1528265077" visible="true" version="1" changeset="183940465" timestamp="2026-06-10T19:20:47Z" user="dkwolf" uid="1771944">
   <nd ref="8499724992"/>
@@ -12877,7 +12821,7 @@
   <nd ref="13930562052"/>
   <tag k="highway" v="path"/>
  </way>
- <way id="1528703740" visible="true" version="1" changeset="184003031" timestamp="2026-06-12T07:33:34Z" user="VikasChoudhary" uid="24138550">
+ <way id="1528703740" visible="true" version="2" changeset="186074632" timestamp="2026-07-20T17:45:10Z" user="VikasChoudhary" uid="24138550">
   <nd ref="13930562053"/>
   <nd ref="13930562054"/>
   <nd ref="13930562055"/>
@@ -12932,7 +12876,6 @@
   <nd ref="13930568802"/>
   <nd ref="13930568803"/>
   <tag k="bicycle" v="designated"/>
-  <tag k="cycleway" v="crossing"/>
   <tag k="foot" v="designated"/>
   <tag k="highway" v="cycleway"/>
  </way>
@@ -12997,7 +12940,7 @@
   <tag k="informal" v="yes"/>
   <tag k="surface" v="sand"/>
  </way>
- <way id="1529641602" visible="true" version="1" changeset="184129666" timestamp="2026-06-15T10:16:05Z" user="VikasChoudhary" uid="24138550">
+ <way id="1529641602" visible="true" version="2" changeset="186074632" timestamp="2026-07-20T17:45:10Z" user="VikasChoudhary" uid="24138550">
   <nd ref="13930562053"/>
   <nd ref="13942299817"/>
   <nd ref="13942299818"/>
@@ -13027,7 +12970,6 @@
   <nd ref="13942299842"/>
   <nd ref="13930562089"/>
   <tag k="bicycle" v="designated"/>
-  <tag k="cycleway" v="crossing"/>
   <tag k="foot" v="designated"/>
   <tag k="highway" v="cycleway"/>
  </way>
@@ -13075,13 +13017,10 @@
   <nd ref="13942425552"/>
   <tag k="amenity" v="parking"/>
  </way>
- <way id="1529657256" visible="true" version="1" changeset="184132010" timestamp="2026-06-15T11:14:39Z" user="VikasChoudhary" uid="24138550">
+ <way id="1529657256" visible="true" version="2" changeset="184209848" timestamp="2026-06-17T06:05:21Z" user="BCNorwich" uid="322785">
   <nd ref="12980144604"/>
   <nd ref="13942425556"/>
   <nd ref="13942425557"/>
-  <nd ref="12979131729"/>
-  <nd ref="13942425558"/>
-  <nd ref="7220643473"/>
   <tag k="highway" v="path"/>
   <tag k="informal" v="yes"/>
  </way>
@@ -13130,7 +13069,7 @@
   <tag k="foot" v="designated"/>
   <tag k="highway" v="cycleway"/>
  </way>
- <way id="1529657260" visible="true" version="1" changeset="184132010" timestamp="2026-06-15T11:14:39Z" user="VikasChoudhary" uid="24138550">
+ <way id="1529657260" visible="true" version="2" changeset="184299426" timestamp="2026-06-19T06:21:00Z" user="BCNorwich" uid="322785">
   <nd ref="13942425588"/>
   <nd ref="13942425590"/>
   <nd ref="13942425591"/>
@@ -13146,7 +13085,6 @@
   <nd ref="13942438101"/>
   <nd ref="13942438102"/>
   <nd ref="12979131804"/>
-  <nd ref="13942438103"/>
   <tag k="highway" v="footway"/>
  </way>
  <way id="1529657261" visible="true" version="1" changeset="184132010" timestamp="2026-06-15T11:14:39Z" user="VikasChoudhary" uid="24138550">
@@ -13229,15 +13167,16 @@
   <nd ref="13943787994"/>
   <tag k="highway" v="service"/>
  </way>
- <way id="1529899558" visible="true" version="2" changeset="184153550" timestamp="2026-06-15T19:55:53Z" user="VikasChoudhary" uid="24138550">
-  
-  
-  
-  
-  
-  
-  
- <nd ref="13943787995"/><nd ref="13943787996"/><nd ref="13943787997"/><nd ref="13943787998"/><nd ref="13943828014"/><nd ref="13943787995"/><tag k="building" v="house"/><tag k="name" v="Animal House"/></way>
+ <way id="1529899558" visible="true" version="2" changeset="184310756" timestamp="2026-06-19T11:12:13Z" user="VikasChoudhary" uid="24138550">
+  <nd ref="13943787995"/>
+  <nd ref="13943787996"/>
+  <nd ref="13943787997"/>
+  <nd ref="13943787998"/>
+  <nd ref="13951869502"/>
+  <nd ref="13943787995"/>
+  <tag k="building" v="house"/>
+  <tag k="name" v="Animal House"/>
+ </way>
  <way id="1529899559" visible="true" version="1" changeset="184153550" timestamp="2026-06-15T19:55:53Z" user="VikasChoudhary" uid="24138550">
   <nd ref="13943788000"/>
   <nd ref="13943828001"/>
@@ -13259,6 +13198,37 @@
   <nd ref="13943828007"/>
   <tag k="landuse" v="residential"/>
   <tag k="name" v="Type - (B-)"/>
+ </way>
+ <way id="1530265285" visible="true" version="1" changeset="184209848" timestamp="2026-06-17T06:05:21Z" user="BCNorwich" uid="322785">
+  <nd ref="12979131729"/>
+  <nd ref="13942425558"/>
+  <nd ref="7220643473"/>
+  <tag k="highway" v="path"/>
+  <tag k="informal" v="yes"/>
+ </way>
+ <way id="1530809138" visible="true" version="1" changeset="184310756" timestamp="2026-06-19T11:12:13Z" user="VikasChoudhary" uid="24138550">
+  <nd ref="13951869502"/>
+  <nd ref="13951869503"/>
+  <nd ref="13951869504"/>
+  <tag k="highway" v="service"/>
+ </way>
+ <way id="1541061821" visible="true" version="1" changeset="186074632" timestamp="2026-07-20T17:45:10Z" user="VikasChoudhary" uid="24138550">
+  <nd ref="12979131745"/>
+  <nd ref="12979131746"/>
+  <tag k="bicycle" v="designated"/>
+  <tag k="foot" v="designated"/>
+  <tag k="highway" v="cycleway"/>
+ </way>
+ <way id="1541061822" visible="true" version="1" changeset="186074632" timestamp="2026-07-20T17:45:10Z" user="VikasChoudhary" uid="24138550">
+  <nd ref="12979131747"/>
+  <nd ref="5729732633"/>
+  <tag k="highway" v="service"/>
+ </way>
+ <way id="1541081486" visible="true" version="1" changeset="186077421" timestamp="2026-07-20T18:43:59Z" user="VikasChoudhary" uid="24138550">
+  <nd ref="14029337436"/>
+  <nd ref="14029337437"/>
+  <tag k="highway" v="service"/>
+  <tag k="layer" v="0"/>
  </way>
  <relation id="1798829" visible="true" version="43" changeset="176074160" timestamp="2025-12-18T03:46:36Z" user="Olyon" uid="1443767">
   <member type="way" ref="1109618146" role="outer"/>
@@ -13307,7 +13277,7 @@
   <tag k="was:boundary" v="administrative"/>
   <tag k="wikidata" v="Q122971177"/>
  </relation>
- <relation id="2374166" visible="true" version="183" changeset="179396090" timestamp="2026-03-05T13:12:24Z" user="Gorger" uid="20415418">
+ <relation id="2374166" visible="true" version="187" changeset="185644353" timestamp="2026-07-13T10:28:41Z" user="Gorger" uid="20415418">
   <member type="way" ref="183905372" role=""/>
   <member type="way" ref="178550916" role=""/>
   <member type="way" ref="169388254" role=""/>
@@ -13332,10 +13302,8 @@
   <member type="way" ref="254834124" role=""/>
   <member type="way" ref="257245530" role=""/>
   <member type="way" ref="1083054514" role=""/>
-  <member type="way" ref="1094633893" role=""/>
   <member type="way" ref="1094633892" role=""/>
   <member type="way" ref="1083054513" role=""/>
-  <member type="way" ref="1094633130" role=""/>
   <member type="way" ref="1097852716" role=""/>
   <member type="way" ref="1083054515" role=""/>
   <member type="way" ref="1083056685" role=""/>
@@ -13442,9 +13410,7 @@
   <member type="way" ref="1084335676" role=""/>
   <member type="way" ref="1084335675" role=""/>
   <member type="way" ref="1083054516" role=""/>
-  <member type="way" ref="1094633135" role=""/>
   <member type="way" ref="177851863" role=""/>
-  <member type="way" ref="1094633136" role=""/>
   <member type="way" ref="1094633137" role=""/>
   <member type="way" ref="1285851147" role=""/>
   <member type="way" ref="177851857" role=""/>
@@ -13512,6 +13478,7 @@
   <member type="way" ref="179574814" role=""/>
   <member type="way" ref="578955628" role=""/>
   <member type="way" ref="578955626" role=""/>
+  <member type="way" ref="1537949015" role=""/>
   <member type="way" ref="177861150" role=""/>
   <member type="way" ref="126065217" role=""/>
   <member type="way" ref="673959581" role=""/>
@@ -13851,10 +13818,29 @@
   <member type="way" ref="1453109080" role=""/>
   <member type="way" ref="182013892" role=""/>
   <member type="way" ref="657053081" role=""/>
+  <member type="way" ref="967346431" role=""/>
+  <member type="way" ref="657053078" role=""/>
+  <member type="way" ref="657053079" role=""/>
+  <member type="way" ref="967346430" role=""/>
+  <member type="way" ref="657053080" role=""/>
   <member type="way" ref="32009257" role=""/>
   <member type="way" ref="967360648" role=""/>
   <member type="way" ref="967360649" role=""/>
   <member type="way" ref="572720453" role=""/>
+  <member type="way" ref="1536282885" role=""/>
+  <member type="way" ref="1536282886" role=""/>
+  <member type="way" ref="1536282883" role=""/>
+  <member type="way" ref="1536282884" role=""/>
+  <member type="way" ref="1536282881" role=""/>
+  <member type="way" ref="1537949017" role=""/>
+  <member type="way" ref="1537949016" role=""/>
+  <member type="way" ref="1536282882" role=""/>
+  <member type="way" ref="1536287857" role=""/>
+  <member type="way" ref="1536287858" role=""/>
+  <member type="way" ref="1536287855" role=""/>
+  <member type="way" ref="1536287856" role=""/>
+  <member type="way" ref="1536287853" role=""/>
+  <member type="way" ref="1536287854" role=""/>
   <member type="way" ref="691734113" role=""/>
   <member type="way" ref="572720454" role=""/>
   <member type="way" ref="572720450" role=""/>
@@ -14074,7 +14060,7 @@
   <tag k="route" v="road"/>
   <tag k="type" v="route"/>
  </relation>
- <relation id="3188295" visible="true" version="169" changeset="183811788" timestamp="2026-06-08T06:50:09Z" user="syedk" uid="19820024">
+ <relation id="3188295" visible="true" version="170" changeset="185956120" timestamp="2026-07-18T12:53:43Z" user="*kv007*" uid="3012284">
   <member type="way" ref="1214444943" role=""/>
   <member type="way" ref="1206685538" role=""/>
   <member type="way" ref="1179983730" role=""/>
@@ -14708,6 +14694,8 @@
   <member type="way" ref="580410784" role=""/>
   <member type="way" ref="1355096396" role=""/>
   <member type="way" ref="1232695176" role=""/>
+  <member type="way" ref="1540242483" role=""/>
+  <member type="way" ref="1540242484" role=""/>
   <member type="way" ref="1179983729" role=""/>
   <member type="way" ref="104805147" role=""/>
   <member type="way" ref="1192644082" role=""/>
@@ -14897,4 +14885,4 @@
   <tag k="type" v="multipolygon"/>
   <tag k="water" v="pond"/>
  </relation>
-<node id="13943828014" visible="true" version="1" lat="26.471614791020848" lon="73.11845645537363"/><node id="13943828015" visible="true" version="1" lat="26.47163942723182" lon="73.1185074075991"/><node id="13943828016" visible="true" version="1" lat="26.471495665130764" lon="73.11874579328418"/><node id="13943828017" visible="true" version="1" lat="26.473816160020938" lon="73.11785424498197"/><node id="13943828018" visible="true" version="1" lat="26.476072" lon="73.117930"><tag k="name" v="E-21"/><tag k="shop" v="yes"/></node><node id="13943828019" visible="true" version="1" lat="26.476493" lon="73.117915"><tag k="name" v="E-22"/><tag k="shop" v="yes"/></node><way id="13943828020" visible="true" version="1"><nd ref="13943828014"/><nd ref="13943828015"/><nd ref="13943828016"/><tag k="highway" v="service"/></way></osm>
+</osm>
