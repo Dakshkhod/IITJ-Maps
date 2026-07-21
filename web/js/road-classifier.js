@@ -27,6 +27,19 @@ const VEHICLE_TYPES = new Set([
   'unclassified', 'residential', 'service',
 ]);
 
+// Ways OSM tags as a plain `highway=service` but which are, on the ground, a
+// building frontage / pedestrian forecourt rather than a through route. Left
+// drivable they win on distance and cars get sent across a walking area.
+//
+// These stay reachable as `destination` (deliveries and drop-offs still route
+// in, via the router's allowDestination fallback) but through-traffic is pushed
+// onto the real service road. Fix the tagging upstream in OSM where possible —
+// an entry here is a local stopgap, not the preferred place to model this.
+const FRONTAGE_NOT_THROUGH_ROUTE = new Map([
+  ['1412392545', 'New Mess west forecourt — through traffic belongs on service road 773563506, east of the mess'],
+  ['1412504049', 'New Mess forecourt stub off the same frontage'],
+]);
+
 const PEDESTRIAN_TYPES = new Set(['footway', 'path', 'steps', 'pedestrian', 'cycleway']);
 const NO_VALUES = new Set(['no', 'private', 'agricultural', 'forestry']);
 const YES_VALUES = new Set(['yes', 'designated', 'permissive', 'destination']);
@@ -192,6 +205,18 @@ function classifyRoadFeature(feature) {
   }
 
   if (type === 'service') {
+    const frontage = FRONTAGE_NOT_THROUGH_ROUTE.get(String(p.osm_id || ''));
+    if (frontage) {
+      return {
+        ...base,
+        vehicle_access: explicitVehicleAllowed(p) ? 'yes' : 'destination',
+        navigation_class: 'building_frontage',
+        drive_confidence: 0.58,
+        drive_penalty: 4.2,
+        drive_note: `Building frontage, not a through route: ${frontage}`,
+      };
+    }
+
     // Genuine access-only spurs: only when OSM explicitly says so via a
     // driveway / parking-aisle / alley subtype. These dead-end at a building
     // or lot, so keep them destination-access (used only when the route's

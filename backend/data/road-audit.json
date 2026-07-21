@@ -1,17 +1,38 @@
 {
-  "generated_at": "2026-07-21T12:17:06.527Z",
+  "generated_at": "2026-07-21T12:43:18.553Z",
   "summary": {
     "campus_main_road": 5,
     "major_vehicle_road": 13,
-    "campus_service_connector": 140,
+    "campus_service_connector": 138,
     "campus_service_road": 12,
     "vehicle_connector": 2,
     "pedestrian_path": 60,
     "campus_standard_road": 20,
     "maintenance_track": 3,
-    "cycle_pedestrian": 26
+    "cycle_pedestrian": 26,
+    "building_frontage": 2
   },
   "uncertain_vehicle_segments": [
+    {
+      "osm_id": "1412392545",
+      "name": "service",
+      "highway_type": "service",
+      "navigation_class": "building_frontage",
+      "vehicle_access": "destination",
+      "drive_confidence": 0.58,
+      "drive_note": "Building frontage, not a through route: New Mess west forecourt — through traffic belongs on service road 773563506, east of the mess",
+      "length_m": 50
+    },
+    {
+      "osm_id": "1412504049",
+      "name": "service",
+      "highway_type": "service",
+      "navigation_class": "building_frontage",
+      "vehicle_access": "destination",
+      "drive_confidence": 0.58,
+      "drive_note": "Building frontage, not a through route: New Mess forecourt stub off the same frontage",
+      "length_m": 2
+    },
     {
       "osm_id": "603603485",
       "name": "service",

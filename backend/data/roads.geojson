@@ -11647,11 +11647,11 @@
         "is_campus": true,
         "length_m": 50,
         "walk_access": "yes",
-        "vehicle_access": "yes",
-        "navigation_class": "campus_service_connector",
-        "drive_confidence": 0.7,
-        "drive_penalty": 2.5,
-        "drive_note": "Drivable campus service road; penalized below main/residential roads."
+        "vehicle_access": "destination",
+        "navigation_class": "building_frontage",
+        "drive_confidence": 0.58,
+        "drive_penalty": 4.2,
+        "drive_note": "Building frontage, not a through route: New Mess west forecourt — through traffic belongs on service road 773563506, east of the mess"
       },
       "geometry": {
         "type": "LineString",
@@ -14409,11 +14409,11 @@
         "is_campus": true,
         "length_m": 2,
         "walk_access": "yes",
-        "vehicle_access": "yes",
-        "navigation_class": "campus_service_connector",
-        "drive_confidence": 0.7,
-        "drive_penalty": 2.5,
-        "drive_note": "Drivable campus service road; penalized below main/residential roads."
+        "vehicle_access": "destination",
+        "navigation_class": "building_frontage",
+        "drive_confidence": 0.58,
+        "drive_penalty": 4.2,
+        "drive_note": "Building frontage, not a through route: New Mess forecourt stub off the same frontage"
       },
       "geometry": {
         "type": "LineString",
