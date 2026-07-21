@@ -27,17 +27,20 @@ const VEHICLE_TYPES = new Set([
   'unclassified', 'residential', 'service',
 ]);
 
-// Ways OSM tags as a plain `highway=service` but which are, on the ground, a
-// building frontage / pedestrian forecourt rather than a through route. Left
-// drivable they win on distance and cars get sent across a walking area.
+// Ways OSM tags as a plain `highway=service` but which must not carry through
+// traffic — building forecourts, and shortcuts across pedestrian ground where a
+// proper road runs parallel. Several are `source=maxar` satellite traces, so
+// OSM carries no hint that they are not real roads. Left drivable they win on
+// distance and cars get sent across walking areas.
 //
 // These stay reachable as `destination` (deliveries and drop-offs still route
 // in, via the router's allowDestination fallback) but through-traffic is pushed
-// onto the real service road. Fix the tagging upstream in OSM where possible —
-// an entry here is a local stopgap, not the preferred place to model this.
-const FRONTAGE_NOT_THROUGH_ROUTE = new Map([
+// onto the real road. Fix the tagging upstream in OSM where possible — an entry
+// here is a local stopgap, not the preferred place to model this.
+const NOT_A_THROUGH_ROUTE = new Map([
   ['1412392545', 'New Mess west forecourt — through traffic belongs on service road 773563506, east of the mess'],
   ['1412504049', 'New Mess forecourt stub off the same frontage'],
+  ['914908600',  'LHC / New Tapri connector — through traffic belongs on service road 603603485, south of the block'],
 ]);
 
 const PEDESTRIAN_TYPES = new Set(['footway', 'path', 'steps', 'pedestrian', 'cycleway']);
@@ -205,15 +208,15 @@ function classifyRoadFeature(feature) {
   }
 
   if (type === 'service') {
-    const frontage = FRONTAGE_NOT_THROUGH_ROUTE.get(String(p.osm_id || ''));
-    if (frontage) {
+    const notThrough = NOT_A_THROUGH_ROUTE.get(String(p.osm_id || ''));
+    if (notThrough) {
       return {
         ...base,
         vehicle_access: explicitVehicleAllowed(p) ? 'yes' : 'destination',
-        navigation_class: 'building_frontage',
+        navigation_class: 'local_access_only',
         drive_confidence: 0.58,
         drive_penalty: 4.2,
-        drive_note: `Building frontage, not a through route: ${frontage}`,
+        drive_note: `Not a through route: ${notThrough}`,
       };
     }
 

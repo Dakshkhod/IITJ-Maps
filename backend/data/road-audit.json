@@ -1,36 +1,46 @@
 {
-  "generated_at": "2026-07-21T12:43:18.553Z",
+  "generated_at": "2026-07-21T12:53:40.442Z",
   "summary": {
     "campus_main_road": 5,
     "major_vehicle_road": 13,
-    "campus_service_connector": 138,
+    "campus_service_connector": 137,
     "campus_service_road": 12,
     "vehicle_connector": 2,
     "pedestrian_path": 60,
     "campus_standard_road": 20,
+    "local_access_only": 3,
     "maintenance_track": 3,
-    "cycle_pedestrian": 26,
-    "building_frontage": 2
+    "cycle_pedestrian": 26
   },
   "uncertain_vehicle_segments": [
+    {
+      "osm_id": "914908600",
+      "name": "service",
+      "highway_type": "service",
+      "navigation_class": "local_access_only",
+      "vehicle_access": "destination",
+      "drive_confidence": 0.58,
+      "drive_note": "Not a through route: LHC / New Tapri connector — through traffic belongs on service road 603603485, south of the block",
+      "length_m": 60
+    },
     {
       "osm_id": "1412392545",
       "name": "service",
       "highway_type": "service",
-      "navigation_class": "building_frontage",
+      "navigation_class": "local_access_only",
       "vehicle_access": "destination",
       "drive_confidence": 0.58,
-      "drive_note": "Building frontage, not a through route: New Mess west forecourt — through traffic belongs on service road 773563506, east of the mess",
+      "drive_note": "Not a through route: New Mess west forecourt — through traffic belongs on service road 773563506, east of the mess",
       "length_m": 50
     },
     {
       "osm_id": "1412504049",
       "name": "service",
       "highway_type": "service",
-      "navigation_class": "building_frontage",
+      "navigation_class": "local_access_only",
       "vehicle_access": "destination",
       "drive_confidence": 0.58,
-      "drive_note": "Building frontage, not a through route: New Mess forecourt stub off the same frontage",
+      "drive_note": "Not a through route: New Mess forecourt stub off the same frontage",
       "length_m": 2
     },
     {
