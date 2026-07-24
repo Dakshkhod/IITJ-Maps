@@ -6738,17 +6738,26 @@ var Landmarks3D = (() => {
   //     the same way Google/Apple/F4 stream 3D detail in as the camera moves.
   // Re-entrant-safe: one loop runs at a time and re-reads _visible every tick,
   // so a toggle mid-warm-up simply upgrades the cadence to per-frame streaming.
+  // Tell perf-tier.js the 3D scene is mid-build/upload so its FPS watchdog
+  // ignores this one-time cost instead of misreading it as a slow device and
+  // demoting the tier (which, at 'low', strips these very models).
+  function _setSceneBusy(b) {
+    if (window.PerfTier) window.PerfTier.sceneBusy = !!b;
+  }
+
   function _startBuild() {
     if (_sceneComplete || _buildLoopRunning) return;
     if (!_threeReady()) { setTimeout(_startBuild, 120); return; }   // loaders not ready yet
     _buildLoopRunning = true;
+    _setSceneBusy(true);
     _initSceneShell();
+    const done = () => { _buildLoopRunning = false; _setSceneBusy(false); _warmIfIdle(); };
     const tick = () => {
-      if (_sceneComplete) { _buildLoopRunning = false; _warmIfIdle(); return; }
+      if (_sceneComplete) { done(); return; }
       const more = _buildLandmarkChunk(_visible ? 3 : 6);
       if (!more) _finalizeScene();
       if (_visible && _map) _map.triggerRepaint();   // paint newly built models
-      if (_sceneComplete) { _buildLoopRunning = false; _warmIfIdle(); return; }
+      if (_sceneComplete) { done(); return; }
       if (_visible) requestAnimationFrame(tick); else _idle(tick);
     };
     if (_visible) requestAnimationFrame(tick); else _idle(tick);
@@ -6768,6 +6777,7 @@ var Landmarks3D = (() => {
   // to the (chunk-streamed) on-demand path, so it can never break rendering.
   function _warmGpu() {
     if (_gpuWarmed || !_renderer || !_scene || !_camera) return;
+    _setSceneBusy(true);
     try {
       _renderer.compile(_scene, _camera);            // link all shader programs
       const box = new THREE.Box3().setFromObject(_scene);
@@ -6788,6 +6798,7 @@ var Landmarks3D = (() => {
       _renderer.resetState();                          // hand GL state back clean
       _gpuWarmed = true;
     } catch (e) { /* best-effort warm-up */ }
+    finally { _setSceneBusy(false); }
   }
 
   // While 3D is still hidden, add the custom layer (which gives onAdd a GL

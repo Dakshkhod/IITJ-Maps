@@ -25,10 +25,13 @@
 (function () {
   'use strict';
 
-  // v3: models are now draw-call-merged on every model tier (much cheaper), so
-  // any tier a device got demoted to under the old, heavier scheme is stale —
-  // start fresh so capable phones re-detect instead of being stuck low.
-  var STORE_KEY = 'iitj_perf_v3';
+  // v4: earlier versions let the FPS watchdog demote all the way to 'low' and
+  // PERSIST it, so a mid-range phone that hitched once during the cold-start 3D
+  // build got permanently stripped of the custom buildings (landmarkModels is
+  // off only at 'low') with no way back. v4 both resets that stale persisted cap
+  // AND floors the watchdog at 'reduced' (see WATCHDOG_FLOOR) so it can never
+  // silently drop the models again. Bumping the key re-detects every device.
+  var STORE_KEY = 'iitj_perf_v4';
 
   function loadStore() {
     try { return JSON.parse(localStorage.getItem(STORE_KEY)) || {}; }
@@ -230,6 +233,11 @@
   var PerfTier = {
     detectedTier: detected,
     gpu: gpu, deviceMemory: mem, cores: cores, dpr: dpr,
+    // Set by landmarks-3d.js while the 3D scene is streaming its geometry in or
+    // uploading it to the GPU. That one-time cost briefly drops the frame rate
+    // during the very first tilt into 3D; the watchdog must NOT read it as the
+    // device being slow (that false positive is what used to demote phones).
+    sceneBusy: false,
     // Scale an instance count (trees/shrubs) by this tier's vegetation density.
     veg: function (n) { return Math.max(0, Math.round(n * PerfTier.vegetationDensity)); },
   };
@@ -248,6 +256,13 @@
   var SMOOTH_FPS = 50;      // below this during movement = not smooth → demote
   var STEP_COOLDOWN = 3500; // ms to let a demotion settle before judging again
   var SAMPLE_N = 18;        // frames per FPS estimate (~0.3s at 60fps)
+  // The watchdog trims for smoothness but must never take a device the
+  // classifier judged capable BELOW the tier that still draws the custom 3D
+  // buildings — otherwise a transient hitch permanently strips the models
+  // (landmarkModels is off only at 'low'). 'reduced' is the lightest tier that
+  // keeps them (merged geometry, trimmed resolution). Genuinely weak GPUs are
+  // already put at 'low' at BOOT by classify(); this only bounds AUTO demotion.
+  var WATCHDOG_FLOOR = TIER_REDUCED;   // = 1
 
   PerfTier.attachWatchdog = function (map) {
     if (!map) return;
@@ -257,7 +272,13 @@
     map.on('moveend',   function () { moving = false; last = 0; samples.length = 0; });
 
     map.on('render', function () {
-      if (!moving || PerfTier.tier <= 0) return;
+      // Stop once at the floor (models safe) and never judge frames spent
+      // building/uploading the 3D scene — that one-time cost isn't the steady
+      // state we're trying to measure. Reset the sampler so stale intervals
+      // from the busy window don't leak into the next real estimate.
+      if (!moving || PerfTier.tier <= WATCHDOG_FLOOR || PerfTier.sceneBusy) {
+        last = 0; samples.length = 0; return;
+      }
       var now = performance.now();
       if (now < nextEval) { last = now; samples.length = 0; return; }  // cooling down
       if (last) {
@@ -285,7 +306,10 @@
   };
 
   function liveDemote(map) {
-    var t = Math.max(0, PerfTier.tier - 1);
+    // Never step past the floor — the custom 3D buildings stay on any device
+    // the classifier booted above 'low'.
+    var t = Math.max(WATCHDOG_FLOOR, PerfTier.tier - 1);
+    if (t === PerfTier.tier) return;
     apply(t);
     if (typeof map.setPixelRatio === 'function') {
       try { map.setPixelRatio(PerfTier.pixelRatio); } catch (e) {}
