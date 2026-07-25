@@ -4886,10 +4886,8 @@ function setupEventListeners() {
     closeMenu();
     shareMyLocation();
   });
-  document.getElementById('menu-about').addEventListener('click', () => {
-    closeMenu();
-    showToast('IITJ Maps v3 — Campus Navigation, IIT Jodhpur', 'info');
-  });
+  // "About IITJ Maps" is a plain link to about.html (opens in a new tab),
+  // mirroring the Privacy item — no JS handler needed.
 
   document.addEventListener('keydown', e => {
     if (e.key === 'Escape') {
