@@ -4901,8 +4901,7 @@ function setupEventListeners() {
     closeMenu();
     shareMyLocation();
   });
-  // "About IITJ Maps" is a plain link to about.html (opens in a new tab),
-  // mirroring the Privacy item — no JS handler needed.
+  // "About IITJ Maps" is a plain link to about.html — no JS handler needed.
 
   document.addEventListener('keydown', e => {
     if (e.key === 'Escape') {
