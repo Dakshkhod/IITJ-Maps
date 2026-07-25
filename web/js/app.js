@@ -621,6 +621,7 @@ let directionsFromMarker = null;
 let directionsToMarker = null;
 let dirSearchTimeout = null;
 let directionsMode = 'drive';  // 'drive' (main roads only) | 'walk' (shortcuts allowed)
+let pendingSharedRoute = null; // a shared-route deep link waiting on the first GPS fix
 
 // ============================================================
 // Initialize
@@ -2842,6 +2843,7 @@ function minimizeDirectionsPanel() {
   document.getElementById('dir-collapsed-meta').textContent =
     currentRoute ? (document.getElementById('dir-summary-text').textContent || '') : 'Tap to edit route';
   document.getElementById('dir-start-mini').style.display = currentRoute ? '' : 'none';
+  document.getElementById('dir-share-mini').style.display = currentRoute ? '' : 'none';
   hideAllDirResults();
   clearDirectionsPickMode();
 }
@@ -2924,6 +2926,7 @@ function setDirectionsPickMode(target) {
     target === 'from' ? 'Tap the map to set start' : 'Tap the map to set destination';
   document.getElementById('dir-collapsed-meta').textContent = 'Choosing on map…';
   document.getElementById('dir-start-mini').style.display = 'none';
+  document.getElementById('dir-share-mini').style.display = 'none';
   hideAllDirResults();
 }
 
@@ -3042,6 +3045,8 @@ function setupDirectionsPanel() {
   document.getElementById('dir-go').addEventListener('click', calculateDirectionsRoute);
   document.getElementById('dir-start').addEventListener('click', startImmersiveNavigation);
   document.getElementById('dir-start-mini').addEventListener('click', startImmersiveNavigation);
+  document.getElementById('dir-share').addEventListener('click', shareRoute);
+  document.getElementById('dir-share-mini').addEventListener('click', shareRoute);
   document.getElementById('dir-close').addEventListener('click', closeDirectionsPanel);
   document.getElementById('dir-close-mini').addEventListener('click', closeDirectionsPanel);
   document.getElementById('dir-expand').addEventListener('click', expandDirectionsPanel);
@@ -4499,6 +4504,16 @@ function onLocationFrame(disp, raw) {
   // Legacy global kept for code paths that still read it directly
   if (disp.heading != null) headingDeg = disp.heading;
 
+  // A shared-route link that had no baked-in origin waited for this first fix —
+  // now route from the recipient's location to the shared destination.
+  if (pendingSharedRoute) {
+    const to = pendingSharedRoute;
+    pendingSharedRoute = null;
+    setDirectionsPoint('from', { lat: userLocation.lat, lng: userLocation.lng, name: 'Your location' }, false);
+    setDirectionsPoint('to', to, false);
+    calculateDirectionsRoute();
+  }
+
   _renderLocationMarker(renderLat, renderLng, disp.accuracy, disp.heading);
 
   // Swing the departure compass arrow smoothly as the map/heading updates.
@@ -5117,6 +5132,7 @@ function escapeHtml(s) { const d = document.createElement('div'); d.textContent 
 // ============================================================
 function handleDeepLink() {
   const p = new URLSearchParams(location.search);
+  if (handleRouteDeepLink(p)) return;   // ?tlat=&tlng=… → a shared route link
   const lat  = parseFloat(p.get('lat'));
   const lng  = parseFloat(p.get('lng'));
   const placeParam = p.get('place');
@@ -5184,6 +5200,82 @@ function shareMyLocation() {
     return;
   }
   sharePlaceOrLocation({ lat: userLocation.lat, lng: userLocation.lng, name: 'My Location' });
+}
+
+// Build a link that reopens the current route (destination + mode, and the
+// origin when it's a fixed place). Opened on any device, it recomputes the same
+// directions — the recipient's own location is used when no origin is shared.
+function buildRouteShareURL() {
+  const base = `${location.origin}${location.pathname}`;
+  const to = directionsTo;
+  const params = new URLSearchParams({
+    tlat: to.lat.toFixed(6),
+    tlng: to.lng.toFixed(6),
+    mode: directionsMode,
+    ...(to.name ? { to: to.name } : {}),
+  });
+  // Include the origin only when it's a real place. Never bake in the sender's
+  // live GPS ("Your location") — a link without an origin routes from wherever
+  // the recipient is.
+  const from = directionsFrom;
+  if (from && from.name && from.name !== 'Your location') {
+    params.set('flat', from.lat.toFixed(6));
+    params.set('flng', from.lng.toFixed(6));
+    params.set('from', from.name);
+  }
+  return `${base}?${params}`;
+}
+
+function shareRoute() {
+  if (!directionsTo || !currentRoute) {
+    showToast('Calculate a route first', 'warn');
+    return;
+  }
+  const url  = buildRouteShareURL();
+  const dest = directionsTo.name && directionsTo.name !== 'Destination' ? directionsTo.name : 'a place';
+  const text = `Directions to ${dest} — IITJ Maps`;
+  if (navigator.share) {
+    navigator.share({ title: text, text, url }).catch(() => {});
+  } else {
+    navigator.clipboard?.writeText(url)
+      .then(() => showToast('Route link copied!', 'success'))
+      .catch(() => showToast(url, 'info'));
+  }
+}
+
+// A shared-route link (?tlat=&tlng=…): reopen directions and recompute the
+// route. Returns true if the link was a route link (so the caller can stop).
+function handleRouteDeepLink(p) {
+  const tlat = parseFloat(p.get('tlat'));
+  const tlng = parseFloat(p.get('tlng'));
+  if (isNaN(tlat) || isNaN(tlng)) return false;
+
+  const to   = { lat: tlat, lng: tlng, name: p.get('to') || 'Destination' };
+  const flat = parseFloat(p.get('flat'));
+  const flng = parseFloat(p.get('flng'));
+  const sharedFrom = (!isNaN(flat) && !isNaN(flng))
+    ? { lat: flat, lng: flng, name: p.get('from') || 'Start' }
+    : null;
+  const mode = p.get('mode');
+  if (mode === 'walk' || mode === 'drive') directionsMode = mode;
+
+  const run = () => {
+    // Prefer a shared origin; otherwise route from the recipient's own location.
+    const origin = sharedFrom || (userLocation
+      ? { lat: userLocation.lat, lng: userLocation.lng, name: 'Your location' }
+      : null);
+    openDirectionsPanel(origin ? { from: origin, to } : { to });
+    if (origin) {
+      calculateDirectionsRoute();
+    } else {
+      // No shared origin and no GPS fix yet — route as soon as one arrives.
+      pendingSharedRoute = to;
+      showToast(`Enable location for directions to ${to.name}`, 'info');
+      if (!watchId) requestUserLocation();
+    }
+  };
+  if (IITJData.isReady()) run(); else IITJData.onReady(run);
+  return true;
 }
 
 function hideSplash() {

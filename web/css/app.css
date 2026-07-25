@@ -683,6 +683,28 @@ body.dir-map-pick .directions-panel .dir-collapsed-bar { pointer-events: all; }
 
 .dir-start-btn-mini { padding: 8px 16px; font-size: 13px; gap: 6px; }
 
+/* Share-route button — secondary/outline styling, sits beside Start */
+.dir-share-btn {
+  width: 40px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--border);
+  border-radius: 99px;
+  background: var(--surface);
+  color: var(--text-secondary);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.15s, color 0.15s, transform 0.1s;
+}
+.dir-share-btn:hover { background: var(--surface-hover); color: var(--text-primary); }
+.dir-share-btn:active { transform: scale(0.95); }
+.dir-share-btn svg { width: 18px; height: 18px; }
+
+.dir-share-btn-mini { width: 32px; height: 32px; border-radius: var(--radius-sm); }
+.dir-share-btn-mini svg { width: 15px; height: 15px; }
+
 /* Re-centre button — floats above nav-panel during immersive nav */
 .nav-recenter-btn {
   position: absolute;
