@@ -12,153 +12,155 @@
     body {
       margin: 0; padding: 0;
       font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
-      line-height: 1.65; color: #1a1a1a; background: #fafafa;
-      -webkit-font-smoothing: antialiased;
+      line-height: 1.6; color: #1a1a1a; background: #fafafa;
+      -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility;
     }
-    .wrap { max-width: 720px; margin: 0 auto; padding: 48px 22px 96px; }
-    header { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
-    .logo { width: 40px; height: 40px; border-radius: 12px; background: #0a0a0a;
-            display: grid; place-items: center; color: #fafafa; font-weight: 800; }
-    h1 { font-size: 1.7rem; margin: 22px 0 4px; letter-spacing: -0.02em; }
-    .sub { color: #6b7280; font-size: 0.95rem; margin: 0 0 28px; }
-    h2 { font-size: 1.12rem; margin: 34px 0 14px; letter-spacing: -0.01em; }
-    p, li { color: #2a2a2a; }
-    a { color: #2563eb; }
-    .pill { display: inline-block; background: #eafff0; color: #15803d; border: 1px solid #bbf7d0;
-            border-radius: 999px; padding: 2px 10px; font-size: 0.8rem; font-weight: 600; }
+    .wrap { max-width: 660px; margin: 0 auto; padding: 46px 22px 88px; }
+
+    .brand { display: flex; align-items: center; gap: 11px; }
+    .logo { width: 38px; height: 38px; border-radius: 11px; background: #0a0a0a;
+            display: grid; place-items: center; color: #fafafa; font-weight: 800; font-size: 0.9rem; }
+    .brand strong { font-size: 0.98rem; letter-spacing: -0.01em; }
+
+    h1 { font-size: 1.75rem; margin: 30px 0 6px; letter-spacing: -0.025em; font-weight: 700; }
+    .lede { color: #5b6470; font-size: 1rem; margin: 0 0 4px; max-width: 46ch; }
+
+    .label {
+      font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.11em;
+      font-weight: 700; color: #99a1ad; margin: 42px 0 15px;
+    }
+    p { color: #33383f; }
 
     /* People */
-    .people-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-    @media (max-width: 560px) { .people-grid { grid-template-columns: 1fr; } }
-    .person {
-      background: #fff; border: 1px solid #e9ebef; border-radius: 16px;
-      padding: 18px 18px 16px; display: flex; flex-direction: column; gap: 12px;
+    .people { display: grid; grid-template-columns: 1fr 1fr; gap: 13px; }
+    @media (max-width: 560px) { .people { grid-template-columns: 1fr; } }
+    .card {
+      background: #fff; border: 1px solid #e8eaee; border-radius: 14px;
+      padding: 19px 19px 17px; display: flex; flex-direction: column; gap: 15px;
     }
-    .person-head { display: flex; align-items: center; gap: 13px; }
+    .who { display: flex; align-items: center; gap: 13px; }
     .avatar {
-      width: 46px; height: 46px; border-radius: 50%; flex: 0 0 46px;
-      display: grid; place-items: center; font-weight: 700; font-size: 1.02rem;
-      background: #0a0a0a; color: #fafafa; letter-spacing: -0.02em;
+      width: 44px; height: 44px; border-radius: 50%; flex: 0 0 44px;
+      display: grid; place-items: center; font-weight: 700; font-size: 0.95rem;
+      background: #0a0a0a; color: #fafafa; letter-spacing: -0.01em;
     }
     .avatar.mentor { background: #1b7fd6; color: #fff; }
-    .person-name { font-weight: 700; font-size: 1.04rem; letter-spacing: -0.01em; line-height: 1.2; }
-    .person-role { color: #6b7280; font-size: 0.86rem; margin-top: 2px; line-height: 1.35; }
-    .chips { display: flex; flex-wrap: wrap; gap: 8px; }
-    .chip {
-      display: inline-flex; align-items: center; gap: 7px;
-      padding: 6px 11px; border-radius: 999px; text-decoration: none;
-      background: #f4f5f7; border: 1px solid #e9ebef; color: #374151;
-      font-size: 0.82rem; font-weight: 600; transition: background .15s, border-color .15s;
+    .name { font-weight: 650; font-size: 1.02rem; letter-spacing: -0.01em; line-height: 1.25; }
+    .role { color: #7a828d; font-size: 0.84rem; margin-top: 3px; line-height: 1.4; }
+
+    .links { display: flex; flex-wrap: wrap; gap: 16px; }
+    .links a {
+      display: inline-flex; align-items: center; gap: 6px;
+      text-decoration: none; color: #545b64; font-size: 0.86rem; font-weight: 500;
+      transition: color .15s;
     }
-    .chip:hover { background: #eceef1; border-color: #dcdfe4; }
-    .chip svg { width: 15px; height: 15px; display: block; }
+    .links a:hover { color: #111; }
+    .links svg { width: 15px; height: 15px; display: block; opacity: 0.75; }
 
-    /* Mentor card spans full width and reads a touch larger */
-    .person.wide { grid-column: 1 / -1; flex-direction: row; align-items: center; }
-    .person.wide .avatar { width: 54px; height: 54px; flex-basis: 54px; font-size: 1.2rem; }
-    .person.wide .person-name { font-size: 1.12rem; }
+    /* Mentor row spans full width */
+    .card.wide { grid-column: 1 / -1; flex-direction: row; align-items: center; gap: 15px; }
+    .card.wide .avatar { width: 50px; height: 50px; flex-basis: 50px; font-size: 1.15rem; }
+    .card.wide .name { font-size: 1.08rem; }
 
-    .back { display: inline-block; margin-top: 40px; color: #2563eb; text-decoration: none; font-weight: 600; }
-    footer { margin-top: 44px; color: #9ca3af; font-size: 0.85rem; border-top: 1px solid #e5e7eb; padding-top: 16px; }
+    .foot {
+      margin-top: 52px; padding-top: 18px; border-top: 1px solid #e8eaee;
+      display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;
+      color: #9199a5; font-size: 0.83rem;
+    }
+    .foot a { color: #2563eb; text-decoration: none; font-weight: 600; }
 
     @media (prefers-color-scheme: dark) {
-      body { color: #e5e7eb; background: #0c0c0d; }
-      .sub { color: #9ca3af; } p, li { color: #cfd3da; }
+      body { color: #e5e7eb; background: #0b0b0c; }
       .logo { background: #fafafa; color: #0a0a0a; }
-      .pill { background: #0f2a17; color: #86efac; border-color: #14532d; }
-      .person { background: #131417; border-color: #23262e; }
-      .person-role { color: #9ca3af; }
+      .lede { color: #9aa2ad; }
+      .label { color: #6b727e; }
+      p { color: #c3c8cf; }
+      .card { background: #131417; border-color: #22252c; }
+      .role { color: #868e99; }
       .avatar { background: #fafafa; color: #0a0a0a; }
       .avatar.mentor { background: #1b7fd6; color: #fff; }
-      .chip { background: #1b1d22; border-color: #2a2d36; color: #cfd3da; }
-      .chip:hover { background: #22252c; border-color: #343843; }
-      footer { border-color: #1f2330; color: #6b7280; }
+      .links a { color: #9aa2ad; }
+      .links a:hover { color: #f3f4f6; }
+      .foot { border-color: #22252c; color: #6b727e; }
     }
   </style>
 </head>
 <body>
   <div class="wrap">
-    <header>
+    <div class="brand">
       <div class="logo">IM</div>
       <strong>IITJ Maps</strong>
-    </header>
-    <h1>About</h1>
-    <p class="sub">Campus navigation, built for IIT Jodhpur.</p>
+    </div>
 
-    <p><span class="pill">A student-built campus map</span></p>
+    <h1>About</h1>
+    <p class="lede">A campus navigation tool for IIT Jodhpur.</p>
 
     <p>
-      IITJ Maps is an interactive 3D map and navigation app for the IIT Jodhpur
-      campus — search for buildings and landmarks, get walking and driving
-      directions, and explore the campus in 3D. It’s a student project, made for
-      the IITJ community.
+      IITJ Maps helps you find any building or landmark on campus and get
+      directions on foot or by road, with a 3D view of the grounds. It was built
+      by students at IIT Jodhpur.
     </p>
 
-    <h2>Developed by</h2>
-    <div class="people-grid">
-      <div class="person">
-        <div class="person-head">
+    <div class="label">Developed by</div>
+    <div class="people">
+      <div class="card">
+        <div class="who">
           <div class="avatar">DK</div>
           <div>
-            <div class="person-name">Daksh Khod</div>
-            <div class="person-role">Developer</div>
+            <div class="name">Daksh Khod</div>
+            <div class="role">Developer</div>
           </div>
         </div>
-        <div class="chips">
-          <a class="chip" href="mailto:b24ci1010@iitj.ac.in" aria-label="Email Daksh Khod">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 6 10 7L22 6"/></svg>
-            Email
+        <div class="links">
+          <a href="mailto:b24ci1010@iitj.ac.in" aria-label="Email Daksh Khod">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 6 10 7L22 6"/></svg>Email
           </a>
-          <a class="chip" href="https://www.instagram.com/daksh_k15" target="_blank" rel="noopener" aria-label="Daksh Khod on Instagram">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1.2" fill="currentColor" stroke="none"/></svg>
-            Instagram
+          <a href="https://www.instagram.com/daksh_k15" target="_blank" rel="noopener" aria-label="Daksh Khod on Instagram">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1.2" fill="currentColor" stroke="none"/></svg>Instagram
           </a>
-          <a class="chip" href="https://www.linkedin.com/in/daksh-khod-967b71326" target="_blank" rel="noopener" aria-label="Daksh Khod on LinkedIn">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="3"/><line x1="7" y1="10" x2="7" y2="17"/><circle cx="7" cy="6.8" r="1.1" fill="currentColor" stroke="none"/><path d="M11 17v-4a2.5 2.5 0 0 1 5 0v4"/><line x1="11" y1="10" x2="11" y2="17"/></svg>
-            LinkedIn
+          <a href="https://www.linkedin.com/in/daksh-khod-967b71326" target="_blank" rel="noopener" aria-label="Daksh Khod on LinkedIn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="2" width="20" height="20" rx="3"/><line x1="7" y1="10" x2="7" y2="17"/><circle cx="7" cy="6.8" r="1.1" fill="currentColor" stroke="none"/><path d="M11 17v-4a2.5 2.5 0 0 1 5 0v4"/><line x1="11" y1="10" x2="11" y2="17"/></svg>LinkedIn
           </a>
         </div>
       </div>
 
-      <div class="person">
-        <div class="person-head">
+      <div class="card">
+        <div class="who">
           <div class="avatar">VC</div>
           <div>
-            <div class="person-name">Vikas Choudhary</div>
-            <div class="person-role">Developer</div>
+            <div class="name">Vikas Choudhary</div>
+            <div class="role">Developer</div>
           </div>
         </div>
-        <div class="chips">
-          <a class="chip" href="mailto:b24ci1056@iitj.ac.in" aria-label="Email Vikas Choudhary">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 6 10 7L22 6"/></svg>
-            Email
+        <div class="links">
+          <a href="mailto:b24ci1056@iitj.ac.in" aria-label="Email Vikas Choudhary">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 6 10 7L22 6"/></svg>Email
           </a>
-          <a class="chip" href="https://www.instagram.com/vikas_choudhary_0512" target="_blank" rel="noopener" aria-label="Vikas Choudhary on Instagram">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1.2" fill="currentColor" stroke="none"/></svg>
-            Instagram
+          <a href="https://www.instagram.com/vikas_choudhary_0512" target="_blank" rel="noopener" aria-label="Vikas Choudhary on Instagram">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1.2" fill="currentColor" stroke="none"/></svg>Instagram
           </a>
-          <a class="chip" href="https://www.linkedin.com/in/vikas-choudhary-0a45ba329" target="_blank" rel="noopener" aria-label="Vikas Choudhary on LinkedIn">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="3"/><line x1="7" y1="10" x2="7" y2="17"/><circle cx="7" cy="6.8" r="1.1" fill="currentColor" stroke="none"/><path d="M11 17v-4a2.5 2.5 0 0 1 5 0v4"/><line x1="11" y1="10" x2="11" y2="17"/></svg>
-            LinkedIn
+          <a href="https://www.linkedin.com/in/vikas-choudhary-0a45ba329" target="_blank" rel="noopener" aria-label="Vikas Choudhary on LinkedIn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="2" width="20" height="20" rx="3"/><line x1="7" y1="10" x2="7" y2="17"/><circle cx="7" cy="6.8" r="1.1" fill="currentColor" stroke="none"/><path d="M11 17v-4a2.5 2.5 0 0 1 5 0v4"/><line x1="11" y1="10" x2="11" y2="17"/></svg>LinkedIn
           </a>
         </div>
       </div>
     </div>
 
-    <h2>Under the guidance of</h2>
-    <div class="people-grid">
-      <div class="person wide">
+    <div class="label">Under the guidance of</div>
+    <div class="people">
+      <div class="card wide">
         <div class="avatar mentor">D</div>
         <div>
-          <div class="person-name">Dr. Deepak Swami</div>
-          <div class="person-role">Professor · Dean of Infrastructure Planning (DOIP), IIT Jodhpur</div>
+          <div class="name">Dr. Deepak Swami</div>
+          <div class="role">Professor · Dean of Infrastructure Planning (DOIP), IIT Jodhpur</div>
         </div>
       </div>
     </div>
 
-    <a class="back" href="/">← Back to the map</a>
-
-    <footer>IIT Jodhpur · Campus Navigation</footer>
+    <div class="foot">
+      <span>IIT Jodhpur · Campus Navigation</span>
+      <a href="/">Back to the map →</a>
+    </div>
   </div>
 </body>
 </html>
