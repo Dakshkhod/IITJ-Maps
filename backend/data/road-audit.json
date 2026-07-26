@@ -1,16 +1,16 @@
 {
-  "generated_at": "2026-07-21T12:53:40.442Z",
+  "generated_at": "2026-07-26T19:00:09.506Z",
   "summary": {
     "campus_main_road": 5,
     "major_vehicle_road": 13,
-    "campus_service_connector": 137,
+    "campus_service_connector": 134,
     "campus_service_road": 12,
     "vehicle_connector": 2,
     "pedestrian_path": 60,
     "campus_standard_road": 20,
     "local_access_only": 3,
     "maintenance_track": 3,
-    "cycle_pedestrian": 26
+    "cycle_pedestrian": 29
   },
   "uncertain_vehicle_segments": [
     {
@@ -954,6 +954,36 @@
       "drive_confidence": 0,
       "drive_note": "path is excluded from vehicle routing.",
       "length_m": 4
+    },
+    {
+      "osm_id": "1412392543",
+      "name": "service",
+      "highway_type": "service",
+      "navigation_class": "cycle_pedestrian",
+      "vehicle_access": "no",
+      "drive_confidence": 0,
+      "drive_note": "Closed to motor vehicles: Hostel spine between the G6–G4 and B1–B3 rows; not car-drivable, walk/cycle only",
+      "length_m": 270
+    },
+    {
+      "osm_id": "1412392542",
+      "name": "service",
+      "highway_type": "service",
+      "navigation_class": "cycle_pedestrian",
+      "vehicle_access": "no",
+      "drive_confidence": 0,
+      "drive_note": "Closed to motor vehicles: I-block frontage, east leg past Hostel I2/I3 to the Old Mess junction; not car-drivable, walk/cycle only",
+      "length_m": 232
+    },
+    {
+      "osm_id": "1412392541",
+      "name": "service",
+      "highway_type": "service",
+      "navigation_class": "cycle_pedestrian",
+      "vehicle_access": "no",
+      "drive_confidence": 0,
+      "drive_note": "Closed to motor vehicles: I-block frontage, west leg from the I2 Ground cycleway (includes its short spur up to 603603485, which now leads nowhere drivable)",
+      "length_m": 117
     },
     {
       "osm_id": "915014171",

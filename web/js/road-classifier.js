@@ -42,6 +42,18 @@ const NOT_A_THROUGH_ROUTE = new Map([
   ['914908600',  'LHC / New Tapri connector — through traffic belongs on service road 603603485, south of the block'],
 ]);
 
+// Ways OSM still carries as a plain road but which carry no motor traffic at
+// all on the ground — while remaining perfectly good on foot or by bike.
+// Stronger than NOT_A_THROUGH_ROUTE: these are not even destination-access, so
+// cars route around them entirely, and they are drawn (and lit, and routed) as
+// shared walk/cycle ways. Fix the tagging upstream in OSM (`motor_vehicle=no`)
+// where possible — an entry here is a local stopgap.
+const WALK_CYCLE_ONLY = new Map([
+  ['1412392543', 'Hostel spine between the G6–G4 and B1–B3 rows; not car-drivable, walk/cycle only'],
+  ['1412392541', 'I-block frontage, west leg from the I2 Ground cycleway (includes its short spur up to 603603485, which now leads nowhere drivable)'],
+  ['1412392542', 'I-block frontage, east leg past Hostel I2/I3 to the Old Mess junction; not car-drivable, walk/cycle only'],
+]);
+
 const PEDESTRIAN_TYPES = new Set(['footway', 'path', 'steps', 'pedestrian', 'cycleway']);
 const NO_VALUES = new Set(['no', 'private', 'agricultural', 'forestry']);
 const YES_VALUES = new Set(['yes', 'designated', 'permissive', 'destination']);
@@ -116,6 +128,15 @@ function classifyRoadFeature(feature) {
     drive_penalty: null,
     drive_note: '',
   };
+
+  const walkCycleOnly = WALK_CYCLE_ONLY.get(String(p.osm_id || ''));
+  if (walkCycleOnly) {
+    return {
+      ...base,
+      navigation_class: 'cycle_pedestrian',
+      drive_note: `Closed to motor vehicles: ${walkCycleOnly}`,
+    };
+  }
 
   if (!type) {
     return {

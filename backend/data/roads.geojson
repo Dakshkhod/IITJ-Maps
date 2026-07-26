@@ -11469,11 +11469,11 @@
         "is_campus": true,
         "length_m": 117,
         "walk_access": "yes",
-        "vehicle_access": "yes",
-        "navigation_class": "campus_service_connector",
-        "drive_confidence": 0.7,
-        "drive_penalty": 2.5,
-        "drive_note": "Drivable campus service road; penalized below main/residential roads."
+        "vehicle_access": "no",
+        "navigation_class": "cycle_pedestrian",
+        "drive_confidence": 0,
+        "drive_penalty": null,
+        "drive_note": "Closed to motor vehicles: I-block frontage, west leg from the I2 Ground cycleway (includes its short spur up to 603603485, which now leads nowhere drivable)"
       },
       "geometry": {
         "type": "LineString",
@@ -11515,11 +11515,11 @@
         "is_campus": true,
         "length_m": 232,
         "walk_access": "yes",
-        "vehicle_access": "yes",
-        "navigation_class": "campus_service_connector",
-        "drive_confidence": 0.7,
-        "drive_penalty": 2.5,
-        "drive_note": "Drivable campus service road; penalized below main/residential roads."
+        "vehicle_access": "no",
+        "navigation_class": "cycle_pedestrian",
+        "drive_confidence": 0,
+        "drive_penalty": null,
+        "drive_note": "Closed to motor vehicles: I-block frontage, east leg past Hostel I2/I3 to the Old Mess junction; not car-drivable, walk/cycle only"
       },
       "geometry": {
         "type": "LineString",
@@ -11569,11 +11569,11 @@
         "is_campus": true,
         "length_m": 270,
         "walk_access": "yes",
-        "vehicle_access": "yes",
-        "navigation_class": "campus_service_connector",
-        "drive_confidence": 0.7,
-        "drive_penalty": 2.5,
-        "drive_note": "Drivable campus service road; penalized below main/residential roads."
+        "vehicle_access": "no",
+        "navigation_class": "cycle_pedestrian",
+        "drive_confidence": 0,
+        "drive_penalty": null,
+        "drive_note": "Closed to motor vehicles: Hostel spine between the G6–G4 and B1–B3 rows; not car-drivable, walk/cycle only"
       },
       "geometry": {
         "type": "LineString",
