@@ -787,6 +787,11 @@ function enterShared3DView() {
 const SAT_OFFSET_DEFAULT = { x: 0, y: 7 };
 const SAT_OFFSET_KEY = 'iitj_sat_offset';
 const SAT_MERC_HALF = 20037508.342789244; // half the Web-Mercator world span (m)
+const SAT_TILE_PX = 256;
+// Esri's pre-rendered tile cache: ~90 ms and ~19 KB a tile, cacheable for a day.
+// Its `export` sibling renders each image on demand instead — 0.5–2 s, 81 KB and
+// `max-age=0, must-revalidate`, so every tile was re-fetched on every visit.
+const SAT_TILE_URL = 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile';
 
 let satOffset = (function loadSatOffset() {
   try {
@@ -814,18 +819,85 @@ function registerSatelliteOffsetProtocol() {
     const p = params.url.replace('esrioffset://', '').split('/');
     const ox = parseFloat(p[0]) || 0, oy = parseFloat(p[1]) || 0;
     const z = +p[2], x = +p[3], y = +p[4];
-    const span = (SAT_MERC_HALF * 2) / Math.pow(2, z);
-    const minx = -SAT_MERC_HALF + x * span + ox;
-    const maxx = -SAT_MERC_HALF + (x + 1) * span + ox;
-    const maxy =  SAT_MERC_HALF - y * span + oy;
-    const miny =  SAT_MERC_HALF - (y + 1) * span + oy;
-    const url = 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/export'
-      + `?bbox=${minx},${miny},${maxx},${maxy}`
-      + '&bboxSR=3857&imageSR=3857&size=256,256&format=jpgpng&transparent=false&f=image';
-    const resp = await fetch(url, { signal: abortController.signal });
-    if (!resp.ok) throw new Error('Esri export failed: ' + resp.status);
-    return { data: await resp.arrayBuffer() };
+    const signal = abortController.signal;
+
+    // Metres of nudge → source pixels. It lands on a whole pixel at every zoom
+    // we allow (7 m is 6.5 px at z17, less below), so nothing is resampled.
+    // Positive y is north, and canvas y grows south, hence the sign flip.
+    const pxPerMetre = (SAT_TILE_PX * Math.pow(2, z)) / (SAT_MERC_HALF * 2);
+    const dx = Math.round(ox * pxPerMetre);
+    const dy = Math.round(-oy * pxPerMetre);
+    if (!dx && !dy) return { data: await fetchSatTileBytes(z, x, y, signal) };
+
+    try {
+      return { data: await composeShiftedSatTile(z, x, y, dx, dy, signal) };
+    } catch (err) {
+      if (signal.aborted) throw err;
+      // Imagery a few metres out still beats a white square.
+      console.warn('[satellite] offset compose failed, serving the tile unshifted:', err);
+      return { data: await fetchSatTileBytes(z, x, y, signal) };
+    }
   });
+}
+
+function satTileUrl(z, x, y) { return `${SAT_TILE_URL}/${z}/${y}/${x}`; }
+
+async function fetchSatTileBytes(z, x, y, signal) {
+  const resp = await fetch(satTileUrl(z, x, y), { signal });
+  if (!resp.ok) throw new Error(`Esri tile ${z}/${x}/${y} failed: ${resp.status}`);
+  return resp.arrayBuffer();
+}
+
+async function fetchSatTileImage(z, x, y, signal) {
+  const resp = await fetch(satTileUrl(z, x, y), { signal });
+  if (!resp.ok) throw new Error(`Esri tile ${z}/${x}/${y} failed: ${resp.status}`);
+  return decodeTileBlob(await resp.blob());
+}
+
+function decodeTileBlob(blob) {
+  if (typeof createImageBitmap === 'function') return createImageBitmap(blob);
+  return new Promise((resolve, reject) => {          // older Safari
+    const img = new Image();
+    const url = URL.createObjectURL(blob);
+    img.onload  = () => { URL.revokeObjectURL(url); resolve(img); };
+    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('tile decode failed')); };
+    img.src = url;
+  });
+}
+
+// The shifted tile is the same imagery read from a window moved by (dx, dy)
+// source pixels, which straddles at most two cached tiles per axis. Neighbouring
+// output tiles read those same cached tiles, and Esri serves them with a day-long
+// max-age, so the extra fetch is a cache hit nearly every time.
+async function composeShiftedSatTile(z, x, y, dx, dy, signal) {
+  const size = SAT_TILE_PX;
+  const world = Math.pow(2, z);
+  const sx = x * size + dx, sy = y * size + dy;
+  const tx0 = Math.floor(sx / size), ty0 = Math.floor(sy / size);
+  const offX = sx - tx0 * size, offY = sy - ty0 * size;
+
+  const parts = [];
+  for (let r = 0; r <= (offY ? 1 : 0); r++) {
+    for (let c = 0; c <= (offX ? 1 : 0); c++) {
+      const ty = ty0 + r;
+      if (ty < 0 || ty >= world) continue;                 // past a pole
+      const tx = ((tx0 + c) % world + world) % world;      // wraps at the antimeridian
+      parts.push({ x: c * size - offX, y: r * size - offY, image: fetchSatTileImage(z, tx, ty, signal) });
+    }
+  }
+
+  const images = await Promise.all(parts.map(part => part.image));
+  const canvas = typeof OffscreenCanvas === 'function'
+    ? new OffscreenCanvas(size, size)
+    : Object.assign(document.createElement('canvas'), { width: size, height: size });
+  const ctx = canvas.getContext('2d');
+  images.forEach((img, i) => ctx.drawImage(img, parts[i].x, parts[i].y));
+
+  const blob = canvas.convertToBlob
+    ? await canvas.convertToBlob({ type: 'image/jpeg', quality: 0.92 })
+    : await new Promise((resolve, reject) => canvas.toBlob(
+        b => b ? resolve(b) : reject(new Error('tile encode failed')), 'image/jpeg', 0.92));
+  return blob.arrayBuffer();
 }
 
 // Re-create the satellite source/layer with the current offset so a calibration
@@ -843,7 +915,10 @@ function refreshSatelliteTiles() {
     attribution: '© Esri, Maxar, Earthstar Geographics, GIS User Community'
   });
   const firstLayer = (map.getStyle().layers[0] || {}).id;
-  map.addLayer({ id, type: 'raster', source: id, paint: { 'raster-opacity': 1 } }, firstLayer);
+  map.addLayer({
+    id, type: 'raster', source: id,
+    paint: { 'raster-opacity': 1, 'raster-fade-duration': 0 },
+  }, firstLayer);
 }
 
 // Map Style — streets (light/dark) or satellite imagery
@@ -865,7 +940,13 @@ function getMapStyle() {
         id: 'satellite-tiles',
         type: 'raster',
         source: 'satellite-tiles',
-        paint: { 'raster-opacity': 1, 'raster-brightness-min': 0, 'raster-brightness-max': 1 },
+        paint: {
+          'raster-opacity': 1, 'raster-brightness-min': 0, 'raster-brightness-max': 1,
+          // Imagery shows the moment it decodes instead of easing in over
+          // MapLibre's default 300 ms — the lower-zoom tile still covers the
+          // gap until then, so nothing flashes white.
+          'raster-fade-duration': 0,
+        },
       }]
     };
   }
