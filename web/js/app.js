@@ -1223,7 +1223,10 @@ function addRoadsLayer(data) {
     'local_through_road', 'local_street', 'vehicle_road',
   ]);
   const serviceFilter = navIn(['campus_service_road', 'campus_service_connector']);
-  const narrowFilter = navIn(['narrow_service_road', 'service_access']);
+  // `local_access_only` (service road flagged as not-a-through-route) belongs
+  // here too — it is destination-access like the other two. Left out, it
+  // matched no layer filter at all and those roads never drew.
+  const narrowFilter = navIn(['narrow_service_road', 'service_access', 'local_access_only']);
   const footwayFilter = typeIn(['footway']);
   const cycleFilter = typeIn(['cycleway']);
   const mixedUseFilter = ['all',

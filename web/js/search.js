@@ -18,6 +18,26 @@ const IITJData = (() => {
   let _ready       = false;
   const _readyCallbacks = [];
 
+  // IITJOverlay.apply swaps in the admin feature wholesale, so an overridden
+  // road arrives carrying only its OSM tags — none of the fields the offline
+  // pipeline derives (navigation_class, vehicle_access, drive_*). The map's
+  // road layers all filter on `navigation_class`, so such a road matches no
+  // layer and silently renders nowhere. Re-derive them here with the same
+  // classifier routing.js uses to patch the routing graph, so the rendered
+  // network and the routable network stay in agreement.
+  function _reclassifyOverlayRoads(fc) {
+    if (typeof IITJRoadClassifier === 'undefined' || !fc || !fc.features) return fc;
+    const overrides = (IITJOverlay.combined() || {}).roads || {};
+    if (!Object.keys(overrides).length) return fc;
+    return {
+      ...fc,
+      features: fc.features.map(f => {
+        const id = String((f.properties && f.properties.osm_id) || '');
+        return id && overrides[id] ? IITJRoadClassifier.enrichRoadFeature(f) : f;
+      }),
+    };
+  }
+
   // Loader
   async function init() {
     const base = '/data';
@@ -39,7 +59,7 @@ const IITJData = (() => {
       try { await IITJOverlay.init(); } catch (_) {}
       _places    = IITJOverlay.apply(places,    'places');
       _buildings = IITJOverlay.apply(buildings, 'buildings');
-      _roads     = IITJOverlay.apply(roads,     'roads');
+      _roads     = _reclassifyOverlayRoads(IITJOverlay.apply(roads, 'roads'));
       _areas     = IITJOverlay.apply(areas,     'areas');
     } else {
       _places = places; _buildings = buildings; _roads = roads; _areas = areas;
