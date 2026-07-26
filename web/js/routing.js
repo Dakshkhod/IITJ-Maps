@@ -17,17 +17,12 @@ const IITJRouter = (() => {
     _loaded = true;
   }
 
-  // Admin overlay → routing graph.
-  // road-graph.json is generated OFFLINE by the pipeline, so on its own an
-  // admin-accepted OSM retag would change only what the map DREW: the router
-  // would keep the stale edge and happily drive cars over ways OSM had
-  // retagged to cycleway/footway. So the overlay is folded into the in-memory
-  // graph at load time.
-  //
-  // The overlay stores raw OSM tags (highway/foot/bicycle) but NOT the derived
-  // routing fields (vehicle_access, drive_confidence, drive_penalty), so those
-  // are re-derived through web/js/road-classifier.js — the same module the
-  // pipeline builds the graph with, so patched and baked edges agree.
+  // Admin overlay → routing graph. road-graph.json is built offline, so without
+  // this an accepted OSM retag would change only what the map DREW, leaving the
+  // router driving cars over ways retagged to cycleway/footway. The overlay
+  // carries raw OSM tags but not the derived routing fields, so those are
+  // re-derived via road-classifier.js — the module the pipeline builds the graph
+  // with, so patched and baked edges agree.
   function _nodeId(lng, lat) {
     return `${Number(lat).toFixed(6)},${Number(lng).toFixed(6)}`;
   }
@@ -112,10 +107,9 @@ const IITJRouter = (() => {
       }
     }
 
-    // 3. Net-new roads — splice in using the pipeline's node-id scheme, so a way
-    //    that shares a vertex with an existing road connects to the network.
-    //    One that touches nothing is counted as isolated and reported, never
-    //    silently dropped (it would be unreachable and skew nothing but noise).
+    // 3. Net-new roads — spliced in with the pipeline's node-id scheme so a way
+    //    sharing a vertex connects to the network. One touching nothing is
+    //    reported as isolated rather than silently dropped.
     for (const [id, f] of Object.entries(overrides)) {
       if (present.has(id) || deleted.has(id)) continue;
       const g = f && f.geometry;
@@ -291,12 +285,11 @@ const IITJRouter = (() => {
     return dFrom > 75 && dTo > 75;
   }
 
-  // Prithvi Missile roundabout — India keeps left, so a car entering from the
-  // south gate / Security Checkpost and heading north must circle the monument
-  // CLOCKWISE (south-west / left side), not cut counter-clockwise up the
-  // east/right side. The route enters the ring at its SE node and would short-
-  // cut up the east; forcing the ring's SW node as a via makes leg 1 take the
-  // short clockwise (left) arc, and leg 2 carries on clockwise to the NW exit.
+  // Prithvi Missile roundabout — India keeps left, so a car from the south gate
+  // heading north must circle CLOCKWISE (south-west side), not cut up the east.
+  // The route enters at the ring's SE node and would short-cut east; forcing the
+  // SW node as a via makes leg 1 take the short clockwise arc, and leg 2 carry
+  // on clockwise to the NW exit.
   const PRITHVI_CENTER = { lat: 26.4669087, lng: 73.1147901 };
   const PRITHVI_WEST_VIA = '26.466828,73.114663'; // SW node of the missile ring (node 5729732486)
   function _needsPrithviWestArc(fromLat, fromLng, toLat, toLng) {
@@ -365,10 +358,9 @@ const IITJRouter = (() => {
     return { nodes, distance: physicalDist[endId] ?? dist[endId], cost: dist[endId] };
   }
 
-  // Force keep-left circulation through the south-campus rings when driving
-  // from the south gate / Security Checkpost to north campus. A trip can pass
-  // BOTH the Prithvi Missile roundabout (first, nearer the gate) and the Brain
-  // Tree ring (further north), so chain the via-waypoints south→north in order.
+  // Force keep-left circulation through the south-campus rings when driving from
+  // the south gate to north campus. A trip can pass both the Prithvi Missile
+  // roundabout and the Brain Tree ring, so chain the vias south→north in order.
   function routeGraph(startId, endId, mode, opts, fromLat, fromLng, toLat, toLng) {
     const vias = [];
     if (mode === 'drive') {
@@ -398,10 +390,9 @@ const IITJRouter = (() => {
   // sandstone-gate road, not the service road behind the berm ribbons.
   const CAMPUS_CENTER = { lng: 73.1147, lat: 26.4727 };
 
-  // Score a candidate snap node. Lower is better. Nodes that lie behind the
-  // user relative to the destination (or campus centre) are heavily penalised
-  // so a gate on the south perimeter doesn't snap to the outer service road
-  // behind it when the campus entry road is right ahead.
+  // Score a candidate snap node; lower is better. Nodes behind the user relative
+  // to the destination are heavily penalised, so a south-perimeter gate doesn't
+  // snap to the service road behind it when the entry road is right ahead.
   function _nodeSnapScore(lat, lng, coords, distM, opts = {}) {
     let dLng, dLat;
     // Berm destinations must snap to the campus-facing road — never let a
@@ -599,21 +590,15 @@ const IITJRouter = (() => {
     return progress / magSq;
   }
 
-  // Turn instructions
+  // Turn instructions — LEFT/RIGHT guidance is intentionally NOT produced.
   //
-  // LEFT/RIGHT turn-by-turn guidance is intentionally NOT produced.
-  //
-  // The campus graph is hand-digitised, and the drive routes are deliberately
-  // forced around the Brain Tree and Prithvi Missile roundabouts with via-
-  // waypoints to keep left (India). That circulation is a loop, and on a loop
-  // the "side" of a maneuver is genuinely ambiguous — the same arc can read as
-  // a left or a right depending on which straight runs you compare. Every
-  // method we tried (adjacent vertices, then arc-length straight-run baselines)
-  // still flipped the reported side on those loops. Rather than announce a
-  // turn direction that might be wrong, guidance is limited to the initial
-  // travel heading + live distance/ETA, then arrival. No `turn` steps are
-  // emitted, so nothing downstream (banner, "Then" line, voice) can announce
-  // a left/right that we can't stand behind.
+  // Drive routes are forced around the Brain Tree and Prithvi Missile
+  // roundabouts with via-waypoints to keep left (India). On a loop the "side" of
+  // a maneuver is genuinely ambiguous — the same arc reads as left or right
+  // depending on which straight runs you compare, and both approaches tried
+  // (adjacent vertices, arc-length baselines) flipped the reported side. So
+  // guidance is limited to the initial heading + live distance/ETA, then arrival.
+  // Emitting no `turn` steps means nothing downstream can announce a wrong side.
   function generateInstructions(coords, totalDistance, etaMinutes) {
     if (coords.length < 2) return [{ type: 'arrive', text: 'You have arrived', distance: 0 }];
 
@@ -780,16 +765,12 @@ const IITJRouter = (() => {
 
       const startNodeIdx = secondNc && startPt.t > 0.35 ? 1 : 0;
 
-      // The destination often sits alongside a road that CONTINUES past the
-      // final graph node rather than the segment the route arrived on, and
-      // projectOntoSegment clamps to that arrival segment — so the line stopped
-      // at the node and visibly fell short of the pin. Look one edge beyond the
-      // end: if the destination projects onto a road the route may legally
-      // carry on along, follow it to that projection. Only a strictly closer
-      // (>1 m) landing wins, so ordinary arrivals are left untouched.
-      // Walk up to TAIL_MAX_HOPS edges: when the projection lands on the far
-      // node the destination is still further along, so traverse it and look
-      // again. Bounded so a bad snap can't send the line wandering the campus.
+      // The destination often sits along a road that CONTINUES past the final
+      // graph node, but projectOntoSegment clamps to the arrival segment, so the
+      // line stops at the node and falls short of the pin. Look beyond the end:
+      // if the destination projects onto a road the route may legally continue
+      // along, follow it there. Only a strictly closer (>1 m) landing wins, and
+      // we walk at most TAIL_MAX_HOPS edges so a bad snap can't wander campus.
       const TAIL_MAX_HOPS = 3;
       let tailPt = null;
       const tailCoords = [];
@@ -823,11 +804,10 @@ const IITJRouter = (() => {
       }
 
       // Symmetric to the start: when the destination projects before the last
-      // graph node (the snap node sits past the building, e.g. a berm POI
-      // between two road nodes), end at the projection instead of routing all
-      // the way to that node and visibly backtracking to it. Drop the node only
-      // when keeping it would add a noticeable (>4 m) overshoot/backtrack.
-      // A tail extension needs that node as its anchor, so keep it in that case.
+      // graph node (the snap node sits past the building), end at the projection
+      // rather than routing to the node and visibly backtracking. Drop the node
+      // only if keeping it adds a noticeable (>4 m) overshoot, and never when a
+      // tail extension needs it as an anchor.
       const lastSegLen = prevNc ? haversine(prevNc[1], prevNc[0], lastNc[1], lastNc[0]) : 0;
       const endNodeIdx = (!tailPt && prevNc && nodeList.length >= 3 && (1 - endPt.t) * lastSegLen > 4)
         ? nodeList.length - 2 : nodeList.length - 1;

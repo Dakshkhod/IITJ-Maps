@@ -8,11 +8,9 @@
 // Config
 const CAMPUS_BBOX = '26.4500,73.0900,26.4900,73.1300'; // south,west,north,east
 
-// Overpass mirrors that ship CORS headers (required for browser-origin POST).
-// Listed in preferred order — we try each in turn so a temporary outage on
-// one mirror doesn't break the workflow. The main overpass-api.de host is
-// NOT CORS-friendly for cross-origin browser requests, so it goes last as a
-// hail-mary; usually one of the earlier mirrors responds first.
+// Overpass mirrors that ship CORS headers (required for browser-origin POST),
+// tried in order so one mirror's outage doesn't break the workflow. The main
+// overpass-api.de host isn't CORS-friendly, so it goes last as a hail-mary.
 const OVERPASS_ENDPOINTS = [
   'https://overpass.kumi.systems/api/interpreter',
   'https://overpass.private.coffee/api/interpreter',
@@ -91,12 +89,10 @@ function fnv1a(str) {
   return h.toString(16);
 }
 
-// Map a feature's properties to a canonical OSM-tag-shape so a local feature
-// and the OSM original hash to the same value when nothing has actually
-// changed. The offline parse pipeline renames a handful of tags (`building` →
-// `building_type`, `highway` → `highway_type`, `leisure` → `area_type`); we
-// reverse those here, and drop derived/cosmetic fields the OSM source can't
-// produce (`category`, `source`, `wikipedia` urls, etc.).
+// Map properties to a canonical OSM-tag shape so a local feature and the OSM
+// original hash alike when nothing actually changed. Reverses the pipeline's
+// renames (`building`→`building_type`, `highway`→`highway_type`,
+// `leisure`→`area_type`) and drops derived fields OSM can't produce.
 function normalizeProps(props, kind) {
   if (!props) return {};
   const p = { ...props };
@@ -269,19 +265,17 @@ function inferCategory(tags) {
   return null;
 }
 
-// Diff engine — compare OSM snapshot against the current map
-// opts.snapshot === true → return EVERY current OSM-vs-base difference,
-// ignoring the pending log AND the baseline. Used by "Clear log" so the
-// baseline captures the FRESH id of every current diff (the normal pending
-// dedup would otherwise hide already-logged items from the snapshot, leaving
-// their fresh ids un-baselined so the backlog resurfaces on the next sync).
+// Diff engine — compare an OSM snapshot against the current map.
+// opts.snapshot === true returns EVERY current OSM-vs-base difference, ignoring
+// the pending log and baseline. "Clear log" needs this so the baseline captures
+// each diff's fresh id; the normal dedup would hide already-logged items and
+// leave their ids un-baselined, resurfacing the backlog on the next sync.
 async function computeDiff(osmFeatures, opts = {}) {
   const snapshot = opts.snapshot === true;
-  // We diff OSM against what the APP ACTUALLY RENDERS = the base bundle with the
-  // admin overlay applied on top (bundled overlay.json + this browser's accepted
-  // -but-unpublished changes). Comparing against the raw base alone makes every
-  // feature already accepted into the overlay — i.e. already live in the app —
-  // re-surface as a brand-new "change" on every sync.
+  // Diff against what the app ACTUALLY RENDERS: the base bundle plus the admin
+  // overlay (bundled overlay.json + this browser's unpublished changes). Against
+  // the raw base alone, anything already accepted into the overlay would
+  // re-surface as a brand-new change on every sync.
   const [places, buildings, roads, areas] = await Promise.all([
     fetch('data/places.geojson').then(r => r.json()),
     fetch('data/buildings.geojson').then(r => r.json()),
@@ -445,11 +439,10 @@ async function resetLog() {
   if (btn) btn.disabled = true;
 
   try {
-    // Snapshot the current OSM state FIRST — we can only baseline what we can
-    // see. computeDiff returns every current OSM-vs-base difference (its fresh
-    // ids also cover any log entries written under older hashing). If OSM is
-    // unreachable we abort WITHOUT clearing, rather than wipe the log into a
-    // half-known baseline that would resurface the backlog on the next sync.
+    // Snapshot OSM first — we can only baseline what we can see, and the fresh
+    // ids also cover log entries written under older hashing. If OSM is
+    // unreachable, abort WITHOUT clearing rather than wipe the log into a
+    // half-known baseline that resurfaces the backlog next sync.
     showToast('Snapshotting current OSM as baseline…', 'info');
     const data = await fetchFromOverpass();
     const features = (data.elements || []).map(overpassToFeature).filter(Boolean);
@@ -858,13 +851,10 @@ function fitMiniToFeatures(feats) {
 }
 
 // Server-side publishing client — commits overlay.json straight to the repo so
-// Vercel redeploys without the admin ever touching a git client.
-//
-// The GitHub credentials live ONLY in the serverless function's environment
-// (see /api/admin.js); they never reach the browser. The client holds, at
-// most, a short-lived signed session token IN MEMORY (never localStorage),
-// obtained by logging in with the admin password. Nothing sensitive persists
-// client-side, so there is no token for an XSS to steal.
+// Vercel redeploys without the admin touching a git client. GitHub credentials
+// live only in the serverless function's environment (see /api/admin.js); the
+// client holds at most a short-lived session token in memory, never
+// localStorage, so there's nothing persisted for an XSS to steal.
 const ADMIN_API = '/api/admin';
 let _adminSession = null;             // { token, exp } in-memory only
 let _pendingPublishAfterLogin = false;

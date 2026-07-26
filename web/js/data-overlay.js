@@ -1,27 +1,11 @@
 /**
- * IITJ Maps — Data Overlay
- * Merges admin-approved OSM changes into the bundled GeoJSON at runtime.
+ * Merges admin-approved OSM changes into the bundled GeoJSON at runtime, from
+ * two optional layers: /data/overlay.json (shared with all users) then
+ * localStorage[iitj-overlay-v1] (admin-only, accepted in this browser since the
+ * last export). So admins see their pending work; end-users see only the bundle.
  *
- * Two overlay layers, both optional, merged in this order over the base data:
- *   1. /data/overlay.json — server-bundled, shared with all users (admin commits
- *      this file to the repo after exporting their localStorage overlay).
- *   2. localStorage[iitj-overlay-v1] — admin-only, for changes accepted in
- *      THIS browser since the last export. Admins see their own pending work;
- *      end-users see only the bundled overlay.
- *
- * Overlay shape (both sources, identical schema):
- *   {
- *     buildings: { [osm_id]: Feature },   // added or modified
- *     places:    { [osm_id]: Feature },
- *     roads:     { [osm_id]: Feature },
- *     areas:     { [osm_id]: Feature },
- *     deleted:   {
- *       buildings: [osm_id, ...],          // removed from the live map
- *       places: [...], roads: [...], areas: [...]
- *     },
- *     version: 1,
- *     updatedAt: ISO8601,
- *   }
+ * Both use the same shape: { buildings|places|roads|areas: { [osm_id]: Feature },
+ * deleted: { buildings|places|roads|areas: [osm_id] }, version, updatedAt }.
  */
 const IITJOverlay = (() => {
   const LS_KEY = 'iitj-overlay-v1';

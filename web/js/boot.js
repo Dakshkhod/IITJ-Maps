@@ -1,11 +1,8 @@
-/* Boot-recovery watchdog. Runs independently of app.js (so it works even if
- * app.js itself was served broken): if the app hasn't booted in time, drop any
- * stale service worker + caches and reload ONCE. A sessionStorage guard prevents
- * a reload loop; if it's still stuck after that, the splash is force-hidden so
- * the user at least sees the map.
- *
- * Kept as an external same-origin file (not an inline <script>) so the strict
- * Content-Security-Policy needs no 'unsafe-inline' / hash for scripts. */
+/* Boot-recovery watchdog, independent of app.js so it works even if app.js was
+ * served broken: if the app hasn't booted in time, drop any stale worker +
+ * caches and reload ONCE (sessionStorage guard prevents a loop; still stuck
+ * after that, the splash is force-hidden). External same-origin file, not an
+ * inline <script>, so the strict CSP needs no 'unsafe-inline'. */
 (function () {
   var KEY = 'iitj-boot-recovery';
   window.__iitjBooted = false;

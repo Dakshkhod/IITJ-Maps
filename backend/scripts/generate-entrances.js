@@ -1,16 +1,10 @@
 /**
- * Generate web/data/entrances.json — maps a destination's display name to the
- * lat/lng of its real entry gate, so drive/walk routing ends at the building's
- * entrance instead of its centroid (consumed by IITJData.getEntrance() in
- * web/js/search.js → app.js calculateDirectionsRoute()).
+ * Generate web/data/entrances.json — display name → entry-gate lat/lng, so
+ * routing ends at a building's entrance rather than its centroid.
  *
- * Sources, in priority order, per building:
- *   1. A named OSM gate node "<code> gate" whose code matches the building
- *      (e.g. "B-1 gate" → "Hostel B1", "Akaash Complex gate" → "Akaash Complex").
- *   2. An entrance=* node that is a vertex of the building's footprint ring
- *      (entrance=main preferred over entrance=yes).
- * Curated campus main gates (Gate 1 / Gate 2) are carried over from the
- * existing file so the two principal vehicle entrances keep working.
+ * Per building, in priority order: (1) a named OSM gate node "<code> gate"
+ * matching the building, (2) an entrance=* vertex on its footprint ring
+ * (entrance=main wins). Curated main gates are carried over from the old file.
  */
 const fs = require('fs');
 const path = require('path');

@@ -586,12 +586,10 @@ function getHardcodedPlaces() {
 }
 
 function getCategories() {
-  // Palette designed for clear category-at-a-glance reading. Hues are spread
-  // around the wheel so neighbouring dots stay distinguishable, conventional
-  // associations are kept where possible (food=red, sports=green, academic=
-  // blue), and previously-clashing pairs (medical/dining both red, parking/
-  // academic both blue, bank/sports both green, gate/recreation both purple)
-  // are pulled apart.
+  // Palette for category-at-a-glance reading: hues spread round the wheel so
+  // neighbouring dots stay distinguishable, keeping conventional associations
+  // (food=red, sports=green, academic=blue) while pulling apart pairs that would
+  // otherwise clash — medical/dining, parking/academic, bank/sports.
   return [
     { id: 'academic',       name: 'Academic',       icon: '🏛️', color: '#2563eb' }, // royal blue
     { id: 'hostel',         name: 'Hostels',        icon: '🏠', color: '#ea580c' }, // orange
@@ -710,21 +708,16 @@ function deduplicatePlaces(places) {
   return result;
 }
 
-// Perimeter-berm gate snap
-// The OSM-coded W-N / E-N nodes that ring the campus are mapped roughly along
-// the perimeter berm but their exact coords drift away from each gate, so dots
-// look "scattered" in 3D. Snap each code to the nearest *unique* sandstone-
-// gate module center, derived with the same centerline + parabolic-fit math
-// that landmarks-3d.js uses to build the 3D berm meshes. Codes that aren't
-// near a berm (the E-1..E-13 indoor labs inside the academic block) are left
-// alone — their nearest gate is > 25 m away.
+// Perimeter-berm gate snap. The OSM W-N / E-N nodes ringing the campus drift off
+// their gates, so the dots look scattered in 3D. Snap each code to the nearest
+// UNIQUE sandstone-gate module centre, using the same centerline + parabolic-fit
+// math landmarks-3d.js builds the 3D berms with. Codes not near a berm (the
+// E-1..E-13 indoor labs) are left alone — nearest gate is > 25 m away.
 
-// Hand-tuned centerline overrides for ribbons whose 3D mesh is drawn at a
-// different position than the OSM polygon's natural centerline (because the
-// landscape designers nudged the rendered berm to land smoothly against the
-// adjacent green retaining walls). Keep in sync with landmarks-3d.js
-// BERM_CL_OVERRIDE — without this our snap would put dots off the visible
-// berm body in 3D.
+// Hand-tuned centerline overrides for ribbons whose 3D mesh is drawn away from
+// the OSM polygon's natural centerline, so it lands smoothly against the adjacent
+// green retaining walls. Keep in sync with landmarks-3d.js BERM_CL_OVERRIDE, or
+// the snap puts dots off the visible berm body in 3D.
 const BERM_CL_OVERRIDE = {
   '1412399747': [[73.1097881,26.4734200],[73.1098133,26.4733116],
                  [73.1098401,26.4732031],[73.1098685,26.4730947],
@@ -764,11 +757,10 @@ const BERM_RINGS = {
 };
 
 // East perimeter ribbons whose POI dots use exact surveyed positions (the
-// "E-14 - 23" coordinate sheet: E-14..E-23, CETSD and the berm societies)
-// rather than the even-spacing gate snap. Every named POI near these two
-// ribbons is on that sheet, so the whole ribbon opts in. POIs are projected
-// onto the rendered centerline (only cross-ribbon drift is removed), keeping
-// each unit at its true, unevenly-spaced along-berm position.
+// "E-14 - 23" sheet: E-14..E-23, CETSD, the berm societies) rather than the
+// even-spacing gate snap. Every named POI near these two ribbons is on that
+// sheet, so the whole ribbon opts in. POIs are projected onto the rendered
+// centerline, removing only cross-ribbon drift and keeping true along-berm spacing.
 const EXACT_BERM_RIBBONS = new Set(['1412399744', '1412399745']);
 
 function _resampleXY(chain, K) {
@@ -956,13 +948,12 @@ function _denseMetricSamples(ring, overridePath) {
   return { samples, cx, cy, mLng, mLat };
 }
 
-// Polygon medial-axis centerline (lng/lat polyline) WITHOUT the parabolic
-// smoothing that _denseMetricSamples applies, so east-berm dots track the
-// actual rendered 2D berm curve. Slices the ribbon perpendicular to its PCA
-// long axis and takes each cross-section's mid-width — locally centred to ~0 in
-// the body. The narrow end-cap slices (whose centre kinks toward a corner) are
-// trimmed; a dot pushed onto the tip then rides the straight body direction via
-// _lngLatAtArcS's own end extrapolation, staying aligned with the rest.
+// Polygon medial-axis centerline WITHOUT the parabolic smoothing
+// _denseMetricSamples applies, so east-berm dots track the rendered 2D curve.
+// Slices the ribbon perpendicular to its PCA long axis and takes each
+// cross-section's mid-width. Narrow end-cap slices kink toward a corner and are
+// trimmed; a dot on the tip then rides the straight body direction via
+// _lngLatAtArcS's end extrapolation.
 function _ribbonMedialCenterline(ring) {
   const pts = ring.slice(0, ring.length - 1);
   const n = pts.length;
@@ -1335,11 +1326,10 @@ function snapPerimeterCodes(places, osmData) {
   }
 
   // South-east landscape berm (ring 1412399742): its E-codes belong on the
-  // CAMPUS-FACING arched sandstone wall (the "sandstone gates"), like every
-  // other berm code. Green berms are excluded from the gate layout so the snap
-  // never touches them. Project onto the retaining-wall centerline — that's the
-  // arch line; the ring medial would drop them mid-slope toward the road. Keep
-  // in sync with the GREEN_BERMS "East part" path in web/js/landmarks-3d.js.
+  // campus-facing arched sandstone wall, like every other berm code. Project onto
+  // the retaining-wall centerline (the arch line) — the ring medial would drop
+  // them mid-slope toward the road. Green berms are excluded from the gate layout
+  // so the snap never touches them. Keep in sync with GREEN_BERMS "East part".
   const SE_GREEN_BERM_CL = [
     [73.1139592, 26.4701471], [73.1141907, 26.4701516], [73.1147332, 26.4702038],
     [73.1152486, 26.4703093], [73.1157409, 26.4704867], [73.1161642, 26.4707136],
@@ -1385,16 +1375,12 @@ const WAVE_BERM_IDS = new Set([
 // South-edge green terraced landscape berms (not blue wave ribbons).
 const LANDSCAPE_BERM_IDS = new Set(['1412399742', '1412399756', '1412399757']);
 
-// 2D-fill footprints for the three green landscape berms (742/756/757). All
-// use their FULL surveyed outline from commit 638f1e9. a51cb73 had slimmed them
-// to thin road-hugging strips, which (a) stranded their POI dots — W-8/W-9 on
-// 757, E-1..E-8 on 742, W-1 on 756 — in the bare ground south of the strip, off
-// the berm, and (b) made the broad green berm by IITJ Fountain (756) look
-// shrunken. Restored to the full footprint so every dot sits ON the berm body
-// and the south ribbon is continuous and correctly proportioned again. (The 3D
-// arcade is unaffected — it builds from GREEN_BERMS centre-lines, not this fill.)
-// These rings sit inside the ring road; they do not overflow it. Hardcoded so a
-// later OSM refresh can't re-slim them. 638f1e9 is the reference "correct" look.
+// 2D-fill footprints for the three green landscape berms (742/756/757), each at
+// its FULL surveyed outline. Slimming these to road-hugging strips strands their
+// POI dots (W-8/W-9, E-1..E-8, W-1) on bare ground off the berm and makes the
+// berm by IITJ Fountain look shrunken, so the full footprint is hardcoded here
+// where a later OSM refresh can't re-slim it. The rings sit inside the ring road.
+// The 3D arcade is unaffected — it builds from GREEN_BERMS centre-lines.
 const GREEN_BERM_FILL = {
   '1412399742': [[73.1139595,26.4701337],[73.1138905,26.4700895],[73.113899,26.4700041],[73.1139546,26.4699516],[73.1140005,26.4699019],[73.1140542,26.4698724],[73.1141013,26.4698502],[73.1148308,26.4698864],[73.1157578,26.4701568],[73.1162919,26.4704533],[73.116736,26.4707984],[73.1169363,26.4709727],[73.1168629,26.4710816],[73.1167571,26.4711599],[73.1165587,26.4710125],[73.1162927,26.4708314],[73.116256,26.4708099],[73.1159859,26.4706516],[73.1159037,26.4706035],[73.1154502,26.4703889],[73.1153456,26.4703627],[73.1149321,26.4702593],[73.1147925,26.4702244],[73.1145244,26.4701883],[73.114226,26.4701482],[73.1140991,26.4701413],[73.1139595,26.4701337]],
   '1412399756': [[73.1127515,26.4703585],[73.1128339,26.4703545],[73.1129424,26.4703204],[73.1131518,26.4702481],[73.1134613,26.4701893],[73.1136596,26.4701332],[73.1137171,26.4700415],[73.1136962,26.4699356],[73.1136208,26.4698849],[73.1135007,26.4698348],[73.1132565,26.4698697],[73.112922,26.4699581],[73.1125958,26.4700771],[73.1127515,26.4703585]],
@@ -1505,12 +1491,10 @@ function main() {
   // 4. Merge & deduplicate places (OSM first, then KML, then curated as fallback)
   const mergedPlaces = deduplicatePlaces([...allPlaces, ...kmlFeatures, ...curatedPlaces]);
 
-  // 4b. Snap perimeter POIs (W-codes, E-codes, berm societies) to the nearest
-  //     sandstone-gate arch center. OSM places these nodes on the access road
-  //     next to the berm, not at the actual gate openings, so without this snap
-  //     their dots appear on the flat ground rather than on the berm structure.
-  //     homeRibbon constraint prevents cross-berm overflow (e.g. Designing Club
-  //     staying on berm 744 instead of spilling onto 745).
+  // 4b. Snap perimeter POIs (W/E-codes, berm societies) to the nearest
+  //     sandstone-gate arch centre. OSM places these nodes on the access road
+  //     beside the berm, not at the gate openings, so unsnapped dots land on flat
+  //     ground. The homeRibbon constraint prevents cross-berm overflow.
   const { bermEntrances, bermLayout } = snapPerimeterCodes(mergedPlaces, bermOsmData);
   const webDataDir = path.join(__dirname, '..', '..', 'web', 'data');
   const bermEntrancesPath = path.join(outDir, 'berm-entrances.json');

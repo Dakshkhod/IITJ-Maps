@@ -542,10 +542,9 @@ function refreshMapLabelPaint() {
 
 const LAYERS = { buildings: true, roads: true, markers: true };
 
-// Lower = higher label priority when markers collide (symbol-sort-key). Keeps
-// the dense perimeter office/utility codes from crowding out real destinations.
-// Gates / parking / transport are bumped into tier 1 when the curated set is
-// small and people orient by those landmarks at campus-overview zoom.
+// Lower = higher label priority on collision (symbol-sort-key), so dense
+// perimeter office/utility codes don't crowd out real destinations. Gates /
+// parking / transport sit in tier 1 — people orient by them at overview zoom.
 const LABEL_PRIORITY = {
   medical: 0, dining: 0, bank: 0,
   academic: 1, sports: 1, hostel: 1, place_of_worship: 1,
@@ -554,10 +553,9 @@ const LABEL_PRIORITY = {
   administrative: 4, utility: 4, residential: 4, other: 5,
 };
 
-// Bare unit codes (W-1, E-15, B-3, etc.) — always lowest priority no matter
-// what category they got tagged with, so they only label at high zoom and
-// never crowd out real destinations. A name with a space, dot, or any letter
-// run beyond the prefix counts as a real name.
+// Bare unit codes (W-1, E-15, B-3) are always lowest priority regardless of
+// category, so they only label at high zoom. A space, dot, or any letter run
+// beyond the prefix makes it a real name instead.
 const BARE_CODE_RE = /^[A-Za-z]{1,4}[-\s]?\d+[A-Za-z]?$/;
 
 function computeLabelPriority(props) {
@@ -601,10 +599,9 @@ let navDestination = null;           // preserved so re-route works after sheet 
 let navEntrance = null;              // registered entrance gate (+floor) of the destination, if any
 let navigationActive = false;
 let navInstructionIndex = 0;
-// True only when the route origin is the user's live GPS position ("Your
-// location"). When the user picked a fixed start that isn't where they are, nav
-// must NOT follow their GPS, flag them off-route, or reroute from their real
-// position — it's a static preview of the chosen A→B route.
+// True only when the route origin is the live GPS position ("Your location").
+// With a fixed start, nav must NOT follow GPS, flag off-route, or reroute from
+// the real position — it's a static preview of the chosen A→B route.
 let navFollowsUser = false;
 let immersiveNav = false;            // true while in Google-Maps-style immersive 3D nav view
 let preNavCameraState = null;        // saved pitch/bearing/zoom/center to restore on End
@@ -679,13 +676,10 @@ async function init() {
 
   map.dragRotate.enable();
 
-  // Any manual gesture — pan, zoom, rotate, or pitch — hands control back to
-  // the user: exit auto-follow so the camera stops snapping back to the GPS
-  // fix (and, in nav, stops re-forcing zoom/pitch every frame), letting the
-  // user freely adjust and zoom while the puck still tracks live position.
-  // The `originalEvent` guard is essential: the follow easeTo itself moves /
-  // rotates / zooms the camera and fires these same events, but WITHOUT an
-  // originalEvent — so only genuine user input cancels follow.
+  // Any manual gesture exits auto-follow, so the camera stops snapping back to
+  // the GPS fix while the puck still tracks live position. The `originalEvent`
+  // guard is essential: the follow easeTo fires these same events without one,
+  // so only genuine user input cancels follow.
   function _exitFollowOnGesture(e) {
     if (e && e.originalEvent == null) return;   // programmatic camera move
     if (autoFollow) setAutoFollow(false);
@@ -716,14 +710,10 @@ async function init() {
   });
 }
 
-// Satellite imagery offset correction.
-// Esri World Imagery is georeferenced a few metres off from our OSM-derived
-// footprints / 3D models in this region (measured ~6 m north of our data
-// against building footprints and roads), so the raw imagery doesn't line up
-// with the buildings. MapLibre can't nudge a raster XYZ layer, so we serve the
-// imagery through a custom protocol that re-requests it from a bbox shifted by
-// `satOffset` — Web-Mercator/EPSG:3857 metres added to the requested bbox.
-// Calibrate live with Alt+Shift+Arrows in satellite view (see keydown handler).
+// Satellite imagery offset correction. Esri imagery sits ~6 m north of our OSM
+// footprints here, and MapLibre can't nudge a raster XYZ layer — so we serve it
+// through a custom protocol that shifts the requested bbox by `satOffset`
+// (EPSG:3857 metres). Calibrate live in satellite view; see the keydown handler.
 const SAT_OFFSET_DEFAULT = { x: 0, y: 7 };
 const SAT_OFFSET_KEY = 'iitj_sat_offset';
 const SAT_MERC_HALF = 20037508.342789244; // half the Web-Mercator world span (m)
@@ -843,11 +833,10 @@ function getMapStyle() {
 
 let styleLoadGeneration = 0;
 
-// User-added overlay sources (and the layers that read from them). MapLibre's
-// setStyle diff can preserve these across a base-style swap, which causes the
-// add* helpers to short-circuit on their `getSource(...)` check and reuse stale
-// paint properties baked for the previous isSatellite/isDark state. We wipe
-// them before re-adding so the create-fresh path runs every time.
+// User-added overlay sources and their layers. MapLibre's setStyle diff can
+// preserve these across a base-style swap, making the add* helpers short-circuit
+// on `getSource(...)` and reuse paint baked for the old isSatellite/isDark
+// state — so we wipe them first to force the create-fresh path.
 const OVERLAY_LAYER_IDS = [
   'campus-basemask',
   'greens-fill',
@@ -1046,10 +1035,9 @@ function dedupeAreaLabels(features) {
   }));
 }
 
-// Flat green ground patches from OSM grass / park / pitch / forest polygons
-// (the same source F4Map paints green). Rendered at the very bottom of the
-// overlay stack so roads, areas and buildings sit on top. Hidden on
-// satellite (the imagery already shows real grass).
+// Flat green ground patches from OSM grass / park / pitch / forest polygons, at
+// the very bottom of the overlay stack so roads, areas and buildings sit on top.
+// Hidden on satellite, where the imagery already shows real grass.
 function addGreensLayer(data) {
   if (map.getSource('campus-greens')) {
     map.getSource('campus-greens').setData(data);
@@ -1091,13 +1079,10 @@ function addAreasLayer(data) {
 
   map.addSource('named-areas', { type: 'geojson', data });
 
-  // Base-map mask — the CARTO raster bakes light-grey building footprints into
-  // its tiles, which then "ghost" out from under our 3D models (CARTO's
-  // generalised footprints are offset/larger than our OSM polygons, so a
-  // per-building mask can't catch them). Painting the campus area polygons in
-  // the exact CARTO land colour, just above the raster, hides every baked-in
-  // footprint inside campus while leaving the basemap untouched off-campus.
-  // Hidden on satellite (we want the imagery there).
+  // Base-map mask — CARTO bakes grey footprints into its tiles, which ghost out
+  // from under our 3D models. They're offset/larger than our OSM polygons, so a
+  // per-building mask can't catch them; instead we paint the campus areas in
+  // CARTO's exact land colour just above the raster. Hidden on satellite.
   if (!isSatellite) {
     const landColor = isDark ? '#26282a' : '#f2efe7';
     map.addLayer({
@@ -1149,10 +1134,10 @@ function addAreasLayer(data) {
     }
   });
 
-  // Category highlight (active filter chip) — glowing fill + border for the
-  // matching areas. Parking, recreation and most sports live as area polygons,
-  // not buildings, so the building-highlight layers never touch them; without
-  // these, clicking those chips would visibly do nothing. Hidden by default.
+  // Category highlight (active filter chip) — glowing fill + border. Parking,
+  // recreation and most sports are area polygons, not buildings, so the
+  // building-highlight layers never reach them and those chips would otherwise
+  // do nothing visible. Hidden by default.
   map.addLayer({
     id: 'areas-highlight-fill',
     type: 'fill',
@@ -2026,8 +2011,8 @@ function startBuildingHighlight(categoryId) {
 
   // Area-polygon categories (parking, recreation, most sports) live in the
   // named-areas source, so highlight them too — flat fill works in 2D and 3D.
-  // Exclude the campus-boundary polygons (area_type=university): they're tagged
-  // academic but span the whole campus, so highlighting them lit up everything.
+  // Exclude area_type=university: tagged academic but spans the whole campus,
+  // so highlighting it lights up everything.
   if (map.getLayer('areas-highlight-fill')) {
     const areaFilter = ['all', polyFilter, ['!=', ['get', 'area_type'], 'university']];
     map.setFilter('areas-highlight-fill', areaFilter);
@@ -2120,11 +2105,9 @@ function addPlacesLayer(features) {
 
   const colorExpr = categoryColorExpr();
 
-  // Per-priority radius — top destinations get a slightly larger dot, low-
-  // priority codes shrink to small markers so they read as accurate points
-  // rather than the blob of fat dots that crowded the perimeter before.
-  // Dots grow noticeably with zoom-in so high-zoom tap targets are easy to
-  // hit on touch devices (≥ ~22 px diameter from z18).
+  // Per-priority radius: top destinations get a larger dot, low-priority codes
+  // shrink so they read as accurate points rather than a blob. Dots grow with
+  // zoom for easy touch targets (≥ ~22 px diameter from z18).
   const radiusFor = (zSmall, zBig) => [
     'case',
     ['<=', ['get', 'label_priority'], 1], zBig,
@@ -2152,12 +2135,9 @@ function addPlacesLayer(features) {
     }
   });
 
-  // Text labels — progressive disclosure by priority so the campus overview
-  // stays readable while every code is still surfaced once you zoom in.
-  //   priority 0–1 (food/medical/bank/academic/hostel/sports)       from z15
-  //   priority 2–3 (recreation/transport/parking/gate)              from z16
-  //   priority 4   (admin/utility with a real descriptive name)     from z17
-  //   priority 5   (bare unit codes: W-1, E-15, indoor labs…)       from z18
+  // Text labels — progressive disclosure by priority so the overview stays
+  // readable but every code surfaces on zoom-in: p0-1 from z15, p2-3 from z16,
+  // p4 (named admin/utility) from z17, p5 (bare unit codes) from z18.
   map.addLayer({
     id: 'places-labels',
     type: 'symbol',
@@ -2195,10 +2175,9 @@ function toggle3D() {
 
   if (is3D) {
     applyBuildingViewMode();
-    // Custom 3D landmark models are only shown on the vector base map, not
-    // over satellite imagery (matches buildings-3d behaviour). Defer one frame
-    // so extrusion visibility + pitch animation start before the custom layer
-    // attaches (scene is usually pre-built by scheduleLandmarks3DPrewarm).
+    // Custom 3D landmarks show only on the vector base map, not over satellite
+    // (matching buildings-3d). Deferred one frame so extrusion visibility and
+    // pitch animation start before the custom layer attaches.
     if (!isSatellite) {
       requestAnimationFrame(() => { if (is3D) showLandmarks3D(); });
     } else if (typeof Landmarks3D !== 'undefined') {
@@ -2221,10 +2200,9 @@ function toggle3D() {
   if (activeCategory) startBuildingHighlight(activeCategory);
 }
 
-// Show the 3D landmark models. Three.js is loaded lazily here the first time
-// the user enters 3D (not on every page load); the callback fires once the
-// library is live, so 2D buildings appear instantly while the detailed models
-// stream in a moment later. Subsequent calls are instant (already loaded).
+// Show the 3D landmark models. Three.js loads lazily on first entry into 3D,
+// not on every page load, so 2D buildings appear instantly while the detailed
+// models stream in behind them. Later calls are instant.
 function showLandmarks3D() {
   if (typeof Landmarks3D === 'undefined') return;
   Landmarks3D.load(() => {
@@ -3224,10 +3202,9 @@ function _extendRouteToPoi(route, poiLat, poiLng) {
   }
   const speed = route.profile === 'driving' ? 7 : 1.4;
   const newDist = Math.round(dist);
-  // The geometry gained the POI vertex and grew longer, so keep the `arrive`
-  // instruction in lockstep — its distance feeds the spoken "continue for X"
-  // and its coord_index anchors arrival. Leaving it at the pre-extension value
-  // is what made the voice announce a shorter distance than the screen showed.
+  // The geometry gained the POI vertex and grew longer, so keep `arrive` in
+  // lockstep: its distance feeds the spoken "continue for X" and its coord_index
+  // anchors arrival. Stale values make the voice and screen disagree.
   const lastIdx = coords.length - 1;
   const instructions = Array.isArray(route.instructions)
     ? route.instructions.map(instr =>
@@ -3444,14 +3421,11 @@ function _remainingDist(segIdx, t, coords) {
   return d;
 }
 
-// RoadSnap — ambient snap-to-road for the user puck
-// During free roaming (no active navigation) raw filtered GPS routinely
-// drifts 5–25 m to either side of the road the user is actually walking
-// on. We build a coarse spatial grid over every roads.geojson segment
-// once at startup; per-frame we look up the 9 nearest cells, project
-// the puck onto the closest segment, and render the projection if it's
-// inside a small buffer (scaled by GPS accuracy so noisy fixes don't
-// magnet onto unrelated paths).
+// RoadSnap — ambient snap-to-road for the user puck. Free-roaming GPS drifts
+// 5-25 m off the actual road, so we grid every roads.geojson segment at startup;
+// per frame we check the 9 nearest cells and render the puck's projection onto
+// the closest segment, within a buffer scaled by GPS accuracy so noisy fixes
+// don't magnet onto unrelated paths.
 const RoadSnap = (() => {
   const CELL_DEG = 0.0005;            // ~55 m at IITJ latitude — comfortably > snap radius
   const SNAP_RADIUS_M = 18;           // base snap buffer
@@ -3533,10 +3507,9 @@ const RoadSnap = (() => {
     return best;
   }
 
-  // Snap a fix to the nearest road if (a) we have an index, (b) the
-  // GPS accuracy isn't too poor to trust the snap, and (c) the road is
-  // close enough. Returns the snapped point or null to fall through to
-  // the raw filtered position.
+  // Snap a fix to the nearest road when we have an index, the GPS accuracy is
+  // good enough to trust it, and the road is close enough. Returns the snapped
+  // point, or null to fall through to the raw filtered position.
   function snap(lat, lng, accuracyM, opts = {}) {
     if (accuracyM != null && accuracyM > MAX_ACC_FOR_SNAP_M) return null;
     const best = nearest(lat, lng);
@@ -3629,15 +3602,10 @@ function updateNavInstruction(distToNextTurn) {
   _updateNavArrowHeading();
 }
 
-// Compass for the "Head <compass>" departure step. Two coordinated rotations
-// give us both behaviours at once:
-//   • The frame spins with the map (rotate −mapBearing) so the "N" tick always
-//     points at true north — while navigating (map follows heading) it visibly
-//     turns in real time as you move/rotate.
-//   • The needle points at the true travel bearing (frame-north + instr.bearing),
-//     so it always matches the word ("northwest" reads as up-left on a north-up
-//     map, and stays pinned to real northwest as the frame spins).
-// Turn steps keep their fixed directional glyph.
+// Compass for the "Head <compass>" departure step, via two coordinated
+// rotations: the frame spins by −mapBearing so its "N" tick always points true
+// north, and the needle points at frame-north + instr.bearing so it keeps
+// matching the spoken word as the frame turns. Turn steps keep a fixed glyph.
 let _navCompassAngle = 0;   // continuous (unwrapped) frame angle — never spin-flips
 function _updateNavArrowHeading() {
   const wrap = document.getElementById('nav-arrow-wrap');
@@ -3699,11 +3667,9 @@ function startImmersiveNavigation() {
   // no GPS follow, no off-route badge, no reroute-to-current-position.
   navFollowsUser = !!(userLocation && directionsFrom?.name === 'Your location');
 
-  // Re-render the instruction now that navigationActive is true, so the compass
-  // switches on immediately (on desktop / before the first GPS fix there's no
-  // _navTick to do it, and the preview render happened while nav was inactive).
-  // For a static preview, _navTick never runs, so seed the distance banner with
-  // the whole-route distance to the destination here.
+  // Re-render now that navigationActive is true so the compass switches on
+  // immediately — before the first GPS fix there's no _navTick to do it. A static
+  // preview never runs _navTick at all, so seed the distance banner here.
   updateNavInstruction(navFollowsUser ? (currentRoute.instructions?.[0]?.distance ?? null) : currentRoute.distance);
   if (!navFollowsUser) {
     const verb   = currentRoute.profile === 'driving' ? 'drive' : 'walk';
@@ -3747,11 +3713,10 @@ function startImmersiveNavigation() {
     ? userLocation.heading
     : (headingDeg ?? _routeStartBearing());
 
-  // Bottom padding puts the user puck in the lower third of the screen,
-  // matching Google Maps' "look ahead" framing. Set autoFollow directly
-  // (don't call setAutoFollow — its built-in flyTo would race this easeTo).
-  // Only follow when the nav tracks the live puck; a fixed-start preview stays
-  // put at the route start so the user can drag through the 3D view.
+  // Bottom padding puts the puck in the lower third, matching Google Maps'
+  // "look ahead" framing. Set autoFollow directly — setAutoFollow's built-in
+  // flyTo would race this easeTo. Only follow when nav tracks the live puck; a
+  // fixed-start preview stays at the route start so the user can drag around.
   autoFollow = navFollowsUser;
   document.getElementById('btn-locate').classList.toggle('location-follow', navFollowsUser);
   map.easeTo({
@@ -3769,10 +3734,9 @@ function startImmersiveNavigation() {
   // context iOS 13+ accepts DeviceOrientationEvent.requestPermission() from.
   _enableCompassWithUX();
 
-  // Spoken guidance: open with the departure heading. The only step after it is
-  // arrival (no turn steps are produced), so we cue the distance to the
-  // destination here rather than announcing "you have arrived" at the start —
-  // the real arrival phrase fires from _voiceGuidance at the end of the route.
+  // Spoken guidance opens with the departure heading. Arrival is the only step
+  // after it (no turn steps exist), so cue the distance to the destination here;
+  // the real arrival phrase fires from _voiceGuidance at the end.
   _resetNavVoiceState();
   if (NavVoice.enabled() && currentRoute.instructions && currentRoute.instructions.length) {
     const first  = currentRoute.instructions[0];
@@ -3853,12 +3817,9 @@ function _occludersNear(coord, radiusM = 35) {
   return { buildingIds, landmarkIds };
 }
 
-// Make ONLY the structures occluding `coord` see-through. Pass coord=null
-// to restore everything to full opacity (used on End).
-//
-// fill-extrusion-opacity is layer-wide (MapLibre doesn't support data-driven
-// for it), so we fade individual features via fill-extrusion-color alpha
-// instead — color expressions ARE data-driven.
+// Make ONLY the structures occluding `coord` see-through; coord=null restores
+// full opacity. fill-extrusion-opacity is layer-wide in MapLibre, so we fade
+// individual features through fill-extrusion-color alpha, which IS data-driven.
 function applyImmersiveBuildingFade(coord) {
   const labelsLayer = map.getLayer('buildings-labels');
   const fillLayer   = map.getLayer('buildings-3d');
@@ -3968,20 +3929,19 @@ function endNavigation() {
   showToast('Navigation ended', 'info');
 }
 
-// NavVoice — spoken turn-by-turn (Web Speech API speechSynthesis)
-// Announces the upcoming maneuver as the user approaches it, the maneuver
-// itself at the turn, reroutes, and arrival. Feature-detected (no-ops where
-// speechSynthesis is missing) and user-mutable; the preference persists.
+// NavVoice — spoken turn-by-turn via speechSynthesis. Announces the upcoming
+// maneuver on approach, the maneuver at the turn, reroutes, and arrival.
+// Feature-detected (no-ops without speechSynthesis) and mutable; pref persists.
 const NavVoice = (() => {
   const PREF_KEY = 'iitj-nav-voice-v1';
   const synth = (typeof window !== 'undefined' && window.speechSynthesis) || null;
   let _enabled = synth ? (localStorage.getItem(PREF_KEY) !== 'off') : false;
   let _voice = null;
 
-  // Voice announces only the honest steps: the departure heading, arrival, and
-  // reroutes. No left/right is ever spoken because no `turn` steps are produced
-  // (see generateInstructions in routing.js) — the roundabout keep-left routing
-  // makes turn side ambiguous, so it's deliberately omitted.
+  // Only the honest steps are announced: departure heading, arrival, reroutes.
+  // Left/right is never spoken because no `turn` steps are produced (see
+  // generateInstructions in routing.js) — keep-left routing round the campus
+  // loops makes turn side ambiguous, so it's deliberately omitted.
   function supported() { return !!synth; }
   function enabled()   { return supported() && _enabled; }
 
@@ -4127,13 +4087,10 @@ function setupVoiceToggle() {
   });
 }
 
-// LocationTracker — Kalman-lite GPS pipeline (single source of truth)
-// One module owns the watchPosition handle, smooths raw fixes with a
-// Kalman-lite filter, rejects outliers, fuses GPS heading with the
-// compass, and runs a requestAnimationFrame loop that interpolates the
-// rendered position toward the latest filtered estimate. Subscribers
-// (marker, camera, nav) consume the smooth `display` position instead
-// of the noisy raw `coords`.
+// LocationTracker — single owner of the watchPosition handle. Smooths raw fixes
+// with a Kalman-lite filter, rejects outliers, fuses GPS heading with the
+// compass, and interpolates toward the latest estimate on a rAF loop, so
+// subscribers (marker, camera, nav) read a smooth `display` position.
 const LocationTracker = (() => {
   // Tunables
   const PROCESS_NOISE_MPS        = 4;    // assumed motion model std-dev (m/s)
@@ -4144,10 +4101,9 @@ const LocationTracker = (() => {
   const ACC_INTERP_FACTOR        = 0.15;
   const HEADING_INTERP_FACTOR    = 0.06; // gentle ease toward target bearing
 
-  // Compass sensitivity controls — phones emit deviceorientation at 30–100Hz
-  // and the raw alpha jitters by several degrees even when the device is
-  // perfectly still. Throttle + smooth + deadzone so the camera doesn't
-  // visibly twitch on every wobble.
+  // Compass sensitivity — phones emit deviceorientation at 30-100 Hz and raw
+  // alpha jitters several degrees even at rest, so throttle + smooth + deadzone
+  // keep the camera from twitching on every wobble.
   const COMPASS_MIN_INTERVAL_MS  = 120;  // hard rate limit on accepted samples
   const COMPASS_SMOOTH_FACTOR    = 0.15; // low-pass on raw compass input
   const COMPASS_DEADZONE_DEG     = 1.5;  // ignore sub-degree micro-rotations
@@ -4307,18 +4263,13 @@ const LocationTracker = (() => {
     return true;
   }
 
-  // Compass is OFF by default — it's only useful when the camera is following
-  // bearing (i.e. during turn-by-turn nav). Attaching it always leaks the
-  // gyroscope's twitchy input into the marker heading and any UI that reads
-  // _bestHeading() at rest, which is what made the puck feel jittery.
+  // Compass is OFF by default — useful only while the camera follows bearing
+  // (turn-by-turn nav). Attaching it always leaks twitchy gyroscope input into
+  // the marker heading, making the puck jitter at rest.
   //
-  // Returns a Promise resolving to one of:
-  //   'attached'    — listeners attached (no permission gate on this platform)
-  //   'granted'     — iOS permission prompt accepted, listeners attached
-  //   'denied'      — iOS permission prompt rejected (caller falls back to GPS)
-  //   'unsupported' — no DeviceOrientation API at all
-  // MUST be invoked from a user gesture on iOS 13+, where requestPermission()
-  // only resolves when triggered by a tap.
+  // Resolves to 'attached' | 'granted' | 'denied' | 'unsupported'. MUST be
+  // invoked from a user gesture on iOS 13+, where requestPermission() only
+  // resolves when triggered by a tap.
   function enableCompass() {
     if (_compassEnabled) return Promise.resolve('attached');
     if (typeof window === 'undefined' || !window.DeviceOrientationEvent) {
@@ -4465,10 +4416,10 @@ function onLocationFrame(disp, raw) {
     if (_followRequested) setAutoFollow(true);
   }
 
-  // Drive nav side-effects (instruction advance / reroute / ETA / camera) ONCE
-  // per frame, using the snapped position so off-road jitter doesn't trigger
-  // false reroutes. Only when the nav follows the live puck — a fixed-start
-  // preview must not advance/reroute off the user's real (off-route) position.
+  // Drive nav side-effects (instruction advance / reroute / ETA / camera) once
+  // per frame from the snapped position, so off-road jitter can't trigger false
+  // reroutes. Live-puck nav only — a fixed-start preview must not advance or
+  // reroute off the user's real position.
   if (navigationActive && currentRoute && snapInfo && navFollowsUser) {
     _navTick(renderLat, renderLng, snapInfo);
   } else if (autoFollow) {
@@ -4511,10 +4462,9 @@ function _renderLocationMarker(lat, lng, accuracyM, heading) {
     });
   }
 
-  // Singleton HTML marker. We REUSE the existing element across updates,
-  // which is why the "two pointers" bug could only ever come from a
-  // different marker class (routeOriginMarker / directionsFromMarker) —
-  // those are now hidden when navigation is active.
+  // Singleton HTML marker, reusing the existing element across updates. A second
+  // visible pointer can therefore only come from another marker class
+  // (routeOriginMarker / directionsFromMarker), which nav hides while active.
   if (!locationMarker) {
     const el = document.createElement('div');
     el.className = 'location-marker';
@@ -4538,12 +4488,10 @@ function _cameraFollow(lat, lng, heading, nav) {
   // Skip if a previous ease is still running — overlapping eases are the
   // source of the visible "stutter" the user reported.
   if (_easingTo) return;
-  // While plainly following (not turn-by-turn nav), don't fire a fresh ease
-  // unless the puck has actually drifted from screen centre. A stationary user
-  // otherwise triggers a needless easeTo every frame, which keeps the map in
-  // perpetual animation and makes it feel "frozen" / unresponsive to touch.
-  // The dragstart/zoomstart handlers still release follow the instant the user
-  // grabs the map, so this only removes idle churn.
+  // While plainly following (not turn-by-turn nav), only ease if the puck has
+  // actually drifted from screen centre. A stationary user otherwise triggers an
+  // easeTo every frame, leaving the map perpetually animating and feeling
+  // unresponsive to touch. Releasing follow on drag/zoom is handled elsewhere.
   if (!nav && map) {
     const c = map.getCenter();
     if (haversine(c.lat, c.lng, lat, lng) < 8) return;   // ~8 m: below GPS jitter
@@ -4701,10 +4649,9 @@ function flyToUserLocation() {
   }
 }
 
-// Re-add location layers after style reload — the HTML marker survives
-// (it's not attached to a style layer), so we ONLY clean up the GeoJSON
-// circle. Killing the marker here was a separate bug: it briefly left no
-// pointer at all, then a new one popped in after the next GPS tick.
+// Re-add location layers after a style reload. The HTML marker survives (it
+// isn't attached to a style layer), so ONLY the GeoJSON circle is cleaned up —
+// removing the marker too would leave no pointer until the next GPS tick.
 function restoreLocationLayer() {
   if (!userLocation) return;
   if (map.getSource('user-accuracy')) {
@@ -4847,13 +4794,11 @@ function setupEventListeners() {
   });
 }
 
-// Calibrate the satellite imagery offset live. In satellite view, press "O" to
-// toggle calibration mode; while it's on, the plain Arrow keys nudge the
-// imagery 1 m in that direction (Shift = fine 0.25 m steps) and "0" resets.
-// (We avoid OS-reserved combos like Alt+Shift, which Windows hijacks to switch
-// keyboard layout.) The map's own arrow-pan is disabled while calibrating, and
-// the chosen value persists in localStorage + logs so it can be baked into
-// SAT_OFFSET_DEFAULT for everyone.
+// Calibrate the satellite offset live: in satellite view "O" toggles the mode,
+// then Arrows nudge 1 m (Shift = 0.25 m) and "0" resets. Plain arrows, not
+// Alt+Shift combos that Windows hijacks for keyboard layout. Map arrow-pan is
+// disabled while calibrating; the value persists and logs, to be baked into
+// SAT_OFFSET_DEFAULT.
 let satCalibrating = false;
 
 function isTypingTarget(el) {
@@ -5215,12 +5160,10 @@ function hideSplash() {
 
 document.addEventListener('DOMContentLoaded', init);
 
-// Offline/PWA service worker was removed — it could wedge the app on slow
-// connections (a fresh load worked, the next SW-controlled load hung). We no
-// longer register one, and we proactively dismantle any worker + caches a
-// device still has from a previous version so nothing stale can intercept
-// requests. /sw.js is now a self-unregistering kill switch as a second path
-// for devices whose app.js never even runs.
+// No service worker: it could wedge the app on slow connections. We also
+// dismantle any worker + caches left from an earlier version, so nothing stale
+// intercepts requests. /sw.js is a self-unregistering kill switch covering
+// devices whose app.js never runs.
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.getRegistrations()
     .then(regs => regs.forEach(r => r.unregister()))

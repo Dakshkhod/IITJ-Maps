@@ -1,14 +1,10 @@
 /* IITJ Maps — service worker KILL SWITCH.
  *
- * The previous offline service worker could leave the app stuck on the splash
- * on slow/flaky connections (a fresh load worked, the next SW-controlled load
- * hung). Offline support is therefore disabled. This file exists ONLY to
- * dismantle any worker + caches a user already has installed, then reload the
- * page so it runs clean with no worker. The browser fetches /sw.js outside of
- * any worker's control, so this reliably replaces a wedged worker.
- *
- * app.js no longer registers a service worker, so once a device is cleaned up
- * this worker is never installed again.
+ * Offline support is disabled: the old worker could wedge the app on the splash
+ * over flaky connections. This file only dismantles any worker + caches a device
+ * already has, then reloads clean. The browser fetches /sw.js outside worker
+ * control, so it reliably replaces a wedged one. app.js never registers a
+ * worker, so a cleaned device stays clean.
  */
 self.addEventListener('install', () => self.skipWaiting());
 

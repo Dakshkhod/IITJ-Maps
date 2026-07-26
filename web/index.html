@@ -2,9 +2,8 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <!-- Page zoom stays enabled for low-vision users (WCAG 1.4.4). The map's own
-       pinch/rotate gestures are unaffected: MapLibre sets touch-action:none on
-       its canvas, so the browser never hijacks gestures over the map. -->
+  <!-- Page zoom stays enabled for low-vision users (WCAG 1.4.4). Map gestures are
+       unaffected: MapLibre sets touch-action:none on its own canvas. -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>IITJ Maps — Smart Campus Navigation</title>
   <meta name="description" content="Navigate IIT Jodhpur campus with interactive maps, search, and turn-by-turn directions">
@@ -25,21 +24,16 @@
        is covered by our own CSP/HSTS and exposes no visitor IP to a CDN. -->
   <link href="/vendor/maplibre/maplibre-gl.css?v=1" rel="stylesheet">
   <script src="/vendor/maplibre/maplibre-gl.js?v=1"></script>
-  <!-- Three.js (for 3D landmark models) is NOT loaded here. It's fetched lazily
-       by landmarks-3d.js (see Landmarks3D.load) the first time the user enters
-       3D, so 2D-only sessions never download ~600 KB. -->
+  <!-- Three.js is NOT loaded here: landmarks-3d.js fetches it lazily on first
+       entry into 3D, so 2D-only sessions never download ~600 KB. -->
 
   <!-- Self-hosted fonts (no Google Fonts CDN). -->
   <link rel="stylesheet" href="/fonts/fonts.css?v=1">
 
   <link rel="stylesheet" href="css/app.css?v=20">
 
-  <!-- Boot watchdog — last-resort recovery from a wedged service worker / bad
-       cache that leaves the app stuck on the splash. Runs independently of
-       app.js (so it works even if app.js itself was served broken): if the app
-       hasn't booted in time, drop the SW + all caches and reload ONCE. The
-       sessionStorage guard prevents a reload loop; if it's still stuck after
-       that, the splash is force-hidden so the user at least sees the map. -->
+  <!-- Boot watchdog — recovers from a wedged worker / bad cache that leaves the
+       app stuck on the splash. Runs independently of app.js; see js/boot.js. -->
   <script src="js/boot.js?v=1"></script>
 </head>
 <body>

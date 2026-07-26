@@ -12,12 +12,9 @@ for f in b['features']:
     if g['type'] == 'Polygon':
         bpolys.append(g['coordinates'][0])
 
-# Also exclude trees inside residential / built area polygons (e.g. the
-# General Quarters), so scrub/forest polygons that overlap housing do not
-# scatter trees on top of the quarters — matches F4Map, which keeps trees
-# off buildings.
-# NOTE: only residential — the 'academic' university boundary covers the
-# whole campus, so excluding it would remove every tree.
+# Also exclude residential/built areas, so scrub/forest polygons overlapping
+# housing don't scatter trees over the quarters. Residential only: the 'academic'
+# university boundary spans the whole campus, so excluding it removes every tree.
 for f in areas['features']:
     if f['properties'].get('category') == 'residential' and f['geometry']['type'] == 'Polygon':
         bpolys.append(f['geometry']['coordinates'][0])

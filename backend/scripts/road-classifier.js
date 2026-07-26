@@ -1,11 +1,10 @@
 /**
  * Pipeline-side road classification + graph building.
  *
- * The CLASSIFICATION core now lives in web/js/road-classifier.js so the browser
- * router can re-classify admin-overlay roads with the EXACT same rules the
- * prebuilt graph was generated with. This file re-exports that core unchanged
- * and adds the pipeline-only builders (graph + audit), which the browser never
- * needs. Do not fork the classification rules back into this file.
+ * The classification core lives in web/js/road-classifier.js so the browser
+ * router re-classifies overlay roads with the exact rules the prebuilt graph
+ * used. This re-exports it unchanged and adds the pipeline-only graph/audit
+ * builders. Do not fork the classification rules back into this file.
  */
 const core = require('../../web/js/road-classifier.js');
 const {

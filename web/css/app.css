@@ -26,9 +26,8 @@
   --radius-lg: 14px;
   --radius-xl: 16px;
   --font: 'Inter', system-ui, -apple-system, sans-serif;
-  /* Motion scale — one ramp so transitions feel consistent across the app.
-     --ease-spring gives panels a gentle, premium overshoot; --ease-out for
-     everyday fades. */
+  /* Motion scale — one ramp so transitions stay consistent. --ease-spring gives
+     panels a gentle overshoot; --ease-out is for everyday fades. */
   --dur-fast: 0.14s;
   --dur-base: 0.22s;
   --dur-slow: 0.36s;
@@ -1722,10 +1721,9 @@ input[type="checkbox"]:checked + .toggle-track .toggle-thumb { transform: transl
 .search-container { padding-top: max(12px, env(safe-area-inset-top, 12px)); }
 .bottom-sheet, .nav-panel { padding-bottom: max(20px, env(safe-area-inset-bottom, 20px)); }
 
-/* Safe-area insets for the remaining edge-anchored chrome — keeps controls
-   clear of notches, punch-holes and the home indicator (needs viewport-fit=
-   cover, set on the <meta viewport>). Left/right insets matter in landscape
-   where the notch sits on a side. */
+/* Safe-area insets keep edge-anchored chrome clear of notches, punch-holes and
+   the home indicator (needs viewport-fit=cover on the meta viewport). Left/right
+   insets matter in landscape, where the notch sits on a side. */
 .directions-panel {
   padding-top: max(12px, env(safe-area-inset-top, 12px));
   padding-left: max(12px, env(safe-area-inset-left, 12px));

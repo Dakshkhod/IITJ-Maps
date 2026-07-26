@@ -1,35 +1,22 @@
 /**
- * perf-tier.js — automatic device-capability tiering for smooth rendering
- * on everything from a budget Galaxy M/A phone to a flagship or desktop.
+ * Automatic device-capability tiering, from budget phones to desktop. No user
+ * quality selector: the device is inspected once at boot, and everything else
+ * reads window.PerfTier.* while building the map / Three.js renderer. An FPS
+ * watchdog then nudges the tier down (and remembers it) on slower devices.
  *
- * There is NO user-facing quality selector (this isn't a game). The module
- * inspects the device once at boot, picks a graphics tier, and every other
- * file reads window.PerfTier.* while building the map / Three.js renderer.
- * A lightweight FPS watchdog then nudges the tier DOWN — and remembers that
- * for next time — if a device turns out slower than its specs suggested.
+ * Tiers tune the four things that actually cost frames on a mobile GPU:
+ * pixelRatio (the big lever — an uncapped dpr of 2.75 shades ~7x the pixels),
+ * antialias (MSAA is costly on budget Mali/Adreno), scene mass (Three.js models
+ * + berms + tree density), and overdraw (glow layers, max pitch).
  *
- * Tiers (0 = low, 1 = balanced, 2 = high) tune the four things that actually
- * cost frames on a mobile GPU:
- *   • pixelRatio  — THE big lever. A Galaxy M32 has devicePixelRatio ≈ 2.75,
- *     so uncapped it shades ~7× the pixels of a logical 1×. Capping this is
- *     what turns a slideshow into a smooth map.
- *   • antialias   — MSAA is very expensive on Mali/Adreno budget GPUs.
- *   • scene mass  — the heavy Three.js procedural landmark models + perimeter
- *     berms are skipped on low-end (plain MapLibre extruded boxes remain), and
- *     instanced tree/shrub density is scaled down.
- *   • overdraw    — the doubled "glow" extrusion layers and max pitch.
- *
- * Loaded BEFORE app.js and landmarks-3d.js so both can read PerfTier at
- * construction time.
+ * Loads BEFORE app.js and landmarks-3d.js so both can read it at construction.
  */
 (function () {
   'use strict';
 
-  // The store key is versioned: bumping it re-detects every device and discards
-  // any stale persisted tier cap. The watchdog is also floored at 'reduced'
-  // (see WATCHDOG_FLOOR), because a phone that hitches once during the
-  // cold-start 3D build must not persist a demotion all the way to 'low' and
-  // lose the custom buildings for good (landmarkModels is off only at 'low').
+  // Versioned store key: bumping it re-detects every device and discards any
+  // stale persisted tier cap. See also WATCHDOG_FLOOR, which stops a one-off
+  // cold-start hitch from persisting a demotion to 'low'.
   var STORE_KEY = 'iitj_perf_v4';
 
   function loadStore() {
@@ -63,10 +50,8 @@
   var gpu   = gpuRenderer();
   var gpuLc = gpu.toLowerCase();
 
-  // Classify → 0 low / 1 reduced / 2 balanced / 3 high
-  // Four tiers so quality lowers GRADUALLY: each step down cuts only what's
-  // needed for smoothness at that level (see TIERS). Crucially, only the LOWEST
-  // tier drops the detailed Three.js models — mid-range phones keep them.
+  // Classify → 0 low / 1 reduced / 2 balanced / 3 high. Four tiers so quality
+  // lowers gradually (see TIERS); only the lowest drops the Three.js models.
   var TIER_HIGH = 3, TIER_BALANCED = 2, TIER_REDUCED = 1, TIER_LOW = 0;
 
   function classify() {
@@ -94,10 +79,9 @@
         /powervr|videocore|swiftshader|llvmpipe|software/.test(gpuLc);
       if (weakGpu) return TIER_LOW;
 
-      // Older upper-mid Mali (G76/G77/G78, ~2019–20, e.g. Realme 6) and
-      // older-mid Adreno (620–639) → reduced: the lighter (draw-call-merged)
-      // model set at trimmed resolution, so they're smooth but still show the
-      // real 3D buildings rather than plain boxes.
+      // Older upper-mid Mali (G76-G78) and older-mid Adreno (620-639) → reduced:
+      // draw-call-merged models at trimmed resolution, so they stay smooth but
+      // still show real 3D buildings rather than plain boxes.
       if (/mali-g7[678]\b/.test(gpuLc)) return TIER_REDUCED;
       if (/adreno[^\d]*6[23]\d\b/.test(gpuLc)) return TIER_REDUCED;
 
@@ -107,11 +91,10 @@
       return isMobile ? TIER_BALANCED : TIER_HIGH;
     }
 
-    // GPU masked/unavailable → lean cautiously on memory + cores. We never
-    // reach `high` here (can't confirm the GPU). Since the models are now
-    // draw-call-merged (cheap), a phone that looks capable gets the LIGHTER
-    // model set (reduced) rather than plain boxes — the watchdog drops it to
-    // low only if it actually can't cope.
+    // GPU masked/unavailable → lean cautiously on memory + cores, never
+    // reaching `high`. Since the models are draw-call-merged and cheap, a
+    // capable-looking phone gets 'reduced' rather than plain boxes; the watchdog
+    // drops it to low only if it genuinely can't cope.
     if (isMobile) {
       if (mem && mem <= 2) return TIER_LOW;             // clearly low-RAM
       if (cores && cores <= 4) return TIER_LOW;         // few cores
@@ -139,22 +122,15 @@
   if (forced == null && typeof store.maxTier === 'number') tier = Math.min(tier, store.maxTier);
   tier = Math.max(0, Math.min(3, tier));
 
-  // Per-tier settings — a GRADUAL quality gradient
-  // Each step down cuts only what's necessary for smoothness at that level,
-  // cheapest-visual-impact first:
-  //   high     → full detailed scene (flagships).
-  //   balanced → small cut: drop antialiasing (MSAA is costly on mobile GPUs)
-  //              and the doubled glow layer. KEEPS the detailed 3D models,
-  //              near-native resolution, full-ish trees. (Capable mid-range,
-  //              e.g. OnePlus Nord CE5.)
-  //   reduced  → medium cut: lower resolution + fewer trees. STILL keeps the
-  //              detailed models. (Weaker mid-range / older phones.)
-  //   low      → reasonable cut: the simplified, non-Three.js version — cheap
-  //              MapLibre extruded building boxes instead of models, no berms,
-  //              sparse trees, no background prewarm. (Weak GPUs, e.g. M32.)
-  // The FPS watchdog moves a phone down one notch at a time until it's smooth,
-  // so the model-dropping "low" tier is only reached by devices that truly
-  // need it — mid-range phones keep the full 3D buildings.
+  // Per-tier settings — a gradual gradient, each step cutting only what's needed
+  // for smoothness, cheapest-visual-impact first:
+  //   high     → full detailed scene.
+  //   balanced → drop antialiasing + the doubled glow layer; keeps the models.
+  //   reduced  → lower resolution + fewer trees; still keeps the models.
+  //   low      → no Three.js: plain MapLibre extruded boxes, no berms, sparse
+  //              trees, no prewarm.
+  // The watchdog steps down one notch at a time, so only devices that truly
+  // need it reach 'low' and lose the detailed buildings.
   var TIERS = [
     { // 0 — low  (weak GPUs: Mali-G52/T-series, entry Adreno, PowerVR)
       name: 'low',
@@ -169,10 +145,9 @@
       prewarm3D: false,
     },
     { // 1 — reduced  (weaker mid-range — the LIGHTER Three.js model set)
-      // Keeps the real 3D buildings but merges each one's hundreds of little
-      // meshes into a few draw calls (mergeModels), which is the main cost on
-      // these GPUs. Trimmed resolution + fewer trees, and built lazily on first
-      // 3D tap (no background upload → no load-time stutter).
+      // Keeps the real 3D buildings but merges each one's hundreds of meshes into
+      // a few draw calls (mergeModels), the main cost on these GPUs. Trimmed
+      // resolution, fewer trees, built lazily on first 3D tap to avoid a stutter.
       name: 'reduced',
       pixelRatio: Math.min(dpr, 1.5),
       antialias: false,
@@ -232,35 +207,28 @@
   var PerfTier = {
     detectedTier: detected,
     gpu: gpu, deviceMemory: mem, cores: cores, dpr: dpr,
-    // Set by landmarks-3d.js while the 3D scene is streaming its geometry in or
-    // uploading it to the GPU. That one-time cost briefly drops the frame rate
-    // during the very first tilt into 3D; the watchdog must NOT read it as the
-    // device being slow, or that false positive demotes a capable phone.
+    // Set by landmarks-3d.js while the scene streams in or uploads to the GPU.
+    // That one-time cost dips the frame rate on the first tilt into 3D; the
+    // watchdog must not read it as slowness and demote a capable phone.
     sceneBusy: false,
     // Scale an instance count (trees/shrubs) by this tier's vegetation density.
     veg: function (n) { return Math.max(0, Math.round(n * PerfTier.vegetationDensity)); },
   };
   apply(tier);
 
-  // FPS watchdog
-  // MapLibre paints on demand, so a plain rAF loop would read a false 60fps
-  // whenever the map is idle. Instead we sample frame INTERVALS only while the
-  // camera is actually moving (pan/zoom/rotate/pitch) — precisely when the GPU
-  // is under load. If a movement isn't running SMOOTHLY (target ~50fps, not
-  // just "not frozen"), we drop the pixel ratio right now (cheap, immediate)
-  // AND remember to boot a tier lower next session — which then also turns off
-  // AA / heavy models / glow from the start. It can step down more than once
-  // (high → balanced → low) across a session, with a short cooldown between
-  // steps so each change gets a chance to take effect before we judge again.
+  // FPS watchdog. MapLibre paints on demand, so a plain rAF loop would read a
+  // false 60fps while idle; instead we sample frame intervals only while the
+  // camera moves — exactly when the GPU is loaded. Below ~50fps we drop the
+  // pixel ratio immediately AND boot a tier lower next session (which also
+  // disables AA / heavy models / glow up front). Can step down repeatedly, with
+  // a cooldown so each change takes effect before the next judgement.
   var SMOOTH_FPS = 50;      // below this during movement = not smooth → demote
   var STEP_COOLDOWN = 3500; // ms to let a demotion settle before judging again
   var SAMPLE_N = 18;        // frames per FPS estimate (~0.3s at 60fps)
-  // The watchdog trims for smoothness but must never take a device the
-  // classifier judged capable BELOW the tier that still draws the custom 3D
-  // buildings — otherwise a transient hitch permanently strips the models
-  // (landmarkModels is off only at 'low'). 'reduced' is the lightest tier that
-  // keeps them (merged geometry, trimmed resolution). Genuinely weak GPUs are
-  // already put at 'low' at BOOT by classify(); this only bounds AUTO demotion.
+  // The watchdog must never push a device the classifier judged capable below
+  // the lightest tier that still draws the custom buildings ('reduced'), or a
+  // transient hitch permanently strips the models. Genuinely weak GPUs are
+  // already placed at 'low' by classify(); this only bounds AUTO demotion.
   var WATCHDOG_FLOOR = TIER_REDUCED;   // = 1
 
   PerfTier.attachWatchdog = function (map) {
@@ -271,10 +239,9 @@
     map.on('moveend',   function () { moving = false; last = 0; samples.length = 0; });
 
     map.on('render', function () {
-      // Stop once at the floor (models safe) and never judge frames spent
-      // building/uploading the 3D scene — that one-time cost isn't the steady
-      // state we're trying to measure. Reset the sampler so stale intervals
-      // from the busy window don't leak into the next real estimate.
+      // Stop at the floor, and never judge frames spent building/uploading the
+      // 3D scene — that one-time cost isn't the steady state we're measuring.
+      // Reset the sampler so stale intervals don't leak into the next estimate.
       if (!moving || PerfTier.tier <= WATCHDOG_FLOOR || PerfTier.sceneBusy) {
         last = 0; samples.length = 0; return;
       }

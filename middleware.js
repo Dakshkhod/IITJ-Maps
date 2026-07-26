@@ -1,15 +1,9 @@
 /**
- * Edge Middleware: HTTP Basic Auth gate for /admin.html only.
+ * Edge Middleware: HTTP Basic Auth gate for /admin.html only, so the page can't
+ * even load unauthenticated. Scoped via `matcher`, leaving the public map open.
  *
- * This is a second, independent layer on top of the server-side publish
- * login in api/admin.js — it stops the admin page from even loading for
- * an unauthenticated visitor, instead of relying solely on the page's own
- * JS to gate the "publish" action. Scoped to /admin.html via `matcher` so
- * the public map and all map data remain fully open.
- *
- * Uses ADMIN_BASIC_USER / ADMIN_BASIC_PASS — deliberately separate from
- * ADMIN_PASSWORD (api/admin.js) so leaking one credential doesn't expose
- * the other layer.
+ * Uses ADMIN_BASIC_USER / ADMIN_BASIC_PASS, kept separate from ADMIN_PASSWORD
+ * (api/admin.js) so leaking one credential doesn't expose the other layer.
  */
 import { next } from '@vercel/edge';
 

@@ -1,20 +1,14 @@
 /**
- * One-off re-categorisation of buildings (and faculty-housing POIs) based on
- * OSM metadata.
+ * One-off re-categorisation of buildings (and faculty-housing POIs) from OSM
+ * metadata, fixing the old KML classifier that mapped any name containing
+ * "housing" to `hostel`.
  *
- * The historical KML classifier mapped any name containing "housing" to
- * `hostel`, so all the Faculty Housing blocks (and a few other buildings)
- * landed in the wrong category.
+ * Buildings get a full tag+amenity+name reclassification, never downgrading a
+ * specific category to generic. Hand-curated POIs are left alone except:
+ * building-derived POIs stay in sync with their building, and a `hostel` POI
+ * clearly named faculty housing/quarters becomes `residential`.
  *
- *  - BUILDINGS get a full, metadata-driven re-classification (tag + amenity +
- *    name), never downgrading a specific existing category to generic.
- *  - PLACES are hand-curated POIs, so they're left alone EXCEPT: a building-
- *    derived POI is kept in sync with its building, and a POI wrongly marked
- *    `hostel` whose name is clearly faculty housing/quarters becomes
- *    `residential`. (Avoids regressions like "Bus Stop (Main Gate)" → gate.)
- *
- * Run `node backend/scripts/recategorize-buildings.js`         (dry run)
- * Run `node backend/scripts/recategorize-buildings.js --apply` (writes files)
+ * Run with --apply to write files; otherwise it's a dry run.
  */
 const fs = require('fs');
 const path = require('path');

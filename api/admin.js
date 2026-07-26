@@ -1,25 +1,12 @@
 /**
- * Serverless admin endpoint for IITJ Maps (Vercel Node function).
+ * Serverless admin endpoint (Vercel Node function). Publishing runs server-side
+ * so the GitHub token never reaches the browser. Login with ADMIN_PASSWORD
+ * returns a short-lived HMAC session token that the publish call must present.
  *
- * Publishing runs server-side so no repo-write Personal Access Token is ever
- * held in the browser, where any XSS could read it out of localStorage. The
- * token (and repo coordinates) live ONLY in server-side environment variables
- * and never reach the client.
- *
- * Auth: the admin logs in with a password (server-side ADMIN_PASSWORD). On
- * success the server returns a short-lived HMAC-signed session token; the
- * publish call must present a valid, unexpired token. The password is never
- * stored client-side and the token cannot be forged without ADMIN_SESSION_SECRET.
- *
- * Required environment variables (set in the Vercel project, NEVER in code):
- *   ADMIN_PASSWORD        — the admin login password
- *   ADMIN_SESSION_SECRET  — random 32+ byte secret for signing session tokens
- *   GITHUB_TOKEN          — fine-grained PAT, Contents: Read & write, this repo only
- *   GITHUB_OWNER          — repo owner (e.g. "Dakshkhod")
- *   GITHUB_REPO           — repo name  (e.g. "IITJ-Maps")
- * Optional:
- *   GITHUB_BRANCH         — default "main"
- *   GITHUB_PATH           — default "web/data/overlay.json"
+ * Env (Vercel project, never in code): ADMIN_PASSWORD, ADMIN_SESSION_SECRET
+ * (32+ bytes), GITHUB_TOKEN (fine-grained PAT, Contents: R/W, this repo),
+ * GITHUB_OWNER, GITHUB_REPO. Optional: GITHUB_BRANCH ("main"),
+ * GITHUB_PATH ("web/data/overlay.json").
  */
 const crypto = require('crypto');
 

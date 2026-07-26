@@ -35,11 +35,10 @@ def cls(t):
     return 'grass'   # grassland, park, garden, meadow, recreation_ground, village_green
 
 
-# Merge the greens Overpass result with veg_geom.json (the bake_trees source).
-# veg_geom carries natural=scrub polygons that the greens query above omits, so
-# without this those scrub areas scatter trees over BARE ground. Deduping by OSM
-# id (greens_raw wins on shared ways) folds the scrub fills in and leaves every
-# tree-bearing polygon with a matching green patch.
+# Merge the greens result with veg_geom.json (the bake_trees source), which
+# carries natural=scrub polygons the query above omits — without them those scrub
+# areas scatter trees over bare ground. Dedupe by OSM id (greens_raw wins) so
+# every tree-bearing polygon ends up with a matching green patch.
 elements = {}
 for src in ('greens_raw.json', 'veg_geom.json'):
     try:
@@ -64,10 +63,9 @@ for e in elements.values():
         'geometry': {'type': 'Polygon', 'coordinates': [ring]},
     })
 
-# Manual green patches (not in OSM): hand-added landscaping, kept here so it
-# survives every greens rebuild. The greens layer sits at the bottom of the map
-# stack, so roads/buildings/area tints render on top — generous coverage only
-# fills the bare cream gaps, it can't overwrite them.
+# Manual green patches (not in OSM), kept here so they survive every rebuild. The
+# greens layer sits at the bottom of the map stack, so roads/buildings/area tints
+# render on top and generous coverage only fills the bare cream gaps.
 def _circle(lng, lat, r_m, n=40):
     mlat = 111132.0
     mlng = 111320.0 * math.cos(math.radians(lat))

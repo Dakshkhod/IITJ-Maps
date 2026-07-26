@@ -1,15 +1,12 @@
 /**
- * 3D Landmark layer registry
- * Renders configured 3D models inside a single MapLibre custom layer
- * using Three.js. Visible only in 3D mode.
+ * 3D landmark registry — renders configured models in a single MapLibre custom
+ * layer via Three.js, visible only in 3D mode.
  *
- * Three formats are supported per landmark:
- *   - 'obj'         load an OBJ mesh, apply uniform material
- *   - 'gltf' | 'glb' load a glTF / GLB scene, apply uniform material
- *   - 'procedural'  call a builder function that returns a THREE.Group
- *                   already coloured and dimensioned in metres
+ * Per-landmark formats: 'obj' / 'gltf' / 'glb' load a mesh or scene and apply a
+ * uniform material; 'procedural' calls a builder returning a THREE.Group already
+ * coloured and dimensioned in metres.
  *
- * To add a landmark: push an entry into LANDMARKS. No other code changes.
+ * To add a landmark, push an entry into LANDMARKS. No other code changes.
  */
 var Landmarks3D = (() => {
   // Three.js Y-up → MapLibre Z-up (mesh-derived models all use Y-up)
@@ -193,10 +190,8 @@ var Landmarks3D = (() => {
     _scaleVec = new THREE.Vector3();
   }
 
-  // O-LANE / Y-LANE HOSTEL — closed rectangular ring with central courtyard.
-  // Close-up satellite shows each hostel is a CLOSED rectangular block with an
-  // internal courtyard (donut shape), not a comb: a front facade plus a back
-  // and sides that close the ring. 4 floors × 3.5 m = 14 m tall.
+  // O-LANE / Y-LANE HOSTEL — a closed rectangular ring (donut, not a comb) round
+  // a central courtyard. 4 floors × 3.5 m = 14 m tall.
   //
   //   ┌─────────────────────────┐
   //   │T▓▓▓▓ back wall ▓▓▓▓▓▓▓ T│      T = stair tower (full depth)
@@ -331,24 +326,16 @@ var Landmarks3D = (() => {
     return g;
   }
 
-  // TYPE B QUARTERS  (Faculty Housing × 22) + GUEST HOUSE (VISITOR)
-  // Reference (aerial photos): a dense cluster of identical G+2 staff/
-  // faculty-housing blocks with a pinwheel/H-shape footprint. Construction
-  // reads as:
-  //   • rough-cut Jodhpur sandstone block masonry (warm peach-tan) on the
-  //     walls, with slim cream stringcourses at each floor line;
-  //   • paired window bays in cream concrete reveals;
-  //   • crisp white flat roofs with low parapets, stepped at the wing ends
-  //     (the central courtyard portion sits one parapet lower than the
-  //     four corner blocks, giving the photogenic tiered silhouette);
-  //   • a small projecting stair-tower headhouse on top of two corners;
-  //   • a cluster of yellow Sintex water tanks + DTH dishes + AC
-  //     condensers scattered on the roof.
+  // TYPE B QUARTERS (Faculty Housing × 22) + GUEST HOUSE (VISITOR)
+  // Identical G+2 blocks on a pinwheel/H footprint: rough-cut peach-tan Jodhpur
+  // sandstone with slim cream stringcourses per floor, paired window bays in
+  // cream reveals, white flat roofs whose centre parapet sits one step below the
+  // four corner blocks (the tiered silhouette), stair-tower headhouses on two
+  // corners, and rooftop water tanks / dishes / AC condensers.
   //
-  // Mesh-local convention: +X = east (length), +Y = up, +Z = south. Built
-  // parametrically (length × depth × floors) so the same function covers
-  // all 22 Type B Quarter blocks and the Guest House next door, with
-  // each LANDMARKS entry passing its own bbox and bearingOffset.
+  // Mesh-local: +X = east (length), +Y = up, +Z = south. Parametric in
+  // length × depth × floors, so one function covers all 22 blocks and the Guest
+  // House, each LANDMARKS entry passing its own bbox and bearingOffset.
   function buildTypeBQuarter(opts = {}) {
     const osmId      = opts.osm_id;
     const FLOORS     = opts.floors     ?? 3;
@@ -374,12 +361,10 @@ var Landmarks3D = (() => {
     const acMat = MAT.typeBAc ?? (MAT.typeBAc =
       new THREE.MeshStandardMaterial({ color: 0xc6c6c2, metalness: 0.4, roughness: 0.55 }));
 
-    // Pull the actual OSM polygon and convert to mesh-local meters
-    // Look-up happens at build time so the actual H/cross footprint is
-    // extruded (no stylised rectangle). If the data isn't ready yet we
-    // just return an empty group; landmarks-3d.js will retry on next
-    // render anyway, but in practice IITJData is loaded long before the
-    // 3D layer is shown.
+    // Pull the actual OSM polygon and convert to mesh-local metres, at build
+    // time, so the real H/cross footprint is extruded rather than a stylised
+    // rectangle. Returns an empty group if the data isn't ready — the layer
+    // retries on the next render, though IITJData loads long before 3D shows.
     const buildings = (typeof IITJData !== 'undefined' && IITJData.isReady?.())
       ? IITJData.getBuildings().features : [];
     const feat = buildings.find(f => String(f.properties.osm_id) === String(osmId));
@@ -523,16 +508,12 @@ var Landmarks3D = (() => {
     //       map view, which clutters the rooftops. The white slab edge already
     //       gives a clean parapet read, so we leave the rim off.
 
-    // D) Window bays — omitted on purpose.
-    //
-    // Louvered window bays around every polygon edge make the facades read at
-    // street level, but at typical map zoom (with a slight oblique pitch) the
-    // 3-floor stack on each edge renders as a long dark stripe, and on the
-    // H-shape's *inner* courtyard walls those stripes become long slanting
-    // lines crossing the roof. Both fight the clean sandstone-and-white-roof
-    // look, so the facades stay plain and the stringcourses + cornice + parapet
-    // carry the elevation detail. The placement helper below is kept unused in
-    // case street-level zooms ever need it again.
+    // D) Window bays — omitted on purpose. At typical map zoom the 3-floor stack
+    // on each edge renders as a long dark stripe, and on the H-shape's inner
+    // courtyard walls those stripes slant across the roof, both fighting the
+    // clean sandstone-and-white-roof look. Facades stay plain; stringcourses +
+    // cornice + parapet carry the detail. The helper below is kept unused in
+    // case street-level zooms ever need it.
     /* eslint-disable */
     function _unusedPlaceWindowsOnEdge(x0, y0, x1, y1) {
       // y0/y1 are polygon-Y; world Z = -y. Direction tangent (tx, tz) along
@@ -570,12 +551,11 @@ var Landmarks3D = (() => {
         const sAlong = margin + b * bayPitch;
         const px = ex0 + txW * sAlong + nxW * 0.06;
         const pz = ez0 + tzW * sAlong + nzW * 0.06;
-        // Rotation around Y so the frame's local X axis (its width, the wall-
-        // hugging tangent direction) lines up with the edge tangent. Y-rotation
-        // by θ sends (1,0,0) → (cos θ, 0, −sin θ); setting that to (txW,0,tzW)
-        // gives θ = atan2(−tzW, txW). The earlier code used atan2(nzW,nxW)
-        // which is rotated 90° — that made each frame stand perpendicular to
-        // the wall and read as a long dark stripe across the roof.
+        // Rotate around Y so the frame's local X axis (its width, the wall-hugging
+        // tangent) lines up with the edge tangent. Y-rotation by θ sends (1,0,0) →
+        // (cos θ, 0, −sin θ), so matching (txW,0,tzW) gives θ = atan2(−tzW, txW).
+        // Using the normal instead is rotated 90° and stands each frame
+        // perpendicular to the wall.
         const winRotY = Math.atan2(-tzW, txW);
         for (let f = 0; f < FLOORS; f++) {
           const y = f * floorH + floorH * 0.55;
@@ -701,15 +681,12 @@ var Landmarks3D = (() => {
     return g;
   }
 
-  // DEPT. MATHS / SOLA — single-storey courtyard halls with hipped metal roof
-  // Reference (drone + front photos): a large (~50 m) single-storey block of
-  // rough-cut RED sandstone masonry wrapping a central open courtyard, capped
-  // by a low-pitch light-grey CORRUGATED-METAL hipped roof that slopes from
-  // the outer eaves up to a ridge and back down into the courtyard. A salmon
-  // plinth band runs along the base and a small gabled porch marks the
-  // entrance. Built from the real OSM polygon (extruded as a ring) so it
-  // aligns exactly; the courtyard + roof are derived by scaling the polygon
-  // toward its centroid.
+  // DEPT. MATHS / SOLA — single-storey courtyard halls with hipped metal roof.
+  // A ~50 m single-storey block of rough-cut red sandstone wrapping an open
+  // courtyard, under a low-pitch grey corrugated-metal hipped roof sloping from
+  // the outer eaves up to a ridge and back into the courtyard. Salmon plinth
+  // band, small gabled entrance porch. Built from the real OSM polygon extruded
+  // as a ring, with courtyard + roof scaled toward its centroid.
   function buildCourtyardHall(opts = {}) {
     const osmId         = opts.osm_id;
     const wallH         = opts.wallH         ?? 4.8;
@@ -887,19 +864,15 @@ var Landmarks3D = (() => {
     return g;
   }
 
-  // G-BLOCK HOSTELS (G1 / G4) — closed sandstone courtyard ring
-  // Top-view drone photo: a square ring of 4-storey wings wrapping a
-  // central courtyard that holds a sports court, with stair towers
-  // projecting above the roofline at the corners and rooftop water tanks.
-  // Front-view photo: rough-cut Jodhpur sandstone block masonry, G+2
-  // (three floors), paired wooden-louvered windows, recessed horizontal string
-  // courses at each floor line, a louvered clerestory band under the
-  // parapet, and a recessed entrance reached by a short flight of steps.
+  // G-BLOCK HOSTELS (G1 / G4) — closed sandstone courtyard ring.
+  // A square ring of wings around a courtyard holding a sports court, with
+  // corner stair towers above the roofline and rooftop water tanks. Rough-cut
+  // Jodhpur sandstone, G+2, paired wooden-louvered windows, recessed string
+  // courses per floor, a louvered clerestory band under the parapet, and a
+  // recessed entrance up a short flight of steps.
   //
-  // Mesh-local convention: +X = east (length), +Y = up, +Z = south.
-  // Built parametrically so G1 and G4 share the design with their own
-  // footprint dimensions; bearingOffset in the LANDMARKS entry rotates
-  // the ring to match each polygon's true orientation.
+  // Mesh-local: +X = east (length), +Y = up, +Z = south. Parametric so G1 and G4
+  // share the design; bearingOffset rotates the ring onto each polygon.
   function buildGHostel(opts = {}) {
     const size   = opts.size   ?? 40;     // outer E-W length
     const depth  = opts.depth  ?? 43;     // outer N-S depth
@@ -1102,15 +1075,13 @@ var Landmarks3D = (() => {
     return g;
   }
 
-  // MESS / DINING BLOCK (Old Mess + New Mess) — solid sandstone-brick block
-  // Reference photos: a ~38×34 m solid G+2 block (NOT a courtyard) of
-  // reddish Jodhpur sandstone-brick, with tall perforated jali window bays
-  // framed by pilasters on every face, and a big flat white roof crowded
-  // with mechanical plant — AHU/cooler boxes, galvanised ducts, yellow +
-  // white water tanks, solar water-heater panels, and a stair-head box.
+  // MESS / DINING BLOCK (Old + New Mess) — solid sandstone-brick block.
+  // A ~38×34 m solid G+2 block (not a courtyard) in reddish Jodhpur
+  // sandstone-brick, with tall perforated jali window bays framed by pilasters
+  // on every face, and a flat white roof crowded with plant: AHU/cooler boxes,
+  // ducts, water tanks, solar water-heater panels, stair-head box.
   //
-  // Mesh-local: +X = long axis, +Y = up, +Z = front. bearingOffset aligns
-  // the block to each footprint.
+  // Mesh-local: +X = long axis, +Y = up, +Z = front; bearingOffset aligns it.
   function buildMess(opts = {}) {
     const size   = opts.size   ?? 38;     // long edge
     const depth  = opts.depth  ?? 34;     // short edge
@@ -1271,18 +1242,15 @@ var Landmarks3D = (() => {
     return g;
   }
 
-  // SME & MBA — School of Management blocks (matches drone + front photos)
-  // Reference photos: warm cream-plaster prefab academic blocks with a bright
-  // WHITE corrugated-metal GABLE roof (deep eave overhang), white-framed
-  // windows each capped by a slim concrete sunshade (chajja), rows of
-  // wall-mounted split-AC outdoor units, a slab-canopy entrance reached by an
-  // accessibility RAMP with steel-pipe railings, and yellow/black painted
-  // kerb stones lining the base. SME is a long single-storey block; MBA is an L of two
-  // single-storey wings wrapping a paved courtyard with two tree-ring planters.
+  // SME & MBA — School of Management blocks.
+  // Cream-plaster prefab academic blocks under a white corrugated-metal gable
+  // roof with deep eaves; white-framed windows each capped by a slim concrete
+  // chajja, wall-mounted split-AC units, a slab-canopy entrance up an
+  // accessibility ramp, and painted kerb stones at the base. SME is one long
+  // single-storey block; MBA is an L of two wings round a paved courtyard.
   //
-  // Shared helpers build a single rectangular wing in mesh-local metres
-  // (+X / +Z plan axes, +Y up); each LANDMARKS entry rotates the wing onto
-  // its footprint via bearingOffset = 90° − (long-axis bearing).
+  // Shared helpers build one rectangular wing in mesh-local metres (+X / +Z plan,
+  // +Y up); each entry rotates it via bearingOffset = 90° − long-axis bearing.
 
   // White corrugated-metal gable roof over a wing. Ridge runs along the wing's
   // LONGER plan dimension; eaves overhang by `ov`; gable-end pediments are
@@ -1510,18 +1478,12 @@ var Landmarks3D = (() => {
     return g;
   }
 
-  // BASIC LAB — three-part sandstone academic block (matches drone photo)
-  // The real building reads as three DIFFERENT volumes along its front:
-  //   • LEFT WING  — tall, clad in fine perforated jali screens
-  //   • CENTRE     — a LOWER recessed entrance bay: white concrete pergola
-  //                  over the door, with a grid of small square punched
-  //                  windows above it
-  //   • RIGHT CUBE — tall, almost entirely BLANK sandstone (only shallow
-  //                  recessed panels + a couple of small windows)
-  // Stepped rooflines, white corner pilasters, and tilted solar-PV arrays
-  // on the tall wing roofs. Footprint is the L-shaped 8-vertex polygon.
-  //
-  // Mesh-local: +X = long axis (local u), +Z = local v.
+  // BASIC LAB — three-part sandstone academic block. Three volumes along the
+  // front: a tall LEFT wing in fine perforated jali; a LOWER recessed CENTRE
+  // entrance bay with a white concrete pergola over the door and a grid of small
+  // punched windows above; and a tall, near-blank RIGHT cube. Stepped rooflines,
+  // white corner pilasters, tilted solar PV on the tall wing roofs. Footprint is
+  // the L-shaped 8-vertex polygon. Mesh-local: +X = long axis (u), +Z = v.
   function buildBasicLab() {
     const g = new THREE.Group();
     const FLOOR_H = 3.7;
@@ -1685,15 +1647,13 @@ var Landmarks3D = (() => {
 
     const H_TALL = 16, H_LOW = 12;
 
-    // Footprint frame: mesh +X = NORTH (long axis), mesh +Z = EAST
-    // (derived from bearingOffset 78.9° → mesh+Z bearing 101°). The
-    // building is an L: a MAIN BLOCK in the NE (the tall plain cube + a
-    // recessed entrance bay) plus a JALI WING protruding to the SW.
+    // Footprint frame: mesh +X = NORTH (long axis), mesh +Z = EAST (from
+    // bearingOffset 78.9°). An L-shape — main block NE (tall cube + recessed
+    // entrance bay) plus a jali wing to the SW:
     //   main block: meshX[-8.5,22.8] × meshZ[-10.8,14.8]
     //   jali wing : meshX[-26.6,-8.5] × meshZ[-23.2,2]
-    // The cube's EAST (+Z) face projects FORWARD toward the entrance plaza
-    // / road (the side the reference photos are taken from). The entrance
-    // bay is recessed west of it; the jali wing sits further back + south.
+    // The cube's east (+Z) face fronts the entrance plaza; the entrance bay is
+    // recessed west of it and the jali wing sits further back and south.
 
     // CUBE — north part of the main block; tall, blank; east face forward.
     addBlock(12.4, 2.0, 20.8, 25.6, H_TALL,
@@ -1735,21 +1695,15 @@ var Landmarks3D = (() => {
     return g;
   }
 
-  // LHC 1 — Lecture Hall Complex (one continuous wide sandstone building)
-  // Reference photos (front = WEST face):
-  //   ONE connected building ~82 m wide whose CENTRE steps BACK and DOWN,
-  //   flanked by two TALL wings (flush/connected through the back mass):
-  //     • NORTH wing (left in photo): mostly BLANK tall sandstone, with a
-  //       band of jali panels only at the base.
-  //     • SOUTH wing (right in photo): a grid of regular square windows.
-  //     • CENTRE: recessed + lower; two RED panels on the upper wall; a
-  //       white PORTAL — one long horizontal beam carried on tall vertical
-  //       columns — stands in front of the recessed entrance.
-  //   Stair towers rise behind the centre; flat white roof with solar PV.
+  // LHC 1 — Lecture Hall Complex, one continuous ~82 m sandstone building whose
+  // centre steps back and down between two tall wings: the north wing mostly
+  // blank with jali only at the base, the south wing a grid of square windows,
+  // and the recessed centre carrying two red upper panels behind a white portal
+  // (one beam on tall columns). Stair towers behind the centre; flat white roof
+  // with solar PV.
   //
-  // Mesh-local: bearingOffset 86.9° → mesh+X = NORTH, mesh+Z = EAST.
-  // Front (west) face = -Z. Footprint spans meshX[-40,43] (N-S) and
-  // roughly meshZ[-18,36] (W-E); west face anchored near meshZ=-18.
+  // Mesh-local: bearingOffset 86.9° → +X = NORTH, +Z = EAST, front (west) = -Z.
+  // Footprint meshX[-40,43] × meshZ[-18,36], west face anchored near meshZ=-18.
   function buildLHC1() {
     const g = new THREE.Group();
     const redMat = new THREE.MeshStandardMaterial({ color: 0xc0201e, metalness: 0.2, roughness: 0.6 });
@@ -1904,22 +1858,17 @@ var Landmarks3D = (() => {
     return g;
   }
 
-  // LHC 2 — Lecture Hall Complex II
-  // Reference photos (front = NNE face, bearing ~17.7°):
-  //   A long G+1 (two-storey) block, ~53 m wide × ~42 m deep. Salmon-pink
-  //   cement frame (pilasters + floor bands + parapet coping) over grey-tan
-  //   sandstone-brick infill; wooden-louvered jali windows in light reveals;
-  //   a row of small square clerestory vents just under the parapet.
-  //   A projecting flat entrance canopy reading "LECTURE HALL COMPLEX-II"
-  //   stands centre-front over a recessed glazed double-door, reached by
-  //   steps with an accessibility ramp to one side. A taller blank stair /
-  //   lift tower rises above the parapet at the LEFT (WNW / -X) end. The
-  //   deeper rear mass (the lecture halls) is one storey taller, with jali
-  //   side/back walls and water tanks on its flat roof.
+  // LHC 2 — a long G+1 block, ~53 m wide × ~42 m deep. Salmon-pink cement frame
+  // (pilasters, floor bands, parapet coping) over grey-tan sandstone-brick
+  // infill; wooden-louvered jali windows; square clerestory vents under the
+  // parapet. A flat entrance canopy stands centre-front over a recessed glazed
+  // door with steps and a ramp, and a blank stair/lift tower rises at the WNW
+  // (-X) end. The deeper rear hall mass is a storey taller, with jali side walls
+  // and rooftop water tanks.
   //
-  // Mesh-local: +X = long axis toward ESE (bearing 107.66°); front (-Z)
-  // faces NNE. Footprint X[-26.5,26.5], Z[-21,21] (front bar Z[-21,-7],
-  // rear hall Z[-7,21]). bearingOffset = 90° − 107.66° = −17.66°.
+  // Mesh-local: +X = long axis toward ESE (bearing 107.66°), front (-Z) faces
+  // NNE. Footprint X[-26.5,26.5], Z[-21,21] (front bar Z[-21,-7], rear hall
+  // Z[-7,21]). bearingOffset = 90° − 107.66° = −17.66°.
   function buildLHC2() {
     const g = new THREE.Group();
     const FRAME  = new THREE.MeshStandardMaterial({ color: 0xdca992, metalness: 0.03, roughness: 0.86 }); // salmon-pink cement
@@ -2082,12 +2031,11 @@ var Landmarks3D = (() => {
     return g;
   }
 
-  // CASE — Centre for Advance Scientific Equipment (U-plan academic block)
-  // Reference photos: a U-shaped G+3 building — two tall wings (buff
-  // sandstone with salmon-PINK floor bands + pink pilasters and a grid of
-  // windows) joined by a back spine, with a LOWER central entrance bay
-  // recessed between the wings carrying a white concrete pergola portico.
-  // Flat white roofs with large solar-PV arrays on the wings + water tanks.
+  // CASE — Centre for Advance Scientific Equipment. U-plan G+3: two tall wings
+  // (buff sandstone, salmon-pink floor bands and pilasters, a grid of windows)
+  // joined by a back spine, with a lower central entrance bay recessed between
+  // them under a white concrete pergola portico. Flat white roofs with large
+  // solar-PV arrays and water tanks.
   //
   // Mesh-local: +X = long axis (u), +Z = depth (v). Courtyard/front = -Z.
   function buildCASE() {
@@ -2192,17 +2140,14 @@ var Landmarks3D = (() => {
     return g;
   }
 
-  // AAKASH SPORTS COMPLEX — long tall indoor sports hall
-  // Reference photos: one large rectangular hall (~85 × 38 m, ~13 m tall),
-  // salmon-PINK plaster walls divided into tall bays by pink pilasters,
-  // each bay carrying horizontal REDDISH-BRICK bands; a brick plinth at the
-  // base; a flat WHITE roof that overhangs the long sides, carried on a
-  // dark-BLUE steel fascia with regularly-spaced ANGLED BRACKETS projecting
-  // from the wall head. A white portal entrance with battered side walls
-  // and steps sits at one gable end.
+  // AAKASH SPORTS COMPLEX — one indoor hall, ~85 × 38 m and ~13 m tall.
+  // Salmon-pink plaster walls split into tall bays by pilasters, each bay banded
+  // in reddish brick over a brick plinth; flat white roof overhanging the long
+  // sides on a dark-blue steel fascia with angled brackets at the wall head. A
+  // white portal entrance with battered side walls and steps sits at one gable.
   //
-  // Mesh-local: +X = long axis, +Z = depth. bearingOffset aligns to the
-  // Akaash Complex polygon (long axis bearing 47.5°).
+  // Mesh-local: +X = long axis, +Z = depth; bearingOffset aligns to the Akaash
+  // Complex polygon (long-axis bearing 47.5°).
   function buildAakashComplex() {
     const g = new THREE.Group();
     const L = 85, D = 38, H = 13;   // hall length, depth, wall height
@@ -2387,16 +2332,14 @@ var Landmarks3D = (() => {
     return g;
   }
 
-  // JODHPUR CLUB — H-plan two-storey club block with sunken courtyard
-  // From drone photographs: two parallel 2-storey wings (reddish Jodhpur
-  // sandstone-brick walls + salmon-PINK plastered floor bands, pilasters and
-  // top cornice) joined by a slightly lower FRONT bar at the south, with a
-  // central SUNKEN COURTYARD between them carrying tiered amphitheatre steps.
-  // A wide WHITE concrete pergola (slab on slim columns) shelters the south
-  // entrance. The flat white roofs carry small solar arrays and a row of
-  // mounted AC condensers along the west wall.
+  // JODHPUR CLUB — H-plan two-storey block with a sunken courtyard. Two parallel
+  // wings (reddish sandstone-brick with salmon-pink floor bands, pilasters and
+  // cornice) joined by a slightly lower front bar at the south, with tiered
+  // amphitheatre steps in the courtyard between them. A wide white concrete
+  // pergola shelters the south entrance; flat white roofs carry small solar
+  // arrays and AC condensers along the west wall.
   //
-  // Mesh-local: +X = long axis (wings separated), +Z = depth (front=+Z).
+  // Mesh-local: +X = long axis (wings separated), +Z = depth (front = +Z).
   function buildJodhpurClub() {
     const g = new THREE.Group();
     const brick = MAT.messBrick, brickD = MAT.messBrickD;
@@ -2574,16 +2517,12 @@ var Landmarks3D = (() => {
     return g;
   }
 
-  // PHC (Primary Health Centre) — E-plan single-storey solar-clad clinic
-  // From drone photographs: an E-shape footprint with three horizontal
-  // wings (top + middle + bottom, running east-west) connected by a
-  // vertical spine on the east side. The middle wing is SHORTER (extends
-  // less far west) so two open landscaped courtyards sit on the west side.
-  // Reddish Jodhpur sandstone-brick walls with pink plaster cornice and
-  // jali window bays. EVERY roof is densely covered with tilted solar PV
-  // arrays — the defining visual feature. The south (front) wall of the
-  // bottom wing carries a long white concrete pergola entrance with a
-  // "HEALTH CENTER" sign over the central bay.
+  // PHC (Primary Health Centre) — E-plan single-storey clinic: three east-west
+  // wings joined by a spine on the east, the middle wing shorter so two
+  // landscaped courtyards open to the west. Reddish sandstone-brick with pink
+  // plaster cornice and jali window bays. Every roof is densely covered in
+  // tilted solar PV — the defining feature. The bottom wing's south wall carries
+  // a long white concrete pergola entrance.
   //
   // Mesh-local: +X = east-west long axis, +Z = south (front), +Y = up.
   function buildPHC() {
@@ -2890,12 +2829,10 @@ var Landmarks3D = (() => {
       g.add(porticoG);
     }
 
-    // Reference-photo detailing (IIT-J main administrative facade):
-    //   (a) a striated elevation of vertical cream fins, and
-    //   (b) a bold WHITE angular end-wing — a solid white stair-core
-    //       tower topped by a slanted white ramp-roof — where the block
-    //       terminates. Placed on the short end OPPOSITE the courtyard
-    //       portico so the two wings bookend the central plaza.
+    // Main administrative facade detailing: (a) a striated elevation of vertical
+    // cream fins, and (b) a bold white angular end-wing — a stair-core tower
+    // under a slanted ramp-roof — at the short end opposite the courtyard
+    // portico, so the two wings bookend the central plaza.
     const FIN     = new THREE.MeshStandardMaterial({ color: 0xd6be96, metalness: 0.04, roughness: 0.80 });
     const wingSgn = outerEnd === 'east' ? 1 : outerEnd === 'west' ? -1 : 0;
     const END_W   = Math.min(7, length * 0.18);    // white end-tower width
@@ -2919,12 +2856,10 @@ var Landmarks3D = (() => {
       }
     }
 
-    // (b) White angular end-wing: a solid white end-pylon with a RAKED top —
-    //     built as an extruded trapezoid so every face is solid (no thin
-    //     edge-on blade) and the slanted top points up into the overhead sun
-    //     so it always reads bright white. This is the signature diagonal
-    //     gesture where the block terminates. A shallow white ramp-roof then
-    //     carries the diagonal a little further in over the roofline.
+    // (b) White angular end-wing: a raked-top end-pylon built as an extruded
+    //     trapezoid, so every face is solid (no thin edge-on blade) and the
+    //     slanted top catches overhead sun to read bright white. A shallow ramp
+    //     roof carries the diagonal a little further over the roofline.
     if (wingSgn) {
       const xo = wingSgn * (length / 2);
       const RISE = 5.5, wDepth = depth + 0.2;
@@ -3077,13 +3012,10 @@ var Landmarks3D = (() => {
     return g;
   }
 
-  // PRITHVI MISSILE — upright missile on a low pedestal with garden walls
-  // Procedural builder: T-72 Ajeya Display Tank
-  // OSM way 1412392546 — concrete pedestal near the south main entrance.
-  // Tank model oriented with gun barrel pointing along +X (east). The
-  // bearingOffset in the LANDMARKS entry rotates it to face the road.
-  // All units metres. Hull dimensions based on T-72 spec:
-  //   hull 6.9m × 3.46m × 2.1m (inc. track skirts), gun ~6.8m above deck.
+  // T-72 Ajeya display tank on its concrete pedestal (OSM way 1412392546, near
+  // the south main entrance). Gun barrel points along +X (east); bearingOffset
+  // rotates it to face the road. Metres, per T-72 spec: hull 6.9 × 3.46 × 2.1
+  // (incl. track skirts), gun ~6.8 above deck.
   function buildTank() {
     const g = new THREE.Group();
 
@@ -3294,6 +3226,7 @@ var Landmarks3D = (() => {
     return g;
   }
 
+  // PRITHVI MISSILE — upright missile on a low pedestal with garden walls.
   function buildPrithviMissile() {
     const g = new THREE.Group();
 
@@ -3393,9 +3326,8 @@ var Landmarks3D = (() => {
   function buildLibraryComplex() {
     const g = new THREE.Group();
 
-    // Polygon analysis (from OSM, in metres relative to polygon centroid;
-    // X = east, Y_polygon = north). Two main rectangular blocks plus a
-    // small clock tower on the west side at the junction:
+    // Polygon analysis (OSM metres from the centroid; X = east, Y = north).
+    // Two rectangular blocks plus a small clock tower west of the junction:
     //
     //   NORTH HALL  : x[-22,13]  y[7,18]    → 35 × 11 m wide block
     //   SOUTH WING  : x[-7,13]   y[-29,0]   → 20 × 29 m long block
@@ -3522,29 +3454,17 @@ var Landmarks3D = (() => {
     return g;
   }
 
-  // DEPARTMENT BUILDING — uniform academic block design
-  // The Physics / Mechanical / Metallurgical / Civil / Electrical /
-  // Chemistry departments share one architectural template (per the
-  // front-view and satellite photos):
+  // DEPARTMENT BUILDING — one template shared by Physics / Mechanical /
+  // Metallurgical / Civil / Electrical / Chemistry. H-shaped footprint: two tall
+  // front-to-back wings plus a middle spine, with a courtyard pocket each side.
+  // Warm-beige library sandstone with a string-course at first-floor level. The
+  // central facade is recessed between the wings, where a cream concrete portico
+  // fronts a tall light-teal curtain wall lighting the atrium. Parapet vent caps
+  // over the centre, jali panels on the wings' outer walls, grouped narrow
+  // windows, and flat roofs with low solar arrays.
   //
-  //   • H-shaped footprint: two tall side wings running front-to-back
-  //     plus a connecting spine across the middle. Courtyard pockets on
-  //     each side of the spine.
-  //   • Library-sandstone walls (warm beige, same palette as the main
-  //     library), slim sandstone string-course at first-floor level
-  //   • The central front facade is RECESSED between the two side wings;
-  //     a cream-white concrete portico (two columns supporting horizontal
-  //     and angled cross-beams — pergola look) stands in front of a tall
-  //     light-teal glass curtain wall that lights the central atrium
-  //   • Small parapet "vent" caps along the top of the central pavilion
-  //   • Discreet jali (stone-screen) panels on the wings' outer side
-  //     walls, narrow vertical windows in groups along each wing
-  //   • Flat roof with small parapet wall + low-profile solar arrays on
-  //     each wing
-  //
-  // Mesh-local axes: +X right (E-W facade width), +Y up, +Z = entrance
-  // direction. Build is centred on (0,0,0) at ground; caller positions/
-  // rotates via the landmark cfg (lng/lat + bearingOffset).
+  // Mesh-local: +X right (facade width), +Y up, +Z = entrance direction, centred
+  // on (0,0,0) at ground; the caller positions/rotates via the landmark cfg.
   function buildDepartmentBuilding(opts = {}) {
     const length   = opts.length      ?? 50;   // facade width (X)
     const bboxD    = opts.bboxDepth   ?? 48;   // total front-back depth (Z)
@@ -3885,18 +3805,15 @@ var Landmarks3D = (() => {
     return g;
   }
 
-  // DEPARTMENT OF CIVIL & INFRASTRUCTURE ENGINEERING — courtyard block
-  // Per the drone photos this building is NOT the generic H-template: it is
-  // a closed 3-storey ring around a central open courtyard. Coursed Jodhpur
-  // sandstone walls with salmon-pink plaster pilasters, string-courses and a
-  // parapet topped by regularly-spaced pink merlon caps; a grid of wooden-
-  // louvered jali windows in light reveals. The WNW front carries a tall
-  // stair tower (with a vertical jali strip) beside a flat projecting
-  // entrance porch over a recessed glazed door reached by steps. Flat white
-  // roof with water tanks, stair-head and fire boxes.
+  // DEPT OF CIVIL & INFRASTRUCTURE ENGINEERING — not the generic H-template but
+  // a closed 3-storey ring around an open courtyard. Coursed Jodhpur sandstone
+  // with salmon-pink pilasters, string-courses and a parapet of pink merlon caps;
+  // a grid of wooden-louvered jali windows. The WNW front carries a tall stair
+  // tower beside a projecting entrance porch over a recessed glazed door. Flat
+  // white roof with water tanks, stair-head and fire boxes.
   //
   // Mesh-local: +X = facade width (NNE-SSW), +Z = entrance direction (WNW).
-  // Outer footprint W(X) × D(Z); a wing thickness t leaves an open court.
+  // Outer footprint W(X) × D(Z); wing thickness t leaves the open court.
   function buildCivilDept() {
     const g = new THREE.Group();
     const STONE  = MAT.deptStone;        // warm coursed sandstone
@@ -4282,17 +4199,14 @@ var Landmarks3D = (() => {
     return g;
   }
 
-  // SHAMIYANA FOOD COURT — shipping-container restaurants laid out around
-  // a central open-air plaza, with concrete tube seating pods along the
-  // west edge, two tensile-fabric shade canopies, and a small round
-  // amphitheatre stage. Each restaurant has its own GeoJSON polygon in
-  // places.geojson; this builder draws all of them as one mesh and the
-  // LANDMARKS entry uses `replacesOsmBuildings` to hide the plain
-  // extrusions so we don't double up.
+  // SHAMIYANA FOOD COURT — shipping-container restaurants round an open plaza,
+  // with concrete tube seating pods along the west edge, two tensile shade
+  // canopies and a small round stage. Each restaurant has its own polygon in
+  // places.geojson; this draws them all as one mesh, and the LANDMARKS entry uses
+  // `replacesOsmBuildings` to hide the plain extrusions.
   //
-  // Layout offsets (E = east, N = north, both in metres from the OSM
-  // 'Shamiyana' POI) and long-edge bearings come from the polygon
-  // centroids — computed once offline and hard-coded here.
+  // Layout offsets (E/N metres from the 'Shamiyana' POI) and long-edge bearings
+  // come from the polygon centroids, computed offline and hard-coded here.
   // Mesh convention: +X = east, +Y = up, -Z = north.
   function buildShamiyanaComplex() {
     const g = new THREE.Group();
@@ -4709,12 +4623,10 @@ var Landmarks3D = (() => {
       }
     }
 
-    // Nine container restaurants. The polygon bboxes in places.geojson
-    //    include the outdoor deck + awning surrounding each container, so
-    //    using them as the container body made everything overlap into a
-    //    solid mass. Hard-coded sizes below are the actual container body
-    //    only (most are standard 20-ft / 40-ft shipping containers,
-    //    2.4 m wide), centred on the polygon centroid.
+    // Nine container restaurants. The places.geojson bboxes include each
+    // container's outdoor deck + awning, so using them as the body overlaps
+    // everything into a solid mass. These hard-coded sizes are the container body
+    // only (mostly standard 20/40-ft, 2.4 m wide), centred on the centroid.
     g.add(placeContainer({ E:  -1.0, N:  -4.2, w: 10.5, d: 3.0, bearingDeg: 107, body: M.cBlue,   roof: M.roofGalv })); // Tealogy (west-central blue café)
     g.add(placeContainer({ E:   1.9, N:   5.4, w:  8.0, d: 5.0, bearingDeg: 110, body: M.cYellow, roof: M.roofGalv, stories: 2 })); // Two-storey yellow building (central landmark) with rooftop terrace
     g.add(placeContainer({ E:  11.1, N:   2.3, w:  5.5, d: 2.5, bearingDeg:  18, body: M.cRed,    roof: M.roofRust })); // Patiala Chicken
@@ -5411,14 +5323,11 @@ var Landmarks3D = (() => {
       ],
     },
 
-    // Type B Quarters (22 Faculty Housing blocks) + Guest House (Visitor)
-    //    Each entry carries an osm_id; the builder pulls the matching
-    //    polygon from IITJData at build time and extrudes its true H/cross
-    //    footprint, so each block aligns exactly with the OSM polygon
-    //    (no PCA bearing needed — the geometry already encodes orientation).
-    //    The lng/lat anchor is the polygon's centroid so MapLibre places
-    //    the mesh-local origin (also the polygon centroid in metres) at the
-    //    correct world position.
+    // Type B Quarters (22 Faculty Housing blocks) + Guest House (Visitor).
+    // Each entry carries an osm_id, and the builder extrudes that polygon's true
+    // H/cross footprint at build time, so no PCA bearing is needed — the geometry
+    // already encodes orientation. The lng/lat anchor is the polygon centroid,
+    // matching the mesh-local origin.
     ...[
       ['773839450', 73.1113527, 26.4732187],
       ['773839451', 73.1107727, 26.4732305],
@@ -5468,12 +5377,11 @@ var Landmarks3D = (() => {
       replacesOsmBuildings: ['773563532'],
     },
 
-    // General Quarters (9 apartment blocks: 3 rectangular "General
-    //    Quarters" + 6 pinwheel/Z-shaped "General Quaters"). Salmon-pink
-    //    cement plaster, G+4, cane-railed balconies, white flat roofs with
-    //    dark Sintex tanks + stair-tower headhouse. Reuses the polygon-
-    //    extrude quarter builder with the pink palette and balconies on.
-    //    Labels come from the buildings-labels layer (kept), so label:null.
+    // General Quarters — 9 apartment blocks (3 rectangular, 6 pinwheel/Z-shaped).
+    // Salmon-pink plaster, G+4, cane-railed balconies, white flat roofs with dark
+    // tanks and a stair-tower headhouse. Reuses the polygon-extrude quarter
+    // builder with the pink palette and balconies on. Labels come from the
+    // buildings-labels layer, hence label:null.
     ...[
       ['1412404070', 73.1122015, 26.4772912],
       ['1412404071', 73.1124801, 26.4772336],
@@ -5549,14 +5457,12 @@ var Landmarks3D = (() => {
   let _root = null;
   let _camera = null;
   let _renderer = null;
-  // MapLibre reuses the SAME WebGL context/canvas across setStyle()
-  // (satellite/dark toggles). Creating more than one THREE.WebGLRenderer
-  // on a single GL context corrupts three's internal program/VAO cache
-  // and the custom layer renders nothing after the first style swap.
-  // So we build ONE renderer, keyed to its gl context, and reuse it for
-  // the life of the context. Because the context (and therefore every
-  // uploaded BufferGeometry) survives a setStyle, the scene is also built
-  // exactly once and reused — no per-toggle rebuild, no lag.
+  // MapLibre reuses the same WebGL context across setStyle() (satellite/dark
+  // toggles), and a second THREE.WebGLRenderer on one context corrupts three's
+  // program/VAO cache, leaving the custom layer blank after the first swap. So we
+  // build ONE renderer keyed to its gl context and reuse it for the context's
+  // life. Since the context (and every uploaded BufferGeometry) survives
+  // setStyle, the scene is built once too — no per-toggle rebuild.
   let _rendererGl = null;
   let _canvasW = 0, _canvasH = 0;   // last-synced canvas backing size (see render())
   let _originMcX = 0, _originMcY = 0, _originMcZ = 0;
@@ -6235,14 +6141,12 @@ var Landmarks3D = (() => {
     return g;
   }
 
-  // GREEN LANDSCAPE BERMS — tall, uplifted, densely-planted terraced earthworks
-  // (mountain-slope) along the SOUTH edge only. Every south berm (these three
-  // PLUS the blue berm 746) is routed off the SAME perimeter-road centre-line,
-  // offset a consistent ~6 m to the outer side, so their campus-facing walls
-  // all ALIGN in one continuous band and none overlaps the road. The sandstone
-  // wall + arcade faces campus (flipOut); terraces step down to the outer side.
-  // Band order W→E: West · 746(blue) · Central, then a gap (entry avenue),
-  // then East (one connected run).
+  // GREEN LANDSCAPE BERMS — tall planted terraced earthworks along the SOUTH edge
+  // only. All four south berms (these three plus blue 746) route off the same
+  // perimeter-road centre-line, offset ~6 m outward, so their campus-facing walls
+  // align in one continuous band clear of the road. The sandstone wall + arcade
+  // faces campus (flipOut); terraces step down outward. Band order W→E:
+  // West · 746 · Central, a gap for the entry avenue, then East.
   const _SOUTH_REF = [73.1140, 26.4730];
   // offset=-halfW keeps the sandstone wall on the path line. baseWidth tuned
   // so the terraced slope stays clear of southern roads.
@@ -6543,12 +6447,11 @@ var Landmarks3D = (() => {
       },
       render(_gl, matrix) {
         if (!_visible || !_scene || !_renderer) return;
-        // Keep three's viewport matched to the MapLibre canvas backing size.
-        // It changes when the render resolution changes (map.setPixelRatio via
-        // the perf watchdog) or on an orientation/resize — and three caches its
-        // size at construction, so without this the 3D would draw into a stale
-        // sub-rectangle (clipped / mis-scaled). setViewport (not setSize) avoids
-        // reassigning canvas.width, which would clear MapLibre's own buffer.
+        // Keep three's viewport matched to the MapLibre canvas backing size, which
+        // changes on setPixelRatio (perf watchdog) or resize. three caches its
+        // size at construction, so without this the 3D draws into a stale
+        // sub-rectangle. setViewport, not setSize, avoids reassigning
+        // canvas.width and clearing MapLibre's own buffer.
         const _cv = _map.getCanvas();
         if (_cv && (_cv.width !== _canvasW || _cv.height !== _canvasH)) {
           _canvasW = _cv.width; _canvasH = _cv.height;
@@ -6706,12 +6609,11 @@ var Landmarks3D = (() => {
     if (!_gpuWarmed && !_visible) _warmLayerHidden();
   }
 
-  // Compile every shader program and upload every geometry buffer to the GPU
-  // ahead of the first visible frame, so switching to 3D doesn't stall doing it
-  // all at once. Renders the whole scene once into a 1×1 off-screen target with
-  // a camera that contains everything (nothing frustum-culled) — the cost is
-  // the upload, not the single pixel. Best-effort: any failure just falls back
-  // to the (chunk-streamed) on-demand path, so it can never break rendering.
+  // Compile every shader and upload every geometry buffer before the first
+  // visible frame, so entering 3D doesn't stall doing it all at once. Renders the
+  // scene once into a 1×1 off-screen target with a camera containing everything
+  // (nothing culled) — the cost is the upload, not the pixel. Best-effort: on
+  // failure it falls back to the chunk-streamed on-demand path.
   function _warmGpu() {
     if (_gpuWarmed || !_renderer || !_scene || !_camera) return;
     _setSceneBusy(true);
@@ -6757,12 +6659,10 @@ var Landmarks3D = (() => {
   // Public warm-up entry (called from init once the map exists).
   function prewarm() { _startBuild(); }
 
-  // Lazy Three.js loader
-  // Three.js + its OBJ/GLTF loaders (~600 KB) are fetched the first time the
-  // user enters 3D, not on every page load — a big win for 2D-only sessions and
-  // slow connections. Self-hosted (same-origin) so no third-party CDN is
-  // contacted and the files are covered by our own CSP/HSTS. Idempotent;
-  // callbacks queue until the loaders are live.
+  // Lazy Three.js loader. Three.js + its OBJ/GLTF loaders (~600 KB) are fetched
+  // on first entry into 3D, not on every page load — a big win for 2D-only
+  // sessions. Self-hosted so no third-party CDN is contacted and the files fall
+  // under our own CSP/HSTS. Idempotent; callbacks queue until the loaders are live.
   const _THREE_SCRIPTS = [
     { src: '/vendor/three/three.min.js?v=1' },
     { src: '/vendor/three/OBJLoader.js?v=1' },
@@ -6849,12 +6749,10 @@ var Landmarks3D = (() => {
   function _raise() {
     if (!_map) return;
     if (_map.getLayer(LAYER_ID)) try { _map.moveLayer(LAYER_ID); } catch (_) {}
-    // In 3D, every name/marker layer would otherwise be drawn under the 3D
-    // building & landmark meshes. Lift them above the mesh — same treatment the
-    // landmark labels get below. moveLayer() raises to the very TOP each call,
-    // so list these bottom-to-top: area names ("TRANSIT ACCOMMODATION", "Tank
-    // at Shaurya Sthal", the Type-B code) and building names were the layers
-    // still buried under the custom models; POI markers stay above them.
+    // In 3D, name/marker layers would otherwise draw under the building and
+    // landmark meshes, so lift them above — the same treatment landmark labels
+    // get below. moveLayer() raises to the very top each call, so these are
+    // listed bottom-to-top: area names, then building names, then POI markers.
     if (_labelOpts.is3D) {
       for (const id of ['areas-labels', 'buildings-labels', 'places-circles', 'places-labels']) {
         if (_map.getLayer(id)) try { _map.moveLayer(id); } catch (_) {}

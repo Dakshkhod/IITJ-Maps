@@ -2,11 +2,10 @@
  * Merge fresh campus roads (regenerated from the campus OSM extract) with the
  * previously-committed wider road network, then rebuild the routing graph.
  *
- * Why: web/data was historically built from a wider OSM pull than map.osm, so
  * web/data/roads.geojson carries ~256 off-campus roads (approach roads, NH-62,
- * ring road, city grid) used for routing context. A plain campus re-extract
- * would drop those. This script keeps them while letting the fresh campus
- * extract win for anything inside the campus bbox.
+ * ring road, city grid) used for routing context, which a plain campus
+ * re-extract would drop. This keeps them while letting the fresh campus extract
+ * win inside the campus bbox.
  *
  * Rule per old road (web/data) not present (by osm_id) in the new extract:
  *   - has a node inside CAMPUS_PULL_BBOX  -> it was deleted upstream  -> drop

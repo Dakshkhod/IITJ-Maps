@@ -1,13 +1,12 @@
 /**
- * Road classification core — SINGLE SOURCE OF TRUTH, shared by:
- *   • the offline pipeline (backend/scripts/road-classifier.js re-exports this)
- *   • the browser router (web/js/routing.js), which re-classifies admin-overlay
- *     roads at load time so an accepted OSM retag actually changes routing.
+ * Road classification core — single source of truth, shared by the offline
+ * pipeline (backend/scripts/road-classifier.js re-exports it) and the browser
+ * router, which re-classifies admin-overlay roads at load time so an accepted
+ * OSM retag actually changes routing.
  *
- * The overlay stores raw OSM tags (highway/foot/bicycle) but NOT the derived
- * routing fields (vehicle_access, drive_confidence, drive_penalty). Those must
- * be re-derived, and they have to be derived the SAME way the prebuilt graph
- * was built — hence one shared module instead of a client-side copy that drifts.
+ * The overlay carries raw OSM tags but not the derived routing fields, which
+ * must be re-derived exactly the way the prebuilt graph was — hence one shared
+ * module rather than a client-side copy that drifts.
  *
  * Keep this dependency-free and browser-safe: no require(), no Node globals.
  */
