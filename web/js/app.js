@@ -671,6 +671,7 @@ function setupOfflineBanner() {
 async function init() {
   isDark = isCampusNight();
   if (isDark) document.documentElement.setAttribute('data-theme', 'dark');
+  applySharedViewMode();   // a shared link's ?v= overrides the default view
 
   registerSatelliteOffsetProtocol();
 
@@ -686,10 +687,10 @@ async function init() {
     zoom: CAMPUS_ZOOM,
     maxBounds: CAMPUS_BOUNDS,
     minZoom: 13,
-    maxZoom: 19,
+    maxZoom: isSatellite ? SATELLITE_MAX_ZOOM : 19,
     maxPitch: _perf.maxPitch,
     pixelRatio: _perf.pixelRatio,
-    pitch: 0,
+    pitch: is3D ? VIEW_3D_PITCH : 0,
     bearing: 0,
     attributionControl: false,
     pitchWithRotate: true,
@@ -730,11 +731,53 @@ async function init() {
     setupEventListeners();
     handleDeepLink();
     requestUserLocation();
-    scheduleLandmarks3DPrewarm();
+    // A ?v=…-3d link already opened in 3D, so build the models now instead
+    // of pre-warming them for a toggle that has effectively already happened.
+    if (is3D) enterShared3DView(); else scheduleLandmarks3DPrewarm();
     syncMapBodyClasses();
     updateBaseMapButtons();
     scheduleAutoNightWatch();
   });
+}
+
+// Shared view mode (?v=) — a share link carries the base map its sender was
+// looking at, so the recipient's first view matches the screenshot they were
+// sent. Read before the map is constructed, so the very first frame is already
+// styled and tilted correctly: no restyle, no flash. Nothing is persisted —
+// the recipient's own toggles take over from here.
+function applySharedViewMode() {
+  const q = new URLSearchParams(location.search);
+  const raw = (q.get('v') || q.get('view') || '').toLowerCase();
+  if (!raw) return;
+  const tokens = new Set(raw.split('-').filter(Boolean));
+  if (!['sat', 'dark', 'map', '3d'].some(t => tokens.has(t))) return;
+
+  isSatellite = tokens.has('sat');
+  is3D = tokens.has('3d');
+
+  if (isSatellite) {
+    // Matches toggleSatellite: imagery carries no day/night theme, and leaving
+    // it later falls back to this device's auto night mode.
+    isDark = false;
+    document.documentElement.removeAttribute('data-theme');
+  } else if (tokens.has('dark') || tokens.has('map')) {
+    // The sender's light/dark choice outranks the recipient's clock, and is
+    // pinned like a manual tap so the night watcher doesn't undo it.
+    isDark = tokens.has('dark');
+    nightModeManual = true;
+    document.documentElement.setAttribute('data-theme', isDark ? 'dark' : '');
+  }
+}
+
+// The 3D half of a ?v= view, once the style and overlays exist. The camera
+// is already pitched from init, so this only brings up the models — no easeTo,
+// no toast: to the recipient this is simply how the map opened.
+function enterShared3DView() {
+  document.getElementById('btn-3d').classList.add('active');
+  applyBuildingViewMode();
+  if (!isSatellite) showLandmarks3D();
+  syncLandmarkLabels();
+  refreshBuildingTheme();
 }
 
 // Satellite imagery offset correction. Esri imagery sits ~6 m north of our OSM
@@ -2199,6 +2242,9 @@ function addPlacesLayer(features) {
   });
 }
 
+// Camera tilt for 3D view — also the pitch a ?view=…-3d link opens at.
+const VIEW_3D_PITCH = 52;
+
 function toggle3D() {
   is3D = !is3D;
   document.getElementById('btn-3d').classList.toggle('active', is3D);
@@ -2216,7 +2262,7 @@ function toggle3D() {
     syncLandmarkLabels();
     syncMapBodyClasses();
     refreshBuildingTheme();
-    map.easeTo({ pitch: 52, bearing: 0, duration: 900 });
+    map.easeTo({ pitch: VIEW_3D_PITCH, bearing: 0, duration: 900 });
     showToast('3D view — drag to rotate', 'info');
   } else {
     if (typeof Landmarks3D !== 'undefined') Landmarks3D.hide();
@@ -5028,57 +5074,148 @@ function formatDist(m) { return m < 1000 ? `${Math.round(m)}m` : `${(m/1000).toF
 
 function escapeHtml(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
 
-// Deep Linking — ?lat=&lng=&place=&zoom=
+// Deep Linking — ?p=Name (or ?c=lat,lng) &v=view &z=zoom, and ?r=… route links.
+// The older, much longer ?lat=&lng=&place=&category=&desc= and ?tlat=&tlng=…
+// forms are still read, so links shared before the short scheme keep working.
 function handleDeepLink() {
   const p = new URLSearchParams(location.search);
-  if (handleRouteDeepLink(p)) return;   // ?tlat=&tlng=… → a shared route link
-  const lat  = parseFloat(p.get('lat'));
-  const lng  = parseFloat(p.get('lng'));
-  const placeParam = p.get('place');
-  const zoom = parseFloat(p.get('zoom')) || 17;
+  if (handleRouteDeepLink(p)) return;   // ?r=… → a shared route link
+  const coord = parseCoordPair(p.get('c')) ||
+                parseCoordPair(`${p.get('lat')},${p.get('lng')}`);
+  const name  = p.get('p') || p.get('place');
+  const zoom  = parseFloat(p.get('z') || p.get('zoom')) || DEFAULT_LINK_ZOOM;
 
-  if (!isNaN(lat) && !isNaN(lng)) {
-    map.flyTo({ center: [lng, lat], zoom, duration: 800 });
+  if (coord) {
+    map.flyTo({ center: [coord.lng, coord.lat], zoom, duration: 800 });
     const info = { _noFly: true };
-    if (placeParam) {
-      info.name = placeParam;
-      const cat = p.get('category');
+    if (name) {
+      info.name = name;
+      const cat  = p.get('t') || p.get('category');
+      const desc = p.get('d') || p.get('desc');
       if (cat) info.category = cat;
-      const desc = p.get('desc');
       if (desc) info.description = desc;
     }
     // Wait for flyTo, then drop pin + open place sheet (named shares included)
-    setTimeout(() => showCoordPin({ lat, lng }, info), 900);
+    setTimeout(() => showCoordPin(coord, info), 900);
     return;
   }
 
-  // ?place=Library  — resolve by name when no coordinates were given. Lets you
-  // share a clean, human-readable link ("meet me here") without coordinates.
-  if (placeParam) {
+  // ?p=Library — a name with no coordinates. The recipient's own dataset fills
+  // in position, category, description and entrance, so the link stays tiny and
+  // the details shown are always the current ones.
+  if (name) {
     const resolve = () => {
-      const place = IITJData.getPlaceByName(placeParam);
+      const place = resolveLinkPlace(name);
       if (place) {
         map.flyTo({ center: [place.lng, place.lat], zoom, duration: 800 });
         setTimeout(() => showPlaceDetail({ ...place, _noFly: true }), 850);
       } else {
-        showToast(`Couldn't find "${placeParam}"`, 'warn');
+        showToast(`Couldn't find "${name}"`, 'warn');
       }
     };
     if (IITJData.isReady()) resolve(); else IITJData.onReady(resolve);
   }
 }
 
+const DEFAULT_LINK_ZOOM = 17;
+const COORD_PAIR_RE = /^(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?)$/;
+
+/** "26.48011,73.11533" → {lat, lng}; anything else (incl. a name) → null. */
+function parseCoordPair(value) {
+  const m = COORD_PAIR_RE.exec(String(value || '').trim());
+  if (!m) return null;
+  const lat = parseFloat(m[1]), lng = parseFloat(m[2]);
+  if (isNaN(lat) || isNaN(lng)) return null;
+  return { lat, lng };
+}
+
+// 5 decimals ≈ 1 m, which is well past what a campus pin needs, and trailing
+// zeros are dropped — every character here is one the recipient has to receive.
+function coordPairParam(place) {
+  const trim = v => String(Number(v.toFixed(5)));
+  return `${trim(place.lat)},${trim(place.lng)}`;
+}
+
+// Names that describe a position rather than a place, so they must never be
+// resolved by name on the recipient's device.
+const RELATIVE_PLACE_NAMES = new Set(['dropped pin', 'my location', 'your location', 'destination', 'start']);
+
+// How far the dataset's copy of a place may sit from the shared point and still
+// count as the same place — enough to cover a tap anywhere on a large building,
+// well under the spacing between neighbouring ones.
+const NAME_LINK_MAX_DRIFT_M = 50;
+
+// Resolving a name out of a link is deliberately stricter than the search box:
+// the same name ignoring case and punctuation, or one name containing the other
+// (what a hand-written short form or a rename looks like). Search scoring is far
+// too loose for this — "Nonexistent Place Xyz" scores a hit on "Training and
+// Placement Office", and a link must say "couldn't find it" rather than quietly
+// send someone to a different building.
+function resolveLinkPlace(name) {
+  if (!name || !IITJData.isReady()) return null;
+  const hit = IITJData.getPlaceByName(name);
+  if (!hit) return null;
+  const norm = s => String(s).toLowerCase().replace(/[^a-z0-9]/g, '');
+  const found = norm(hit.name), asked = norm(name);
+  if (!found || !asked) return null;
+  return (found === asked || found.includes(asked) || asked.includes(found)) ? hit : null;
+}
+
+/** True when the recipient's dataset can turn this place's name back into it. */
+function resolvesByName(place) {
+  if (!place || !place.name || !IITJData.isReady()) return false;
+  if (RELATIVE_PLACE_NAMES.has(place.name.toLowerCase().trim())) return false;
+  const hit = resolveLinkPlace(place.name);
+  // Same-named places do exist (a POI point beside its building), so confirm
+  // the hit really is this spot before trusting the name to carry the link.
+  return !!hit && haversine(place.lat, place.lng, hit.lat, hit.lng) <= NAME_LINK_MAX_DRIFT_M;
+}
+
+/** A link endpoint: its name when the dataset knows it, else "lat,lng". */
+function endpointParam(place) {
+  if (!place) return null;
+  return resolvesByName(place) ? place.name : coordPairParam(place);
+}
+
+// Built by hand rather than with URLSearchParams, which percent-encodes the
+// comma in "lat,lng" — three characters of link each, for nothing.
+function buildQuery(pairs) {
+  return pairs
+    .filter(([, v]) => v != null && v !== '')
+    .map(([k, v]) => `${k}=${encodeURIComponent(v).replace(/%20/g, '+').replace(/%2C/g, ',')}`)
+    .join('&');
+}
+
+/** Share links drop the default document name: /index.html and / are the same page. */
+function shareBase() {
+  return `${location.origin}${location.pathname.replace(/index\.html$/, '')}`;
+}
+
+// The base map the sender is looking at, as a compact `v` token: the base
+// ('sat' | 'dark' | 'map') plus '3d' when tilted — e.g. "dark-3d". Sent with
+// every share link so the recipient opens on the same view. 'map' is spelled
+// out rather than implied, so a link shared in daylight still opens light when
+// the recipient opens it after 18:00 (auto night mode).
+function currentViewToken() {
+  const base = isSatellite ? 'sat' : (isDark ? 'dark' : 'map');
+  return is3D ? `${base}-3d` : base;
+}
+
+// A place the dataset knows travels as just its name (?p=) — no coordinates,
+// category or description, since the recipient's app looks all of that up. Only
+// pins it can't know (dropped pins, a live location) carry ?c=lat,lng, and then
+// the label and details come along because nothing else can supply them.
 function buildShareURL(place) {
-  const base = `${location.origin}${location.pathname}`;
-  const params = new URLSearchParams({
-    lat:  place.lat.toFixed(6),
-    lng:  place.lng.toFixed(6),
-    zoom: 17,
-    ...(place.name        ? { place: place.name }        : {}),
-    ...(place.category    ? { category: place.category } : {}),
-    ...(place.description ? { desc: place.description }  : {}),
-  });
-  return `${base}?${params}`;
+  const pairs = resolvesByName(place)
+    ? [['p', place.name]]
+    : [
+        ['c', coordPairParam(place)],
+        ['p', place.name && place.name !== 'Dropped Pin' ? place.name : null],
+        ['t', place.category],
+        ['d', place.description],
+      ];
+  pairs.push(['v', currentViewToken()]);
+  return `${shareBase()}?${buildQuery(pairs)}`;
 }
 
 function sharePlaceOrLocation(place) {
@@ -5104,25 +5241,21 @@ function shareMyLocation() {
 // Build a link that reopens the current route (destination + mode, and the
 // origin when it's a fixed place). Opened on any device, it recomputes the same
 // directions — the recipient's own location is used when no origin is shared.
+// Endpoints ride as names wherever the dataset can resolve them back.
 function buildRouteShareURL() {
-  const base = `${location.origin}${location.pathname}`;
-  const to = directionsTo;
-  const params = new URLSearchParams({
-    tlat: to.lat.toFixed(6),
-    tlng: to.lng.toFixed(6),
-    mode: directionsMode,
-    ...(to.name ? { to: to.name } : {}),
-  });
   // Include the origin only when it's a real place. Never bake in the sender's
   // live GPS ("Your location") — a link without an origin routes from wherever
   // the recipient is.
   const from = directionsFrom;
-  if (from && from.name && from.name !== 'Your location') {
-    params.set('flat', from.lat.toFixed(6));
-    params.set('flng', from.lng.toFixed(6));
-    params.set('from', from.name);
-  }
-  return `${base}?${params}`;
+  const pairs = [
+    ['r', endpointParam(directionsTo)],
+    ['f', from && from.name && from.name !== 'Your location' ? endpointParam(from) : null],
+    // Only walking is spelled out; the parser reads a missing mode as driving,
+    // so these links don't shift meaning if the app's default ever changes.
+    ['m', directionsMode === 'walk' ? 'w' : null],
+    ['v', currentViewToken()],
+  ];
+  return `${shareBase()}?${buildQuery(pairs)}`;
 }
 
 function shareRoute() {
@@ -5142,29 +5275,37 @@ function shareRoute() {
   }
 }
 
-// A shared-route link (?tlat=&tlng=…): reopen directions and recompute the
-// route. Returns true if the link was a route link (so the caller can stop).
+// A shared-route link (?r=…, or the older ?tlat=&tlng=…): reopen directions and
+// recompute the route. Returns true if the link was a route link (so the caller
+// can stop). Endpoint names resolve once the dataset is ready, not before.
 function handleRouteDeepLink(p) {
-  const tlat = parseFloat(p.get('tlat'));
-  const tlng = parseFloat(p.get('tlng'));
-  if (isNaN(tlat) || isNaN(tlng)) return false;
+  const dest   = p.get('r');
+  const origin = p.get('f');
+  const legacyTo = parseCoordPair(`${p.get('tlat')},${p.get('tlng')}`);
+  if (!dest && !legacyTo) return false;
 
-  const to   = { lat: tlat, lng: tlng, name: p.get('to') || 'Destination' };
-  const flat = parseFloat(p.get('flat'));
-  const flng = parseFloat(p.get('flng'));
-  const sharedFrom = (!isNaN(flat) && !isNaN(flng))
-    ? { lat: flat, lng: flng, name: p.get('from') || 'Start' }
-    : null;
-  const mode = p.get('mode');
-  if (mode === 'walk' || mode === 'drive') directionsMode = mode;
+  const mode = p.get('m') || p.get('mode');
+  directionsMode = (mode === 'w' || mode === 'walk') ? 'walk' : 'drive';
 
   const run = () => {
+    const to = legacyTo
+      ? { ...legacyTo, name: p.get('to') || 'Destination' }
+      : resolveLinkEndpoint(dest, 'Destination');
+    if (!to) {
+      showToast(`Couldn't find "${dest}"`, 'warn');
+      return;
+    }
+    const legacyFrom = parseCoordPair(`${p.get('flat')},${p.get('flng')}`);
+    const sharedFrom = legacyFrom
+      ? { ...legacyFrom, name: p.get('from') || 'Start' }
+      : resolveLinkEndpoint(origin, 'Start');
+
     // Prefer a shared origin; otherwise route from the recipient's own location.
-    const origin = sharedFrom || (userLocation
+    const start = sharedFrom || (userLocation
       ? { lat: userLocation.lat, lng: userLocation.lng, name: 'Your location' }
       : null);
-    openDirectionsPanel(origin ? { from: origin, to } : { to });
-    if (origin) {
+    openDirectionsPanel(start ? { from: start, to } : { to });
+    if (start) {
       calculateDirectionsRoute();
     } else {
       // No shared origin and no GPS fix yet — route as soon as one arrives.
@@ -5175,6 +5316,15 @@ function handleRouteDeepLink(p) {
   };
   if (IITJData.isReady()) run(); else IITJData.onReady(run);
   return true;
+}
+
+/** A route link endpoint — "lat,lng" as-is, a name through the dataset. */
+function resolveLinkEndpoint(value, fallbackName) {
+  if (!value) return null;
+  const coord = parseCoordPair(value);
+  if (coord) return { ...coord, name: fallbackName };
+  const place = resolveLinkPlace(value);
+  return place ? { lat: place.lat, lng: place.lng, name: place.name } : null;
 }
 
 function hideSplash() {
