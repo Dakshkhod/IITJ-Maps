@@ -7203,7 +7203,7 @@
       "properties": {
         "osm_id": "1521877041",
         "name": "Academic Building",
-        "category": "building",
+        "category": "academic",
         "source": "osm",
         "building_type": "school",
         "amenity": null,

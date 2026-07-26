@@ -24,6 +24,7 @@ const CATEGORY_STYLES = {
   residential:    { abbr: 'RS', label: 'Residential' },
   bank:           { abbr: 'BK', label: 'Bank/ATM' },
   building:       { abbr: 'BL', label: 'Building' },
+  area:           { abbr: 'AR', label: 'Campus area' },
   university:     { abbr: 'UN', label: 'University' },
   poi:            { abbr: 'PO', label: 'POI' },
   other:          { abbr: 'OT', label: 'Other' },
@@ -336,7 +337,10 @@ const mapHandlers = {
     showCoordPin(e.lngLat, {
       name: p.name,
       category: p.category || 'building',
-      description: p.description || p.amenity || p.building_type || '',
+      // No raw OSM tag fallback: `building_type`/`amenity` are vocabulary, not
+      // prose, and surfaced as "school" / "college" / "restaurant" under the
+      // title. With nothing here showPlaceDetail falls back to the category.
+      description: p.description || '',
     });
   },
   onRoadClick(e) {
@@ -371,7 +375,7 @@ const mapHandlers = {
     showCoordPin(e.lngLat, {
       name: p.name,
       category: p.category || 'recreation',
-      description: p.area_type ? p.area_type.replace(/_/g, ' ') : 'Campus area',
+      description: p.description || '',   // `area_type` is a raw tag — see onBuildingClick
     });
   },
   onPlaceClick(e) {
@@ -2620,7 +2624,8 @@ function showPlaceDetail(place) {
   document.getElementById('sheet-badge').textContent = style.label || place.category;
   document.getElementById('sheet-title').textContent = place.name;
 
-  let desc = place.description || `${style.label || place.category} at IIT Jodhpur`;
+  // Without a description of its own, a place is described by its category.
+  let desc = place.description || style.label || place.category || '';
   if (place.is_proposed) desc = 'Proposed — ' + desc;
   document.getElementById('sheet-description').textContent = desc;
 

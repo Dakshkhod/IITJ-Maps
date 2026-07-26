@@ -378,7 +378,8 @@ function classifyBuilding(tags) {
   // Name-based hints for buildings whose OSM tags lack a category-defining amenity
   const nameLower = (tags.name || tags['name:en'] || '').toLowerCase();
   if (/\b(phc|primary health centre|primary health center|health centre|hospital|clinic)\b/.test(nameLower)) return 'medical';
-  if (tags.amenity === 'university' || tags.building === 'university' || tags.building === 'college') return 'academic';
+  if (tags.amenity === 'university' || tags.building === 'university' ||
+      tags.building === 'college' || tags.building === 'school') return 'academic';
   if (tags.building === 'dormitory' || tags.tourism === 'hostel' || tags.building === 'hostel') return 'hostel';
   if (/\bhostel\b/.test(nameLower)) return 'hostel';
   // Faculty/staff residential: housing, quarters, Type-X blocks, bungalows.
@@ -1535,20 +1536,29 @@ function main() {
   fs.writeFileSync(path.join(outDir, 'road-audit.json'),
     JSON.stringify(roadAudit, null, 2));
 
-  // Build search index (places + areas)
+  // Build search index (places + areas). An area's `area_type` is a raw OSM
+  // vocabulary word ("pitch", "grassland", "plant_nursery") — useful to match
+  // on, but it reads as gibberish in the place card, which shows `description`
+  // verbatim. Keep it searchable as a keyword and leave the description empty
+  // so the card falls back to the category name.
   const allSearchable = [
     ...mergedPlaces,
     ...areas.map(a => ({
       ...a,
       centroid: a.centroid,
-      properties: { ...a.properties, description: a.properties.area_type || '' }
+      properties: {
+        ...a.properties,
+        description: a.properties.description || '',
+        keywords: [...(a.properties.keywords || []), a.properties.area_type]
+          .filter(Boolean).map(k => String(k).replace(/_/g, ' ')),
+      }
     }))
   ];
   const searchIndex = allSearchable.map(f => ({
     id: f.properties.osm_id || f.properties.id || f.properties.name,
     name: f.properties.name,
     category: f.properties.category,
-    description: f.properties.description || f.properties.area_type || '',
+    description: f.properties.description || '',
     keywords: f.properties.keywords || [],
     lat: f.centroid?.lat || (f.geometry.type === 'Point' ? f.geometry.coordinates[1] : null),
     lng: f.centroid?.lng || (f.geometry.type === 'Point' ? f.geometry.coordinates[0] : null),

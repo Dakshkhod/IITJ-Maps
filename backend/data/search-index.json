@@ -1702,7 +1702,7 @@
   {
     "id": "1521877041",
     "name": "Academic Building",
-    "category": "building",
+    "category": "academic",
     "description": "",
     "keywords": [],
     "lat": 26.476047766666667,
@@ -2151,8 +2151,10 @@
     "id": "603118968",
     "name": "Indian Institute of Technology Jodhpur",
     "category": "academic",
-    "description": "university",
-    "keywords": [],
+    "description": "",
+    "keywords": [
+      "university"
+    ],
     "lat": 26.463956170967744,
     "lng": 73.11942517419354,
     "source": "osm",
@@ -2162,8 +2164,10 @@
     "id": "603118969",
     "name": "Indian Institute of Technology Jodhpur",
     "category": "academic",
-    "description": "university",
-    "keywords": [],
+    "description": "",
+    "keywords": [
+      "university"
+    ],
     "lat": 26.472548055882346,
     "lng": 73.11299638529411,
     "source": "osm",
@@ -2173,8 +2177,10 @@
     "id": "773587401",
     "name": "Cricket Ground",
     "category": "sports",
-    "description": "pitch",
-    "keywords": [],
+    "description": "",
+    "keywords": [
+      "pitch"
+    ],
     "lat": 26.478445364285715,
     "lng": 73.12267076904763,
     "source": "osm",
@@ -2184,8 +2190,10 @@
     "id": "773818311",
     "name": "Football Field",
     "category": "sports",
-    "description": "pitch",
-    "keywords": [],
+    "description": "",
+    "keywords": [
+      "pitch"
+    ],
     "lat": 26.475569243749998,
     "lng": 73.12012036875001,
     "source": "osm",
@@ -2195,8 +2203,10 @@
     "id": "1266941059",
     "name": "Informal Grounds",
     "category": "recreation",
-    "description": "college",
-    "keywords": [],
+    "description": "",
+    "keywords": [
+      "college"
+    ],
     "lat": 26.471010184615388,
     "lng": 73.11461546923077,
     "source": "osm",
@@ -2206,8 +2216,10 @@
     "id": "1266941060",
     "name": "Hockey Ground",
     "category": "sports",
-    "description": "pitch",
-    "keywords": [],
+    "description": "",
+    "keywords": [
+      "pitch"
+    ],
     "lat": 26.473909683333332,
     "lng": 73.11946024999999,
     "source": "osm",
@@ -2217,8 +2229,10 @@
     "id": "1412392536",
     "name": "Type C Quarters",
     "category": "residential",
-    "description": "residential",
-    "keywords": [],
+    "description": "",
+    "keywords": [
+      "residential"
+    ],
     "lat": 26.46671656666667,
     "lng": 73.11226533333333,
     "source": "osm",
@@ -2228,8 +2242,10 @@
     "id": "1412392544",
     "name": "B2 & B3 Garden",
     "category": "recreation",
-    "description": "park",
-    "keywords": [],
+    "description": "",
+    "keywords": [
+      "park"
+    ],
     "lat": 26.47264404,
     "lng": 73.11683056000001,
     "source": "osm",
@@ -2239,8 +2255,10 @@
     "id": "1412392567",
     "name": "Basketball Court",
     "category": "sports",
-    "description": "pitch",
-    "keywords": [],
+    "description": "",
+    "keywords": [
+      "pitch"
+    ],
     "lat": 26.47662474,
     "lng": 73.12110174,
     "source": "osm",
@@ -2250,8 +2268,10 @@
     "id": "1412392568",
     "name": "Basketball Court",
     "category": "sports",
-    "description": "pitch",
-    "keywords": [],
+    "description": "",
+    "keywords": [
+      "pitch"
+    ],
     "lat": 26.476589139999998,
     "lng": 73.1214737,
     "source": "osm",
@@ -2261,8 +2281,10 @@
     "id": "1412392569",
     "name": "Basketball Court",
     "category": "sports",
-    "description": "pitch",
-    "keywords": [],
+    "description": "",
+    "keywords": [
+      "pitch"
+    ],
     "lat": 26.476574140000004,
     "lng": 73.12166898,
     "source": "osm",
@@ -2272,8 +2294,10 @@
     "id": "1412392570",
     "name": "Basketball Court",
     "category": "sports",
-    "description": "pitch",
-    "keywords": [],
+    "description": "",
+    "keywords": [
+      "pitch"
+    ],
     "lat": 26.47655944,
     "lng": 73.12184494,
     "source": "osm",
@@ -2283,8 +2307,10 @@
     "id": "1412392571",
     "name": "Tennis Court",
     "category": "sports",
-    "description": "pitch",
-    "keywords": [],
+    "description": "",
+    "keywords": [
+      "pitch"
+    ],
     "lat": 26.477017240000002,
     "lng": 73.1211515,
     "source": "osm",
@@ -2294,8 +2320,10 @@
     "id": "1412392572",
     "name": "Tennis Court",
     "category": "sports",
-    "description": "pitch",
-    "keywords": [],
+    "description": "",
+    "keywords": [
+      "pitch"
+    ],
     "lat": 26.47698692,
     "lng": 73.1215195,
     "source": "osm",
@@ -2305,8 +2333,10 @@
     "id": "1412392573",
     "name": "Tennis Court",
     "category": "sports",
-    "description": "pitch",
-    "keywords": [],
+    "description": "",
+    "keywords": [
+      "pitch"
+    ],
     "lat": 26.476970919999996,
     "lng": 73.1217053,
     "source": "osm",
@@ -2316,8 +2346,10 @@
     "id": "1412392574",
     "name": "Tennis Court",
     "category": "sports",
-    "description": "pitch",
-    "keywords": [],
+    "description": "",
+    "keywords": [
+      "pitch"
+    ],
     "lat": 26.476954240000005,
     "lng": 73.12189699999999,
     "source": "osm",
@@ -2327,8 +2359,10 @@
     "id": "1412392575",
     "name": "Volleyball",
     "category": "sports",
-    "description": "pitch",
-    "keywords": [],
+    "description": "",
+    "keywords": [
+      "pitch"
+    ],
     "lat": 26.47733384,
     "lng": 73.12117686,
     "source": "osm",
@@ -2338,8 +2372,10 @@
     "id": "1412392576",
     "name": "Volleyball",
     "category": "sports",
-    "description": "pitch",
-    "keywords": [],
+    "description": "",
+    "keywords": [
+      "pitch"
+    ],
     "lat": 26.47729738,
     "lng": 73.12155536,
     "source": "osm",
@@ -2349,8 +2385,10 @@
     "id": "1412392577",
     "name": "Volleyball",
     "category": "sports",
-    "description": "pitch",
-    "keywords": [],
+    "description": "",
+    "keywords": [
+      "pitch"
+    ],
     "lat": 26.477285799999997,
     "lng": 73.12170106,
     "source": "osm",
@@ -2360,8 +2398,10 @@
     "id": "1412392578",
     "name": "Volleyball",
     "category": "sports",
-    "description": "pitch",
-    "keywords": [],
+    "description": "",
+    "keywords": [
+      "pitch"
+    ],
     "lat": 26.4772704,
     "lng": 73.12184546,
     "source": "osm",
@@ -2371,8 +2411,10 @@
     "id": "1412392596",
     "name": "Pronite Ground",
     "category": "academic",
-    "description": "university",
-    "keywords": [],
+    "description": "",
+    "keywords": [
+      "university"
+    ],
     "lat": 26.476417588888882,
     "lng": 73.11712748888888,
     "source": "osm",
@@ -2382,8 +2424,10 @@
     "id": "1412399739",
     "name": "Type B Park",
     "category": "recreation",
-    "description": "garden",
-    "keywords": [],
+    "description": "",
+    "keywords": [
+      "garden"
+    ],
     "lat": 26.47390868,
     "lng": 73.11193639999999,
     "source": "osm",
@@ -2393,8 +2437,10 @@
     "id": "1412399760",
     "name": "Director Lawn",
     "category": "recreation",
-    "description": "garden",
-    "keywords": [],
+    "description": "",
+    "keywords": [
+      "garden"
+    ],
     "lat": 26.470947999999996,
     "lng": 73.11231705833333,
     "source": "osm",
@@ -2404,8 +2450,10 @@
     "id": "1412399765",
     "name": "G6 Ground",
     "category": "recreation",
-    "description": "grassland",
-    "keywords": [],
+    "description": "",
+    "keywords": [
+      "grassland"
+    ],
     "lat": 26.47333482,
     "lng": 73.11470428000001,
     "source": "osm",
@@ -2415,8 +2463,10 @@
     "id": "1412399766",
     "name": "B5 Ground",
     "category": "recreation",
-    "description": "grassland",
-    "keywords": [],
+    "description": "",
+    "keywords": [
+      "grassland"
+    ],
     "lat": 26.4723931,
     "lng": 73.11452321666667,
     "source": "osm",
@@ -2426,8 +2476,10 @@
     "id": "1412399767",
     "name": "I2 Ground",
     "category": "recreation",
-    "description": "grassland",
-    "keywords": [],
+    "description": "",
+    "keywords": [
+      "grassland"
+    ],
     "lat": 26.471855239999996,
     "lng": 73.11449836,
     "source": "osm",
@@ -2437,8 +2489,10 @@
     "id": "1412399768",
     "name": "B1 Ground",
     "category": "recreation",
-    "description": "grassland",
-    "keywords": [],
+    "description": "",
+    "keywords": [
+      "grassland"
+    ],
     "lat": 26.4728445,
     "lng": 73.11456368000002,
     "source": "osm",
@@ -2448,8 +2502,10 @@
     "id": "1412399772",
     "name": "Type B Quarters",
     "category": "residential",
-    "description": "residential",
-    "keywords": [],
+    "description": "",
+    "keywords": [
+      "residential"
+    ],
     "lat": 26.474052226666675,
     "lng": 73.11105545333334,
     "source": "osm",
@@ -2459,8 +2515,10 @@
     "id": "1412400623",
     "name": "Cricket Nets [4]",
     "category": "sports",
-    "description": "pitch",
-    "keywords": [],
+    "description": "",
+    "keywords": [
+      "pitch"
+    ],
     "lat": 26.478348840000002,
     "lng": 73.12147266,
     "source": "osm",
@@ -2470,8 +2528,10 @@
     "id": "1412404069",
     "name": "TRANSIT ACCOMMODATION",
     "category": "residential",
-    "description": "residential",
-    "keywords": [],
+    "description": "",
+    "keywords": [
+      "residential"
+    ],
     "lat": 26.477216485714287,
     "lng": 73.11249171428572,
     "source": "osm",
@@ -2481,8 +2541,10 @@
     "id": "1412439400",
     "name": "Runnign Tracks",
     "category": "sports",
-    "description": "track",
-    "keywords": [],
+    "description": "",
+    "keywords": [
+      "track"
+    ],
     "lat": 26.475602308000003,
     "lng": 73.12021684000001,
     "source": "osm",
@@ -2492,8 +2554,10 @@
     "id": "1412504089",
     "name": "Fountain",
     "category": "recreation",
-    "description": "grassland",
-    "keywords": [],
+    "description": "",
+    "keywords": [
+      "grassland"
+    ],
     "lat": 26.470474253846156,
     "lng": 73.11363855384616,
     "source": "osm",
@@ -2503,8 +2567,10 @@
     "id": "1525109576",
     "name": "Tank at Shaurya Sthal",
     "category": "area",
-    "description": "military",
-    "keywords": [],
+    "description": "",
+    "keywords": [
+      "military"
+    ],
     "lat": 26.46675048,
     "lng": 73.11454298,
     "source": "osm",
@@ -2514,8 +2580,10 @@
     "id": "1525594981",
     "name": "IITJ Nursery",
     "category": "area",
-    "description": "plant_nursery",
-    "keywords": [],
+    "description": "",
+    "keywords": [
+      "plant nursery"
+    ],
     "lat": 26.46504407575758,
     "lng": 73.10939518181819,
     "source": "osm",
@@ -2525,8 +2593,10 @@
     "id": "1529899554",
     "name": "Type - ( C- )",
     "category": "residential",
-    "description": "residential",
-    "keywords": [],
+    "description": "",
+    "keywords": [
+      "residential"
+    ],
     "lat": 26.467090062500006,
     "lng": 73.111098875,
     "source": "osm",
@@ -2536,8 +2606,10 @@
     "id": "1529899560",
     "name": "Type - (B-)",
     "category": "residential",
-    "description": "residential",
-    "keywords": [],
+    "description": "",
+    "keywords": [
+      "residential"
+    ],
     "lat": 26.475566325,
     "lng": 73.1113933875,
     "source": "osm",
