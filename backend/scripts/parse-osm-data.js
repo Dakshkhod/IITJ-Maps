@@ -570,6 +570,10 @@ function getHardcodedPlaces() {
     { name: "Parking (4-Wheeler)", category: "parking", lat: 26.4668, lng: 73.1115, keywords: ["parking", "car", "4 wheeler", "vehicle"], description: "4-wheeler parking area" },
     { name: "Parking (2-Wheeler)", category: "parking", lat: 26.4671, lng: 73.1110, keywords: ["parking", "bike", "2 wheeler", "scooter", "motorcycle"], description: "2-wheeler parking area" },
     { name: "Visitor's Hostel", category: "hostel", lat: 26.4682, lng: 73.1127, keywords: ["visitor", "guest house", "accommodation", "visitors hostel"], description: "Guest accommodation for campus visitors" },
+    // 1st floor of the Dept. Civil block — point sits inside that footprint,
+    // offset from the building's own label; entrances.json routes it to the
+    // Civil door with the floor attached.
+    { name: "Training and Placement Office", category: "administrative", lat: 26.480113, lng: 73.115326, keywords: ["tpo", "t&p", "training and placement cell", "placement cell", "placement", "training", "career", "internship", "recruitment"], description: "Training & Placement Cell · 1st floor, Dept. Civil" },
   ].map((p, i) => ({
     type: 'Feature',
     properties: {

@@ -646,5 +646,12 @@
     "lng": 73.11794288963146,
     "gate_name": "sandstone gate",
     "berm": true
+  },
+  "Training and Placement Office": {
+    "lat": 26.4801033,
+    "lng": 73.115076,
+    "osm_id": "13930500573",
+    "gate_name": "Dept. Civil entrance",
+    "floor": 1
   }
 }

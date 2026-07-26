@@ -2542,5 +2542,26 @@
     "lng": 73.1113933875,
     "source": "osm",
     "is_proposed": false
+  },
+  {
+    "id": "curated_3",
+    "name": "Training and Placement Office",
+    "category": "administrative",
+    "description": "Training & Placement Cell · 1st floor, Dept. Civil",
+    "keywords": [
+      "tpo",
+      "t&p",
+      "training and placement cell",
+      "placement cell",
+      "placement",
+      "training",
+      "career",
+      "internship",
+      "recruitment"
+    ],
+    "lat": 26.480113,
+    "lng": 73.115326,
+    "source": "curated",
+    "is_proposed": false
   }
 ]

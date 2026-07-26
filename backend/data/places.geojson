@@ -9016,6 +9016,38 @@
         "lat": 26.47956191111111,
         "lng": 73.1150983888889
       }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "curated_3",
+        "name": "Training and Placement Office",
+        "category": "administrative",
+        "description": "Training & Placement Cell · 1st floor, Dept. Civil",
+        "keywords": [
+          "tpo",
+          "t&p",
+          "training and placement cell",
+          "placement cell",
+          "placement",
+          "training",
+          "career",
+          "internship",
+          "recruitment"
+        ],
+        "source": "curated"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          73.115326,
+          26.480113
+        ]
+      },
+      "centroid": {
+        "lat": 26.480113,
+        "lng": 73.115326
+      }
     }
   ]
 }
