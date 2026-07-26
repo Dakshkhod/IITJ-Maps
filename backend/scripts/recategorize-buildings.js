@@ -22,7 +22,7 @@ const path = require('path');
 const ROOT = path.resolve(__dirname, '..', '..');
 const APPLY = process.argv.includes('--apply');
 
-// ── Building classifier (metadata-driven) ────────────────────
+// Building classifier (metadata-driven)
 function classifyBuilding(p) {
   const name = (p.name || '').toLowerCase();
   const bt   = (p.building_type || '').toLowerCase();
@@ -96,7 +96,7 @@ function recategorizePlace(p) {
   return p.category;
 }
 
-// ── Files ────────────────────────────────────────────────────
+// Files
 const files = {
   webBuildings:     path.join(ROOT, 'web/data/buildings.geojson'),
   backendBuildings: path.join(ROOT, 'backend/data/buildings.geojson'),
@@ -136,7 +136,7 @@ printDiff(webP, recategorizePlace, 'place');
 
 if (!APPLY) { console.log('\n(dry run — re-run with --apply to write)\n'); process.exit(0); }
 
-// ── Apply ────────────────────────────────────────────────────
+// Apply
 function applyFC(fc, fn) {
   let n = 0;
   for (const f of fc.features) { const next = fn(f.properties); if (f.properties.category !== next) { f.properties.category = next; n++; } }

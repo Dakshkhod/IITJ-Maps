@@ -4,7 +4,6 @@
  * No HTML markers — all places rendered as MapLibre circle+label layers
  */
 
-// Legacy API base kept for reference — all calls replaced with local modules (IITJData, IITJRouter)
 const CAMPUS_CENTER = [73.1147, 26.4727];
 const CAMPUS_ZOOM = 15.5;
 const CAMPUS_BOUNDS = [[73.0900, 26.4450], [73.1350, 26.4950]];
@@ -623,9 +622,6 @@ let dirSearchTimeout = null;
 let directionsMode = 'drive';  // 'drive' (main roads only) | 'walk' (shortcuts allowed)
 let pendingSharedRoute = null; // a shared-route deep link waiting on the first GPS fix
 
-// ============================================================
-// Initialize
-// ============================================================
 // Slim top banner when the network drops — tiles and data can't load offline,
 // so this explains a half-rendered map rather than leaving the user guessing.
 function setupOfflineBanner() {
@@ -720,17 +716,14 @@ async function init() {
   });
 }
 
-// ============================================================
-// Satellite imagery offset correction
-// ============================================================
+// Satellite imagery offset correction.
 // Esri World Imagery is georeferenced a few metres off from our OSM-derived
-// footprints / 3D models in this region, so the raw imagery doesn't line up
+// footprints / 3D models in this region (measured ~6 m north of our data
+// against building footprints and roads), so the raw imagery doesn't line up
 // with the buildings. MapLibre can't nudge a raster XYZ layer, so we serve the
 // imagery through a custom protocol that re-requests it from a bbox shifted by
-// `satOffset` (Web-Mercator/EPSG:3857 metres added to the requested bbox).
+// `satOffset` — Web-Mercator/EPSG:3857 metres added to the requested bbox.
 // Calibrate live with Alt+Shift+Arrows in satellite view (see keydown handler).
-// Calibrated against OSM building footprints + roads (Esri imagery sat ~6 m
-// north of our data here); EPSG:3857 metres added to the requested bbox.
 const SAT_OFFSET_DEFAULT = { x: 0, y: 7 };
 const SAT_OFFSET_KEY = 'iitj_sat_offset';
 const SAT_MERC_HALF = 20037508.342789244; // half the Web-Mercator world span (m)
@@ -793,9 +786,7 @@ function refreshSatelliteTiles() {
   map.addLayer({ id, type: 'raster', source: id, paint: { 'raster-opacity': 1 } }, firstLayer);
 }
 
-// ============================================================
 // Map Style — streets (light/dark) or satellite imagery
-// ============================================================
 function getMapStyle() {
   if (isSatellite) {
     return {
@@ -987,12 +978,8 @@ function updateBaseMapButtons() {
   document.getElementById('btn-dark').style.opacity = isSatellite ? '0.45' : '';
 }
 
-// ============================================================
-// Load Map Data
-// ============================================================
 async function loadMapData() {
   try {
-    // All data loaded locally via IITJData (no backend required)
     await IITJData.init();
     await IITJRouter.init();
 
@@ -1022,9 +1009,7 @@ async function loadMapData() {
   }
 }
 
-// ============================================================
 // Remove all custom layers (used on style/dark-mode reload)
-// ============================================================
 function removeCustomLayers() {
   const layers = [
     'areas-fill', 'areas-outline', 'areas-labels',
@@ -1040,9 +1025,7 @@ function removeCustomLayers() {
   sources.forEach(id => { try { if (map.getSource(id)) map.removeSource(id); } catch (_) {} });
 }
 
-// ============================================================
 // Named Areas Layer (grounds, gardens, pitches — label only, no heavy fill)
-// ============================================================
 function dedupeAreaLabels(features) {
   const groups = new Map();
   for (const f of features) {
@@ -1219,9 +1202,7 @@ function addAreasLayer(data) {
   });
 }
 
-// ============================================================
 // Roads Layer — styled for map & satellite, clickable, labeled
-// ============================================================
 function addRoadsLayer(data) {
   const roadVis = LAYERS.roads ? 'visible' : 'none';
   const navIn = (classes) => ['match', ['get', 'navigation_class'], classes, true, false];
@@ -1316,8 +1297,8 @@ function addRoadsLayer(data) {
       ['campus_standard_road', 'local_street', 'vehicle_road'], 21.5,
       20],
   ];
-  // Service roads now start at z13 (was z14) so they don't vanish when zoomed
-  // out — they're a big part of the internal campus network.
+  // Service roads start at z13 so they don't vanish when zoomed out — they're
+  // a big part of the internal campus network.
   const serviceSurfaceW = ['interpolate', ['linear'], ['zoom'],
     13, ['match', ['get', 'navigation_class'], 'campus_service_road', 2.6, 'campus_service_connector', 2.0, 1.8],
     16, ['match', ['get', 'navigation_class'], 'campus_service_road', 5.8, 'campus_service_connector', 4.4, 3.9],
@@ -1565,11 +1546,8 @@ function addRoadsLayer(data) {
   addRoadLampLayers(data);
 }
 
-// ============================================================
-// Road lamps — warm pools of light along drivable roads at night
-// ============================================================
-// Every drawn campus road gets lamps at night — service connectors were the
-// biggest gap (most internal spurs were skipped by the old allow-list).
+// Road lamps — warm pools of light along drivable roads at night. Every drawn
+// campus road qualifies, including service connectors and internal spurs.
 const ROAD_LAMP_SKIP_CLASSES = new Set(['unknown', 'non_vehicle_route']);
 
 function shouldPlaceRoadLamps(props = {}) {
@@ -1711,9 +1689,7 @@ function syncRoadLamps() {
   }
 }
 
-// ============================================================
 // Berms Layer: perimeter wave + landscape berm footprints (2D only)
-// ============================================================
 function addBermsLayer(data) {
   if (!data || !data.features || !data.features.length) return;
 
@@ -1756,9 +1732,7 @@ function addBermsLayer(data) {
   }, beforeId);
 }
 
-// ============================================================
 // Buildings Layer: 2D fill + 3D extrusion + labels
-// ============================================================
 const NEVER_BUILDING_FILTER = ['==', ['literal', 1], 0];
 
 function addBuildingsLayer(data) {
@@ -1966,7 +1940,7 @@ function categoryHighlightColorExpr() {
   ];
 }
 
-// ─── Category highlight / pulse ───────────────────────────────────────────────
+// Category highlight / pulse
 let _pulseTimer = null;
 let _pulseHigh = true;
 
@@ -2100,9 +2074,7 @@ function stopBuildingHighlight() {
   if (typeof Landmarks3D !== 'undefined') Landmarks3D.clearCategoryHighlight();
 }
 
-// ============================================================
 // Places Layer — MapLibre circles + text labels (no HTML markers)
-// ============================================================
 function addPlacesLayer(features) {
   // Point POIs only — skip anything already labeled on buildings/areas layers
   const pointFeatures = features.map(f => {
@@ -2139,7 +2111,6 @@ function addPlacesLayer(features) {
 
   const data = { type: 'FeatureCollection', features: pointFeatures };
 
-  // Update existing source if present
   if (map.getSource('places-points')) {
     map.getSource('places-points').setData(data);
     return;
@@ -2218,9 +2189,6 @@ function addPlacesLayer(features) {
   });
 }
 
-// ============================================================
-// 3D Toggle
-// ============================================================
 function toggle3D() {
   is3D = !is3D;
   document.getElementById('btn-3d').classList.toggle('active', is3D);
@@ -2266,9 +2234,6 @@ function showLandmarks3D() {
   });
 }
 
-// ============================================================
-// Layer Toggle Panel
-// ============================================================
 function toggleLayer(layerName) {
   LAYERS[layerName] = !LAYERS[layerName];
   const vis = LAYERS[layerName] ? 'visible' : 'none';
@@ -2300,9 +2265,6 @@ function showLayerPanel() {
   }
 }
 
-// ============================================================
-// Category Filter Chips
-// ============================================================
 function renderCategoryChips(categoriesData) {
   const container = document.getElementById('category-chips');
   container.replaceChildren();
@@ -2338,9 +2300,6 @@ async function filterByCategory(categoryId, chipEl) {
   }
 }
 
-// ============================================================
-// Search
-// ============================================================
 function setupSearch() {
   const input   = document.getElementById('search-input');
   const results = document.getElementById('search-results');
@@ -2543,9 +2502,7 @@ function setupVoiceSearch() {
   });
 }
 
-// ============================================================
 // Place Detail Bottom Sheet
-// ============================================================
 let sheetHistoryActive = false;
 
 function resetSheetTransform() {
@@ -2738,9 +2695,7 @@ function showPlaceDetail(place) {
   if (!place._noFly) map.flyTo({ center: [place.lng, place.lat], zoom: 17, duration: 800 });
 }
 
-// ============================================================
 // Coordinate Pin — drops on every map tap, shows place sheet
-// ============================================================
 let coordMarker = null;
 
 function removeCoordPin() {
@@ -2788,9 +2743,7 @@ function showCoordPin(lngLat, info = {}) {
     .addTo(map);
 }
 
-// ============================================================
 // Directions Panel — start/end by search or map pick
-// ============================================================
 function openDirectionsPanel(initial = {}) {
   directionsOpen = true;
   closePlaceSheet();
@@ -3212,9 +3165,7 @@ async function calculateDirectionsRoute() {
   }
 }
 
-// ============================================================
 // Navigation — route markers + progress tracking + rerouting
-// ============================================================
 let routeOriginMarker = null;   // blue dot at start
 let routeDestMarker   = null;   // red pin at destination
 let _rerouteCooldown  = false;  // prevents spam-rerouting
@@ -3302,9 +3253,8 @@ function _removeRouteMarkers() {
 function _addRouteMarkers(startCoord, endCoord) {
   _removeRouteMarkers();
 
-  // ── Start: blue circle. Skipped during active navigation because the
-  // live user puck already sits at this position — drawing both was the
-  // "two location pointers" bug the user saw.
+  // Start: blue circle. Skipped during active navigation — the live user puck
+  // already sits at this position, so drawing both duplicates the pointer.
   if (!navigationActive || !userLocation) {
     const startEl = document.createElement('div');
     startEl.className = 'route-origin-marker';
@@ -3312,7 +3262,7 @@ function _addRouteMarkers(startCoord, endCoord) {
       .setLngLat(startCoord).addTo(map);
   }
 
-  // ── End: red teardrop pin ──
+  // End: red teardrop pin
   const endEl = document.createElement('div');
   endEl.className = 'route-dest-marker';
   routeDestMarker = new maplibregl.Marker({ element: endEl, anchor: 'bottom' })
@@ -3371,7 +3321,6 @@ function drawRoute(geometry, animate = true, destMarker = null) {
     paint: { 'line-color': '#9ca3af', 'line-width': 6.5, 'line-opacity': 0.85 }
   });
 
-  // Place start/end markers
   const coords = geometry.coordinates;
   _addRouteMarkers(coords[0], destMarker || coords[coords.length - 1]);
 
@@ -3437,7 +3386,7 @@ function _updateTraveledOverlay(segIdx, t, coords) {
   });
 }
 
-// ── Direction arrow SVG icons ─────────────────────────────────
+// Direction arrow SVG icons
 const NAV_ARROWS = {
   straight: '↑',
   'turn-right': '↱',
@@ -3495,9 +3444,7 @@ function _remainingDist(segIdx, t, coords) {
   return d;
 }
 
-// ============================================================
 // RoadSnap — ambient snap-to-road for the user puck
-// ============================================================
 // During free roaming (no active navigation) raw filtered GPS routinely
 // drifts 5–25 m to either side of the road the user is actually walking
 // on. We build a coarse spatial grid over every roads.geojson segment
@@ -3650,10 +3597,8 @@ function updateNavInstruction(distToNextTurn) {
   const instr = currentRoute.instructions[navInstructionIndex];
   if (!instr) return;
 
-  // Arrow icon
   document.getElementById('nav-arrow-icon').textContent = _instrArrow(instr);
 
-  // Distance to next turn
   const distEl = document.getElementById('nav-turn-dist');
   if (distToNextTurn != null && distToNextTurn > 0) {
     distEl.textContent = formatDist(distToNextTurn);
@@ -3667,7 +3612,6 @@ function updateNavInstruction(distToNextTurn) {
       ? `Arrive — enter via ${navEntrance.gate_name}${navEntrance.floor != null ? ' · ' + _floorLabel(navEntrance.floor) : ''}`
       : instr.text;
 
-  // Next instruction
   const next  = currentRoute.instructions[navInstructionIndex + 1];
   const bar   = document.getElementById('nav-next-bar');
   if (next && next.type !== 'arrive') {
@@ -3678,7 +3622,6 @@ function updateNavInstruction(distToNextTurn) {
     bar?.classList.add('hidden');
   }
 
-  // Progress bar
   const pct = Math.round(navInstructionIndex / Math.max(1, currentRoute.instructions.length - 1) * 100);
   document.getElementById('nav-progress').style.width = `${pct}%`;
 
@@ -3723,9 +3666,7 @@ function _updateNavArrowHeading() {
   document.getElementById('nav-compass-needle').style.transform = `rotate(${instr.bearing}deg)`;
 }
 
-// ============================================================
 // Immersive Navigation — Google-Maps-style first-person 3D view
-// ============================================================
 function _routeStartBearing() {
   const coords = currentRoute?.geometry?.coordinates;
   if (!coords || coords.length < 2) return 0;
@@ -4027,9 +3968,7 @@ function endNavigation() {
   showToast('Navigation ended', 'info');
 }
 
-// ============================================================
 // NavVoice — spoken turn-by-turn (Web Speech API speechSynthesis)
-// ============================================================
 // Announces the upcoming maneuver as the user approaches it, the maneuver
 // itself at the turn, reroutes, and arrival. Feature-detected (no-ops where
 // speechSynthesis is missing) and user-mutable; the preference persists.
@@ -4092,6 +4031,7 @@ function _spokenDist(m) {
   if (m < 1000) return `${Math.round(m)} metres`;
   return `${(m / 1000).toFixed(1)} kilometres`;
 }
+
 // Lowercase the first letter so "In 90 metres, turn left" flows naturally.
 function _lower1(s) { return s ? s.charAt(0).toLowerCase() + s.slice(1) : s; }
 
@@ -4187,9 +4127,7 @@ function setupVoiceToggle() {
   });
 }
 
-// ============================================================
 // LocationTracker — Kalman-lite GPS pipeline (single source of truth)
-// ============================================================
 // One module owns the watchPosition handle, smooths raw fixes with a
 // Kalman-lite filter, rejects outliers, fuses GPS heading with the
 // compass, and runs a requestAnimationFrame loop that interpolates the
@@ -4428,9 +4366,7 @@ const LocationTracker = (() => {
   return { start, subscribe, getDisplay, getRaw, hasFix, watching, enableCompass, disableCompass, compassEnabled, compassActive, compassAccuracy };
 })();
 
-// ============================================================
 // User Location — marker, accuracy circle, auto-follow, nav tracking
-// ============================================================
 function requestUserLocation() {
   if (LocationTracker.watching()) return;
   if (!navigator.geolocation) { showToast('Location not supported on this device', 'error'); return; }
@@ -4565,7 +4501,6 @@ function _renderLocationMarker(lat, lng, accuracyM, heading) {
     map.setPaintProperty('user-accuracy-circle', 'circle-radius', r);
   }
 
-  // Bind zoom listener exactly once
   if (!map._locationZoomBound) {
     map._locationZoomBound = true;
     map.on('zoom', () => {
@@ -4628,8 +4563,8 @@ function _cameraFollow(lat, lng, heading, nav) {
   map.easeTo(opts);
 }
 
-// Single-tick consolidated nav update — replaces the old in-line block
-// inside watchPosition. Uses snapped position to avoid spurious reroutes.
+// Single-tick consolidated nav update, driven from watchPosition. Uses the
+// snapped position to avoid spurious reroutes.
 function _navTick(lat, lng, snap) {
   const coords = currentRoute.geometry.coordinates;
   const instrs = currentRoute.instructions;
@@ -4637,13 +4572,11 @@ function _navTick(lat, lng, snap) {
 
   _updateTraveledOverlay(segIdx, t, coords);
 
-  // Off-route detection with hysteresis. The old 45 m threshold was too
-  // loose for the campus: parallel paths are routinely 25-35 m apart,
-  // so walking on the road next to the suggested one stayed silently
-  // "on route". Now: above 25 m the badge appears immediately; if it
-  // stays above 25 m for ~2 s of GPS fixes we trigger a real reroute.
-  // This filters spurious one-fix outliers without ignoring a genuine
-  // detour.
+  // Off-route detection with hysteresis. Campus paths run parallel just 25-35 m
+  // apart, so a looser threshold would let walking on the road beside the
+  // suggested one still read as "on route". Above 25 m the badge appears
+  // immediately; only if it holds for ~2 s of fixes do we trigger a real
+  // reroute, which filters one-fix outliers without ignoring a genuine detour.
   const OFFROUTE_M       = 25;
   const OFFROUTE_HOLD_MS = 2000;
   const now = (typeof performance !== 'undefined' ? performance.now() : Date.now());
@@ -4782,9 +4715,7 @@ function restoreLocationLayer() {
   _renderLocationMarker(userLocation.lat, userLocation.lng, userLocation.accuracy || 12, userLocation.heading);
 }
 
-// ============================================================
 // Base map toggles — satellite / dark mode
-// ============================================================
 // Esri World Imagery tiles become "not yet available" above zoom 17
 const SATELLITE_MAX_ZOOM = 17;
 
@@ -4823,9 +4754,7 @@ async function toggleDarkMode() {
   updateBaseMapButtons();
 }
 
-// ============================================================
 // Toast Notifications
-// ============================================================
 function showToast(msg, type = 'info', duration = 2800) {
   const old = document.getElementById('toast');
   if (old) old.remove();
@@ -4854,9 +4783,7 @@ function hideLoadingToast() {
   if (t) { t.classList.remove('visible'); setTimeout(() => t.remove(), 300); }
 }
 
-// ============================================================
 // Event Listeners
-// ============================================================
 function setupEventListeners() {
   setupSearch();
   setupSheetGestures();
@@ -4995,9 +4922,7 @@ function handleSatOffsetCalibration(e) {
 function openMenu()  { document.getElementById('side-menu').classList.remove('hidden'); document.getElementById('menu-overlay').classList.remove('hidden'); }
 function closeMenu() { document.getElementById('side-menu').classList.add('hidden');    document.getElementById('menu-overlay').classList.add('hidden');    }
 
-// ============================================================
 // Utilities
-// ============================================================
 // Cached media-query for users who asked the OS to reduce motion — we skip
 // the route-draw / pulse animations for them.
 let _rmQuery = null;
@@ -5060,7 +4985,7 @@ function getOpenStatus(oh) {
   return { open: false, label: 'Closed now', sub: '', cls: 'closed' };
 }
 
-// ── Favorites & Recents (localStorage) ───────────────────────────────
+// Favorites & Recents (localStorage)
 // Small, self-contained store. Each entry is a slim place ref so it survives
 // data reloads: { name, category, lat, lng, description }.
 const FAVORITES_KEY = 'iitj-favorites-v1';
@@ -5074,10 +4999,11 @@ function _placeRef(p) {
     lat: +Number(p.lat).toFixed(6), lng: +Number(p.lng).toFixed(6),
     description: p.description || null };
 }
+
 // Same place if the names match (case-insensitive) OR the coordinates nearly
 // coincide. Name-first matters because the same place opened from its building
 // polygon vs. its POI point has slightly different coords — without this they'd
-// pile up as duplicate recents (the "three New Mess" bug).
+// pile up as duplicate recents.
 function _samePlace(a, b) {
   if (!a || !b) return false;
   const na = (a.name || '').trim().toLowerCase();
@@ -5126,9 +5052,7 @@ function formatDist(m) { return m < 1000 ? `${Math.round(m)}m` : `${(m/1000).toF
 
 function escapeHtml(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
 
-// ============================================================
 // Deep Linking — ?lat=&lng=&place=&zoom=
-// ============================================================
 function handleDeepLink() {
   const p = new URLSearchParams(location.search);
   if (handleRouteDeepLink(p)) return;   // ?tlat=&tlng=… → a shared route link

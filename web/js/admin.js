@@ -5,9 +5,7 @@
  * serving the bundled GeoJSON.
  */
 
-// ============================================================
 // Config
-// ============================================================
 const CAMPUS_BBOX = '26.4500,73.0900,26.4900,73.1300'; // south,west,north,east
 
 // Overpass mirrors that ship CORS headers (required for browser-origin POST).
@@ -60,9 +58,7 @@ function classify(tags) {
   return null;
 }
 
-// ============================================================
 // Storage (single source of truth for pending changes)
-// ============================================================
 function loadPending() {
   try { return JSON.parse(localStorage.getItem(PENDING_KEY) || '[]'); } catch (_) { return []; }
 }
@@ -128,9 +124,6 @@ function hashFeature(props, geom, kind) {
   return fnv1a(JSON.stringify(keep) + '|' + geomHash);
 }
 
-// ============================================================
-// Overpass fetch
-// ============================================================
 async function fetchFromOverpass() {
   const query = `
     [out:json][timeout:60];
@@ -276,9 +269,7 @@ function inferCategory(tags) {
   return null;
 }
 
-// ============================================================
 // Diff engine — compare OSM snapshot against the current map
-// ============================================================
 // opts.snapshot === true → return EVERY current OSM-vs-base difference,
 // ignoring the pending log AND the baseline. Used by "Clear log" so the
 // baseline captures the FRESH id of every current diff (the normal pending
@@ -340,7 +331,7 @@ async function computeDiff(osmFeatures, opts = {}) {
 
   const newChanges = [];
 
-  // ── Added & Modified ────────────────────────────────────────
+  // Added & Modified
   for (const kind of Object.keys(osmById)) {
     for (const [id, osmF] of Object.entries(osmById[kind])) {
       if (overlayDeleted[kind].has(id)) continue; // admin deleted it in the overlay — don't re-add
@@ -366,7 +357,7 @@ async function computeDiff(osmFeatures, opts = {}) {
     }
   }
 
-  // ── Deleted (in local with source:osm but missing from new fetch) ──
+  // Deleted (in local with source:osm but missing from new fetch)
   for (const kind of Object.keys(localById)) {
     for (const [id, localF] of Object.entries(localById[kind])) {
       if (localF.properties?.source !== 'osm') continue;
@@ -401,9 +392,7 @@ function makeChange(type, kind, after, before, contentHash) {
   };
 }
 
-// ============================================================
 // Sync — fetch + diff + persist (merge with existing pending)
-// ============================================================
 async function runSync() {
   setSyncing(true);
   try {
@@ -439,10 +428,8 @@ function setSyncing(on) {
   label.textContent = on ? 'Syncing…' : 'Sync from OSM';
 }
 
-// ============================================================
 // Clear log — wipe the entire review log and set the current OSM
 // state as the baseline, so only edits made from now on will appear.
-// ============================================================
 async function resetLog() {
   const pending = loadPending();
   const ok = window.confirm(
@@ -490,9 +477,7 @@ async function resetLog() {
   }
 }
 
-// ============================================================
 // Decisions: Accept / Reject
-// ============================================================
 function acceptChange(change) {
   const overlay = IITJOverlay.loadLocal();
   if (change.type === 'deleted') {
@@ -540,9 +525,7 @@ function stripInternal(f) {
   return rest;
 }
 
-// ============================================================
 // UI rendering
-// ============================================================
 let _filterStatus = 'pending';
 let _filterKind   = 'all';
 let _filterType   = 'all';
@@ -874,11 +857,9 @@ function fitMiniToFeatures(feats) {
   });
 }
 
-// ============================================================
-// GitHub publish — commits overlay.json straight to the repo so
+// Server-side publishing client — commits overlay.json straight to the repo so
 // Vercel redeploys without the admin ever touching a git client.
-// ============================================================
-// ── Server-side publishing client ─────────────────────────────────────────
+//
 // The GitHub credentials live ONLY in the serverless function's environment
 // (see /api/admin.js); they never reach the browser. The client holds, at
 // most, a short-lived signed session token IN MEMORY (never localStorage),
@@ -979,7 +960,7 @@ function countOverlayEntries(o) {
   return { total, kinds };
 }
 
-// ── Login modal ───────────────────────────────────────────────
+// Login modal
 function openSettings() {
   const pw = document.getElementById('cfg-password');
   if (pw) pw.value = '';
@@ -1020,9 +1001,7 @@ function adminLogout() {
   showSettingsStatus('Logged out.', 'ok');
 }
 
-// ============================================================
 // Export / Import overlay
-// ============================================================
 function exportOverlay() {
   const overlay = IITJOverlay.loadLocal();
   const blob = new Blob([JSON.stringify(overlay, null, 2)], { type: 'application/json' });
@@ -1060,9 +1039,7 @@ function importOverlay(file) {
   reader.readAsText(file);
 }
 
-// ============================================================
 // Helpers
-// ============================================================
 function timeAgo(iso) {
   const t = new Date(iso).getTime();
   const s = Math.floor((Date.now() - t) / 1000);
@@ -1075,8 +1052,8 @@ function timeAgo(iso) {
 function escapeHtml(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
 
 // Persistent status log. Messages stay pinned to the side until the admin
-// dismisses them or they're pushed out of the capped stack — an error or a
-// success no longer flashes past before it can be read. Newest on top.
+// dismisses them or they're pushed out of the capped stack, so an error or a
+// success can't flash past before it's read. Newest on top.
 const STATUS_MAX = 6;
 function showToast(msg, type = 'info') {
   const stack = document.getElementById('status-stack');
@@ -1113,9 +1090,6 @@ function showToast(msg, type = 'info') {
   }
 }
 
-// ============================================================
-// Boot
-// ============================================================
 function boot() {
   purgeStaleSecrets();
   document.getElementById('app').classList.remove('hidden');

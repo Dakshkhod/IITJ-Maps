@@ -1,6 +1,4 @@
-/* ============================================================
-   IITJ Maps — Premium UI
-   ============================================================ */
+/* IITJ Maps — Premium UI */
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -88,9 +86,7 @@ html, body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* ============================================================
-   Splash
-   ============================================================ */
+/* Splash */
 .splash {
   position: fixed;
   inset: 0;
@@ -143,14 +139,12 @@ html, body {
   100% { width: 100%; }
 }
 
-/* ============================================================
-   Layout
-   ============================================================ */
+/* Layout */
 .app { position: fixed; inset: 0; overflow: hidden; }
 .hidden { display: none !important; }
 #map { width: 100%; height: 100%; }
 
-/* ── F4map cartography tone (vector map: 2D + 3D) ──────────────────────────
+/* F4map cartography tone (vector map: 2D + 3D).
    3D day: sun-washed brightness on the canvas while extrusions are active.
    Night: subdued dim on the vector canvas (2D or 3D). Plain 2D day has no filter. */
 body.map-3d.map-vector:not(.map-dark):not(.map-satellite) #map .maplibregl-canvas {
@@ -166,9 +160,7 @@ body.map-3d.map-vector.map-dark:not(.map-satellite) #map .maplibregl-canvas {
   filter: brightness(0.89) contrast(1.04) saturate(0.96);
 }
 
-/* ============================================================
-   Search
-   ============================================================ */
+/* Search */
 .search-container {
   position: absolute;
   top: 0;
@@ -291,9 +283,7 @@ body.map-dark .category-chip:not(.active) {
   color: var(--accent-inverse);
 }
 
-/* ============================================================
-   Directions Panel
-   ============================================================ */
+/* Directions Panel */
 .directions-panel {
   position: absolute;
   top: 0;
@@ -767,9 +757,7 @@ body.immersive-nav #search-results { display: none !important; }
   .directions-panel { max-width: 400px; left: 12px; right: auto; }
 }
 
-/* ============================================================
-   Search Results
-   ============================================================ */
+/* Search Results */
 .search-results {
   position: absolute;
   top: 114px;
@@ -854,9 +842,7 @@ body.immersive-nav #search-results { display: none !important; }
 .search-empty { padding: 32px 24px; text-align: center; color: var(--text-muted); }
 .empty-text { font-size: 14px; line-height: 1.5; }
 
-/* ============================================================
-   Map Controls
-   ============================================================ */
+/* Map Controls */
 .map-controls {
   position: absolute;
   right: 14px;
@@ -904,9 +890,7 @@ body.immersive-nav #search-results { display: none !important; }
   line-height: 1;
 }
 
-/* ============================================================
-   Layer Panel
-   ============================================================ */
+/* Layer Panel */
 .layer-panel {
   position: absolute;
   right: 62px;
@@ -975,9 +959,7 @@ body.immersive-nav #search-results { display: none !important; }
 input[type="checkbox"]:checked + .toggle-track { background: var(--accent); }
 input[type="checkbox"]:checked + .toggle-track .toggle-thumb { transform: translateX(16px); }
 
-/* ============================================================
-   Bottom Sheet
-   ============================================================ */
+/* Bottom Sheet */
 .bottom-sheet {
   position: absolute;
   bottom: 0;
@@ -1144,12 +1126,8 @@ input[type="checkbox"]:checked + .toggle-track .toggle-thumb { transform: transl
 
 .action-secondary:hover { background: var(--surface); }
 
-/* ============================================================
-   Navigation Panel
-   ============================================================ */
-/* ============================================================
-   Navigation Panel — Modern Google Maps style
-   ============================================================ */
+/* Navigation Panel */
+/* Navigation Panel — Modern Google Maps style */
 .nav-panel {
   position: absolute;
   bottom: 0; left: 0; right: 0;
@@ -1411,7 +1389,7 @@ input[type="checkbox"]:checked + .toggle-track .toggle-thumb { transform: transl
 }
 .nav-end-btn:hover { opacity: 0.85; }
 
-/* ── Route start / end markers ── */
+/* Route start / end markers */
 .route-origin-marker {
   width: 22px; height: 22px;
   background: #007AFF;
@@ -1457,9 +1435,7 @@ input[type="checkbox"]:checked + .toggle-track .toggle-thumb { transform: transl
   70%, 100% { transform: scale(2.7); opacity: 0; }
 }
 
-/* ============================================================
-   Side Menu
-   ============================================================ */
+/* Side Menu */
 .side-menu {
   position: absolute;
   top: 0;
@@ -1565,9 +1541,7 @@ input[type="checkbox"]:checked + .toggle-track .toggle-thumb { transform: transl
   backdrop-filter: blur(2px);
 }
 
-/* ============================================================
-   Location Marker
-   ============================================================ */
+/* Location Marker */
 .location-marker {
   position: relative;
   width: 28px;
@@ -1644,9 +1618,7 @@ input[type="checkbox"]:checked + .toggle-track .toggle-thumb { transform: transl
 
 .map-ctrl-btn.location-follow svg { stroke: var(--accent-inverse); }
 
-/* ============================================================
-   Toast
-   ============================================================ */
+/* Toast */
 .toast {
   position: fixed;
   bottom: 28px;
@@ -1721,17 +1693,13 @@ input[type="checkbox"]:checked + .toggle-track .toggle-thumb { transform: transl
 
 @keyframes spin { to { transform: rotate(360deg); } }
 
-/* ============================================================
-   Coordinate Pin
-   ============================================================ */
+/* Coordinate Pin */
 .coord-pin-wrapper {
   cursor: pointer;
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
 }
 
-/* ============================================================
-   MapLibre
-   ============================================================ */
+/* MapLibre */
 .maplibregl-ctrl-bottom-left { bottom: 8px !important; left: 8px !important; }
 
 .maplibregl-ctrl-attrib {
@@ -1750,9 +1718,7 @@ input[type="checkbox"]:checked + .toggle-track .toggle-thumb { transform: transl
 
 .maplibregl-canvas { outline: none; }
 
-/* ============================================================
-   Responsive
-   ============================================================ */
+/* Responsive */
 .search-container { padding-top: max(12px, env(safe-area-inset-top, 12px)); }
 .bottom-sheet, .nav-panel { padding-bottom: max(20px, env(safe-area-inset-bottom, 20px)); }
 
@@ -1846,8 +1812,8 @@ input[type="checkbox"]:checked + .toggle-track .toggle-thumb { transform: transl
   .action-btn { padding: 14px; font-size: 14px; }
   .sheet-content { padding: 12px 52px 28px 20px; }
 
-  /* iOS Safari auto-zooms the page when focusing an input under 16px now that
-     user-scalable is back on. Keep text fields at 16px on touch to suppress it. */
+  /* iOS Safari auto-zooms the page when focusing an input under 16px, since
+     user-scalable is enabled. Keep text fields at 16px on touch to suppress it. */
   #search-input,
   .dir-input-row input { font-size: 16px; }
 
@@ -1866,9 +1832,7 @@ input[type="checkbox"]:checked + .toggle-track .toggle-thumb { transform: transl
   .dir-mode-btn { min-height: 44px; }
 }
 
-/* ============================================================
-   Offline banner
-   ============================================================ */
+/* Offline banner */
 .offline-banner {
   position: absolute;
   top: max(12px, env(safe-area-inset-top, 12px));
@@ -1899,9 +1863,7 @@ input[type="checkbox"]:checked + .toggle-track .toggle-thumb { transform: transl
 }
 .offline-banner[hidden] { display: none; }
 
-/* ============================================================
-   Focus rings — keyboard-only, never on mouse/touch
-   ============================================================ */
+/* Focus rings — keyboard-only, never on mouse/touch */
 :focus-visible {
   outline: none;
   box-shadow: var(--focus-ring);
@@ -1909,9 +1871,7 @@ input[type="checkbox"]:checked + .toggle-track .toggle-thumb { transform: transl
 }
 .maplibregl-canvas:focus-visible { box-shadow: none; }
 
-/* ============================================================
-   Reduced motion — respect the OS setting
-   ============================================================ */
+/* Reduced motion — respect the OS setting */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.001ms !important;
@@ -1921,9 +1881,7 @@ input[type="checkbox"]:checked + .toggle-track .toggle-thumb { transform: transl
   }
 }
 
-/* ============================================================
-   Favorite button (place sheet) + open-now badge
-   ============================================================ */
+/* Favorite button (place sheet) + open-now badge */
 .action-icon {
   flex: 0 0 auto;
   width: 46px;
@@ -1966,9 +1924,7 @@ input[type="checkbox"]:checked + .toggle-track .toggle-thumb { transform: transl
 }
 .sheet-entrance svg { flex-shrink: 0; opacity: 0.9; }
 
-/* ============================================================
-   Quick-access (recents / favorites / near-me) in the search panel
-   ============================================================ */
+/* Quick-access (recents / favorites / near-me) in the search panel */
 .qa-actions { padding: 10px 12px 4px; }
 .qa-chip {
   display: inline-flex;

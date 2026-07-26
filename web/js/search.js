@@ -5,7 +5,7 @@
  */
 
 const IITJData = (() => {
-  // ── State ───────────────────────────────────────────────────
+  // State
   let _places      = null;
   let _buildings   = null;
   let _roads       = null;
@@ -18,7 +18,7 @@ const IITJData = (() => {
   let _ready       = false;
   const _readyCallbacks = [];
 
-  // ── Loader ──────────────────────────────────────────────────
+  // Loader
   async function init() {
     const base = '/data';
     const [places, buildings, roads, areas, searchIndex, categories, entrances, berms, greens] = await Promise.all([
@@ -77,7 +77,7 @@ const IITJData = (() => {
     else _readyCallbacks.push(cb);
   }
 
-  // ── Helpers ──────────────────────────────────────────────────
+  // Helpers
   function levenshteinLite(a, b) {
     if (a.length > b.length) [a, b] = [b, a];
     let dist = 0;
@@ -93,7 +93,7 @@ const IITJData = (() => {
     return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   }
 
-  // ── Public API ───────────────────────────────────────────────
+  // Public API
   function search(q, limit = 10) {
     if (!_searchTokens || !q || q.length < 1) return [];
     const query     = q.toLowerCase().trim();

@@ -13,9 +13,7 @@ const CAMPUS_BOUNDS = {
   minLng: 73.0900, maxLng: 73.1300
 };
 
-// ============================================================
 // OSM Parser (DOM-based, reliable)
-// ============================================================
 function parseOSM(filePath) {
   console.log('📖 Parsing OSM file:', filePath);
   const xml = fs.readFileSync(filePath, 'utf-8');
@@ -69,9 +67,6 @@ function parseOSM(filePath) {
   return { nodes, ways };
 }
 
-// ============================================================
-// KML Parser
-// ============================================================
 function parseKML(filePath) {
   console.log('📖 Parsing KML file:', filePath);
   const xml = fs.readFileSync(filePath, 'utf-8');
@@ -168,9 +163,7 @@ function computeCentroid(coords) {
   return { lat: latSum / coords.length, lng: lngSum / coords.length };
 }
 
-// ============================================================
 // OSM Feature Extraction
-// ============================================================
 // Building types that are NOT real buildings and should not get the building fill treatment
 const NON_BUILDING_TYPES = new Set(['berms', 'wall', 'fence', 'hedge', 'retaining_wall']);
 
@@ -567,9 +560,7 @@ function extractUsefulTags(tags) {
   return useful;
 }
 
-// ============================================================
 // Curated Hardcoded Places (verified IITJ locations)
-// ============================================================
 function getHardcodedPlaces() {
   // Only include places NOT already in OSM data with verified coordinates.
   // OSM already has: LHC, Library, Hostels B1-B4, G1-G6, I1-I4, Y1-Y4,
@@ -594,9 +585,6 @@ function getHardcodedPlaces() {
   }));
 }
 
-// ============================================================
-// Categories
-// ============================================================
 function getCategories() {
   // Palette designed for clear category-at-a-glance reading. Hues are spread
   // around the wheel so neighbouring dots stay distinguishable, conventional
@@ -623,9 +611,7 @@ function getCategories() {
   ];
 }
 
-// ============================================================
 // Build Road Graph for routing
-// ============================================================
 function buildRoadGraph(roads) {
   const graph = {}; // nodeId -> [{nodeId, distance}]
   const nodeCoords = {}; // nodeId -> [lng, lat]
@@ -666,9 +652,7 @@ function haversine(lat1, lng1, lat2, lng2) {
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
-// ============================================================
 // Deduplication
-// ============================================================
 // Strip a parenthetical suffix, dashes, and spaces so "W-1" and "W1 (ID Card)"
 // collapse to "w1" — OSM has both for the same physical perimeter office
 // because the new W-N sequence was added without removing the legacy entry.
@@ -726,9 +710,7 @@ function deduplicatePlaces(places) {
   return result;
 }
 
-// ============================================================
 // Perimeter-berm gate snap
-// ============================================================
 // The OSM-coded W-N / E-N nodes that ring the campus are mapped roughly along
 // the perimeter berm but their exact coords drift away from each gate, so dots
 // look "scattered" in 3D. Snap each code to the nearest *unique* sandstone-
@@ -1485,9 +1467,7 @@ function buildBermsGeoJSON(osmData) {
   return { type: 'FeatureCollection', features };
 }
 
-// ============================================================
 // Main
-// ============================================================
 function main() {
   console.log('═══════════════════════════════════════════');
   console.log('  IITJ Maps — GIS Data Pipeline v2');

@@ -17,16 +17,17 @@ const IITJRouter = (() => {
     _loaded = true;
   }
 
-  // ── Admin overlay → routing graph ─────────────────────────────
-  // road-graph.json is generated OFFLINE by the pipeline, so an admin-accepted
-  // OSM retag used to change only what the map DREW: the router kept the stale
-  // edge and happily drove cars over ways OSM had retagged to cycleway/footway.
-  // Here the overlay is folded into the in-memory graph at load time.
+  // Admin overlay → routing graph.
+  // road-graph.json is generated OFFLINE by the pipeline, so on its own an
+  // admin-accepted OSM retag would change only what the map DREW: the router
+  // would keep the stale edge and happily drive cars over ways OSM had
+  // retagged to cycleway/footway. So the overlay is folded into the in-memory
+  // graph at load time.
   //
   // The overlay stores raw OSM tags (highway/foot/bicycle) but NOT the derived
   // routing fields (vehicle_access, drive_confidence, drive_penalty), so those
-  // are re-derived through web/js/road-classifier.js — the very module the
-  // pipeline used to build the graph, so patched edges and baked edges agree.
+  // are re-derived through web/js/road-classifier.js — the same module the
+  // pipeline builds the graph with, so patched and baked edges agree.
   function _nodeId(lng, lat) {
     return `${Number(lat).toFixed(6)},${Number(lng).toFixed(6)}`;
   }
@@ -153,7 +154,7 @@ const IITJRouter = (() => {
     return stats;
   }
 
-  // ── Geometry helpers ──────────────────────────────────────────
+  // Geometry helpers
   function haversine(lat1, lng1, lat2, lng2) {
     const R = 6371000;
     const a = Math.sin((lat2 - lat1) * Math.PI / 360) ** 2 +
@@ -183,7 +184,7 @@ const IITJRouter = (() => {
     return { lat: lat1 + t * dy, lng: lng1 + t * dx, t };
   }
 
-  // ── Binary min-heap ───────────────────────────────────────────
+  // Binary min-heap
   class MinHeap {
     constructor() { this.data = []; }
     push(item) { this.data.push(item); this._up(this.data.length - 1); }
@@ -320,7 +321,7 @@ const IITJRouter = (() => {
     return 8;
   }
 
-  // ── Dijkstra ──────────────────────────────────────────────────
+  // Dijkstra
   function dijkstra(startId, endId, mode = 'drive', opts = {}) {
     const dist = { [startId]: 0 };
     const physicalDist = { [startId]: 0 };
@@ -598,7 +599,7 @@ const IITJRouter = (() => {
     return progress / magSq;
   }
 
-  // ── Turn instructions ─────────────────────────────────────────
+  // Turn instructions
   //
   // LEFT/RIGHT turn-by-turn guidance is intentionally NOT produced.
   //
@@ -635,7 +636,7 @@ const IITJRouter = (() => {
     ];
   }
 
-  // ── Public: compute route ─────────────────────────────────────
+  // Public: compute route
   // mode: 'drive' (default — main roads only, car-passable) or 'walk' (also
   // uses footways, cycleways, paths — shortcuts allowed).
   function computeRoute(fromLat, fromLng, toLat, toLng, mode = 'drive', routeOpts = {}) {

@@ -16,11 +16,10 @@ var Landmarks3D = (() => {
   const Y_UP_TO_Z_UP = Math.PI / 2;
 
   // THREE-dependent objects (materials + reusable matrices) are built lazily so
-  // this module parses even before Three.js is loaded. Three.js is now fetched
-  // only when the user first enters 3D, keeping ~600 KB off the 2D-only load
-  // path. _initThreeObjects() runs once, from _initSceneShell(), after Three.js
-  // is confirmed ready. (Object bodies below sit one indent level shallow to
-  // keep this a minimal, low-risk diff.)
+  // this module parses even before Three.js is loaded. Three.js is fetched only
+  // when the user first enters 3D, keeping ~600 KB off the 2D-only load path.
+  // _initThreeObjects() runs once, from _initSceneShell(), after Three.js is
+  // confirmed ready.
   let MAT = null, BMAT = null;
   let _rotX = null, _projM = null, _localM = null, _scaleVec = null;
   let _threeObjectsReady = false;
@@ -177,7 +176,7 @@ var Landmarks3D = (() => {
     // Structural ribs / pilasters — slim near-white verticals
     waveRib: new THREE.MeshStandardMaterial({ color: 0xe7dcc4, metalness: 0.03, roughness: 0.82, side: THREE.DoubleSide }),
 
-    // ── Administration / landscape retaining berms (Family 1) ──
+    // Administration / landscape retaining berms (Family 1)
     // Pink Jodhpur-sandstone retaining wall (outer face)
     bermStone: new THREE.MeshStandardMaterial({ color: 0xc7a079, metalness: 0.03, roughness: 0.92, side: THREE.DoubleSide }),
     bermStoneTop: new THREE.MeshStandardMaterial({ color: 0xd8c2a2, metalness: 0.03, roughness: 0.85, side: THREE.DoubleSide }),
@@ -194,13 +193,10 @@ var Landmarks3D = (() => {
     _scaleVec = new THREE.Vector3();
   }
 
-  // ─────────────────────────────────────────────────────────────────────
-  // O-LANE / Y-LANE HOSTEL — closed rectangular ring with central courtyard
-  // ─────────────────────────────────────────────────────────────────────
-  // Close-up satellite shows each hostel is a CLOSED rectangular block
-  // with an internal courtyard (donut shape), not a comb. The previous
-  // front-facade design was right; we just need a proper back and sides
-  // forming the ring. 4 floors × 3.5 m = 14 m tall.
+  // O-LANE / Y-LANE HOSTEL — closed rectangular ring with central courtyard.
+  // Close-up satellite shows each hostel is a CLOSED rectangular block with an
+  // internal courtyard (donut shape), not a comb: a front facade plus a back
+  // and sides that close the ring. 4 floors × 3.5 m = 14 m tall.
   //
   //   ┌─────────────────────────┐
   //   │T▓▓▓▓ back wall ▓▓▓▓▓▓▓ T│      T = stair tower (full depth)
@@ -222,7 +218,7 @@ var Landmarks3D = (() => {
     const frontZ = bboxDepth / 2 - frontDepth / 2;
     const backZ  = -bboxDepth / 2 + backDepth / 2;
 
-    // ── FRONT facade (south wall, the photogenic side with entrance) ──
+    // FRONT facade (south wall, the photogenic side with entrance)
     const front = new THREE.Mesh(new THREE.BoxGeometry(length, height, frontDepth), MAT.hostelWall);
     front.position.set(0, height / 2, frontZ);
     g.add(front);
@@ -255,7 +251,7 @@ var Landmarks3D = (() => {
     canopyPosts.position.set(0, 1.7, canopyZ + 0.6);
     g.add(canopyPosts);
 
-    // ── BACK wall (north, simpler — same band rhythm, no pilasters)
+    // BACK wall (north, simpler — same band rhythm, no pilasters)
     const back = new THREE.Mesh(new THREE.BoxGeometry(length, height, backDepth), MAT.hostelWall);
     back.position.set(0, height / 2, backZ);
     g.add(back);
@@ -269,7 +265,7 @@ var Landmarks3D = (() => {
     backPara.position.set(0, height + 0.25, backZ);
     g.add(backPara);
 
-    // ── EAST + WEST side walls connecting front to back, closing the ring
+    // EAST + WEST side walls connecting front to back, closing the ring
     const sideDepth = bboxDepth - frontDepth - backDepth + 0.4;
     const sideCenterZ = (frontZ - frontDepth / 2 + backZ + backDepth / 2) / 2;
     const sideThickness = 7;
@@ -289,7 +285,7 @@ var Landmarks3D = (() => {
       g.add(sidePara);
     });
 
-    // ── End stair towers — full-depth on both ends, taller, with jali on the south face
+    // End stair towers — full-depth on both ends, taller, with jali on the south face
     const TOWER_HT = height + 1.3;
     [-(length / 2) + towerW / 2, (length / 2) - towerW / 2].forEach((tx) => {
       const tower = new THREE.Mesh(new THREE.BoxGeometry(towerW, TOWER_HT, bboxDepth), MAT.hostelWall);
@@ -305,12 +301,12 @@ var Landmarks3D = (() => {
       g.add(tPara);
     });
 
-    // ── Rooftop machine room above the front facade
+    // Rooftop machine room above the front facade
     const mech = new THREE.Mesh(new THREE.BoxGeometry(5.5, 2.5, 3.5), MAT.hostelWall);
     mech.position.set(length * 0.12, height + 1.25, frontZ);
     g.add(mech);
 
-    // ── Interior cross-beam — single wing of rooms spanning the courtyard
+    // Interior cross-beam — single wing of rooms spanning the courtyard
     // from front to back, dividing it into two halves (matches satellite).
     const beamInnerZmin = backZ + backDepth / 2;             // courtyard north edge
     const beamInnerZmax = frontZ - frontDepth / 2;           // courtyard south edge
@@ -335,9 +331,7 @@ var Landmarks3D = (() => {
     return g;
   }
 
-  // ─────────────────────────────────────────────────────────────────────
   // TYPE B QUARTERS  (Faculty Housing × 22) + GUEST HOUSE (VISITOR)
-  // ─────────────────────────────────────────────────────────────────────
   // Reference (aerial photos): a dense cluster of identical G+2 staff/
   // faculty-housing blocks with a pinwheel/H-shape footprint. Construction
   // reads as:
@@ -380,7 +374,7 @@ var Landmarks3D = (() => {
     const acMat = MAT.typeBAc ?? (MAT.typeBAc =
       new THREE.MeshStandardMaterial({ color: 0xc6c6c2, metalness: 0.4, roughness: 0.55 }));
 
-    // ── Pull the actual OSM polygon and convert to mesh-local meters ─
+    // Pull the actual OSM polygon and convert to mesh-local meters
     // Look-up happens at build time so the actual H/cross footprint is
     // extruded (no stylised rectangle). If the data isn't ready yet we
     // just return an empty group; landmarks-3d.js will retry on next
@@ -432,7 +426,7 @@ var Landmarks3D = (() => {
     const length = obb.tMax - obb.tMin;    // along principal axis
     const depth  = obb.wMax - obb.wMin;    // perpendicular
 
-    // ── A) Extrude the actual polygon for the main body ─────────────
+    // A) Extrude the actual polygon for the main body
     function shapeFromPoly(scale = 1, ox = 0, oy = 0) {
       const sh = new THREE.Shape();
       const [x0, y0] = polyXY[0];
@@ -452,7 +446,7 @@ var Landmarks3D = (() => {
     const body = new THREE.Mesh(bodyGeo, wallMat);
     g.add(body);
 
-    // ── A2) Balconies — projecting slabs + cane-railing bands on the longest
+    // A2) Balconies — projecting slabs + cane-railing bands on the longest
     //        outer facades, at each upper floor. Only the two longest edges
     //        get them (the photogenic fronts); they project OUTWARD along a
     //        straight wall so, unlike bands wrapping the whole outline, they
@@ -510,7 +504,7 @@ var Landmarks3D = (() => {
     // edges, as a line crossing the open courtyard). The plain sandstone
     // wall + bright white roof slab give the clean read the user asked for.
 
-    // ── B) White roof slab — the exact body polygon, extruded a little and
+    // B) White roof slab — the exact body polygon, extruded a little and
     //       lifted 5 cm over the body top face (the lift avoids z-fighting
     //       between the two coplanar surfaces). Using the same shape means
     //       no offset math that could self-intersect on the concave H-corners.
@@ -524,23 +518,21 @@ var Landmarks3D = (() => {
     slab.position.y = H + slabLift;
     g.add(slab);
 
-    // ── C) Parapet rim — intentionally omitted. Any thin band sitting proud
+    // C) Parapet rim — intentionally omitted. Any thin band sitting proud
     //       of the H-shaped wall reads as a slanting line from a straight-down
     //       map view, which clutters the rooftops. The white slab edge already
     //       gives a clean parapet read, so we leave the rim off.
 
-    // ── D) Window bays — omitted on purpose.
+    // D) Window bays — omitted on purpose.
     //
-    // Earlier revisions placed louvered window bays around every polygon
-    // edge so the facades read at street level, but at the typical map
-    // zoom (with a slight oblique pitch) the 3-floor stack on each edge
-    // rendered as a long dark stripe — and on the H-shape's *inner*
-    // courtyard walls the stripes became long slanting lines crossing the
-    // roof. Both effects fight against the clean sandstone-and-white-roof
-    // read the user asked for, so we leave the facades plain and rely on
-    // the stringcourses + cornice + parapet to carry the elevation detail.
-    // (The legacy placement function is kept commented out below in case
-    // street-view zooms eventually need it again.)
+    // Louvered window bays around every polygon edge make the facades read at
+    // street level, but at typical map zoom (with a slight oblique pitch) the
+    // 3-floor stack on each edge renders as a long dark stripe, and on the
+    // H-shape's *inner* courtyard walls those stripes become long slanting
+    // lines crossing the roof. Both fight the clean sandstone-and-white-roof
+    // look, so the facades stay plain and the stringcourses + cornice + parapet
+    // carry the elevation detail. The placement helper below is kept unused in
+    // case street-level zooms ever need it again.
     /* eslint-disable */
     function _unusedPlaceWindowsOnEdge(x0, y0, x1, y1) {
       // y0/y1 are polygon-Y; world Z = -y. Direction tangent (tx, tz) along
@@ -609,11 +601,9 @@ var Landmarks3D = (() => {
     // (windows intentionally not placed — see note above)
     /* eslint-enable */
 
-    // ── Rooftop-placement helpers ──────────────────────────────────
-    // Rooftop accessories were previously positioned from the oriented
-    // bounding box, which on a rotated or non-rectangular footprint let
-    // them hang off the roof edge. These helpers keep every accessory
-    // fully inside the actual polygon.
+    // Rooftop-placement helpers. Every accessory is kept inside the actual
+    // polygon: placing them off the oriented bounding box instead lets them
+    // hang over the roof edge on a rotated or non-rectangular footprint.
     const obbAngle = Math.atan2(obb.ay, obb.ax);   // building rotation (Y axis)
     function pointInPoly(px, py) {
       let inside = false;
@@ -647,7 +637,7 @@ var Landmarks3D = (() => {
       return [0, 0];                               // fallback: centroid
     }
 
-    // ── E) Stair-tower headhouses — rotated to the building angle and
+    // E) Stair-tower headhouses — rotated to the building angle and
     //       clamped so they never overhang the roof edge.
     const towerH = 3.0, towerW = 5.5, towerD = 5.5;
     const towerClear = Math.hypot(towerW, towerD) / 2 + 0.3;
@@ -667,7 +657,7 @@ var Landmarks3D = (() => {
       g.add(tCap);
     });
 
-    // ── F) Water tanks scattered along the principal axis, clamped inside.
+    // F) Water tanks scattered along the principal axis, clamped inside.
     const tankGeo = new THREE.CylinderGeometry(0.55, 0.55, 1.05, 10);
     const tankYBase = H + slabLift + slabH + 0.6;
     for (let i = 0; i < 6; i++) {
@@ -682,7 +672,7 @@ var Landmarks3D = (() => {
       g.add(t);
     }
 
-    // ── G) AC condenser boxes — near (but inside) the long parapets.
+    // G) AC condenser boxes — near (but inside) the long parapets.
     const acGeo = new THREE.BoxGeometry(0.9, 0.6, 0.7);
     for (let i = 0; i < 6; i++) {
       const tAxis = obb.tMin + (obb.tMax - obb.tMin) * (i + 0.5) / 6;
@@ -698,7 +688,7 @@ var Landmarks3D = (() => {
       }
     }
 
-    // ── H) Small mechanical-room box near the centre (already interior).
+    // H) Small mechanical-room box near the centre (already interior).
     const mech = new THREE.Mesh(new THREE.BoxGeometry(3.2, 1.4, 2.2), wallMat);
     mech.position.set(0, H + slabLift + slabH + 0.7, 0);
     mech.rotation.y = obbAngle;
@@ -711,9 +701,7 @@ var Landmarks3D = (() => {
     return g;
   }
 
-  // ─────────────────────────────────────────────────────────────────────
   // DEPT. MATHS / SOLA — single-storey courtyard halls with hipped metal roof
-  // ─────────────────────────────────────────────────────────────────────
   // Reference (drone + front photos): a large (~50 m) single-storey block of
   // rough-cut RED sandstone masonry wrapping a central open courtyard, capped
   // by a low-pitch light-grey CORRUGATED-METAL hipped roof that slopes from
@@ -734,7 +722,7 @@ var Landmarks3D = (() => {
     const roofMat   = MAT.metalRoof;
     const ridgeMat  = MAT.metalRidge;
 
-    // ── OSM polygon → local metres, centred on centroid ──────────────
+    // OSM polygon → local metres, centred on centroid
     const buildings = (typeof IITJData !== 'undefined' && IITJData.isReady?.())
       ? IITJData.getBuildings().features : [];
     const feat = buildings.find(f => String(f.properties.osm_id) === String(osmId));
@@ -766,19 +754,19 @@ var Landmarks3D = (() => {
       return sh;
     }
 
-    // ── Walls: ring (outer polygon with courtyard hole) extruded to wallH
+    // Walls: ring (outer polygon with courtyard hole) extruded to wallH
     const wGeo = new THREE.ExtrudeGeometry(ringShape(poly, court), { depth: wallH, bevelEnabled: false, steps: 1 });
     wGeo.rotateX(-Math.PI / 2);
     g.add(new THREE.Mesh(wGeo, wallMat));
 
-    // ── Salmon plinth band — slightly larger ring, low, at the base
+    // Salmon plinth band — slightly larger ring, low, at the base
     const plGeo = new THREE.ExtrudeGeometry(ringShape(scaleP(1.015), scaleP(courtyardFrac * 0.985)), { depth: 0.9, bevelEnabled: false, steps: 1 });
     plGeo.rotateX(-Math.PI / 2);
     const plinth = new THREE.Mesh(plGeo, plinthMat);
     plinth.position.y = 0.001;
     g.add(plinth);
 
-    // ── Hipped ring roof: outer eave (overhung) → ridge → courtyard eave
+    // Hipped ring roof: outer eave (overhung) → ridge → courtyard eave
     const eaveY = wallH - 0.10;
     const ridgeY = wallH + roofRise;
     const outerEave = scaleP(1.07);
@@ -827,7 +815,7 @@ var Landmarks3D = (() => {
       g.add(cap);
     }
 
-    // ── Gabled entrance porch anchored exactly where the access path meets
+    // Gabled entrance porch anchored exactly where the access path meets
     //    the building. The campus paths dead-end right at the entrance node
     //    (for both halls the path terminus coincides with footprint vertex
     //    v2 — the centre kink of the south facade), so we anchor the porch at
@@ -899,9 +887,7 @@ var Landmarks3D = (() => {
     return g;
   }
 
-  // ─────────────────────────────────────────────────────────────────────
   // G-BLOCK HOSTELS (G1 / G4) — closed sandstone courtyard ring
-  // ─────────────────────────────────────────────────────────────────────
   // Top-view drone photo: a square ring of 4-storey wings wrapping a
   // central courtyard that holds a sports court, with stair towers
   // projecting above the roofline at the corners and rooftop water tanks.
@@ -1033,7 +1019,7 @@ var Landmarks3D = (() => {
     wWing.position.set(-(halfX - wingD / 2), 0, 0);
     g.add(wWing);
 
-    // ── Optional central N-S cross-wing dividing a wide courtyard into two
+    // Optional central N-S cross-wing dividing a wide courtyard into two
     //    (the bigger G/B/I hostels have a central spine in the drone photo).
     if (opts.crossWing) {
       const innerDepth = depth - 2 * wingD;   // courtyard N-S span
@@ -1057,7 +1043,7 @@ var Landmarks3D = (() => {
       // (No windows on the central cross-wing — it reads as a plain spine.)
     }
 
-    // ── Corner stair towers — taller, capped, projecting above the roof
+    // Corner stair towers — taller, capped, projecting above the roof
     const TWR   = wingD + 0.6;
     const TWR_H = H + 2.4;
     [[halfX - TWR / 2,  halfZ - TWR / 2], [-(halfX - TWR / 2),  halfZ - TWR / 2],
@@ -1075,7 +1061,7 @@ var Landmarks3D = (() => {
       g.add(tv);
     });
 
-    // ── Central courtyard floor with a sports court
+    // Central courtyard floor with a sports court
     const courtX = size - 2 * wingD - 1.0;
     const courtZ = depth - 2 * wingD - 1.0;
     const court = new THREE.Mesh(new THREE.BoxGeometry(courtX, 0.12, courtZ), MAT.gCourt);
@@ -1090,7 +1076,7 @@ var Landmarks3D = (() => {
     cl2.position.set(0, 0.07, 0);
     g.add(cl2);
 
-    // ── Rooftop water tanks on a few wing roofs (white + green, per photo)
+    // Rooftop water tanks on a few wing roofs (white + green, per photo)
     const tankSpots = [
       [ halfX * 0.45,  halfZ - wingD / 2, 0],
       [-halfX * 0.5,  -(halfZ - wingD / 2), 1],
@@ -1103,7 +1089,7 @@ var Landmarks3D = (() => {
       g.add(tank);
     });
 
-    // ── A couple of rooftop stair-head boxes (mech rooms) for roof texture
+    // A couple of rooftop stair-head boxes (mech rooms) for roof texture
     [[0, halfZ - wingD / 2], [-halfX * 0.3, -(halfZ - wingD / 2)]].forEach(([mx, mz]) => {
       const mech = new THREE.Mesh(new THREE.BoxGeometry(3.2, 2.0, 3.0), MAT.gStone);
       mech.position.set(mx, H + 1.0, mz);
@@ -1116,9 +1102,7 @@ var Landmarks3D = (() => {
     return g;
   }
 
-  // ─────────────────────────────────────────────────────────────────────
   // MESS / DINING BLOCK (Old Mess + New Mess) — solid sandstone-brick block
-  // ─────────────────────────────────────────────────────────────────────
   // Reference photos: a ~38×34 m solid G+2 block (NOT a courtyard) of
   // reddish Jodhpur sandstone-brick, with tall perforated jali window bays
   // framed by pilasters on every face, and a big flat white roof crowded
@@ -1137,7 +1121,7 @@ var Landmarks3D = (() => {
     const entranceSide = opts.entranceSide ?? 'front';
     const g = new THREE.Group();
 
-    // ── Main solid block
+    // Main solid block
     const block = new THREE.Mesh(new THREE.BoxGeometry(size, H, depth), MAT.messBrick);
     block.position.y = H / 2;
     g.add(block);
@@ -1160,7 +1144,7 @@ var Landmarks3D = (() => {
     para.position.y = H + 0.425;
     g.add(para);
 
-    // ── Jali window bays on every face. Pilasters split each wall into
+    // Jali window bays on every face. Pilasters split each wall into
     //    bays; each bay holds a tall perforated jali panel framed by a
     //    lighter reveal. `entranceBay` leaves the centre bay of the front
     //    face open at ground level for the entrance.
@@ -1222,13 +1206,13 @@ var Landmarks3D = (() => {
     addFace(depth, size / 2, 'z', +1, entranceSide === 'right');    // right (+X)
     addFace(depth, -size / 2, 'z', -1, entranceSide === 'left');    // left (-X)
 
-    // ── Roof slab (slightly inset, white) so the roof reads distinct
+    // Roof slab (slightly inset, white) so the roof reads distinct
     const roof = new THREE.Mesh(new THREE.BoxGeometry(size - 0.4, 0.12, depth - 0.4), MAT.messRoof);
     roof.position.y = H + 0.06;
     g.add(roof);
     const RY = H + 0.12;   // roof working height
 
-    // ── Roof plant clustered along one edge (matches photo). Coordinates
+    // Roof plant clustered along one edge (matches photo). Coordinates
     //    are in roof-local metres; cluster sits toward -X / +Z corner.
     // AHU / cooler boxes in a row
     const ahuMats = [MAT.ahuTeal, MAT.ahuBlue, MAT.ahuTeal, MAT.ahuBlue, MAT.ahuTeal];
@@ -1287,9 +1271,7 @@ var Landmarks3D = (() => {
     return g;
   }
 
-  // ─────────────────────────────────────────────────────────────────────
   // SME & MBA — School of Management blocks (matches drone + front photos)
-  // ─────────────────────────────────────────────────────────────────────
   // Reference photos: warm cream-plaster prefab academic blocks with a bright
   // WHITE corrugated-metal GABLE roof (deep eave overhang), white-framed
   // windows each capped by a slim concrete sunshade (chajja), rows of
@@ -1528,9 +1510,7 @@ var Landmarks3D = (() => {
     return g;
   }
 
-  // ─────────────────────────────────────────────────────────────────────
   // BASIC LAB — three-part sandstone academic block (matches drone photo)
-  // ─────────────────────────────────────────────────────────────────────
   // The real building reads as three DIFFERENT volumes along its front:
   //   • LEFT WING  — tall, clad in fine perforated jali screens
   //   • CENTRE     — a LOWER recessed entrance bay: white concrete pergola
@@ -1546,7 +1526,7 @@ var Landmarks3D = (() => {
     const g = new THREE.Group();
     const FLOOR_H = 3.7;
 
-    // ── Per-face treatments ────────────────────────────────────────────
+    // Per-face treatments
     // Shared geometry helper: resolve a face into its constant coord,
     // outward sign, run-axis and wall length.
     function faceInfo(cx, cz, w, d, side) {
@@ -1728,7 +1708,7 @@ var Landmarks3D = (() => {
     addBlock(-17.55, -10.6, 16.0, 23.0, H_TALL,
       { '-x': 'jali', '+x': 'jali', '+z': 'jali', '-z': 'jali' }, true);
 
-    // ── White concrete pergola over the entrance, on the entrance bay's
+    // White concrete pergola over the entrance, on the entrance bay's
     //    EAST (+Z) face, facing the plaza.
     {
       const ex = -3.25, ez = -0.5 + 21.0 / 2;   // entrance bay east face (z=+10)
@@ -1755,9 +1735,7 @@ var Landmarks3D = (() => {
     return g;
   }
 
-  // ─────────────────────────────────────────────────────────────────────
   // LHC 1 — Lecture Hall Complex (one continuous wide sandstone building)
-  // ─────────────────────────────────────────────────────────────────────
   // Reference photos (front = WEST face):
   //   ONE connected building ~82 m wide whose CENTRE steps BACK and DOWN,
   //   flanked by two TALL wings (flush/connected through the back mass):
@@ -1865,25 +1843,25 @@ var Landmarks3D = (() => {
     // Whole model sized + centred to clear all surrounding roads (verified
     // ≥8 m clearance): bounding box meshX[-35,35], meshZ[-12,20].
 
-    // ── BACK MASS — full width + deep, ties the whole building together
+    // BACK MASS — full width + deep, ties the whole building together
     addBlock(0, 11, 70, 18, H_WING, true);       // meshX[-35,35], meshZ[2,20]
 
-    // ── NORTH WING (front, +X / left in photo): blank with jali base
+    // NORTH WING (front, +X / left in photo): blank with jali base
     addBlock(23.5, -3, 23, 18, H_WING, false);   // meshX[12,35], meshZ[-12,6]
     addBlank(23.5, -3, 23, 18, H_WING, '-z');
     addGrid (23.5, -3, 23, 18, H_WING, '-z', 'jali', 3, 1);   // jali base only
     addBlank(23.5, -3, 23, 18, H_WING, '+x');
 
-    // ── SOUTH WING (front, -X / right in photo): regular window grid
+    // SOUTH WING (front, -X / right in photo): regular window grid
     addBlock(-23.5, -3, 23, 18, H_WING, false);  // meshX[-35,-12], meshZ[-12,6]
     addGrid (-23.5, -3, 23, 18, H_WING, '-z', 'window', 3);
     addGrid (-23.5, -3, 23, 18, H_WING, '-x', 'window', 3);
 
-    // ── CENTRE LOWER (recessed 4 m + one storey lower): jali entrance wall
+    // CENTRE LOWER (recessed 4 m + one storey lower): jali entrance wall
     addBlock(0, 0, 24, 16, H_LOW, false);        // front at meshZ=-8
     addGrid (0, 0, 24, 16, H_LOW, '-z', 'jali', 2);
 
-    // ── CENTRE UPPER (set-back taller wall carrying the two red panels)
+    // CENTRE UPPER (set-back taller wall carrying the two red panels)
     addBlock(0, 2, 22, 10, H_UP, false);         // front at meshZ=-3
     [-4.5, 4.5].forEach((rx) => {
       const r = new THREE.Mesh(new THREE.BoxGeometry(2.4, 1.5, 0.25), redMat);
@@ -1891,11 +1869,11 @@ var Landmarks3D = (() => {
       g.add(r);
     });
 
-    // ── Stair towers rising behind the centre
+    // Stair towers rising behind the centre
     addBlock(-6, 5, 7, 7, H_TWR, false);
     addBlock( 6, 5, 7, 7, H_TWR, false);
 
-    // ── WHITE PORTAL — one long horizontal beam on tall vertical columns,
+    // WHITE PORTAL — one long horizontal beam on tall vertical columns,
     //    standing in front of the recessed centre (between the two wings).
     {
       const PZ = -11.0;             // just in front of the wings' west face (-12)
@@ -1926,9 +1904,7 @@ var Landmarks3D = (() => {
     return g;
   }
 
-  // ─────────────────────────────────────────────────────────────────────
   // LHC 2 — Lecture Hall Complex II
-  // ─────────────────────────────────────────────────────────────────────
   // Reference photos (front = NNE face, bearing ~17.7°):
   //   A long G+1 (two-storey) block, ~53 m wide × ~42 m deep. Salmon-pink
   //   cement frame (pilasters + floor bands + parapet coping) over grey-tan
@@ -2033,7 +2009,7 @@ var Landmarks3D = (() => {
 
     const H_BAR = 9.5, H_HALL = 10.5, H_TWR = 12.8;
 
-    // ── REAR HALL — deeper, one storey taller lecture-hall mass
+    // REAR HALL — deeper, one storey taller lecture-hall mass
     addBlock(0, 7, 53, 28, H_HALL);
     addFacade(0, 7, 53, 28, H_HALL, '+z', 2, true);   // back (SSW)
     addFacade(0, 7, 53, 28, H_HALL, '+x', 2, true);   // ESE end
@@ -2048,12 +2024,12 @@ var Landmarks3D = (() => {
       ac.position.set(tx, H_HALL + 0.9, 13); g.add(ac);
     });
 
-    // ── FRONT BAR — two-storey photographed facade (right of the tower)
+    // FRONT BAR — two-storey photographed facade (right of the tower)
     addBlock(5.5, -14, 42, 14, H_BAR);
     addFacade(5.5, -14, 42, 14, H_BAR, '-z', 2, true, [-3.6, 3.6]);  // front (NNE)
     addFacade(5.5, -14, 42, 14, H_BAR, '+x', 2, false);             // ESE end
 
-    // ── STAIR / LIFT TOWER — tall blank block at the WNW (-X) end
+    // STAIR / LIFT TOWER — tall blank block at the WNW (-X) end
     addBlock(-21, -14, 11, 14, H_TWR);
     addFacade(-21, -14, 11, 14, H_TWR, '-x', 2, false);
     // tall blank pink panel that reads as the stair head on the front face
@@ -2062,7 +2038,7 @@ var Landmarks3D = (() => {
       panel.position.set(-21, (H_TWR - 1.0)/2 + 0.5, -21 - 0.09); g.add(panel);
     }
 
-    // ── CENTRAL ENTRANCE — projecting canopy, sign, glazed doors, steps, ramp
+    // CENTRAL ENTRANCE — projecting canopy, sign, glazed doors, steps, ramp
     {
       const ex = 0, FZ = -21;
       // light reveal surround + recessed dark glazed double door
@@ -2106,9 +2082,7 @@ var Landmarks3D = (() => {
     return g;
   }
 
-  // ─────────────────────────────────────────────────────────────────────
   // CASE — Centre for Advance Scientific Equipment (U-plan academic block)
-  // ─────────────────────────────────────────────────────────────────────
   // Reference photos: a U-shaped G+3 building — two tall wings (buff
   // sandstone with salmon-PINK floor bands + pink pilasters and a grid of
   // windows) joined by a back spine, with a LOWER central entrance bay
@@ -2218,9 +2192,7 @@ var Landmarks3D = (() => {
     return g;
   }
 
-  // ─────────────────────────────────────────────────────────────────────
   // AAKASH SPORTS COMPLEX — long tall indoor sports hall
-  // ─────────────────────────────────────────────────────────────────────
   // Reference photos: one large rectangular hall (~85 × 38 m, ~13 m tall),
   // salmon-PINK plaster walls divided into tall bays by pink pilasters,
   // each bay carrying horizontal REDDISH-BRICK bands; a brick plinth at the
@@ -2235,24 +2207,24 @@ var Landmarks3D = (() => {
     const g = new THREE.Group();
     const L = 85, D = 38, H = 13;   // hall length, depth, wall height
 
-    // ── Main hall volume (pink plaster)
+    // Main hall volume (pink plaster)
     const hall = new THREE.Mesh(new THREE.BoxGeometry(L, H, D), MAT.akPink);
     hall.position.y = H / 2;
     g.add(hall);
 
-    // ── Brick plinth
+    // Brick plinth
     const plinth = new THREE.Mesh(new THREE.BoxGeometry(L + 0.3, 1.6, D + 0.3), MAT.akBrick);
     plinth.position.y = 0.8;
     g.add(plinth);
 
-    // ── Horizontal reddish-brick bands wrapping the hall (3 courses)
+    // Horizontal reddish-brick bands wrapping the hall (3 courses)
     [0.32, 0.55, 0.78].forEach((fr) => {
       const band = new THREE.Mesh(new THREE.BoxGeometry(L + 0.18, 0.5, D + 0.18), MAT.akBrick);
       band.position.y = H * fr;
       g.add(band);
     });
 
-    // ── Pink pilasters dividing the long (±Z) walls into bays
+    // Pink pilasters dividing the long (±Z) walls into bays
     const nBays = 10;
     const bayW = L / nBays;
     const longFaces = [D / 2, -D / 2];
@@ -2280,7 +2252,7 @@ var Landmarks3D = (() => {
       }
     }
 
-    // ── Dark-blue steel fascia band running along the top of the long walls
+    // Dark-blue steel fascia band running along the top of the long walls
     [D / 2, -D / 2].forEach((fz, s) => {
       const os = s === 0 ? 1 : -1;
       const fascia = new THREE.Mesh(new THREE.BoxGeometry(L + 1.0, 0.6, 0.4), MAT.akBlue);
@@ -2296,7 +2268,7 @@ var Landmarks3D = (() => {
       }
     });
 
-    // ── Flat white roof, overhanging the long sides (on the brackets)
+    // Flat white roof, overhanging the long sides (on the brackets)
     const roof = new THREE.Mesh(new THREE.BoxGeometry(L + 1.2, 0.5, D + 3.0), MAT.akRoof);
     roof.position.y = H + 0.85;
     g.add(roof);
@@ -2308,7 +2280,7 @@ var Landmarks3D = (() => {
       g.add(trim);
     });
 
-    // ── The gable ends are plain pink + brick walls (NO grand entrance).
+    // The gable ends are plain pink + brick walls (NO grand entrance).
     //    The only public gate is a SMALL RED GATE on the FRONT long side
     //    (facing the sports ground), near the SW end, with a small low
     //    structure (utility annex) adjacent to it — per the reference photo.
@@ -2345,7 +2317,7 @@ var Landmarks3D = (() => {
       }
     }
 
-    // ── A few small roof vents
+    // A few small roof vents
     [[-25, 0], [0, 5], [25, -4]].forEach(([vx, vz]) => {
       const v = new THREE.Mesh(new THREE.BoxGeometry(2.5, 1.0, 2.5), MAT.akRoof);
       v.position.set(vx, H + 1.6, vz);
@@ -2355,9 +2327,7 @@ var Landmarks3D = (() => {
     return g;
   }
 
-  // ─────────────────────────────────────────────────────────────────────
   // COMPUTER CENTRE — sandstone block with white portal frame entrance
-  // ─────────────────────────────────────────────────────────────────────
   // Footprint ~39 × 42 m. 3 floors (~13 m). Symmetric stepped massing
   // with a central tall entrance volume flanked by two lower side wings,
   // joined by a tall WHITE structural portal frame at the entrance.
@@ -2417,9 +2387,7 @@ var Landmarks3D = (() => {
     return g;
   }
 
-  // ─────────────────────────────────────────────────────────────────────
   // JODHPUR CLUB — H-plan two-storey club block with sunken courtyard
-  // ─────────────────────────────────────────────────────────────────────
   // From drone photographs: two parallel 2-storey wings (reddish Jodhpur
   // sandstone-brick walls + salmon-PINK plastered floor bands, pilasters and
   // top cornice) joined by a slightly lower FRONT bar at the south, with a
@@ -2443,7 +2411,7 @@ var Landmarks3D = (() => {
     const wingW = 23, bridgeD = 16;
     const courtW = W - 2*wingW;
 
-    // ── Ground apron + plinth so the building reads as sitting ON the ground
+    // Ground apron + plinth so the building reads as sitting ON the ground
     //    (not clipping into it). The pink plinth wraps the whole footprint.
     const apron = new THREE.Mesh(new THREE.BoxGeometry(W + 6, 0.3, D + 6), brickD);
     apron.position.set(0, 0.15, 0); g.add(apron);
@@ -2456,7 +2424,7 @@ var Landmarks3D = (() => {
     bg.position.y = 1.45;
     g.add(bg);
 
-    // ── Wing factory (left at cx=-W/2+wingW/2, right at +W/2-wingW/2) ──
+    // Wing factory (left at cx=-W/2+wingW/2, right at +W/2-wingW/2)
     function buildWing(cx) {
       const wg = new THREE.Group();
       // 2-storey brick volume
@@ -2495,7 +2463,7 @@ var Landmarks3D = (() => {
     bg.add(buildWing(-W/2 + wingW/2));
     bg.add(buildWing(+W/2 - wingW/2));
 
-    // ── Front bridge (south, connects wings; slightly lower than wings) ──
+    // Front bridge (south, connects wings; slightly lower than wings)
     const bH = H * 0.72;
     const bridge = new THREE.Mesh(new THREE.BoxGeometry(W, bH, bridgeD), brick);
     bridge.position.set(0, bH/2, D/2 - bridgeD/2); bg.add(bridge);
@@ -2506,7 +2474,7 @@ var Landmarks3D = (() => {
     const bRoof = new THREE.Mesh(new THREE.BoxGeometry(W + 0.3, 0.4, bridgeD + 0.3), roof);
     bRoof.position.set(0, bH + 0.2, D/2 - bridgeD/2); bg.add(bRoof);
 
-    // ── White concrete entrance pergola (south, projecting +Z) ──
+    // White concrete entrance pergola (south, projecting +Z)
     const pW = 16, pD = 5.5, pH = 4.6;
     const pZ = D/2 + pD/2;
     // Top slab
@@ -2526,7 +2494,7 @@ var Landmarks3D = (() => {
       s.position.set(0, 0.11 + i*0.22, D/2 + pD + 0.5 + i*0.8); bg.add(s);
     }
 
-    // ── Sunken central courtyard plaza ──
+    // Sunken central courtyard plaza
     const courtCZ = (-(D/2 - bridgeD) + (-D/2 + 11)) / 2;   // centre between bridge and rear pad
     const courtCD = (D/2 - bridgeD) - (-D/2 + 11);
     const plaza = new THREE.Mesh(new THREE.BoxGeometry(courtW - 1, 0.25, courtCD), brickD);
@@ -2538,11 +2506,11 @@ var Landmarks3D = (() => {
       s.position.set(0, sh/2 + i*sh, D/2 - bridgeD - 0.7 - i*sd); bg.add(s);
     }
 
-    // ── Rear (north) plaza pad ──
+    // Rear (north) plaza pad
     const np = new THREE.Mesh(new THREE.BoxGeometry(courtW + 4, 0.55, 11), brickD);
     np.position.set(0, 0.275, -D/2 + 5.5); bg.add(np);
 
-    // ── AC condenser units on the west wall of left wing ──
+    // AC condenser units on the west wall of left wing
     for (let i = 0; i < 7; i++) {
       const ac = new THREE.Mesh(new THREE.BoxGeometry(1.45, 1.15, 0.7), ahu);
       ac.position.set(-W/2 - 0.4, H * 0.55 + 0.2, -10 + i * 2.6); bg.add(ac);
@@ -2551,7 +2519,7 @@ var Landmarks3D = (() => {
       br.position.set(-W/2 - 0.1, H * 0.55 + 0.2, -10 + i * 2.6); bg.add(br);
     }
 
-    // ── Solar arrays on the wing roofs ──
+    // Solar arrays on the wing roofs
     function addSolar(cx) {
       for (let i = 0; i < 3; i++) for (let j = 0; j < 2; j++) {
         const p = new THREE.Mesh(new THREE.BoxGeometry(3.4, 0.12, 1.95), solar);
@@ -2566,7 +2534,7 @@ var Landmarks3D = (() => {
     const stairBox = new THREE.Mesh(new THREE.BoxGeometry(2.2, 1.6, 2.2), brickD);
     stairBox.position.set(-W/2 + 4, H + 0.8 + 0.8, -D/2 + 4); bg.add(stairBox);
 
-    // ── Window grids on facades (jali rhythm) ──
+    // Window grids on facades (jali rhythm)
     function addWindows(cx, fz, count, sign) {
       for (let r = 0; r < 2; r++) for (let c = 0; c < count; c++) {
         const winW = 1.35, winH = 1.55;
@@ -2587,7 +2555,7 @@ var Landmarks3D = (() => {
     // Front bridge inner (courtyard-facing) windows
     addWindows(0, D/2 - bridgeD - 0.05, 5, -1);
 
-    // ── Pink vertical pilasters on south wing faces (front) ──
+    // Pink vertical pilasters on south wing faces (front)
     [-W/2 + wingW/2, +W/2 - wingW/2].forEach(cx => {
       for (let i = -3; i <= 3; i++) {
         const pil = new THREE.Mesh(new THREE.BoxGeometry(0.4, H, 0.25), pink);
@@ -2595,7 +2563,7 @@ var Landmarks3D = (() => {
       }
     });
 
-    // ── Ground-level entrance steps (descending from plinth to ground) ──
+    // Ground-level entrance steps (descending from plinth to ground)
     // These sit at the GROUND (not lifted with bg), and rise UP to the plinth.
     for (let i = 0; i < 4; i++) {
       const sw = pW + 2 + i*0.8, sh = 0.36, sd = 0.9;
@@ -2606,9 +2574,7 @@ var Landmarks3D = (() => {
     return g;
   }
 
-  // ─────────────────────────────────────────────────────────────────────
   // PHC (Primary Health Centre) — E-plan single-storey solar-clad clinic
-  // ─────────────────────────────────────────────────────────────────────
   // From drone photographs: an E-shape footprint with three horizontal
   // wings (top + middle + bottom, running east-west) connected by a
   // vertical spine on the east side. The middle wing is SHORTER (extends
@@ -2637,7 +2603,7 @@ var Landmarks3D = (() => {
     const spineW = 6;                   // east-side vertical spine width
     const midLen = W - 18;              // middle wing is shorter
 
-    // ── Apron + plinth so the building sits ON the ground ──
+    // Apron + plinth so the building sits ON the ground
     const apron = new THREE.Mesh(new THREE.BoxGeometry(W + 6, 0.3, D + 6), brickD);
     apron.position.set(0, 0.15, 0); g.add(apron);
     const plinth = new THREE.Mesh(new THREE.BoxGeometry(W + 1.2, 0.8, D + 1.2), pink);
@@ -2646,7 +2612,7 @@ var Landmarks3D = (() => {
     plinthTop.position.set(0, 1.01, 0); g.add(plinthTop);
     const bg = new THREE.Group(); bg.position.y = 1.07; g.add(bg);
 
-    // ── Jali (perforated-louver) window in a recessed light reveal ──
+    // Jali (perforated-louver) window in a recessed light reveal
     function jali(face, x, z, y, w, h) {
       const ax = (face === 'x+' || face === 'x-');
       const os = (face === 'z+' || face === 'x+') ? 1 : -1;
@@ -2675,7 +2641,7 @@ var Landmarks3D = (() => {
       }
     }
 
-    // ── Wing factory: a horizontal bar (E-W) of given length, centered at cx ──
+    // Wing factory: a horizontal bar (E-W) of given length, centered at cx
     function buildWing(cz, len, cx) {
       const wall = new THREE.Mesh(new THREE.BoxGeometry(len, H, barD), brick);
       wall.position.set(cx, H/2, cz); bg.add(wall);
@@ -2712,7 +2678,7 @@ var Landmarks3D = (() => {
     buildWing(midZ, midLen, (W - midLen)/2);      // middle wing — shorter, east-aligned
     buildWing(botZ, W,      0);                   // front wing — full length
 
-    // ── East-side vertical spine (closes the E-shape on the east) ──
+    // East-side vertical spine (closes the E-shape on the east)
     const spine = new THREE.Mesh(new THREE.BoxGeometry(spineW, H, D), brick);
     spine.position.set(W/2 - spineW/2, H/2, 0); bg.add(spine);
     const spineCor = new THREE.Mesh(new THREE.BoxGeometry(spineW + 0.25, 0.4, D + 0.25), pink);
@@ -2722,7 +2688,7 @@ var Landmarks3D = (() => {
     const sePara = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.6, D + 0.5), pink);
     sePara.position.set(W/2 + 0.1, H + 0.65, 0); bg.add(sePara);
 
-    // ── Taller utility block at the back-east corner (small high windows) ──
+    // Taller utility block at the back-east corner (small high windows)
     {
       const ubW = 13, ubD = 13, ubH = 6.8;
       const ubx = W/2 - ubW/2, ubz = -D/2 + ubD/2;
@@ -2736,7 +2702,7 @@ var Landmarks3D = (() => {
       jaliRow('z-', ubx, ubz - ubD/2, ubW - 4, 2, ubH - 1.8, 1.0, 1.2);   // north face
     }
 
-    // ── Dense solar PV arrays on every roof (the building's signature) ──
+    // Dense solar PV arrays on every roof (the building's signature)
     // Long rows of tilted dark-blue panels on a light support rail.
     function solarField(cx, cz, lenX, lenZ, rows) {
       const rowGap = lenZ / rows, panelD = rowGap * 0.78;
@@ -2756,7 +2722,7 @@ var Landmarks3D = (() => {
     solarField((W - midLen)/2, midZ, midLen - 4, barD - 1.5, 2);
     solarField(0, botZ, W - 5, barD - 1.5, 2);
 
-    // ── White concrete pergola colonnade entrance (front of bottom wing) ──
+    // White concrete pergola colonnade entrance (front of bottom wing)
     const pgW = 22, pgD = 5.0, pgH = 4.4;
     const pgZ = D/2 + pgD/2;
     const pgTop = new THREE.Mesh(new THREE.BoxGeometry(pgW + 0.8, 0.45, pgD + 0.3), white);
@@ -2785,7 +2751,7 @@ var Landmarks3D = (() => {
       new THREE.MeshStandardMaterial({ color: 0x3c4b52, metalness: 0.5, roughness: 0.3 }));
     door.position.set(0, 1.7, D/2 - 0.12); bg.add(door);
 
-    // ── Jali window grid (front, back, ends + courtyard faces) ──
+    // Jali window grid (front, back, ends + courtyard faces)
     const wy = 2.5, ww = 1.2, wh = 1.9;
     jaliRow('z+', -21, botZ, 18, 5, wy, ww, wh);     // front, left of entrance
     jaliRow('z+',  21, botZ, 18, 5, wy, ww, wh);     // front, right of entrance
@@ -2797,7 +2763,7 @@ var Landmarks3D = (() => {
     jaliRow('x-', -W/2, botZ, barD - 3, 2, wy, ww, wh);  // west gable, front wing
     jaliRow('x-', -W/2, topZ, barD - 3, 2, wy, ww, wh);  // west gable, back wing
 
-    // ── Landscape courtyards (between wings on the west side) ──
+    // Landscape courtyards (between wings on the west side)
     [topZ + barD/2, midZ + barD/2].forEach((zFrom) => {
       const zTo = zFrom + (D - 3*barD)/2;
       const cyCZ = (zFrom + zTo) / 2, cyD = zTo - zFrom;
@@ -2805,7 +2771,7 @@ var Landmarks3D = (() => {
       floor.position.set(-(W - midLen)/2 - 2, 0.075, cyCZ); bg.add(floor);
     });
 
-    // ── Brick-paved forecourt + approach steps in front of the pergola ──
+    // Brick-paved forecourt + approach steps in front of the pergola
     const court = new THREE.Mesh(new THREE.BoxGeometry(pgW + 8, 0.1, 14), brickD);
     court.position.set(0, 0.16, D/2 + pgD + 7.5); g.add(court);
     for (let i = 0; i < 3; i++) {
@@ -2817,9 +2783,7 @@ var Landmarks3D = (() => {
     return g;
   }
 
-  // ─────────────────────────────────────────────────────────────────────
   // CHANAKYA COMPLEX — IIT-J Administrative Block
-  // ─────────────────────────────────────────────────────────────────────
   // Long low sandstone facade with a CURVED sloping roof cornice, a long
   // recessed entrance protected by a WHITE concrete portico made of two
   // tall columns supporting a series of horizontal beams. A small clock
@@ -2841,7 +2805,7 @@ var Landmarks3D = (() => {
                                      : portalSide === 'west' ? 'east' : null);
     const g = new THREE.Group();
 
-    // ── Main sandstone block
+    // Main sandstone block
     const block = new THREE.Mesh(new THREE.BoxGeometry(length, height, depth), MAT.sandstone);
     block.position.set(0, height / 2, 0);
     g.add(block);
@@ -2854,7 +2818,7 @@ var Landmarks3D = (() => {
       g.add(band);
     }
 
-    // ── Curved sloping cornice — approximated by three stepped slabs of
+    // Curved sloping cornice — approximated by three stepped slabs of
     // decreasing width to evoke the curved roofline visible in the photo
     const corniceSteps = [
       { w: length + 0.6, h: 0.6,  yo: 0.0 },
@@ -2867,7 +2831,7 @@ var Landmarks3D = (() => {
       g.add(slab);
     }
 
-    // ── White entrance portico — two tall front columns + a row of
+    // White entrance portico — two tall front columns + a row of
     // horizontal beams running the full portico width. Built in a sub-
     // group facing +Z, then translated to the requested face and rotated.
     if (portal) {
@@ -2926,14 +2890,12 @@ var Landmarks3D = (() => {
       g.add(porticoG);
     }
 
-    // ─────────────────────────────────────────────────────────────
     // Reference-photo detailing (IIT-J main administrative facade):
     //   (a) a striated elevation of vertical cream fins, and
     //   (b) a bold WHITE angular end-wing — a solid white stair-core
     //       tower topped by a slanted white ramp-roof — where the block
     //       terminates. Placed on the short end OPPOSITE the courtyard
     //       portico so the two wings bookend the central plaza.
-    // ─────────────────────────────────────────────────────────────
     const FIN     = new THREE.MeshStandardMaterial({ color: 0xd6be96, metalness: 0.04, roughness: 0.80 });
     const wingSgn = outerEnd === 'east' ? 1 : outerEnd === 'west' ? -1 : 0;
     const END_W   = Math.min(7, length * 0.18);    // white end-tower width
@@ -2990,9 +2952,7 @@ var Landmarks3D = (() => {
     return g;
   }
 
-  // ─────────────────────────────────────────────────────────────────────
   // IIT-J NAME CANOPY — curved sandstone arch in front of Chanakya
-  // ─────────────────────────────────────────────────────────────────────
   // Standalone landmark: two thick sandstone columns supporting a curved
   // canopy carrying the "INDIAN INSTITUTE OF TECHNOLOGY JODHPUR" sign.
   // Sits in the courtyard space between OoA and OoS.
@@ -3052,9 +3012,7 @@ var Landmarks3D = (() => {
     return g;
   }
 
-  // ─────────────────────────────────────────────────────────────────────
   // IITJ FOUNTAIN — circular sandstone basin + interlocking chrome rings
-  // ─────────────────────────────────────────────────────────────────────
   function buildFountain() {
     const g = new THREE.Group();
 
@@ -3082,7 +3040,7 @@ var Landmarks3D = (() => {
     water.position.y = 0.9;
     g.add(water);
 
-    // ── Sculpture: interlocking polished chrome rings (per reference photo)
+    // Sculpture: interlocking polished chrome rings (per reference photo)
     // Two large vertical tori at perpendicular axes form the dramatic
     // intertwined silhouette; a third smaller diagonal ring adds richness.
     const baseY  = 1.0;       // top of basin
@@ -3119,10 +3077,8 @@ var Landmarks3D = (() => {
     return g;
   }
 
-  // ─────────────────────────────────────────────────────────────────────
   // PRITHVI MISSILE — upright missile on a low pedestal with garden walls
-  // ─────────────────────────────────────────────────────────────────────
-  // ── Procedural builder: T-72 Ajeya Display Tank ──────────────────────
+  // Procedural builder: T-72 Ajeya Display Tank
   // OSM way 1412392546 — concrete pedestal near the south main entrance.
   // Tank model oriented with gun barrel pointing along +X (east). The
   // bearingOffset in the LANDMARKS entry rotates it to face the road.
@@ -3150,7 +3106,7 @@ var Landmarks3D = (() => {
 
     const BY = PEDESTAL_H; // base Y of tank bottom
 
-    // ── Hull ──────────────────────────────────────────────────────
+    // Hull
     const HULL_L  = 6.9;
     const HULL_W  = 3.46;
     const HULL_H  = 1.8;
@@ -3185,7 +3141,7 @@ var Landmarks3D = (() => {
       g.add(skirt);
     }
 
-    // ── Tracks ────────────────────────────────────────────────────
+    // Tracks
     const TRACK_W = 0.55;
     for (const side of [-1, 1]) {
       // Lower track run (flat box under hull)
@@ -3200,7 +3156,7 @@ var Landmarks3D = (() => {
       g.add(trackTop);
     }
 
-    // ── Road wheels (5 per side, matching photo) ─────────────────
+    // Road wheels (5 per side, matching photo)
     const WHEEL_R  = 0.27;
     const WHEEL_TH = 0.28;   // axle-direction thickness
     // X positions along hull (evenly-ish spaced, front → rear)
@@ -3250,7 +3206,7 @@ var Landmarks3D = (() => {
       g.add(idler);
     }
 
-    // ── Turret ────────────────────────────────────────────────────
+    // Turret
     // T-72 turret: rounded ovoid, sand on sides, dark red on top dome.
     // Position: slightly forward of hull centre.
     const TURRET_Y = BY + HULL_H + 0.14;
@@ -3288,7 +3244,7 @@ var Landmarks3D = (() => {
     cupolid.position.set(TURRET_CX - 0.3, TURRET_Y + 1.42, 0.6);
     g.add(cupolid);
 
-    // ── Main gun barrel ───────────────────────────────────────────
+    // Main gun barrel
     // From photo: dark teal body, sand/tan thermal sleeve over the middle,
     // and a distinctive RED muzzle cap at the tip. Gun points along +X.
     const GUN_L   = 7.0;
@@ -3323,7 +3279,7 @@ var Landmarks3D = (() => {
 
     g.add(barrelGroup);
 
-    // ── Indian flag on a small pole atop the turret ───────────────
+    // Indian flag on a small pole atop the turret
     const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.025, 0.025, 2.0, 8), MAT.tankBarrel);
     pole.position.set(TURRET_CX + 0.1, TURRET_Y + 1.2 + 1.0, -0.2);
     g.add(pole);
@@ -3380,7 +3336,7 @@ var Landmarks3D = (() => {
     return g;
   }
 
-  // ── Procedural builder: Brain Tree tiered platform + stairs ───────────
+  // Procedural builder: Brain Tree tiered platform + stairs
   // Concentric ring tiers (green → white → saffron → tan) mirroring the
   // Indian-tricolor garden the sculpture stands on, with one staircase
   // wedge cutting from the outer ground up to the central pedestal.
@@ -3431,7 +3387,7 @@ var Landmarks3D = (() => {
     return g;
   }
 
-  // ── Procedural builder: SR Ranganathan Learning Hub + Clock Tower ──────
+  // Procedural builder: SR Ranganathan Learning Hub + Clock Tower
   // All units are metres. The group's local Y is up; the parent layer will
   // rotate Y→Z to align with MapLibre's coordinate system.
   function buildLibraryComplex() {
@@ -3477,7 +3433,7 @@ var Landmarks3D = (() => {
     wingCornice.position.set(WING_CX, H + 0.5, -WING_CN);
     g.add(wingCornice);
 
-    // ── Colonnade along the south face of the south wing ──────────
+    // Colonnade along the south face of the south wing
     // South face of wing is at polygon Y = WING_CN - WING_D/2 = -28,
     // which in mesh coords is +Z = 28.
     const SOUTH_FACE_Z   = -(WING_CN - WING_D / 2);    // = 28
@@ -3502,7 +3458,7 @@ var Landmarks3D = (() => {
     entrance.position.set(WING_CX, 3.25, SOUTH_FACE_Z + 0.3);
     g.add(entrance);
 
-    // ── Clock tower on the WEST side at the polygon junction ──────
+    // Clock tower on the WEST side at the polygon junction
     // Polygon position (-15, 5) — sits where the hall meets the wing on
     // the western edge. Mesh coords: x = -15, z = -5.
     const TOWER_X = -15;
@@ -3536,7 +3492,7 @@ var Landmarks3D = (() => {
       towerY += t.h;
     });
 
-    // ── Four clock faces on the clock tier ─────────────────────────
+    // Four clock faces on the clock tier
     const faceGeom = new THREE.CircleGeometry(1.3, 24);
     const handVert = new THREE.BoxGeometry(0.12, 0.95, 0.05);
     const handHorz = new THREE.BoxGeometry(0.12, 0.7,  0.05);
@@ -3566,9 +3522,7 @@ var Landmarks3D = (() => {
     return g;
   }
 
-  // ─────────────────────────────────────────────────────────────────────
   // DEPARTMENT BUILDING — uniform academic block design
-  // ─────────────────────────────────────────────────────────────────────
   // The Physics / Mechanical / Metallurgical / Civil / Electrical /
   // Chemistry departments share one architectural template (per the
   // front-view and satellite photos):
@@ -3601,7 +3555,7 @@ var Landmarks3D = (() => {
 
     const g = new THREE.Group();
 
-    // ── Plinth (thin sandstone base running under everything)
+    // Plinth (thin sandstone base running under everything)
     const plinthH = 0.55;
     const plinth = new THREE.Mesh(
       new THREE.BoxGeometry(length + 0.6, plinthH, bboxD + 0.6),
@@ -3610,7 +3564,7 @@ var Landmarks3D = (() => {
     plinth.position.set(0, plinthH / 2, 0);
     g.add(plinth);
 
-    // ── Two side wings (left + right) — long in Z, narrow in X.
+    // Two side wings (left + right) — long in Z, narrow in X.
     // Side wings extend from -bboxD/2 to +bboxD/2 in Z (the full N-S extent).
     const wingBodyH = height - plinthH;
     const wingFrontZ = bboxD / 2;                // wing front face
@@ -3650,7 +3604,7 @@ var Landmarks3D = (() => {
       g.add(band2);
     });
 
-    // ── Central spine connecting the two wings (the bar of the H).
+    // Central spine connecting the two wings (the bar of the H).
     // Runs in X across the middle, Z-depth = spineD, height = main height.
     const spineW = length - 2 * wingW;
     const spineFrontZ = spineD / 2;
@@ -3677,7 +3631,7 @@ var Landmarks3D = (() => {
       g.add(sb);
     });
 
-    // ── Central pavilion — a slightly taller volume rising above the
+    // Central pavilion — a slightly taller volume rising above the
     // spine, sandwiched between the two wings. This is what's visible in
     // the front photos as the "tall middle block" with parapet caps.
     const pavilion = new THREE.Mesh(
@@ -3706,7 +3660,7 @@ var Landmarks3D = (() => {
       g.add(vent);
     }
 
-    // ── Tall glass curtain wall on the central pavilion's south face
+    // Tall glass curtain wall on the central pavilion's south face
     //    (lights the central atrium). Light teal, NOT near-black.
     const curtainW = spineW - 2.0;
     const curtainH = pavH - plinthH - 1.0;
@@ -3739,7 +3693,7 @@ var Landmarks3D = (() => {
       g.add(xb);
     });
 
-    // ── Portico — two cream-white columns standing in front of the
+    // Portico — two cream-white columns standing in front of the
     //    curtain wall, supporting horizontal beams + angled cross-beams
     //    (the pergola/trellis structure visible in the front photos).
     const colH       = pavH - 1.8;
@@ -3787,7 +3741,7 @@ var Landmarks3D = (() => {
     lowBeam.position.set(0, beamY - 1.3, porticoZ + 0.1);
     g.add(lowBeam);
 
-    // ── Ground-level entrance: small glass door under the portico, plus
+    // Ground-level entrance: small glass door under the portico, plus
     //    a couple of stair-treads in front of it.
     const doorW = 3.2;
     const doorH = 2.8;
@@ -3823,7 +3777,7 @@ var Landmarks3D = (() => {
       g.add(step);
     }
 
-    // ── Wing front facades — recessed rectangular windows arranged in a
+    // Wing front facades — recessed rectangular windows arranged in a
     //    regular grid (matches the photos: clean modern punched windows
     //    rather than narrow vertical strips).
     const winMat = MAT.deptGlass;
@@ -3857,7 +3811,7 @@ var Landmarks3D = (() => {
       }
     });
 
-    // ── Side-facing facades of the wings — recessed jali (stone screen)
+    // Side-facing facades of the wings — recessed jali (stone screen)
     //    panels. Each wing's outer side wall has 4 floors of jali grids.
     const jaliMat = MAT.deptStoneDark;
     [
@@ -3881,7 +3835,7 @@ var Landmarks3D = (() => {
       }
     });
 
-    // ── Side-facing windows on the spine ends (the gable strips that
+    // Side-facing windows on the spine ends (the gable strips that
     //    connect the wings — visible as small windows on the sides of the
     //    pavilion in the photos)
     [
@@ -3899,7 +3853,7 @@ var Landmarks3D = (() => {
       }
     });
 
-    // ── Wing roof parapets (low sandstone walls around each wing roof)
+    // Wing roof parapets (low sandstone walls around each wing roof)
     [leftX, rightX].forEach((cx) => {
       const parH = 0.55;
       // Four parapet edges per wing
@@ -3911,7 +3865,7 @@ var Landmarks3D = (() => {
       g.add(bk);
     });
 
-    // ── Low-profile solar arrays on each wing roof (not so prominent
+    // Low-profile solar arrays on each wing roof (not so prominent
     //    they dominate the view).
     function addSolarPad(centerX, centerZ, spanX, spanZ) {
       const sheet = new THREE.Mesh(
@@ -3931,9 +3885,7 @@ var Landmarks3D = (() => {
     return g;
   }
 
-  // ─────────────────────────────────────────────────────────────────────
   // DEPARTMENT OF CIVIL & INFRASTRUCTURE ENGINEERING — courtyard block
-  // ─────────────────────────────────────────────────────────────────────
   // Per the drone photos this building is NOT the generic H-template: it is
   // a closed 3-storey ring around a central open courtyard. Coursed Jodhpur
   // sandstone walls with salmon-pink plaster pilasters, string-courses and a
@@ -4019,11 +3971,11 @@ var Landmarks3D = (() => {
       }
     }
 
-    // ── Ground slab / plinth under the whole footprint (courtyard floor too)
+    // Ground slab / plinth under the whole footprint (courtyard floor too)
     const slab = new THREE.Mesh(new THREE.BoxGeometry(W+0.8, 0.5, D+0.8), MAT.deptStoneLight);
     slab.position.set(0, 0.25, 0); g.add(slab);
 
-    // ── Four wings forming the hollow ring (courtyard = (W-2t) × (D-2t))
+    // Four wings forming the hollow ring (courtyard = (W-2t) × (D-2t))
     const fcz =  HZ - t/2, lcx = -(HX - t/2);
     const wings = [
       [0,  fcz, W, t],        // front (+Z)
@@ -4039,18 +3991,18 @@ var Landmarks3D = (() => {
       r.position.set(cx, H+0.05, cz); g.add(r);
     });
 
-    // ── Outer facades (with merlon caps)
+    // Outer facades (with merlon caps)
     addFacade(0, fcz, W, t, H, '+z', { caps: true, skipX: [-9, 8.5] });  // front (entrance)
     addFacade(0, -fcz, W, t, H, '-z', { caps: true });                    // back
     addFacade(-lcx, 0, t, D, H, '+x', { caps: true });                    // right end
     addFacade(lcx, 0, t, D, H, '-x', { caps: true });                     // left end
-    // ── Inner courtyard facades (no caps; protrude inward)
+    // Inner courtyard facades (no caps; protrude inward)
     addFacade(0, fcz, W-2*t, t, H, '-z', {});   // front wing, court side
     addFacade(0, -fcz, W-2*t, t, H, '+z', {});  // back wing, court side
     addFacade(lcx, 0, t, D-2*t, H, '+x', {});   // left wing, court side
     addFacade(-lcx, 0, t, D-2*t, H, '-x', {});  // right wing, court side
 
-    // ── Front entrance: tall stair tower + flat projecting porch
+    // Front entrance: tall stair tower + flat projecting porch
     {
       // stair tower (left of the porch), projecting slightly proud of the face
       const tx = -6, TF = HZ + 0.8, tback = 6.0, th = H + 1.8;
@@ -4091,7 +4043,7 @@ var Landmarks3D = (() => {
       }
     }
 
-    // ── Roof clutter — water tanks, stair-head box, fire boxes (on wings)
+    // Roof clutter — water tanks, stair-head box, fire boxes (on wings)
     [[-14, -fcz], [-7, -fcz], [3, -fcz], [-lcx, 6], [-lcx, -6]].forEach(([rx, rz]) => {
       const tk = new THREE.Mesh(new THREE.CylinderGeometry(1.0, 1.0, 1.4, 14), TANK);
       tk.position.set(rx, H + 0.9, rz); g.add(tk);
@@ -4108,7 +4060,6 @@ var Landmarks3D = (() => {
     return g;
   }
 
-  // ─────────────────────────────────────────────────────────────────────
   // SCHOOL OF AI & DATA SCIENCE — closed two-storey (G+1) sandstone ring
   // around a central open courtyard, matching the drone reference photos.
   // The signature feature is the white concrete egg-crate PERGOLA that
@@ -4117,7 +4068,6 @@ var Landmarks3D = (() => {
   // entrance. Mesh-local: +X = right, +Y = up, +Z = front (entrance).
   // The LANDMARKS entry uses bearingOffset = 90° so +Z faces EAST, which
   // is where the OSM entrance node (13905508756) sits on the footprint.
-  // ─────────────────────────────────────────────────────────────────────
   function buildAIDSSchool() {
     const g = new THREE.Group();
     const STONE  = MAT.deptStone;        // warm coursed sandstone / brick
@@ -4191,11 +4141,11 @@ var Landmarks3D = (() => {
       }
     }
 
-    // ── Ground slab / plinth under the whole footprint (courtyard floor too)
+    // Ground slab / plinth under the whole footprint (courtyard floor too)
     const slab = new THREE.Mesh(new THREE.BoxGeometry(W+0.8, 0.5, D+0.8), MAT.deptStoneLight);
     slab.position.set(0, 0.25, 0); g.add(slab);
 
-    // ── Four wings forming the hollow ring (courtyard = (W-2t) × (D-2t))
+    // Four wings forming the hollow ring (courtyard = (W-2t) × (D-2t))
     const fcz =  HZ - t/2, lcx = -(HX - t/2);
     const wings = [
       [0,  fcz, W, t],        // front (+Z, entrance)
@@ -4210,18 +4160,18 @@ var Landmarks3D = (() => {
       r.position.set(cx, H+0.05, cz); g.add(r);
     });
 
-    // ── Outer facades (entrance bays skipped on the front)
+    // Outer facades (entrance bays skipped on the front)
     addFacade(0, fcz, W, t, H, '+z', { skipX: [-8, 8] });  // front (entrance)
     addFacade(0, -fcz, W, t, H, '-z', {});                  // back
     addFacade(-lcx, 0, t, D, H, '+x', {});                  // right end
     addFacade(lcx, 0, t, D, H, '-x', {});                   // left end
-    // ── Inner courtyard facades (protrude inward)
+    // Inner courtyard facades (protrude inward)
     addFacade(0, fcz, W-2*t, t, H, '-z', {});   // front wing, court side
     addFacade(0, -fcz, W-2*t, t, H, '+z', {});  // back wing, court side
     addFacade(lcx, 0, t, D-2*t, H, '+x', {});   // left wing, court side
     addFacade(-lcx, 0, t, D-2*t, H, '-x', {});  // right wing, court side
 
-    // ── Front entrance bay: recessed two-storey portico with glazed doors,
+    // Front entrance bay: recessed two-storey portico with glazed doors,
     //    a signage band, and steps — set into the centre of the front face.
     {
       const ez = HZ;                       // front face plane
@@ -4251,7 +4201,7 @@ var Landmarks3D = (() => {
       }
     }
 
-    // ── Signature white egg-crate PERGOLA over the forecourt ──────────────
+    // Signature white egg-crate PERGOLA over the forecourt
     {
       const P  = 8.5;                 // projection forward from the face
       const PW = 19;                  // pergola / forecourt width
@@ -4293,8 +4243,8 @@ var Landmarks3D = (() => {
       }
     }
 
-    // ── Roof clutter: AC condensers ringing the courtyard, water tanks,
-    //    stair-head tower, fire boxes ──────────────────────────────────────
+    // Roof clutter: AC condensers ringing the courtyard, water tanks,
+    // stair-head tower, fire boxes
     // AC condenser rows along the inner (courtyard) parapet of each wing
     const innerF = fcz - t/2 + 0.7, innerB = -fcz + t/2 - 0.7;
     const innerL = lcx + t/2 - 0.7, innerR = -lcx - t/2 + 0.7;
@@ -4332,7 +4282,6 @@ var Landmarks3D = (() => {
     return g;
   }
 
-  // ─────────────────────────────────────────────────────────────────────
   // SHAMIYANA FOOD COURT — shipping-container restaurants laid out around
   // a central open-air plaza, with concrete tube seating pods along the
   // west edge, two tensile-fabric shade canopies, and a small round
@@ -4345,7 +4294,6 @@ var Landmarks3D = (() => {
   // 'Shamiyana' POI) and long-edge bearings come from the polygon
   // centroids — computed once offline and hard-coded here.
   // Mesh convention: +X = east, +Y = up, -Z = north.
-  // ─────────────────────────────────────────────────────────────────────
   function buildShamiyanaComplex() {
     const g = new THREE.Group();
 
@@ -4712,13 +4660,11 @@ var Landmarks3D = (() => {
       return c;
     }
 
-    // ── Plaza ground — two layers that match the actual food-court
-    //    landscaping: a near-white paving base (blends with the #fafafa
-    //    basemap so the slab edge isn't visible), then sage-green grass
-    //    patches on top in the zones where the drone photos show lawn
-    //    strips (under the pod row, along the south edge, and in
-    //    pockets next to the perimeter road). The result no longer
-    //    looks like a brown rectangle popping out of the terrain.
+    // Plaza ground — two layers that match the actual food-court landscaping:
+    // a near-white paving base (blends with the #fafafa basemap so the slab
+    // edge isn't visible), then sage-green grass patches on top in the zones
+    // where the drone photos show lawn strips (under the pod row, along the
+    // south edge, and in pockets next to the perimeter road).
     function _shapeFrom(pts) {
       const s = new THREE.Shape();
       s.moveTo(pts[0][0], pts[0][1]);
@@ -4763,7 +4709,7 @@ var Landmarks3D = (() => {
       }
     }
 
-    // ── Nine container restaurants. The polygon bboxes in places.geojson
+    // Nine container restaurants. The polygon bboxes in places.geojson
     //    include the outdoor deck + awning surrounding each container, so
     //    using them as the container body made everything overlap into a
     //    solid mass. Hard-coded sizes below are the actual container body
@@ -4780,7 +4726,7 @@ var Landmarks3D = (() => {
     // (The "unnamed west" blue container was removed — it does not exist on site.
     //  Its OSM footprint 1412504068 stays in replacesOsmBuildings so no flat box shows.)
 
-    // ── Five concrete tube pods, N–S row at E=-10. Spaced ~1.7 m apart
+    // Five concrete tube pods, N–S row at E=-10. Spaced ~1.7 m apart
     //    edge-to-edge so each colour reads as its own pod from above
     //    (matching the drone photos). Position is clear of the western
     //    container (E max -13.7) and the long row (Tealogy E min -6.5).
@@ -4790,19 +4736,19 @@ var Landmarks3D = (() => {
       g.add(placeTubePod({ E: -10, N: -2 + i * 4.0, interiorHex: podColors[i] }));
     }
 
-    // ── Main beige shamiyana — saddle membrane on four white masts over turf,
+    // Main beige shamiyana — saddle membrane on four white masts over turf,
     //    in the open plaza just north of the central yellow building (sized to
     //    fit the gap so its masts clear the yellow + the north red pavilion).
     g.add(placeShamiyana({ E: 4, N: 11.4, size: 5, base: 3.4, amp: 1.4 }));
 
-    // ── Beige roof extension shading the dining area in front of the blue café
+    // Beige roof extension shading the dining area in front of the blue café
     g.add(placeCanopyRoof({ E: -3, N: -1, w: 7.5, d: 4.0, height: 3.1, bearingDeg: 107 }));
 
-    // ── Boat-sail amphitheatre at the SW corner of the food court (the
+    // Boat-sail amphitheatre at the SW corner of the food court (the
     //    distinctive crescent-shaped stage visible in every drone photo).
     g.add(placeStage({ E: -19, N: -5, radius: 3.2 }));
 
-    // ── Hedge planters following the perimeter road, matching the
+    // Hedge planters following the perimeter road, matching the
     //    pruned bushes that ring the food court in every drone photo.
     //    Each pip is a low rectangular planter with a clipped-hedge
     //    canopy on top. Positions sampled along the outer boundary.
@@ -4822,7 +4768,7 @@ var Landmarks3D = (() => {
       g.add(bush);
     }
 
-    // ── Picnic benches — under the shamiyana + in the open west plaza
+    // Picnic benches — under the shamiyana + in the open west plaza
     [
       { E:  3.0, N: 11.0, bearingDeg: 107 },
       { E:  5.0, N: 11.8, bearingDeg: 107 },
@@ -4833,7 +4779,7 @@ var Landmarks3D = (() => {
     return g;
   }
 
-  // ── Landmark registry ───────────────────────────────────────────────────
+  // Landmark registry
   // Height of the tiered base that the Brain Tree sits on top of.
   // Sum of all tier thicknesses + pedestal in buildBrainTreeBase().
   const BRAIN_TREE_BASE_TOP_Y = 0.20 + 0.45 + 0.55 + 0.65 + 0.8;  // 2.65 m
@@ -4887,7 +4833,7 @@ var Landmarks3D = (() => {
       replacesOsmBuildings: ['773563507'],
     },
 
-    // ── O-lane / Y-lane hostels (same architectural design × 4 footprints)
+    // O-lane / Y-lane hostels (same architectural design × 4 footprints)
     // Bearings come from each polygon's longest edge; bearingOffset is the
     // angular delta from compass-east in radians (negative = rotate CW).
     {
@@ -4947,7 +4893,7 @@ var Landmarks3D = (() => {
       replacesOsmBuildings: ['1412504060'],
     },
 
-    // ── G-block courtyard hostels (G1 / G4). Sandstone ring around a
+    // G-block courtyard hostels (G1 / G4). Sandstone ring around a
     //    central sports court. bearingOffset = -(longestEdgeBearing - 90):
     //      G1 main edge 92°  → -2°
     //      G4 main edge 96.8° → -6.8°
@@ -4978,7 +4924,7 @@ var Landmarks3D = (() => {
       replacesOsmBuildings: ['773839449'],
     },
 
-    // ── Remaining G/B/I-lane hostels. Same sandstone G+2 courtyard design.
+    // Remaining G/B/I-lane hostels. Same sandstone G+2 courtyard design.
     //    The wide (~70×41 m) blocks get a central cross-wing; B3 is a small
     //    square like G1/G4. Oriented dims + bearingOffset come from each
     //    polygon's oriented bounding box (long axis ≈ E-W).
@@ -5060,7 +5006,7 @@ var Landmarks3D = (() => {
       bearingOffset: -5.3 * Math.PI / 180, replacesOsmBuildings: ['1412392537'],
     },
 
-    // ── Old Mess & New Mess — solid G+2 dining blocks with jali facades
+    // Old Mess & New Mess — solid G+2 dining blocks with jali facades
     //    and equipment-covered roofs. bearingOffset from each footprint's
     //    long-edge bearing (Old Mess 26°, New Mess 12°).
     {
@@ -5078,7 +5024,7 @@ var Landmarks3D = (() => {
       bearingOffset: 78.2 * Math.PI / 180, replacesOsmBuildings: ['1266941057'],
     },
 
-    // ── SME & MBA — School of Management cream blocks with white corrugated
+    // SME & MBA — School of Management cream blocks with white corrugated
     //    gable roofs. SME: long single-storey block (footprint long-edge
     //    bearing 104.4° → off −14.4°). MBA: L of two single-storey wings (long-wing bearing
     //    11.7° → off 78.3°). lng/lat are each footprint's centre.
@@ -5097,7 +5043,7 @@ var Landmarks3D = (() => {
       bearingOffset: 78.3 * Math.PI / 180, replacesOsmBuildings: ['1266941053'],
     },
 
-    // ── Basic Lab — L-shaped G+3 sandstone academic block with jali
+    // Basic Lab — L-shaped G+3 sandstone academic block with jali
     //    screens, pergola entrance, and a solar-covered roof.
     {
       id: 'basic-lab-3d', label: 'Basic Lab', labelOffsetY: -0.5, labelOffsetY3d: -2.0,
@@ -5108,7 +5054,7 @@ var Landmarks3D = (() => {
       bearingOffset: (78.9 + 180) * Math.PI / 180, replacesOsmBuildings: ['773587413'],
     },
 
-    // ── LHC 1 — Lecture Hall Complex
+    // LHC 1 — Lecture Hall Complex
     {
       id: 'lhc1-3d', label: 'LHC', labelOffsetY: -0.5, labelOffsetY3d: -2.0,
       format: 'procedural',
@@ -5118,7 +5064,7 @@ var Landmarks3D = (() => {
       bearingOffset: 86.9 * Math.PI / 180, replacesOsmBuildings: ['603120869'],
     },
 
-    // ── LHC 2 — Lecture Hall Complex II. Replaces OSM footprint 1419313442.
+    // LHC 2 — Lecture Hall Complex II. Replaces OSM footprint 1419313442.
     {
       id: 'lhc2-3d', label: 'LHC 2', labelOffsetY: -0.5, labelOffsetY3d: -2.0,
       format: 'procedural',
@@ -5129,7 +5075,7 @@ var Landmarks3D = (() => {
       bearingOffset: -17.66 * Math.PI / 180, replacesOsmBuildings: ['1419313442'],
     },
 
-    // ── Aakash Sports Complex — indoor sports hall. The custom model replaces
+    // Aakash Sports Complex — indoor sports hall. The custom model replaces
     //    OSM footprint 773587402 ("Akaash Complex"), long axis bearing 47.5°.
     {
       id: 'aakash-complex-3d', label: 'Aakash Sports Complex', labelOffsetY: -0.5, labelOffsetY3d: -2.0,
@@ -5140,7 +5086,7 @@ var Landmarks3D = (() => {
       replacesOsmBuildings: ['773587402'],
     },
 
-    // ── Centre for Advance Scientific Equipment (U-plan academic block)
+    // Centre for Advance Scientific Equipment (U-plan academic block)
     {
       id: 'case-3d', label: 'Center for Advance Scientific Equipment', labelOffsetY: -0.5, labelOffsetY3d: -2.0,
       format: 'procedural',
@@ -5151,7 +5097,7 @@ var Landmarks3D = (() => {
     },
 
 
-    // ── Jodhpur Club — H-plan two-storey club with sunken courtyard.
+    // Jodhpur Club — H-plan two-storey club with sunken courtyard.
     //    OSM footprint longest edge bearing 42.4°; mesh +X must align with
     //    that, so bearingOffset = 90° − 42.4° = 47.6°.
     {
@@ -5163,7 +5109,7 @@ var Landmarks3D = (() => {
       replacesOsmBuildings: ['1266941055'],
     },
 
-    // ── PHC (Primary Health Centre) — E-plan single storey, solar-clad.
+    // PHC (Primary Health Centre) — E-plan single storey, solar-clad.
     //    OSM footprint longest edge bearing 280.6°. Mesh +X = E-W long axis;
     //    mesh +Z = pergola/front (should face SOUTH). Use -10.6° so the
     //    pergola faces south and the E opens WEST (matches reference photos).
@@ -5274,7 +5220,7 @@ var Landmarks3D = (() => {
       bearingOffset: 45 * Math.PI / 180,
     },
 
-    // ── Department buildings — uniform H-shaped academic block design.
+    // Department buildings — uniform H-shaped academic block design.
     //    bearingOffset orients each building so its entrance faces its
     //    paired partner across the central plaza:
     //      Physics ↔ Metallurgical, Electrical ↔ Mechanical (north cluster)
@@ -5465,7 +5411,7 @@ var Landmarks3D = (() => {
       ],
     },
 
-    // ── Type B Quarters (22 Faculty Housing blocks) + Guest House (Visitor)
+    // Type B Quarters (22 Faculty Housing blocks) + Guest House (Visitor)
     //    Each entry carries an osm_id; the builder pulls the matching
     //    polygon from IITJData at build time and extrudes its true H/cross
     //    footprint, so each block aligns exactly with the OSM polygon
@@ -5522,7 +5468,7 @@ var Landmarks3D = (() => {
       replacesOsmBuildings: ['773563532'],
     },
 
-    // ── General Quarters (9 apartment blocks: 3 rectangular "General
+    // General Quarters (9 apartment blocks: 3 rectangular "General
     //    Quarters" + 6 pinwheel/Z-shaped "General Quaters"). Salmon-pink
     //    cement plaster, G+4, cane-railed balconies, white flat roofs with
     //    dark Sintex tanks + stair-tower headhouse. Reuses the polygon-
@@ -5553,7 +5499,7 @@ var Landmarks3D = (() => {
       replacesOsmBuildings: [osmId],
     })),
 
-    // ── Dept. Maths & SOLA — single-storey red-sandstone courtyard halls
+    // Dept. Maths & SOLA — single-storey red-sandstone courtyard halls
     //    with hipped light-grey metal roofs. Built from their real OSM
     //    polygons (centroids = vertex-mean incl. closing node, matching the
     //    builder), so bearingOffset stays 0.
@@ -5579,23 +5525,18 @@ var Landmarks3D = (() => {
     },
   ];
 
-  // ─────────────────────────────────────────────────────────────────────
   // Singleton state — ONE scene/camera/renderer for ALL landmarks.
   //
-  // The previous design created one custom MapLibre layer (with its own
-  // scene, camera, renderer, and a per-frame triggerRepaint) PER landmark.
-  // With ~14 landmarks that meant a continuous render loop with 14 forced
-  // repaints per frame and dozens of matrix allocations — the map never
-  // went idle, killing performance on mid-range hardware.
-  //
-  // This rewrite consolidates everything into a single layer:
+  // A custom MapLibre layer per landmark (each with its own scene, camera,
+  // renderer and per-frame triggerRepaint) would mean ~14 forced repaints per
+  // frame plus dozens of matrix allocations: the map never goes idle, which
+  // kills performance on mid-range hardware. So everything lives in one layer:
   //   • one Scene with all landmark groups, each pre-positioned in metres
   //     relative to a fixed campus-centre origin
   //   • one renderer + camera, reused across style swaps
   //   • render() does not call triggerRepaint() — the scene is static
   //   • geometry is built once during init() and cached forever
   //   • show()/hide() just toggle layer visibility
-  // ─────────────────────────────────────────────────────────────────────
   const LAYER_ID = 'iitj-landmarks-3d';
   const LABEL_SRC_ID = 'landmark-labels-src';
   const LABEL_LAYER_ID = 'landmark-labels';
@@ -5705,7 +5646,6 @@ var Landmarks3D = (() => {
   }
 
 
-  // ─────────────────────────────────────────────────────────────────────
   // VEGETATION — instanced low-poly trees, driven by the SAME OpenStreetMap
   // vegetation that F4Map renders: landuse=forest, natural=scrub,
   // leisure=park / leisure=garden polygons.
@@ -5716,13 +5656,11 @@ var Landmarks3D = (() => {
   // couple of InstancedMeshes — full trees (trunk + canopy) and low scrub
   // bushes (canopy only) — so even a few thousand trees stay at ~3 draw
   // calls and a static scene.
-  // ─────────────────────────────────────────────────────────────────────
   function _lngLatToLocal(lng, lat) {
     const mc = maplibregl.MercatorCoordinate.fromLngLat([lng, lat], 0);
     return [(mc.x - _originMcX) / _mercPerMeter, (mc.y - _originMcY) / _mercPerMeter];
   }
 
-  // ─────────────────────────────────────────────────────────────────────
   // PERIMETER BERM SYSTEM  (data-driven from the OSM "Berms" footprints)
   //
   // IIT-Jodhpur's perimeter berms are long, sculptural earth-wall ribbons
@@ -5740,7 +5678,6 @@ var Landmarks3D = (() => {
   // cross-section along it. Geometry is emitted as a few merged
   // BufferGeometry strips per segment (≈4 draw calls) so the whole system
   // stays lightweight. Materials are shared and double-sided.
-  // ─────────────────────────────────────────────────────────────────────
 
   // Raw OSM footprints (closed lng,lat rings), name="Berms" from
   // buildings.geojson. The E/W hostel-side perimeter is built as BLUE wave-berm
@@ -5896,7 +5833,7 @@ var Landmarks3D = (() => {
     return _parabolicArc(pts, K || 28);
   }
 
-  // ── Module geometry helpers (module-local frame) ─────────────────────
+  // Module geometry helpers (module-local frame)
   //   +x = along the berm length (one module spans this)
   //   +z = OUTWARD toward the road (blue mural side)   -z = campus side
   //   +y = up.
@@ -6026,7 +5963,7 @@ var Landmarks3D = (() => {
     const stepW = total / n;
     const mw = stepW * 0.995;
 
-    // ── per-module component geometries (instanced) ──
+    // per-module component geometries (instanced)
     const campusWall = _boxAt(mw, wallH, 0.55, 0, wallH/2, zCampus + 0.275);
     // Blind-arch applique sits just proud of the campus face (z = zCampus)
     // so the arcade motif reads; two stacked bays per module.
@@ -6070,7 +6007,7 @@ var Landmarks3D = (() => {
     }
     all.forEach(m => { m.instanceMatrix.needsUpdate = true; });
 
-    // ── sandstone end caps (close the open cross-section at both ends) ──
+    // sandstone end caps (close the open cross-section at both ends)
     const capGeo = _boxAt(0.5, wallH, depth, 0, wallH/2, 0);
     [0, total].forEach((s) => {
       const cap = new THREE.Mesh(capGeo, BMAT.waveInt);
@@ -6083,7 +6020,7 @@ var Landmarks3D = (() => {
     return g;
   }
 
-  // ── ADMINISTRATION / LANDSCAPE BERMS (Family 1) ──────────────────────
+  // ADMINISTRATION / LANDSCAPE BERMS (Family 1)
   // Around the Brain-Tree entry / Director-Lawn precinct the campus uses big
   // sweeping landscape berms: a near-vertical pink-sandstone RETAINING WALL
   // on the outer face holding back a TERRACED, planted earth embankment on
@@ -6165,7 +6102,7 @@ var Landmarks3D = (() => {
       if (flipOut) { ox = -ox; oz = -oz; }
       pv.set(st.px + ox*z, yAtZ(z), st.pz + oz*z);
     };
-    // ── Trees ──
+    // Trees
     const trunkGeo = new THREE.CylinderGeometry(0.13, 0.2, 1.3, 5); trunkGeo.translate(0, 0.65, 0);
     const canopyGeo = new THREE.IcosahedronGeometry(1.25, 0);       canopyGeo.translate(0, 1.95, 0);
     const trunk = new THREE.InstancedMesh(trunkGeo, MAT.treeTrunk, nTree);
@@ -6182,7 +6119,7 @@ var Landmarks3D = (() => {
     trunk.instanceMatrix.needsUpdate = canopy.instanceMatrix.needsUpdate = true;
     if (canopy.instanceColor) canopy.instanceColor.needsUpdate = true;
     g.add(trunk, canopy);
-    // ── Flowering shrubs (denser, lower, blossom colours) ──
+    // Flowering shrubs (denser, lower, blossom colours)
     const shrubGeo = new THREE.IcosahedronGeometry(0.75, 0); shrubGeo.translate(0, 0.5, 0);
     const shrub = new THREE.InstancedMesh(shrubGeo, MAT.canopy, nShrub);
     shrub.frustumCulled = false;
@@ -6402,7 +6339,7 @@ var Landmarks3D = (() => {
     // uniformly scattered in the baked file, so taking the first N thins evenly.
     const _vegN = (n) => (window.PerfTier ? PerfTier.veg(n) : n);
 
-    // ── Full trees: trunk + icosahedron canopy ──
+    // Full trees: trunk + icosahedron canopy
     const full = _treeData.full || [];
     const nFull = _vegN(full.length >> 1);
     if (nFull) {
@@ -6425,7 +6362,7 @@ var Landmarks3D = (() => {
       _root.add(trunk); _root.add(fol);
     }
 
-    // ── Scrub bushes: low rounded shrubs, no trunk ──
+    // Scrub bushes: low rounded shrubs, no trunk
     const bush = _treeData.bush || [];
     const nBush = _vegN(bush.length >> 1);
     if (nBush) {
@@ -6449,7 +6386,7 @@ var Landmarks3D = (() => {
     if (_map) _map.triggerRepaint();
   }
 
-  // ── Lighter Three.js models (mergeModels tier) ──────────────────────────
+  // Lighter Three.js models (mergeModels tier)
   // The procedural builders emit each building as HUNDREDS of tiny meshes
   // (windows, slats, cornices…) — hundreds of separate draw calls, which is the
   // dominant cost on weaker mobile GPUs. Since the scene is static and every
@@ -6588,8 +6525,8 @@ var Landmarks3D = (() => {
         // Reuse the existing renderer if MapLibre handed us the same GL
         // context (the normal case across setStyle). Only build a new one
         // if there is none yet, or the context was genuinely replaced
-        // (e.g. after a WebGL context-loss/restore). Creating a second
-        // renderer on a live context is what previously blanked the layer.
+        // (e.g. after a WebGL context-loss/restore) — creating a second
+        // renderer on a live context blanks the layer.
         if (!_renderer || _rendererGl !== gl) {
           // Antialiasing (MSAA) is a heavy cost on budget mobile GPUs, so the
           // device tier (perf-tier.js) decides whether we ask for it.
@@ -6820,7 +6757,7 @@ var Landmarks3D = (() => {
   // Public warm-up entry (called from init once the map exists).
   function prewarm() { _startBuild(); }
 
-  // ── Lazy Three.js loader ────────────────────────────────────────────────
+  // Lazy Three.js loader
   // Three.js + its OBJ/GLTF loaders (~600 KB) are fetched the first time the
   // user enters 3D, not on every page load — a big win for 2D-only sessions and
   // slow connections. Self-hosted (same-origin) so no third-party CDN is
@@ -7040,12 +6977,11 @@ var Landmarks3D = (() => {
   // Because they write DISJOINT properties (and never swap the material object
   // out) the two effects compose and each restores independently.
   //
-  // The previous design had fade and highlight EACH swap mesh.material and
-  // stash their own "original"; interleaving them (fade during navigation +
-  // a category highlight) made one restore hand the other its stale clone,
-  // leaving buildings stuck transparent with depthWrite off — so the plain
-  // extrusion box under the model and the buildings behind it bled through,
-  // i.e. "both the custom and non-custom model showing for the same building".
+  // Having each effect swap mesh.material and stash its own "original" does not
+  // work: interleaving them (fade during navigation + a category highlight)
+  // makes one restore hand the other its stale clone, leaving buildings stuck
+  // transparent with depthWrite off, so the plain extrusion box under the model
+  // and the buildings behind it bleed through.
   function _ownMaterials(mesh) {
     if (!mesh.userData._ownMat) {
       const clone = (m) => {

@@ -25,12 +25,11 @@
 (function () {
   'use strict';
 
-  // v4: earlier versions let the FPS watchdog demote all the way to 'low' and
-  // PERSIST it, so a mid-range phone that hitched once during the cold-start 3D
-  // build got permanently stripped of the custom buildings (landmarkModels is
-  // off only at 'low') with no way back. v4 both resets that stale persisted cap
-  // AND floors the watchdog at 'reduced' (see WATCHDOG_FLOOR) so it can never
-  // silently drop the models again. Bumping the key re-detects every device.
+  // The store key is versioned: bumping it re-detects every device and discards
+  // any stale persisted tier cap. The watchdog is also floored at 'reduced'
+  // (see WATCHDOG_FLOOR), because a phone that hitches once during the
+  // cold-start 3D build must not persist a demotion all the way to 'low' and
+  // lose the custom buildings for good (landmarkModels is off only at 'low').
   var STORE_KEY = 'iitj_perf_v4';
 
   function loadStore() {
@@ -41,7 +40,7 @@
     try { localStorage.setItem(STORE_KEY, JSON.stringify(s)); } catch (e) {}
   }
 
-  // ── Raw device signals ────────────────────────────────────────────────
+  // Raw device signals
   var dpr   = Math.max(1, window.devicePixelRatio || 1);
   var mem   = navigator.deviceMemory || 0;         // GB — Chrome/Android only (0 = unknown)
   var cores = navigator.hardwareConcurrency || 0;  // logical cores (0 = unknown)
@@ -64,7 +63,7 @@
   var gpu   = gpuRenderer();
   var gpuLc = gpu.toLowerCase();
 
-  // ── Classify → 0 low / 1 reduced / 2 balanced / 3 high ─────────────────
+  // Classify → 0 low / 1 reduced / 2 balanced / 3 high
   // Four tiers so quality lowers GRADUALLY: each step down cuts only what's
   // needed for smoothness at that level (see TIERS). Crucially, only the LOWEST
   // tier drops the detailed Three.js models — mid-range phones keep them.
@@ -78,7 +77,7 @@
     // proxies for rendering power (plenty of mid-range phones ship 6–8 GB and
     // 8 cores behind a weak GPU). RAM/cores are only a fallback for masked GPUs.
     if (gpuLc) {
-      // ── Known-STRONG → high (full detailed scene) ──
+      // Known-STRONG → high (full detailed scene)
       //   Apple GPUs; Adreno 7xx/8xx (2022+ flagships); Mali-G7xx *three-digit*
       //   (G710/G715/G720) and Immortalis; desktop discrete/modern integrated.
       if (/apple gpu|apple m\d/.test(gpuLc)) return TIER_HIGH;
@@ -86,7 +85,7 @@
       if (/mali-g7\d\d|immortalis/.test(gpuLc)) return TIER_HIGH;
       if (!isMobile && /nvidia|geforce|radeon|intel.*(arc|iris)/.test(gpuLc)) return TIER_HIGH;
 
-      // ── Known-WEAK → low (simplified 3D, no Three.js models) ──
+      // Known-WEAK → low (simplified 3D, no Three.js models)
       //   Budget Mali (T-series, G31/G5x, e.g. Galaxy M32's G52), entry Adreno
       //   (3xx–5xx, 60x/61x), PowerVR, software rasterisers.
       var weakGpu =
@@ -140,7 +139,7 @@
   if (forced == null && typeof store.maxTier === 'number') tier = Math.min(tier, store.maxTier);
   tier = Math.max(0, Math.min(3, tier));
 
-  // ── Per-tier settings — a GRADUAL quality gradient ─────────────────────
+  // Per-tier settings — a GRADUAL quality gradient
   // Each step down cuts only what's necessary for smoothness at that level,
   // cheapest-visual-impact first:
   //   high     → full detailed scene (flagships).
@@ -236,14 +235,14 @@
     // Set by landmarks-3d.js while the 3D scene is streaming its geometry in or
     // uploading it to the GPU. That one-time cost briefly drops the frame rate
     // during the very first tilt into 3D; the watchdog must NOT read it as the
-    // device being slow (that false positive is what used to demote phones).
+    // device being slow, or that false positive demotes a capable phone.
     sceneBusy: false,
     // Scale an instance count (trees/shrubs) by this tier's vegetation density.
     veg: function (n) { return Math.max(0, Math.round(n * PerfTier.vegetationDensity)); },
   };
   apply(tier);
 
-  // ── FPS watchdog ──────────────────────────────────────────────────────
+  // FPS watchdog
   // MapLibre paints on demand, so a plain rAF loop would read a false 60fps
   // whenever the map is idle. Instead we sample frame INTERVALS only while the
   // camera is actually moving (pan/zoom/rotate/pitch) — precisely when the GPU

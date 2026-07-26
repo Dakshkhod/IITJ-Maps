@@ -1,6 +1,4 @@
-/* ============================================================
-   IITJ Maps — Admin Review panel
-   ============================================================ */
+/* IITJ Maps — Admin Review panel */
 :root {
   --bg:           #f6f7f9;
   --bg-elevated:  #ffffff;
@@ -31,7 +29,7 @@
 html, body { margin: 0; padding: 0; height: 100%; background: var(--bg); color: var(--text); font-family: var(--font); }
 .hidden { display: none !important; }
 
-/* ─── Passphrase gate ────────────────────────────────────────── */
+/* Passphrase gate */
 .gate {
   position: fixed; inset: 0; z-index: 100;
   background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
@@ -59,7 +57,7 @@ html, body { margin: 0; padding: 0; height: 100%; background: var(--bg); color: 
 }
 .gate-hint { margin-top: 14px !important; font-size: 12px !important; color: var(--text-muted) !important; }
 
-/* ─── Top bar ────────────────────────────────────────────────── */
+/* Top bar */
 .topbar {
   display: flex; align-items: center; justify-content: space-between;
   padding: 14px 24px; background: var(--bg-elevated);
@@ -91,7 +89,7 @@ html, body { margin: 0; padding: 0; height: 100%; background: var(--bg); color: 
 .btn-publish:disabled { opacity: 0.55; cursor: not-allowed; }
 .btn:disabled { opacity: 0.55; cursor: not-allowed; }
 
-/* ─── Settings modal ─────────────────────────────────────────── */
+/* Settings modal */
 .modal {
   position: fixed; inset: 0; z-index: 60;
   display: flex; align-items: center; justify-content: center;
@@ -165,7 +163,7 @@ html, body { margin: 0; padding: 0; height: 100%; background: var(--bg); color: 
 .form-status.warn  { background: var(--amber-soft); color: var(--amber); }
 .form-status:empty { display: none; }
 
-/* ─── Stats row ──────────────────────────────────────────────── */
+/* Stats row */
 .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; padding: 18px 24px 0; }
 .stat-card {
   background: var(--bg-elevated); border: 1px solid var(--border);
@@ -178,7 +176,7 @@ html, body { margin: 0; padding: 0; height: 100%; background: var(--bg); color: 
 .stat-approved .stat-value { color: var(--green); }
 .stat-rejected .stat-value { color: var(--red); }
 
-/* ─── Filters ────────────────────────────────────────────────── */
+/* Filters */
 .filters {
   display: flex; align-items: center; gap: 18px; flex-wrap: wrap;
   padding: 16px 24px; border-bottom: 1px solid var(--border);
@@ -204,7 +202,7 @@ html, body { margin: 0; padding: 0; height: 100%; background: var(--bg); color: 
 }
 .filter-search input:focus { border-color: var(--accent); }
 
-/* ─── Workspace layout ───────────────────────────────────────── */
+/* Workspace layout */
 .workspace { display: grid; grid-template-columns: 360px 1fr; gap: 0; min-height: calc(100vh - 230px); }
 
 .changes-list { background: var(--bg-elevated); border-right: 1px solid var(--border); overflow-y: auto; max-height: calc(100vh - 230px); }
@@ -238,7 +236,7 @@ html, body { margin: 0; padding: 0; height: 100%; background: var(--bg); color: 
 .empty-state { padding: 36px 16px; text-align: center; color: var(--text-muted); font-size: 13px; }
 .empty-hint { font-size: 12px; margin-top: 8px; }
 
-/* ─── Detail panel ───────────────────────────────────────────── */
+/* Detail panel */
 .detail { padding: 24px; overflow-y: auto; max-height: calc(100vh - 230px); }
 .detail-empty { padding: 48px 24px; text-align: center; color: var(--text-muted); }
 .detail-empty h2 { color: var(--text); font-weight: 600; }
@@ -304,7 +302,7 @@ html, body { margin: 0; padding: 0; height: 100%; background: var(--bg); color: 
 .decision-log strong { font-weight: 600; }
 .decision-log .reason { color: var(--text-secondary); margin-top: 4px; }
 
-/* ─── Status log (persistent, side-anchored) ─────────────────── */
+/* Status log (persistent, side-anchored) */
 .status-stack {
   position: fixed; bottom: 20px; right: 20px; z-index: 50;
   display: flex; flex-direction: column; gap: 8px;
@@ -340,7 +338,7 @@ html, body { margin: 0; padding: 0; height: 100%; background: var(--bg); color: 
 .status-card.status-warn    { border-left-color: var(--amber); }
 .status-card.status-info    { border-left-color: var(--accent); }
 
-/* ─── Responsive ─────────────────────────────────────────────── */
+/* Responsive */
 @media (max-width: 1100px) {
   .detail-grid { grid-template-columns: 1fr; }
 }

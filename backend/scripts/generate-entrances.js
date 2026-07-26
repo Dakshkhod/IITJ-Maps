@@ -22,7 +22,7 @@ const OSM_FILE = path.join(ROOT, 'map.osm');
 
 const doc = new DOMParser().parseFromString(fs.readFileSync(OSM_FILE, 'utf8'), 'text/xml');
 
-// ── Parse nodes + ways ───────────────────────────────────────────────────────
+// Parse nodes + ways
 const nodes = {};
 for (const el of Array.from(doc.getElementsByTagName('node'))) {
   const id = el.getAttribute('id');
@@ -44,7 +44,7 @@ const bestBuildingName = (tags) => (tags.name || tags['name:en'] || '').trim();
 // normalise a building/gate code for matching: drop "Hostel", spaces, dashes
 const codeKey = (s) => (s || '').replace(/hostel/ig, '').replace(/[-\s]/g, '').toUpperCase();
 
-// ── Named buildings (closed, named ways with a building tag) ──────────────────
+// Named buildings (closed, named ways with a building tag)
 const buildings = [];
 for (const w of ways) {
   const name = bestBuildingName(w.tags);
@@ -56,7 +56,7 @@ for (const w of ways) {
   buildings.push({ id: w.id, name, ndSet: new Set(w.ndIds), lat: lat / ring.length, lng: lng / ring.length });
 }
 
-// ── Gate / entrance nodes ─────────────────────────────────────────────────────
+// Gate / entrance nodes
 const namedGates = [];   // { id, name, base, key, lat, lng }
 const entranceNodes = []; // { id, lat, lng, kind }  (kind: 'main' | 'yes' | other)
 for (const [id, n] of Object.entries(nodes)) {
@@ -69,7 +69,7 @@ for (const [id, n] of Object.entries(nodes)) {
   }
 }
 
-// ── Assign each building an entrance ──────────────────────────────────────────
+// Assign each building an entrance
 const out = {};
 const report = [];
 const usedGate = new Set();

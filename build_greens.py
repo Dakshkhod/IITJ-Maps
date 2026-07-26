@@ -64,10 +64,10 @@ for e in elements.values():
         'geometry': {'type': 'Polygon', 'coordinates': [ring]},
     })
 
-# ── Manual green patches (not in OSM): hand-added landscaping requested by the
-#    user. Kept here so they survive every greens rebuild. The greens layer sits
-#    at the bottom of the map stack, so roads/buildings/area tints render on top
-#    — generous coverage only fills the bare cream gaps, it can't overwrite them.
+# Manual green patches (not in OSM): hand-added landscaping, kept here so it
+# survives every greens rebuild. The greens layer sits at the bottom of the map
+# stack, so roads/buildings/area tints render on top — generous coverage only
+# fills the bare cream gaps, it can't overwrite them.
 def _circle(lng, lat, r_m, n=40):
     mlat = 111132.0
     mlng = 111320.0 * math.cos(math.radians(lat))
@@ -81,10 +81,9 @@ def _circle(lng, lat, r_m, n=40):
 MANUAL = [
     # Brain Tree roundabout island — green the white ring inside the circle.
     ('grass', _circle(73.1141633, 26.4692796, 30)),
-    # NOTE: a hand-added "ring-road median / berm strip" by IITJ Fountain &
-    # Informal Grounds used to live here. It spilled south past the ring road and
-    # bled into Informal Grounds, so it was removed — the OSM grass polygons + the
-    # area fills already cover the arc without overflowing.
+    # No median/berm strip by the IITJ Fountain & Informal Grounds: the OSM grass
+    # polygons and area fills already cover that arc, and a patch there spills
+    # south past the ring road into Informal Grounds.
 ]
 for _g, _ring in MANUAL:
     feats.append({'type': 'Feature', 'properties': {'g': _g},

@@ -1,10 +1,10 @@
 /**
  * Serverless admin endpoint for IITJ Maps (Vercel Node function).
  *
- * Replaces the old browser-side GitHub publishing, which kept a repo-write
- * Personal Access Token in localStorage — a token the browser could leak via
- * any XSS. Here the token (and repo coordinates) live ONLY in server-side
- * environment variables and never reach the client.
+ * Publishing runs server-side so no repo-write Personal Access Token is ever
+ * held in the browser, where any XSS could read it out of localStorage. The
+ * token (and repo coordinates) live ONLY in server-side environment variables
+ * and never reach the client.
  *
  * Auth: the admin logs in with a password (server-side ADMIN_PASSWORD). On
  * success the server returns a short-lived HMAC-signed session token; the
