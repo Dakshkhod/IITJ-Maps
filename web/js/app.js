@@ -305,10 +305,31 @@ function shouldSuppressMapUI() {
   return directionsOpen && !directionsPickTarget;
 }
 
+// MapLibre fires the click listener of EVERY layer under the pointer, not just
+// the topmost one. The campus area polygon and the road hit-lines span almost
+// the whole map, so a tap on a POI dot or a building also runs their handlers —
+// and those treat "a sheet is already open" as "the user tapped the background,
+// dismiss it". The dismissal goes through an async history.back(), so the late
+// popstate hides the sheet the more specific handler just opened: the card
+// flashes and vanishes. Ranking the layers lets the specific one win.
+const CLICK_TIERS = [
+  ['places-circles'],
+  ['buildings-fill', 'buildings-3d'],
+  ['campus-roads-hit'],
+  ['areas-fill'],
+];
+
+function outrankedClick(e, tier) {
+  if (!e.point) return false;
+  const above = CLICK_TIERS.slice(0, tier).flat().filter(id => map.getLayer(id));
+  return above.length > 0 && map.queryRenderedFeatures(e.point, { layers: above }).length > 0;
+}
+
 const mapHandlers = {
   onBuildingClick(e) {
     _layerClickHandled = true;
     if (!e.features?.length) return;
+    if (outrankedClick(e, 1)) return;
     const p = e.features[0].properties;
     if (tryDirectionsMapPick(e, p.name)) return;
     if (shouldSuppressMapUI()) return;
@@ -321,6 +342,7 @@ const mapHandlers = {
   onRoadClick(e) {
     _layerClickHandled = true;
     if (!e.features?.length) return;
+    if (outrankedClick(e, 2)) return;
     if (tryDirectionsMapPick(e)) return;
     if (shouldSuppressMapUI()) return;
     // Roads are background — first tap closes any open sheet
@@ -340,6 +362,7 @@ const mapHandlers = {
   onAreaClick(e) {
     _layerClickHandled = true;
     if (!e.features?.length) return;
+    if (outrankedClick(e, 3)) return;
     const p = e.features[0].properties;
     if (tryDirectionsMapPick(e, p.name)) return;
     if (shouldSuppressMapUI()) return;
