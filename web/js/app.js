@@ -710,9 +710,14 @@ async function init() {
   // so only genuine user input cancels follow.
   function _exitFollowOnGesture(e) {
     if (e && e.originalEvent == null) return;   // programmatic camera move
-    if (autoFollow) setAutoFollow(false);
-    // In immersive nav, surface a Re-centre chip so the user can snap back
-    if (immersiveNav) showRecenterBtn();
+    if (!autoFollow) return;
+    setAutoFollow(false);
+    // Surface a Re-centre chip so the user can snap back to their live position —
+    // not just during immersive nav. A shared route link (our QR signs) opens
+    // straight into plain preview mode, where losing follow on the very first
+    // pinch used to leave no way back except noticing the tiny locate button
+    // had gone dim and re-tapping it. That read as "my location drifted".
+    showRecenterBtn();
   }
   map.on('dragstart', _exitFollowOnGesture);
   map.on('zoomstart', _exitFollowOnGesture);
@@ -4025,15 +4030,22 @@ function applyImmersiveBuildingFade(coord) {
 }
 
 function showRecenterBtn() {
-  if (!immersiveNav) return;
   document.getElementById('nav-recenter-btn')?.classList.remove('hidden');
 }
 function hideRecenterBtn() {
   document.getElementById('nav-recenter-btn')?.classList.add('hidden');
 }
 
+// Re-centre chip handler. Immersive turn-by-turn gets the full 3D snap-back;
+// plain route preview (what every shared/QR link opens into, since Start is
+// never pressed) just re-arms follow at the current 2D view — same as
+// tapping the locate button again, but discoverable without hunting for it.
 function recenterImmersive() {
-  if (!immersiveNav) return;
+  if (!immersiveNav) {
+    setAutoFollow(true);
+    hideRecenterBtn();
+    return;
+  }
   const coords = currentRoute?.geometry?.coordinates;
   const center = userLocation
     ? [userLocation.lng, userLocation.lat]
@@ -4751,6 +4763,7 @@ function setAutoFollow(on) {
     // Use a SINGLE ease (not a flyTo + later easeTo race)
     _easingTo = false;
     _cameraFollow(userLocation.lat, userLocation.lng, userLocation.heading, /*nav=*/navigationActive);
+    hideRecenterBtn();
   }
 }
 
