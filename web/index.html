@@ -430,5 +430,12 @@
   <script src="js/routing.js?v=58"></script>
   <script src="js/landmarks-3d.js?v=59" defer></script>
   <script src="js/app.js?v=99"></script>
+
+  <!-- Vercel Web Analytics — aggregate page-view counts only (no cookies, no
+       visitor IDs, nothing tying a view to a person). Served first-party from
+       /_vercel/insights, so the existing script-src/connect-src 'self' CSP
+       covers it with no exception. Loaded last and deferred: if Analytics is
+       off in the dashboard the file 404s and nothing else is affected. -->
+  <script defer src="/_vercel/insights/script.js"></script>
 </body>
 </html>
