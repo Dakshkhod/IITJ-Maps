@@ -705,24 +705,37 @@ async function init() {
   map.dragRotate.enable();
 
   // Any manual gesture exits auto-follow, so the camera stops snapping back to
-  // the GPS fix while the puck still tracks live position. The `originalEvent`
-  // guard is essential: the follow easeTo fires these same events without one,
-  // so only genuine user input cancels follow.
-  function _exitFollowOnGesture(e) {
-    if (e && e.originalEvent == null) return;   // programmatic camera move
+  // the GPS fix while the puck still tracks live position.
+  function _exitFollowOnGesture() {
     if (!autoFollow) return;
     setAutoFollow(false);
     // Surface a Re-centre chip so the user can snap back to their live position —
     // not just during immersive nav. A shared route link (our QR signs) opens
     // straight into plain preview mode, where losing follow on the very first
-    // pinch used to leave no way back except noticing the tiny locate button
-    // had gone dim and re-tapping it. That read as "my location drifted".
+    // pinch left no obvious way back.
     showRecenterBtn();
   }
-  map.on('dragstart', _exitFollowOnGesture);
-  map.on('zoomstart', _exitFollowOnGesture);
-  map.on('rotatestart', _exitFollowOnGesture);
-  map.on('pitchstart', _exitFollowOnGesture);
+
+  // Cancel follow from RAW DOM gestures on the canvas, not MapLibre's
+  // zoomstart/dragstart. Those fire for programmatic eases too, and the only
+  // way to tell the two apart — `e.originalEvent` — is null for genuine
+  // pinch-zoom and scroll-zoom as well, because MapLibre runs those through an
+  // internal animation loop. So the old `originalEvent == null` guard silently
+  // swallowed every real zoom: follow stayed armed, the follow easeTo kept
+  // dragging the camera back to the GPS fix mid-pinch, and the puck looked like
+  // it was drifting with zoom. A touchmove/wheel/drag on the canvas, by
+  // contrast, can only come from the user.
+  const _canvasEl = map.getCanvasContainer();
+  ['touchmove', 'wheel'].forEach(evt => {
+    _canvasEl.addEventListener(evt, _exitFollowOnGesture, { passive: true });
+  });
+  // Mouse panning: only once the pointer actually moves with a button held, so
+  // a plain click to open a place doesn't drop follow.
+  _canvasEl.addEventListener('mousedown', () => {
+    const onMove = () => _exitFollowOnGesture();
+    window.addEventListener('mousemove', onMove, { passive: true, once: true });
+    window.addEventListener('mouseup', () => window.removeEventListener('mousemove', onMove), { once: true });
+  }, { passive: true });
 
   map.on('error', (e) => console.error('MapLibre error:', e.error?.message || e));
 
