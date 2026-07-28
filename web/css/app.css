@@ -1402,8 +1402,12 @@ input[type="checkbox"]:checked + .toggle-track .toggle-thumb { transform: transl
   cursor: default;
 }
 
+/* MUST stay `absolute`: MapLibre positions marker root elements with
+   position:absolute + a transform. Overriding this to `relative` drops the
+   marker into normal flow, where its 42px height then shifts every marker
+   added after it (notably the live-location puck) 42px down the page. */
 .route-dest-marker {
-  position: relative;
+  position: absolute;
   width: 32px;
   height: 42px;
   cursor: default;
@@ -1544,9 +1548,14 @@ input[type="checkbox"]:checked + .toggle-track .toggle-thumb { transform: transl
   backdrop-filter: blur(2px);
 }
 
-/* Location Marker */
+/* Location Marker. `absolute` is required, not cosmetic — see the note on
+   .route-dest-marker: a `relative` marker root falls into normal flow and is
+   then pushed around by whatever in-flow markers precede it, which offsets the
+   puck from its real coordinate by a fixed pixel amount (and therefore by a
+   zoom-dependent number of metres). It still establishes the containing block
+   the dot/pulse/heading children position against. */
 .location-marker {
-  position: relative;
+  position: absolute;
   width: 28px;
   height: 28px;
   --loc-heading: 0deg;
