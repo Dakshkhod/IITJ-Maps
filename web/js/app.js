@@ -4343,12 +4343,19 @@ const LocationTracker = (() => {
     const targetH   = _bestHeading();
 
     if (!_disp) {
-      _disp = { lat: _est.lat, lng: _est.lng, accuracy: targetAcc, heading: targetH ?? 0 };
+      // heading stays null (not 0) until a real GPS/compass bearing exists —
+      // 0 is a valid heading (due north) and would wrongly show the
+      // direction cone on a stationary puck with no known orientation.
+      _disp = { lat: _est.lat, lng: _est.lng, accuracy: targetAcc, heading: targetH };
     } else {
       _disp.lat       += (_est.lat - _disp.lat) * POS_INTERP_FACTOR;
       _disp.lng       += (_est.lng - _disp.lng) * POS_INTERP_FACTOR;
       _disp.accuracy  += (targetAcc - _disp.accuracy) * ACC_INTERP_FACTOR;
-      if (targetH != null) _disp.heading = _rotateAngle(_disp.heading, targetH, HEADING_INTERP_FACTOR);
+      if (targetH != null) {
+        _disp.heading = (_disp.heading == null)
+          ? targetH
+          : _rotateAngle(_disp.heading, targetH, HEADING_INTERP_FACTOR);
+      }
     }
 
     for (const cb of _listeners) {
