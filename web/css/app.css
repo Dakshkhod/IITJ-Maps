@@ -1388,13 +1388,17 @@ input[type="checkbox"]:checked + .toggle-track .toggle-thumb { transform: transl
 }
 .nav-end-btn:hover { opacity: 0.85; }
 
-/* Route start / end markers */
+/* Route start / end markers. Origin is deliberately NOT blue: blue is
+   reserved for the live GPS puck (.location-dot). A shared route link often
+   starts from a named place (e.g. "Security Checkpost") rather than the
+   user's live position — with both drawn blue, the fixed origin and the
+   real-time puck read as the same drifting dot as you pan/zoom between them. */
 .route-origin-marker {
   width: 22px; height: 22px;
-  background: #007AFF;
+  background: #6b7280;
   border: 3px solid #fff;
   border-radius: 50%;
-  box-shadow: 0 2px 8px rgba(0,122,255,0.55);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.35);
   cursor: default;
 }
 
