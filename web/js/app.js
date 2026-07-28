@@ -4661,7 +4661,7 @@ function _renderLocationMarker(lat, lng, accuracyM, heading) {
   }
 }
 
-function _cameraFollow(lat, lng, heading, nav) {
+function _cameraFollow(lat, lng, heading, nav, force = false) {
   // Skip if a previous ease is still running — overlapping eases are the
   // source of the visible "stutter" the user reported.
   if (_easingTo) return;
@@ -4669,7 +4669,11 @@ function _cameraFollow(lat, lng, heading, nav) {
   // actually drifted from screen centre. A stationary user otherwise triggers an
   // easeTo every frame, leaving the map perpetually animating and feeling
   // unresponsive to touch. Releasing follow on drag/zoom is handled elsewhere.
-  if (!nav && map) {
+  // `force` bypasses this for an explicit re-centre: rotating the map (two-finger
+  // twist) can leave the centre already within 8m while the BEARING is still
+  // wildly off — without force, tapping Re-centre would silently no-op because
+  // this guard returned before the bearing reset below ever ran.
+  if (!nav && !force && map) {
     const c = map.getCenter();
     if (haversine(c.lat, c.lng, lat, lng) < 8) return;   // ~8 m: below GPS jitter
   }
@@ -4680,8 +4684,11 @@ function _cameraFollow(lat, lng, heading, nav) {
     opts.pitch = 65;
     opts.zoom = 18;
     opts.padding = { top: 0, bottom: 280, left: 0, right: 0 };
-  } else if (heading != null) {
-    opts.bearing = heading;
+  } else {
+    // No genuine compass/GPS bearing (the common case while stationary): snap
+    // back to north-up rather than leaving whatever rotation the user last
+    // applied, so re-centring reliably un-twists the view too.
+    opts.bearing = heading != null ? heading : 0;
   }
   const onMoveEnd = () => { _easingTo = false; map.off('moveend', onMoveEnd); };
   map.once('moveend', onMoveEnd);
@@ -4760,9 +4767,12 @@ function setAutoFollow(on) {
   const btn = document.getElementById('btn-locate');
   btn.classList.toggle('location-follow', on);
   if (on && userLocation) {
-    // Use a SINGLE ease (not a flyTo + later easeTo race)
+    // Use a SINGLE ease (not a flyTo + later easeTo race). Every caller of
+    // setAutoFollow(true) is a deliberate re-follow (locate tap, re-centre
+    // chip) — force it so a rotated/tilted view gets straightened even when
+    // the centre itself hasn't drifted.
     _easingTo = false;
-    _cameraFollow(userLocation.lat, userLocation.lng, userLocation.heading, /*nav=*/navigationActive);
+    _cameraFollow(userLocation.lat, userLocation.lng, userLocation.heading, /*nav=*/navigationActive, /*force=*/true);
     hideRecenterBtn();
   }
 }
