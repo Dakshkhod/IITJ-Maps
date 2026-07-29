@@ -4294,14 +4294,21 @@ const LocationTracker = (() => {
   const OUTLIER_SIGMA            = 4;    // jumps beyond Nσ get heavily down-weighted
   const POS_INTERP_FACTOR        = 0.22; // per-frame ease toward estimate
   const ACC_INTERP_FACTOR        = 0.15;
-  const HEADING_INTERP_FACTOR    = 0.06; // gentle ease toward target bearing
+  const HEADING_INTERP_FACTOR    = 0.05; // gentle ease toward target bearing
 
   // Compass sensitivity — phones emit deviceorientation at 30-100 Hz and raw
   // alpha jitters several degrees even at rest, so throttle + smooth + deadzone
   // keep the camera from twitching on every wobble.
-  const COMPASS_MIN_INTERVAL_MS  = 120;  // hard rate limit on accepted samples
-  const COMPASS_SMOOTH_FACTOR    = 0.15; // low-pass on raw compass input
-  const COMPASS_DEADZONE_DEG     = 1.5;  // ignore sub-degree micro-rotations
+  //
+  // These are deliberately heavy. Held upright for navigation (beta near 90°)
+  // the alpha/beta/gamma decomposition sits at gimbal lock, where alpha and
+  // gamma trade off — so a few degrees of hand roll swings raw alpha by tens of
+  // degrees and the map spins far more than the phone actually turned.
+  const COMPASS_MIN_INTERVAL_MS  = 150;  // hard rate limit on accepted samples
+  const COMPASS_SMOOTH_FACTOR    = 0.14; // low-pass on raw compass input
+  const COMPASS_DEADZONE_DEG     = 8;    // hold still until a real turn happens
+  const COMPASS_TILT_HALF_DEG    = 3;    // beta/gamma change per sample that
+                                         // halves how much we trust alpha
 
   let _raw  = null;   // last accepted raw fix (lat,lng,accuracy,heading,speed,t)
   let _est  = null;   // Kalman estimate (lat,lng,variance,t)
@@ -4310,6 +4317,7 @@ const LocationTracker = (() => {
   let _compassHeading = null;
   let _compassRaw     = null;  // smoothed raw bearing before deadzone gating
   let _compassLastT   = 0;
+  let _compassTilt    = null;  // last accepted {beta,gamma}, for the tilt weight
   let _compassEnabled = false;
   let _compassGotSample = false;  // a usable orientation event has actually arrived
   let _compassAccuracy  = null;   // webkitCompassAccuracy (deg); <0 or large = poor
@@ -4402,6 +4410,7 @@ const LocationTracker = (() => {
 
   function _onCompass(e) {
     let h = null;
+    let fromAlpha = false;   // alpha needs tilt weighting; webkit heading doesn't
     // iOS Safari provides webkitCompassHeading (true-north, 0..360) and a
     // companion accuracy in degrees (negative = uncalibrated).
     if (typeof e.webkitCompassHeading === 'number' && !isNaN(e.webkitCompassHeading)) {
@@ -4411,10 +4420,12 @@ const LocationTracker = (() => {
       // Only trust alpha when the platform flags it absolute (true-north);
       // relative alpha drifts and would point the camera the wrong way.
       h = (360 - e.alpha) % 360;
+      fromAlpha = true;
     } else if (e.alpha != null && !isNaN(e.alpha) && e.absolute == null) {
       // Older Android Chrome fires plain `deviceorientation` with no
       // `absolute` flag but alpha is magnetometer-backed — accept it.
       h = (360 - e.alpha) % 360;
+      fromAlpha = true;
     }
     if (h == null) return;
     _compassGotSample = true;
@@ -4423,9 +4434,31 @@ const LocationTracker = (() => {
     if (now - _compassLastT < COMPASS_MIN_INTERVAL_MS) return;
     _compassLastT = now;
 
+    // Tilt-weighted trust. While the phone is being pitched or rolled, alpha is
+    // largely reporting that tilt rather than a change of facing: a near-upright
+    // hold sits close to gimbal lock, where alpha and gamma trade off and a few
+    // degrees of hand roll read as tens of degrees of yaw. So the faster the
+    // phone is tilting, the less this sample moves the heading — which is what
+    // stops angling the phone from swinging the map. Weighting beats a hard
+    // cutoff here: it degrades smoothly instead of freezing the compass
+    // whenever a walking phone bobs past a threshold. iOS's
+    // webkitCompassHeading is already tilt-compensated, so it skips this.
+    let trust = 1;
+    if (fromAlpha && e.beta != null && e.gamma != null && !isNaN(e.beta) && !isNaN(e.gamma)) {
+      const prev = _compassTilt;
+      _compassTilt = { beta: e.beta, gamma: e.gamma };
+      if (prev) {
+        const dB = Math.abs(e.beta - prev.beta);
+        // gamma wraps at ±180°, so measure the short way round.
+        const dG = Math.min(Math.abs(e.gamma - prev.gamma), 360 - Math.abs(e.gamma - prev.gamma));
+        const rate = (dB + dG) / COMPASS_TILT_HALF_DEG;
+        trust = 1 / (1 + rate * rate);
+      }
+    }
+
     // Low-pass filter on the raw input — flattens the high-frequency wobble
     // before it reaches the deadzone / interp stage.
-    _compassRaw = (_compassRaw == null) ? h : _rotateAngle(_compassRaw, h, COMPASS_SMOOTH_FACTOR);
+    _compassRaw = (_compassRaw == null) ? h : _rotateAngle(_compassRaw, h, COMPASS_SMOOTH_FACTOR * trust);
 
     // Deadzone — only publish a new heading when it moved meaningfully.
     if (_compassHeading == null) {
@@ -4505,6 +4538,7 @@ const LocationTracker = (() => {
     _compassHeading = null;
     _compassRaw     = null;
     _compassLastT   = 0;
+    _compassTilt    = null;
   }
 
   function subscribe(cb) { _listeners.add(cb); return () => _listeners.delete(cb); }
