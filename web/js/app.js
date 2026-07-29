@@ -3891,9 +3891,10 @@ function startImmersiveNavigation() {
   const startCoord = (userLocation && directionsFrom?.name === 'Your location')
     ? [userLocation.lng, userLocation.lat]
     : currentRoute.geometry.coordinates[0];
-  const bearing = (userLocation?.heading != null)
-    ? userLocation.heading
-    : (headingDeg ?? _routeStartBearing());
+  // Course, not compass — see _navCameraBearing. At the moment Start is tapped
+  // the user is usually standing still, so this is normally the route's own
+  // opening direction, which is exactly where the camera should look.
+  const bearing = userLocation?.course ?? _routeStartBearing();
 
   // Bottom padding puts the puck in the lower third, matching Google Maps'
   // "look ahead" framing. Set autoFollow directly — setAutoFollow's built-in
@@ -4078,9 +4079,10 @@ function recenterImmersive() {
   const center = userLocation
     ? [userLocation.lng, userLocation.lat]
     : (coords ? coords[0] : map.getCenter());
-  const bearing = (userLocation?.heading != null)
-    ? userLocation.heading
-    : (headingDeg ?? _routeStartBearing());
+  // Re-align to the direction of travel, falling back to the route's direction
+  // where the user is standing — not to wherever the handset happens to point.
+  const snap = (userLocation && coords) ? _nearestOnRoute(userLocation.lat, userLocation.lng, coords) : null;
+  const bearing = (snap ? _navCameraBearing(snap, coords) : null) ?? _routeStartBearing();
   autoFollow = true;
   document.getElementById('btn-locate').classList.add('location-follow');
   // Re-centre is an explicit "straighten it out", so it sets the bearing
@@ -4320,6 +4322,17 @@ const LocationTracker = (() => {
   const COMPASS_TILT_HALF_DEG    = 3;    // beta/gamma change per sample that
                                          // halves how much we trust alpha
 
+  // Course over ground — the direction the user is actually travelling, which
+  // is a different question from the direction the phone is pointing. Only
+  // course can answer "which way am I going", because a magnetometer reads the
+  // same whether the user turned or merely tilted the handset in their grip.
+  const COURSE_MIN_SPEED_MPS     = 1.0;  // below this, coords.heading is noise
+  const COURSE_MIN_MOVE_M        = 15;   // travel needed to derive a fallback
+  const COURSE_ANCHOR_TTL_MS     = 12000;// …and it has to be covered this fast,
+                                         // so GPS wander while standing can
+                                         // never accumulate into a fake course
+  const COURSE_INTERP_FACTOR     = 0.05; // per-frame ease toward the course
+
   let _raw  = null;   // last accepted raw fix (lat,lng,accuracy,heading,speed,t)
   let _est  = null;   // Kalman estimate (lat,lng,variance,t)
   let _disp = null;   // smoothly interpolated render position (lat,lng,accuracy,heading)
@@ -4328,6 +4341,8 @@ const LocationTracker = (() => {
   let _compassRaw     = null;  // smoothed raw bearing before deadzone gating
   let _compassLastT   = 0;
   let _compassTilt    = null;  // last accepted {beta,gamma}, for the tilt weight
+  let _courseHeading  = null;  // last known direction of travel
+  let _courseAnchor   = null;  // position the derived course was measured from
   let _compassEnabled = false;
   let _compassGotSample = false;  // a usable orientation event has actually arrived
   let _compassAccuracy  = null;   // webkitCompassAccuracy (deg); <0 or large = poor
@@ -4375,6 +4390,31 @@ const LocationTracker = (() => {
     return true;
   }
 
+  function _bearingTo(lat1, lng1, lat2, lng2) {
+    const dLng = (lng2 - lng1) * Math.PI / 180;
+    const y = Math.sin(dLng) * Math.cos(lat2 * Math.PI / 180);
+    const x = Math.cos(lat1 * Math.PI / 180) * Math.sin(lat2 * Math.PI / 180) -
+      Math.sin(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.cos(dLng);
+    return ((Math.atan2(y, x) * 180 / Math.PI) + 360) % 360;
+  }
+
+  // Update the course from where the filtered position has actually travelled.
+  // `coords.heading` is null on plenty of Android fixes and always null when
+  // stationary, so this covers the gap — and it can only ever change when the
+  // user genuinely moves, which is the whole point.
+  function _updateCourse(lat, lng, tMs) {
+    if (!_courseAnchor) { _courseAnchor = { lat, lng, t: tMs }; return; }
+    if (_haversine(_courseAnchor.lat, _courseAnchor.lng, lat, lng) >= COURSE_MIN_MOVE_M) {
+      _courseHeading = _bearingTo(_courseAnchor.lat, _courseAnchor.lng, lat, lng);
+      _courseAnchor  = { lat, lng, t: tMs };
+      return;
+    }
+    // The anchor aged out without the user covering real ground: that's GPS
+    // drift while standing, not travel. Re-anchor so metres of wander can never
+    // accumulate into a course that turns the map on its own.
+    if (tMs - _courseAnchor.t > COURSE_ANCHOR_TTL_MS) _courseAnchor = { lat, lng, t: tMs };
+  }
+
   function _rotateAngle(from, to, factor) {
     let delta = to - from;
     while (delta > 180) delta -= 360;
@@ -4401,7 +4441,7 @@ const LocationTracker = (() => {
       // heading stays null (not 0) until a real GPS/compass bearing exists —
       // 0 is a valid heading (due north) and would wrongly show the
       // direction cone on a stationary puck with no known orientation.
-      _disp = { lat: _est.lat, lng: _est.lng, accuracy: targetAcc, heading: targetH };
+      _disp = { lat: _est.lat, lng: _est.lng, accuracy: targetAcc, heading: targetH, course: _courseHeading };
     } else {
       _disp.lat       += (_est.lat - _disp.lat) * POS_INTERP_FACTOR;
       _disp.lng       += (_est.lng - _disp.lng) * POS_INTERP_FACTOR;
@@ -4410,6 +4450,11 @@ const LocationTracker = (() => {
         _disp.heading = (_disp.heading == null)
           ? targetH
           : _rotateAngle(_disp.heading, targetH, HEADING_INTERP_FACTOR);
+      }
+      if (_courseHeading != null) {
+        _disp.course = (_disp.course == null)
+          ? _courseHeading
+          : _rotateAngle(_disp.course, _courseHeading, COURSE_INTERP_FACTOR);
       }
     }
 
@@ -4497,6 +4542,16 @@ const LocationTracker = (() => {
         };
         if (c.heading != null && !isNaN(c.heading)) _gpsHeading = c.heading;
         if (c.speed   != null && !isNaN(c.speed))   _speed      = c.speed;
+
+        // Course over ground: trust the device's own value while it's moving
+        // fast enough for it to mean anything, otherwise derive it from travel.
+        if (c.heading != null && !isNaN(c.heading) &&
+            c.speed != null && !isNaN(c.speed) && c.speed >= COURSE_MIN_SPEED_MPS) {
+          _courseHeading = c.heading;
+          _courseAnchor  = { lat: _est.lat, lng: _est.lng, t: tMs };
+        } else {
+          _updateCourse(_est.lat, _est.lng, tMs);
+        }
       },
       (err) => { onError?.(err); },
       // maximumAge:0 — never accept a stale cached fix; that's the #1 source
@@ -4634,9 +4689,11 @@ function onLocationFrame(disp, raw) {
   userLocation = {
     lat: renderLat, lng: renderLng,
     accuracy: disp.accuracy, heading: disp.heading,
+    course: disp.course,   // direction of travel; drives the nav camera
     raw, // keep raw available for sharing/precision-sensitive consumers
   };
-  // Legacy global kept for code paths that still read it directly
+  // Compass bearing, kept for debugging. Nothing steers off it any more — the
+  // camera reads `course` and the puck cone reads `heading` from `userLocation`.
   if (disp.heading != null) headingDeg = disp.heading;
 
   // A shared-route link that had no baked-in origin waited for this first fix —
@@ -4730,6 +4787,32 @@ function _renderLocationMarker(lat, lng, accuracyM, heading) {
   } else {
     wrapper.classList.remove('has-heading');
   }
+}
+
+// Which way the navigation camera points.
+//
+// Deliberately NOT the compass. A magnetometer reports where the handset is
+// aimed, and it reads exactly the same whether the user turned a corner or just
+// tilted the phone in their grip — the two are physically indistinguishable to
+// it, so no amount of filtering can separate them. Held upright the reading is
+// near gimbal lock as well, where a few degrees of hand roll show up as tens of
+// degrees of yaw. Steering the map with it is why simply angling the phone
+// spun the view, and why deadzones and persistence checks only ever reduced the
+// symptom: tilt the phone and hold it, and the compass has genuinely, steadily
+// changed.
+//
+// Course over ground is the honest answer to "which way am I going", and it
+// cannot change unless the user actually moves. Where there's no course yet
+// (standing at the start, no fix has travelled far enough), the route's own
+// direction at the current position is both stable and correct. The compass
+// still drives the puck's direction cone, where being a few degrees out costs
+// nothing.
+function _navCameraBearing(snap, coords) {
+  const course = userLocation?.course;
+  if (course != null) return course;
+  const a = coords[snap.segIdx], b = coords[snap.segIdx + 1];
+  if (a && b) return segmentBearingDeg(a[1], a[0], b[1], b[0]);
+  return null;   // nothing trustworthy — leave the bearing alone
 }
 
 // How lazily the navigation camera rotates.
@@ -4899,7 +4982,7 @@ function _navTick(lat, lng, snap) {
   _voiceGuidance(instrs, navInstructionIndex, nextInstr, distToTurn, remDist);
 
   if (autoFollow) {
-    _cameraFollow(lat, lng, userLocation.heading, /*nav=*/true);
+    _cameraFollow(lat, lng, _navCameraBearing(snap, coords), /*nav=*/true);
     // The occluder scan walks every building and landmark, and this tick runs
     // on the ~60Hz location frame — so only rescan once the focus point has
     // actually moved. Buildings are metres across; the fade set can't change
@@ -4927,7 +5010,11 @@ function setAutoFollow(on) {
       // chip) — force it so a rotated/tilted view gets straightened even when
       // the centre itself hasn't drifted.
       _easingTo = false;
-      _cameraFollow(userLocation.lat, userLocation.lng, userLocation.heading, /*nav=*/navigationActive, /*force=*/true);
+      // During nav the camera tracks course, never the compass — otherwise
+      // re-arming follow would snap the view to wherever the phone is pointing.
+      // Outside nav, heading (or north-up when there is none) is still right.
+      const b = navigationActive ? (userLocation.course ?? null) : userLocation.heading;
+      _cameraFollow(userLocation.lat, userLocation.lng, b, /*nav=*/navigationActive, /*force=*/true);
     }
   }
 }
