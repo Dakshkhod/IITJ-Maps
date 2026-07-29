@@ -634,6 +634,7 @@ let immersiveNav = false;            // true while in Google-Maps-style immersiv
 let preNavCameraState = null;        // saved pitch/bearing/zoom/center to restore on End
 let pre3DState = false;              // saved is3D flag so we can restore on End
 let _lastFadeKey = '';               // memo so we don't reapply identical occluder sets each GPS tick
+let _lastFadeAt  = null;             // [lng,lat] the memo above was computed for
 
 // Directions panel state
 let directionsOpen = false;
@@ -3900,7 +3901,10 @@ function startImmersiveNavigation() {
   // fixed-start preview stays at the route start so the user can drag around.
   autoFollow = navFollowsUser;
   document.getElementById('btn-locate').classList.toggle('location-follow', navFollowsUser);
-  map.easeTo({
+  // Claimed, not a bare easeTo: auto-follow is armed one line above, so the
+  // ~60Hz follow loop would otherwise restart this entry animation on every
+  // frame and the camera would never reach the tilted first-person pose.
+  _claimCameraEase({
     center: startCoord,
     zoom: 18,
     pitch: 65,
@@ -4011,6 +4015,7 @@ function applyImmersiveBuildingFade(coord) {
 
   if (!coord) {
     _lastFadeKey = '';
+    _lastFadeAt  = null;
     if (fillLayer) map.setPaintProperty('buildings-3d', 'fill-extrusion-color', baseColor);
     if (labelsLayer) {
       map.setLayoutProperty('buildings-labels', 'visibility',
@@ -4073,7 +4078,9 @@ function recenterImmersive() {
     : (headingDeg ?? _routeStartBearing());
   autoFollow = true;
   document.getElementById('btn-locate').classList.add('location-follow');
-  map.easeTo({
+  // Same reason as the Start-tap ease: follow is armed, so this snap-back has
+  // to own the camera or the per-frame follow loop restarts it into a crawl.
+  _claimCameraEase({
     center,
     zoom: 18,
     pitch: 65,
@@ -4535,6 +4542,8 @@ function requestUserLocation() {
 let _locationSubscribed = false;
 let _firstFixShown      = false;
 let _easingTo           = false;   // throttle camera ease to one in-flight at a time
+let _easeToken          = 0;       // invalidates the release of a superseded ease
+let _easeReleaseTimer   = 0;
 
 function onLocationFrame(disp, raw) {
   // Snap to route during active nav — uses smoothed estimate, NOT raw GPS.
@@ -4695,7 +4704,6 @@ function _cameraFollow(lat, lng, heading, nav, force = false) {
     const c = map.getCenter();
     if (haversine(c.lat, c.lng, lat, lng) < 8) return;   // ~8 m: below GPS jitter
   }
-  _easingTo = true;
   const opts = { center: [lng, lat], duration: nav ? 700 : 400, easing: t => t };
   if (nav) {
     if (heading != null) opts.bearing = heading;
@@ -4708,9 +4716,33 @@ function _cameraFollow(lat, lng, heading, nav, force = false) {
     // applied, so re-centring reliably un-twists the view too.
     opts.bearing = heading != null ? heading : 0;
   }
-  const onMoveEnd = () => { _easingTo = false; map.off('moveend', onMoveEnd); };
-  map.once('moveend', onMoveEnd);
+  _claimCameraEase(opts);
+}
+
+// Run a camera ease and hold the follow loop off until it actually finishes.
+//
+// The release listener MUST be bound AFTER map.easeTo(). easeTo() begins by
+// stopping whatever ease is in flight, and that stop fires `moveend`
+// synchronously — so a listener bound *before* it (what this used to do) was
+// immediately consumed by the PREVIOUS ease's end and cleared the in-flight
+// flag on the same tick. The guard therefore never held: onLocationFrame runs
+// at ~60Hz, so every frame restarted the ease and reset MapLibre's `_easeStart`
+// before the camera had advanced more than a fraction of a millisecond's worth
+// of a 700ms curve. That is the "navigation doesn't engage, the map just
+// crawls" bug — the entry animation inched along for seconds instead of
+// running in 900ms, and only a screen touch fixed it, because dropping
+// auto-follow finally stopped the restarts and let one ease play out.
+function _claimCameraEase(opts) {
+  const token = ++_easeToken;
+  clearTimeout(_easeReleaseTimer);
+  _easingTo = true;
   map.easeTo(opts);
+  const release = () => { if (token === _easeToken) _easingTo = false; };
+  map.once('moveend', release);
+  // A moveend can go missing — style reload mid-ease, backgrounded tab, or an
+  // ease short enough that it ended before we bound. Never let that wedge the
+  // camera out of follow for the rest of the session.
+  _easeReleaseTimer = setTimeout(release, (opts.duration || 0) + 250);
 }
 
 // Single-tick consolidated nav update, driven from watchPosition. Uses the
@@ -4775,7 +4807,14 @@ function _navTick(lat, lng, snap) {
 
   if (autoFollow) {
     _cameraFollow(lat, lng, userLocation.heading, /*nav=*/true);
-    if (immersiveNav) applyImmersiveBuildingFade([lng, lat]);
+    // The occluder scan walks every building and landmark, and this tick runs
+    // on the ~60Hz location frame — so only rescan once the focus point has
+    // actually moved. Buildings are metres across; the fade set can't change
+    // below this distance anyway.
+    if (immersiveNav && (!_lastFadeAt || haversine(_lastFadeAt[1], _lastFadeAt[0], lat, lng) > 5)) {
+      _lastFadeAt = [lng, lat];
+      applyImmersiveBuildingFade([lng, lat]);
+    }
   }
 }
 
