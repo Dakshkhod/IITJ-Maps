@@ -3901,6 +3901,11 @@ function startImmersiveNavigation() {
   // fixed-start preview stays at the route start so the user can drag around.
   autoFollow = navFollowsUser;
   document.getElementById('btn-locate').classList.toggle('location-follow', navFollowsUser);
+  // Park the rotation damper against this entry bearing, so the camera holds
+  // the route's direction until a real turn happens rather than drifting off
+  // toward whatever the compass reads.
+  _navBearingParked    = true;
+  _navBearingOverSince = 0;
   // Claimed, not a bare easeTo: auto-follow is armed one line above, so the
   // ~60Hz follow loop would otherwise restart this entry animation on every
   // frame and the camera would never reach the tilted first-person pose.
@@ -4078,6 +4083,11 @@ function recenterImmersive() {
     : (headingDeg ?? _routeStartBearing());
   autoFollow = true;
   document.getElementById('btn-locate').classList.add('location-follow');
+  // Re-centre is an explicit "straighten it out", so it sets the bearing
+  // directly and re-parks the damper there — the user always has a one-tap way
+  // to realign no matter how lazy the automatic rotation is.
+  _navBearingParked    = true;
+  _navBearingOverSince = 0;
   // Same reason as the Start-tap ease: follow is armed, so this snap-back has
   // to own the camera or the per-frame follow loop restarts it into a crawl.
   _claimCameraEase({
@@ -4722,6 +4732,54 @@ function _renderLocationMarker(lat, lng, accuracyM, heading) {
   }
 }
 
+// How lazily the navigation camera rotates.
+//
+// Before the _claimCameraEase fix the map barely rotated at all — not by
+// design, but because the follow ease was restarted every frame and never got
+// anywhere. Fixing that handed the camera the full compass swing, and with the
+// phone held upright a few degrees of hand roll reads as tens of degrees of
+// yaw, so the view span around on the slightest tilt. The damping the bug used
+// to supply by accident is deliberate here: ignore any disagreement under
+// WAKE_DEG, and once a real turn does wake the camera, rotate no faster than
+// MAX_STEP_DEG per ease until it settles back inside SLEEP_DEG.
+//
+// Waking and sleeping at different angles matters — a plain deadzone would
+// stall the camera the moment it got within WAKE_DEG and leave the map
+// permanently askew after every turn.
+const NAV_BEARING_WAKE_DEG     = 15;
+const NAV_BEARING_WAKE_HOLD_MS = 700;
+const NAV_BEARING_SLEEP_DEG    = 3;
+const NAV_BEARING_MAX_STEP_DEG = 15;   // per 700ms follow ease (~21°/s)
+let _navBearingParked    = true;
+let _navBearingOverSince = 0;
+
+function _navBearingTarget(heading) {
+  if (heading == null || !map) return null;
+  const cur = map.getBearing();
+  let delta = heading - cur;
+  while (delta > 180) delta -= 360;
+  while (delta < -180) delta += 360;
+  const mag = Math.abs(delta);
+  const now = (typeof performance !== 'undefined' ? performance.now() : Date.now());
+
+  if (_navBearingParked) {
+    if (mag < NAV_BEARING_WAKE_DEG) { _navBearingOverSince = 0; return null; }
+    // Require the disagreement to PERSIST before rotating. A tilted phone
+    // swings the compass past the threshold and straight back again; a real
+    // turn holds it there. That's what separates "rotated the phone in their
+    // hand" from "walked round a corner" — magnitude alone cannot, which is
+    // why a plain deadzone still let big slow sways drag the map around.
+    if (_navBearingOverSince === 0) _navBearingOverSince = now;
+    if (now - _navBearingOverSince < NAV_BEARING_WAKE_HOLD_MS) return null;
+    _navBearingParked = false;
+  } else if (mag < NAV_BEARING_SLEEP_DEG) {
+    _navBearingParked    = true;
+    _navBearingOverSince = 0;
+    return null;
+  }
+  return cur + Math.max(-NAV_BEARING_MAX_STEP_DEG, Math.min(NAV_BEARING_MAX_STEP_DEG, delta));
+}
+
 function _cameraFollow(lat, lng, heading, nav, force = false) {
   // Skip if a previous ease is still running — overlapping eases are the
   // source of the visible "stutter" the user reported.
@@ -4740,7 +4798,8 @@ function _cameraFollow(lat, lng, heading, nav, force = false) {
   }
   const opts = { center: [lng, lat], duration: nav ? 700 : 400, easing: t => t };
   if (nav) {
-    if (heading != null) opts.bearing = heading;
+    const b = _navBearingTarget(heading);
+    if (b != null) opts.bearing = b;
     opts.pitch = 65;
     opts.zoom = 18;
     opts.padding = { top: 0, bottom: 280, left: 0, right: 0 };
