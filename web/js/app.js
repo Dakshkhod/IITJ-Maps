@@ -713,7 +713,12 @@ async function init() {
     // not just during immersive nav. A shared route link (our QR signs) opens
     // straight into plain preview mode, where losing follow on the very first
     // pinch left no obvious way back.
-    showRecenterBtn();
+    //
+    // Only while a route is on screen, though. Panning and pinching IS plain
+    // browsing, so firing the chip there put a permanent "Re-centre" bar over
+    // the map for anyone who had ever tapped locate — and the locate button is
+    // right there in the search bar to re-arm follow.
+    if (currentRoute) showRecenterBtn();
   }
 
   // Cancel follow from RAW DOM gestures on the canvas, not MapLibre's
@@ -4779,14 +4784,19 @@ function setAutoFollow(on) {
   _followRequested = on;
   const btn = document.getElementById('btn-locate');
   btn.classList.toggle('location-follow', on);
-  if (on && userLocation) {
-    // Use a SINGLE ease (not a flyTo + later easeTo race). Every caller of
-    // setAutoFollow(true) is a deliberate re-follow (locate tap, re-centre
-    // chip) — force it so a rotated/tilted view gets straightened even when
-    // the centre itself hasn't drifted.
-    _easingTo = false;
-    _cameraFollow(userLocation.lat, userLocation.lng, userLocation.heading, /*nav=*/navigationActive, /*force=*/true);
+  if (on) {
+    // Follow is armed again, so there is nothing left to re-centre back to.
+    // Hidden even without a fix yet — otherwise the chip lingers while we wait
+    // on GPS and taps into a no-op.
     hideRecenterBtn();
+    if (userLocation) {
+      // Use a SINGLE ease (not a flyTo + later easeTo race). Every caller of
+      // setAutoFollow(true) is a deliberate re-follow (locate tap, re-centre
+      // chip) — force it so a rotated/tilted view gets straightened even when
+      // the centre itself hasn't drifted.
+      _easingTo = false;
+      _cameraFollow(userLocation.lat, userLocation.lng, userLocation.heading, /*nav=*/navigationActive, /*force=*/true);
+    }
   }
 }
 
