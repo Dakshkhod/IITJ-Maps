@@ -436,6 +436,14 @@ const IITJRouter = (() => {
     return (nodeLng * toCampusLng + nodeLat * toCampusLat) > 0;
   }
 
+  // Below this the destination is effectively ON the arrival road — a hostel
+  // gate node that IS a graph vertex, or an entrance within half a carriageway
+  // of the centre line. "Which side" is then meaningless (the cross product is
+  // ~0 and reads as "right"), so the keep-left rule must not fire: it used to
+  // disqualify the exact gate snap and hand the route to a node ~30 m past the
+  // building whose side test happened to pass (Hostel Y3/Y4 drove past the gate).
+  const SIDE_AGNOSTIC_M = 8;
+
   function _pathArrivalPenalty(pathNodes, destLat, destLng, mode, preferCampusSide) {
     if (mode !== 'drive' || pathNodes.length < 2) return 0;
     const prev = _nodeCoords[pathNodes[pathNodes.length - 2]];
@@ -446,7 +454,9 @@ const IITJRouter = (() => {
     const endPt = projectOntoSegment(destLat, destLng, prev[1], prev[0], last[1], last[0]);
     let penalty = 0;
 
-    if (!_isDestOnLeft(bearing, endPt.lat, endPt.lng, destLat, destLng)) {
+    const arrivalOffset = haversine(destLat, destLng, endPt.lat, endPt.lng);
+    if (arrivalOffset > SIDE_AGNOSTIC_M
+        && !_isDestOnLeft(bearing, endPt.lat, endPt.lng, destLat, destLng)) {
       penalty += 280;
     }
     if (preferCampusSide && !_nodeOnCampusSideOf(last, destLat, destLng)) {
