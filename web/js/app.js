@@ -614,7 +614,6 @@ let locationAccuracyMarker = null;   // accuracy circle HTML el
 let headingDeg = null;               // device compass bearing
 let autoFollow = false;              // map pans to keep user centred
 let _followRequested = false;        // user explicitly asked to follow (locate tap); OFF by default
-let watchId = null;                  // geolocation watchPosition handle
 let isDark = false, is3D = false, isSatellite = false;
 let nightModeManual = false;         // true after user taps the dark-mode button
 let _nightWatchTimer = null;
@@ -3169,7 +3168,7 @@ function setupDirectionsPanel() {
   document.getElementById('dir-your-location').addEventListener('click', () => {
     if (!userLocation) {
       showToast('Enable GPS first', 'warn');
-      if (!watchId) requestUserLocation();
+      requestUserLocation();
       return;
     }
     setDirectionsPoint('from', {
@@ -3367,7 +3366,7 @@ async function startNavigation() {
   if (from && to) calculateDirectionsRoute();
   else if (!from) {
     showToast('Set starting point or enable GPS', 'warn');
-    if (!watchId) requestUserLocation();
+    requestUserLocation();
   }
 }
 
@@ -4563,6 +4562,23 @@ const LocationTracker = (() => {
     return true;
   }
 
+  // Drop the watch. Needed because a watch that errors out is not a watch that
+  // recovers: with the device's location services switched off, Chrome on
+  // Android reports POSITION_UNAVAILABLE once and then never delivers from that
+  // handle again, even after the user turns location back on. Holding the dead
+  // handle would leave `watching()` claiming true forever, so every later
+  // attempt to start tracking would no-op and only a page reload could fix it.
+  //
+  // Keeps the estimate and the rAF loop when a fix already exists, so stopping
+  // and restarting mid-session doesn't drop the puck.
+  function stop() {
+    if (_watchId !== null) {
+      try { navigator.geolocation.clearWatch(_watchId); } catch (_) {}
+      _watchId = null;
+    }
+    if (_rafId && !_est) { cancelAnimationFrame(_rafId); _rafId = 0; }
+  }
+
   // Compass is OFF by default — useful only while the camera follows bearing
   // (turn-by-turn nav). Attaching it always leaks twitchy gyroscope input into
   // the marker heading, making the puck jitter at rest.
@@ -4610,21 +4626,40 @@ const LocationTracker = (() => {
   function getDisplay() { return _disp; }
   function getRaw()     { return _raw; }
   function hasFix()     { return !!_disp; }
+  // A fix landed in the filter — true one tick earlier than hasFix(), which
+  // waits for the rAF loop to publish it.
+  function hasEstimate() { return !!_est; }
   function watching()   { return _watchId !== null; }
   function compassEnabled()  { return _compassEnabled; }
   function compassActive()   { return _compassEnabled && _compassGotSample; }
   function compassAccuracy() { return _compassAccuracy; }
 
-  return { start, subscribe, getDisplay, getRaw, hasFix, watching, enableCompass, disableCompass, compassEnabled, compassActive, compassAccuracy };
+  return { start, stop, subscribe, getDisplay, getRaw, hasFix, hasEstimate, watching, enableCompass, disableCompass, compassEnabled, compassActive, compassAccuracy };
 })();
 
 // User Location — marker, accuracy circle, auto-follow, nav tracking
-function requestUserLocation() {
+//
+// `quiet` suppresses the toasts, for the automatic retries below: those fire
+// without the user asking, so a failure has nothing to report.
+function requestUserLocation({ quiet = false } = {}) {
   if (LocationTracker.watching()) return;
-  if (!navigator.geolocation) { showToast('Location not supported on this device', 'error'); return; }
-  showToast('Finding your location…', 'info');
+  if (!navigator.geolocation) { if (!quiet) showToast('Location not supported on this device', 'error'); return; }
+  if (!quiet) showToast('Finding your location…', 'info');
   const started = LocationTracker.start((err) => {
-    const msgs = { 1: 'Location access denied — enable in browser settings', 2: 'Location unavailable', 3: 'Location request timed out' };
+    // An error before the first fix means this attempt is finished — the phone
+    // has location switched off, or the permission isn't there. Let go of the
+    // watch so the next attempt opens a fresh one; keeping it would make
+    // `watching()` lie and silently swallow every later request. Errors *after*
+    // a fix are transient (tunnel, brief signal loss) and the watch recovers on
+    // its own, so those are left alone.
+    if (!LocationTracker.hasEstimate()) {
+      LocationTracker.stop();
+      _armLocationRetry(err);
+    } else {
+      _scheduleLocationRenew();
+    }
+    if (quiet) return;
+    const msgs = { 1: 'Location access denied — enable in browser settings', 2: 'Location unavailable — turn on location on your device', 3: 'Location request timed out' };
     showToast(msgs[err.code] || 'Location error', 'warn');
     document.getElementById('btn-locate').classList.remove('location-active', 'location-follow');
   });
@@ -4633,6 +4668,93 @@ function requestUserLocation() {
     _locationSubscribed = true;
     LocationTracker.subscribe(onLocationFrame);
   }
+}
+
+// Location retry — picks the user up as soon as they switch location on, so a
+// failed first attempt no longer means reloading the page. Three triggers,
+// because no single one covers every way location gets enabled:
+//   • returning to the tab, for a trip to the Settings app;
+//   • the geolocation permission flipping to granted, for the browser prompt;
+//   • a slow poll, for Android's quick-settings tile — that toggle fires no
+//     event at all, since the page never even loses visibility.
+const LOCATION_PROBE_MS = 8000;
+let _locationRetryTimer  = 0;
+let _locationRetryHooked = false;
+let _geoPermission       = null;   // 'granted' | 'prompt' | 'denied' | null when unknown
+
+function _armLocationRetry(err) {
+  if (!_locationRetryHooked) {
+    _locationRetryHooked = true;
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') _retryUserLocation();
+    });
+    window.addEventListener('focus', _retryUserLocation);
+    try {
+      navigator.permissions?.query?.({ name: 'geolocation' }).then(status => {
+        _geoPermission = status.state;
+        status.onchange = () => {
+          _geoPermission = status.state;
+          if (status.state === 'granted') _retryUserLocation();
+        };
+        // The first failure raced this query, so re-decide now that the
+        // permission state is actually known.
+        _startLocationProbe();
+      }).catch(() => {});
+    } catch (_) {}
+  }
+  if (err?.code !== 1) _startLocationProbe();
+}
+
+function _startLocationProbe() {
+  // Poll only once the permission is known to be granted: probing while it's
+  // still 'prompt' would re-raise the browser's permission dialog every few
+  // seconds, and 'denied' can only be undone in browser settings — which the
+  // permission listener already watches for. Without the Permissions API
+  // (older Safari) there's no safe way to tell, so those browsers rely on the
+  // visibility/focus triggers instead.
+  if (_locationRetryTimer || _geoPermission !== 'granted') return;
+  if (LocationTracker.watching()) return;
+  _locationRetryTimer = setInterval(_probeLocation, LOCATION_PROBE_MS);
+}
+
+// Cheap "is location back?" check — coarse accuracy, no watch, no UI. Only
+// once it answers yes do we spin the real high-accuracy tracker back up.
+function _probeLocation() {
+  if (LocationTracker.watching()) { _clearLocationRetry(); return; }
+  if (document.visibilityState !== 'visible') return;   // no battery burn in the background
+  navigator.geolocation.getCurrentPosition(
+    () => _retryUserLocation(),
+    () => {},                                            // still off — stay armed, stay quiet
+    { enableHighAccuracy: false, maximumAge: 0, timeout: 6000 }
+  );
+}
+
+function _retryUserLocation() {
+  if (LocationTracker.watching()) { _clearLocationRetry(); return; }
+  requestUserLocation({ quiet: true });
+}
+
+function _clearLocationRetry() {
+  if (_locationRetryTimer) { clearInterval(_locationRetryTimer); _locationRetryTimer = 0; }
+}
+
+// Location switched off *while* the map was already tracking. The watch is left
+// alone at first, since most errors here are a momentary signal drop the
+// browser recovers from by itself — but if nothing arrives for a while the
+// handle is as dead as in the cold-start case, so renew it. Restarting keeps
+// the filter state, so the puck doesn't jump and navigation carries on.
+const LOCATION_STALE_MS = 15000;
+let _locationRenewTimer = 0;
+
+function _scheduleLocationRenew() {
+  if (_locationRenewTimer) return;
+  _locationRenewTimer = setTimeout(() => {
+    _locationRenewTimer = 0;
+    if (document.visibilityState !== 'visible') { _scheduleLocationRenew(); return; }
+    if (Date.now() - (LocationTracker.getRaw()?.t || 0) < LOCATION_STALE_MS) return;  // fixes still flowing
+    LocationTracker.stop();
+    requestUserLocation({ quiet: true });
+  }, LOCATION_STALE_MS);
 }
 
 // One subscriber drives every consumer (marker + camera + nav) so there's
@@ -4713,6 +4835,7 @@ function onLocationFrame(disp, raw) {
 
   if (!_firstFixShown) {
     _firstFixShown = true;
+    _clearLocationRetry();
     showToast('Location found', 'success');
     document.getElementById('btn-locate').classList.add('location-active');
     // Follow is OFF by default — the camera only starts tracking once the user
@@ -5664,7 +5787,7 @@ function handleRouteDeepLink(p) {
       // No shared origin and no GPS fix yet — route as soon as one arrives.
       pendingSharedRoute = to;
       showToast(`Enable location for directions to ${to.name}`, 'info');
-      if (!watchId) requestUserLocation();
+      requestUserLocation();
     }
   };
   if (IITJData.isReady()) run(); else IITJData.onReady(run);
