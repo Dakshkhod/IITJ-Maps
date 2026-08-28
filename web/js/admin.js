@@ -780,23 +780,7 @@ function renderMiniMap(change) {
 
   _miniMap = new maplibregl.Map({
     container: 'mini-map',
-    style: {
-      version: 8,
-      glyphs: 'https://fonts.openmaptiles.org/{fontstack}/{range}.pbf',
-      sources: {
-        carto: {
-          type: 'raster',
-          tiles: [
-            'https://a.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',
-            'https://b.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',
-            'https://c.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',
-          ],
-          tileSize: 256,
-          attribution: '© OpenStreetMap contributors © CARTO',
-        },
-      },
-      layers: [{ id: 'base', type: 'raster', source: 'carto' }],
-    },
+    style: window.BasemapStyles.get(false),
     center,
     zoom: 17.5,
     attributionControl: { compact: true },

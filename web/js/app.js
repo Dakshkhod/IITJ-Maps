@@ -974,35 +974,9 @@ function getMapStyle() {
     };
   }
 
-  const tiles = isDark
-    ? [
-        'https://a.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}.png',
-        'https://b.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}.png',
-        'https://c.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}.png',
-      ]
-    : [
-        'https://a.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}.png',
-        'https://b.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}.png',
-        'https://c.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}.png',
-      ];
-
-  return {
-    version: 8,
-    glyphs: 'https://fonts.openmaptiles.org/{fontstack}/{range}.pbf',
-    sources: {
-      'carto-tiles': {
-        type: 'raster',
-        tiles,
-        tileSize: 256,
-        attribution: '© OpenStreetMap contributors © CARTO'
-      }
-    },
-    layers: [{
-      id: 'carto-tiles',
-      type: 'raster',
-      source: 'carto-tiles',
-    }]
-  };
+  // OpenFreeMap vector tiles — same positron/dark cartography the overlay was
+  // coloured against, minus CARTO's new API-key watermark. See basemap-styles.js.
+  return window.BasemapStyles.get(isDark);
 }
 
 let styleLoadGeneration = 0;
@@ -1253,10 +1227,10 @@ function addAreasLayer(data) {
 
   map.addSource('named-areas', { type: 'geojson', data });
 
-  // Base-map mask — CARTO bakes grey footprints into its tiles, which ghost out
-  // from under our 3D models. They're offset/larger than our OSM polygons, so a
-  // per-building mask can't catch them; instead we paint the campus areas in
-  // CARTO's exact land colour just above the raster. Hidden on satellite.
+  // Base-map mask — the basemap draws its own OSM building footprints, which
+  // ghost out from under our 3D models. They're offset/larger than our OSM
+  // polygons, so a per-building mask can't catch them; instead we paint the
+  // campus areas in a flat ground colour just above it. Hidden on satellite.
   if (!isSatellite) {
     const landColor = isDark ? '#26282a' : '#f2efe7';
     map.addLayer({
