@@ -418,29 +418,6 @@
     </div>
     <div id="menu-overlay" class="menu-overlay hidden"></div>
 
-    <!-- Shown only when a user chooses a location-powered feature. The map
-         never requests GPS or sends precise movement before this opt-in. -->
-    <div id="location-consent" class="location-consent hidden" role="dialog" aria-modal="true" aria-labelledby="location-consent-title">
-      <div class="location-consent-backdrop"></div>
-      <div class="location-consent-card">
-        <div class="location-consent-icon" aria-hidden="true">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 1 1 18 0z"/><circle cx="12" cy="10" r="3"/>
-          </svg>
-        </div>
-        <h2 id="location-consent-title">Use your precise location?</h2>
-        <p>
-          This enables the blue location marker and live navigation. During this
-          visit, IITJ Maps administrators can also see your precise position,
-          movement path, selected route, and session duration. Data is kept for
-          up to 7 days and is not linked to your identity.
-        </p>
-        <div class="location-consent-actions">
-          <button id="location-consent-decline" class="location-consent-btn location-consent-secondary" type="button">Not now</button>
-          <button id="location-consent-accept" class="location-consent-btn location-consent-primary" type="button">Continue</button>
-        </div>
-      </div>
-    </div>
   </div>
 
   <!-- Detects device graphics capability and picks a rendering tier; MUST run
@@ -454,8 +431,8 @@
   <script src="js/search.js?v=61"></script>
   <script src="js/routing.js?v=59"></script>
   <script src="js/landmarks-3d.js?v=59" defer></script>
-  <script src="js/telemetry.js?v=1"></script>
-  <script src="js/app.js?v=107"></script>
+  <script src="js/telemetry.js?v=2"></script>
+  <script src="js/app.js?v=108"></script>
 
   <!-- Vercel Web Analytics — aggregate page-view counts only (no cookies, no
        visitor IDs, nothing tying a view to a person). Served first-party from

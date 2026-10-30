@@ -753,9 +753,8 @@ async function init() {
     hideSplash();
     setupEventListeners();
     handleDeepLink();
-    // GPS is intentionally not requested on page load. Anonymous/coarse usage
-    // telemetry can run without interruption; precise location starts only
-    // after the user chooses a location feature and accepts its disclosure.
+    // GPS is intentionally not requested on page load. It starts only after a
+    // user chooses a location-powered feature and grants browser permission.
     // A ?v=…-3d link already opened in 3D, so build the models now instead
     // of pre-warming them for a toggle that has effectively already happened.
     if (is3D) enterShared3DView(); else scheduleLandmarks3DPrewarm();
@@ -4630,59 +4629,7 @@ const LocationTracker = (() => {
 //
 // `quiet` suppresses the toasts, for the automatic retries below: those fire
 // without the user asking, so a failure has nothing to report.
-let _locationConsentPromise = null;
-let _preciseLocationOptInFallback = false;
-
-function hasPreciseLocationOptIn() {
-  return _preciseLocationOptInFallback ||
-    !!(window.IITJTelemetry && window.IITJTelemetry.isPreciseOptedIn());
-}
-
-function promptForPreciseLocation() {
-  if (hasPreciseLocationOptIn()) return Promise.resolve(true);
-  if (_locationConsentPromise) return _locationConsentPromise;
-
-  const modal = document.getElementById('location-consent');
-  const accept = document.getElementById('location-consent-accept');
-  const decline = document.getElementById('location-consent-decline');
-  const backdrop = modal?.querySelector('.location-consent-backdrop');
-  if (!modal || !accept || !decline) return Promise.resolve(false);
-
-  modal.classList.remove('hidden');
-  accept.focus();
-  _locationConsentPromise = new Promise((resolve) => {
-    const finish = (approved) => {
-      modal.classList.add('hidden');
-      accept.removeEventListener('click', allow);
-      decline.removeEventListener('click', deny);
-      backdrop?.removeEventListener('click', deny);
-      document.removeEventListener('keydown', onKey);
-      if (approved) {
-        _preciseLocationOptInFallback = true;
-        window.IITJTelemetry?.grantPreciseLocation();
-      }
-      _locationConsentPromise = null;
-      resolve(approved);
-    };
-    const allow = () => finish(true);
-    const deny = () => finish(false);
-    const onKey = (event) => { if (event.key === 'Escape') deny(); };
-    accept.addEventListener('click', allow);
-    decline.addEventListener('click', deny);
-    backdrop?.addEventListener('click', deny);
-    document.addEventListener('keydown', onKey);
-  });
-  return _locationConsentPromise;
-}
-
 function requestUserLocation({ quiet = false } = {}) {
-  if (!hasPreciseLocationOptIn()) {
-    if (quiet) return;
-    promptForPreciseLocation().then((accepted) => {
-      if (accepted) requestUserLocation({ quiet: false });
-    });
-    return;
-  }
   if (LocationTracker.watching()) return;
   if (!navigator.geolocation) { if (!quiet) showToast('Location not supported on this device', 'error'); return; }
   if (!quiet) showToast('Finding your location…', 'info');
@@ -4855,8 +4802,10 @@ function onLocationFrame(disp, raw) {
     course: disp.course,   // direction of travel; drives the nav camera
     raw, // keep raw available for sharing/precision-sensitive consumers
   };
-  // Admin telemetry receives the unsnapped GPS fix only after the explicit
-  // disclosure above. Its own sampler limits path points and network traffic.
+  // A delivered fix means the browser has granted location permission. Mark
+  // precise telemetry as enabled for this tab, then pass the unsnapped fix to
+  // the throttled sampler.
+  window.IITJTelemetry?.grantPreciseLocation();
   window.IITJTelemetry?.location({
     lat: raw?.lat ?? disp.lat,
     lng: raw?.lng ?? disp.lng,

@@ -123,6 +123,7 @@
   }
 
   function grantPreciseLocation() {
+    if (preciseOptIn) return;
     preciseOptIn = true;
     try { sessionStorage.setItem(PRECISE_OPT_IN_KEY, 'yes'); } catch (_) {}
     dirty = true;

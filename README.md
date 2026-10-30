@@ -26,8 +26,8 @@ function and edge-middleware auth gate powering the admin overlay tool.
 
 The protected admin page includes anonymous real-time presence, coarse
 city/region mapping, session duration, and route analytics. Precise GPS and
-movement paths are sent only after the user chooses a location-powered feature,
-accepts the in-app disclosure, and grants the browser's geolocation permission.
+movement paths are sent only after the user chooses a location-powered feature
+and grants the browser's geolocation permission.
 Session IDs are random per browser tab, IP addresses are not stored, and records
 expire after 7 days.
 
