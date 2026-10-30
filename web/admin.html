@@ -12,7 +12,7 @@
 
   <link rel="stylesheet" href="/fonts/fonts.css?v=1">
 
-  <link rel="stylesheet" href="css/admin.css?v=3">
+  <link rel="stylesheet" href="css/admin.css?v=4">
 </head>
 <body>
   <div id="app" class="hidden">
@@ -33,6 +33,10 @@
       </div>
 
       <div class="topbar-actions">
+        <button id="btn-live" class="btn btn-live" title="Open the real-time anonymous usage dashboard">
+          <span class="live-dot" aria-hidden="true"></span>
+          <span id="btn-live-label">Live usage</span>
+        </button>
         <button id="btn-sync" class="btn btn-primary">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
             <path d="M21 12a9 9 0 1 1-3-6.7L21 8"/><path d="M21 3v5h-5"/>
@@ -60,6 +64,46 @@
       </div>
     </header>
 
+    <!-- Anonymous sessions + consented precise locations. Protected by the
+         same short-lived admin token used for publishing. -->
+    <section id="live-usage" class="live-usage hidden" aria-labelledby="live-usage-title">
+      <header class="live-head">
+        <div>
+          <h2 id="live-usage-title">Live usage</h2>
+          <p id="live-status">Connect to view active and recent anonymous sessions.</p>
+        </div>
+        <div class="live-head-actions">
+          <span id="live-updated" class="live-updated"></span>
+          <button id="btn-live-refresh" class="btn btn-ghost" type="button">Refresh</button>
+          <button id="btn-live-close" class="btn btn-ghost" type="button" aria-label="Close live usage">Close</button>
+        </div>
+      </header>
+
+      <div class="live-stats">
+        <div class="live-stat"><span>Active now</span><strong id="live-active">—</strong></div>
+        <div class="live-stat"><span>Sharing precise GPS</span><strong id="live-precise">—</strong></div>
+        <div class="live-stat"><span>Sessions · 24h</span><strong id="live-day">—</strong></div>
+        <div class="live-stat"><span>Average duration</span><strong id="live-duration">—</strong></div>
+      </div>
+
+      <div class="live-grid">
+        <div class="live-map-panel">
+          <div class="live-map-legend">
+            <span><i class="live-key live-key-precise"></i>Precise · opted in</span>
+            <span><i class="live-key live-key-coarse"></i>Approximate city/region</span>
+            <span><i class="live-key live-key-path"></i>Selected movement path</span>
+          </div>
+          <div id="live-map" class="live-map"></div>
+        </div>
+        <aside class="live-session-panel">
+          <div class="live-session-title">Recent sessions</div>
+          <div id="live-session-list" class="live-session-list">
+            <div class="live-empty">Log in to load sessions.</div>
+          </div>
+        </aside>
+      </div>
+    </section>
+
     <!-- Settings modal — GitHub publishing config -->
     <div id="settings-modal" class="modal hidden">
       <div class="modal-backdrop"></div>
@@ -70,9 +114,9 @@
         </header>
         <div class="modal-body">
           <p class="modal-intro">
-            Enter the admin password to publish the accepted overlay to the live site.
-            The GitHub credentials live only on the server — nothing sensitive is stored
-            in this browser. Your session lasts a few hours, then you log in again.
+            Enter the admin password to access live usage analytics or publish the
+            accepted overlay. Server credentials never reach this browser. Your
+            session lasts a few hours, then you log in again.
           </p>
 
           <form id="login-form" autocomplete="off">
@@ -85,7 +129,7 @@
         </div>
         <footer class="modal-foot">
           <button class="btn btn-ghost" id="settings-logout" type="button">Log out</button>
-          <button class="btn btn-primary" id="settings-save" type="submit" form="login-form">Log in &amp; publish</button>
+          <button class="btn btn-primary" id="settings-save" type="submit" form="login-form">Log in</button>
         </footer>
       </div>
     </div>
@@ -204,6 +248,6 @@
 
   <script src="js/basemap-styles.js?v=1"></script>
   <script src="js/data-overlay.js?v=3"></script>
-  <script src="js/admin.js?v=12"></script>
+  <script src="js/admin.js?v=13"></script>
 </body>
 </html>

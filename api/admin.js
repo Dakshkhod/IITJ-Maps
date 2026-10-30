@@ -12,6 +12,10 @@ const crypto = require('crypto');
 
 const SESSION_TTL_MS = 4 * 60 * 60 * 1000;     // 4 hours
 const MAX_OVERLAY_BYTES = 2_000_000;           // 2 MB hard cap
+const TELEMETRY_INDEX_KEY = 'iitj:telemetry:sessions';
+const TELEMETRY_RETENTION_MS = 7 * 24 * 60 * 60 * 1000;
+const TELEMETRY_ACTIVE_MS = 45 * 1000;
+const TELEMETRY_MAX_SESSIONS = 300;
 
 function constantTimeEquals(a, b) {
   const ab = Buffer.from(String(a), 'utf8');
@@ -48,6 +52,63 @@ function verifyToken(token, secret) {
     const { exp } = JSON.parse(Buffer.from(payload, 'base64url').toString('utf8'));
     return typeof exp === 'number' && Date.now() < exp;
   } catch (_) { return false; }
+}
+
+function telemetryRedisConfig() {
+  const url = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL;
+  const token = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN;
+  return url && token ? { url: url.replace(/\/$/, ''), token } : null;
+}
+
+async function telemetryRedisCommand(command) {
+  const cfg = telemetryRedisConfig();
+  if (!cfg) {
+    const error = new Error('Live analytics is not configured. Connect a Vercel KV/Upstash Redis store.');
+    error.status = 503;
+    throw error;
+  }
+  const response = await fetch(cfg.url, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${cfg.token}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(command),
+  });
+  if (!response.ok) throw new Error(`Telemetry store HTTP ${response.status}`);
+  const body = await response.json();
+  if (body && body.error) throw new Error('Telemetry store rejected the request');
+  return body ? body.result : null;
+}
+
+async function telemetrySnapshot() {
+  const now = Date.now();
+  const oldest = now - TELEMETRY_RETENTION_MS;
+  // Keep the index bounded even when individual session keys have expired.
+  await telemetryRedisCommand(['ZREMRANGEBYSCORE', TELEMETRY_INDEX_KEY, '-inf', oldest]);
+  const ids = await telemetryRedisCommand([
+    'ZREVRANGEBYSCORE', TELEMETRY_INDEX_KEY, '+inf', oldest,
+    'LIMIT', 0, TELEMETRY_MAX_SESSIONS,
+  ]);
+  if (!Array.isArray(ids) || ids.length === 0) {
+    return { now, activeWindowMs: TELEMETRY_ACTIVE_MS, retentionDays: 7, sessions: [] };
+  }
+  const values = await telemetryRedisCommand([
+    'MGET', ...ids.map((id) => `iitj:telemetry:session:${id}`),
+  ]);
+  const sessions = [];
+  for (const value of (Array.isArray(values) ? values : [])) {
+    if (typeof value !== 'string') continue;
+    try {
+      const session = JSON.parse(value);
+      if (session && typeof session === 'object') {
+        session.active = session.visible === true && !session.endedAt &&
+          Number(session.lastSeen) >= now - TELEMETRY_ACTIVE_MS;
+        sessions.push(session);
+      }
+    } catch (_) { /* skip a corrupted entry without breaking the dashboard */ }
+  }
+  return { now, activeWindowMs: TELEMETRY_ACTIVE_MS, retentionDays: 7, sessions };
 }
 
 // GitHub's own status + error text, trimmed to something safe to show. Surfaced
@@ -100,9 +161,9 @@ module.exports = async (req, res) => {
   const GITHUB_BRANCH = process.env.GITHUB_BRANCH || 'main';
   const GITHUB_PATH = process.env.GITHUB_PATH || 'web/data/overlay.json';
 
-  if (!ADMIN_PASSWORD || !ADMIN_SESSION_SECRET || !GITHUB_TOKEN || !GITHUB_OWNER || !GITHUB_REPO) {
+  if (!ADMIN_PASSWORD || !ADMIN_SESSION_SECRET) {
     res.statusCode = 503;
-    return res.end(JSON.stringify({ error: 'Admin publishing is not configured on the server.' }));
+    return res.end(JSON.stringify({ error: 'Admin authentication is not configured on the server.' }));
   }
 
   const body = await readJsonBody(req);
@@ -124,11 +185,33 @@ module.exports = async (req, res) => {
     return res.end(JSON.stringify({ token: issueToken(ADMIN_SESSION_SECRET), expiresInSec: SESSION_TTL_MS / 1000 }));
   }
 
+  // ── Telemetry: verified token -> anonymous live/recent sessions ───────────
+  if (action === 'telemetry') {
+    if (!verifyToken(body.token, ADMIN_SESSION_SECRET)) {
+      res.statusCode = 401;
+      return res.end(JSON.stringify({ error: 'Session expired — log in again.' }));
+    }
+    try {
+      const snapshot = await telemetrySnapshot();
+      res.statusCode = 200;
+      return res.end(JSON.stringify(snapshot));
+    } catch (error) {
+      const detail = error && error.message ? String(error.message).slice(0, 200) : 'Telemetry unavailable';
+      console.error('[admin/telemetry]', detail);
+      res.statusCode = error && error.status ? error.status : 502;
+      return res.end(JSON.stringify({ error: detail }));
+    }
+  }
+
   // ── Publish: verified token + overlay -> commit to GitHub (server-side) ────
   if (action === 'publish') {
     if (!verifyToken(body.token, ADMIN_SESSION_SECRET)) {
       res.statusCode = 401;
       return res.end(JSON.stringify({ error: 'Session expired — log in again.' }));
+    }
+    if (!GITHUB_TOKEN || !GITHUB_OWNER || !GITHUB_REPO) {
+      res.statusCode = 503;
+      return res.end(JSON.stringify({ error: 'Admin publishing is not configured on the server.' }));
     }
     const overlay = body.overlay;
     if (!overlay || typeof overlay !== 'object' || Array.isArray(overlay)) {

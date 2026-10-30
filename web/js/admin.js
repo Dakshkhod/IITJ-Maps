@@ -1,8 +1,7 @@
 /**
  * IITJ Maps — Admin Review Panel
- * 100% client-side: Overpass API → diff engine → localStorage queue → UI.
- * No backend required; the only server roundtrip is the static asset host
- * serving the bundled GeoJSON.
+ * OSM review remains client-side (Overpass → diff → localStorage). Protected
+ * serverless endpoints handle publishing and the anonymous live-usage view.
  */
 
 // Config
@@ -842,6 +841,7 @@ function fitMiniToFeatures(feats) {
 const ADMIN_API = '/api/admin';
 let _adminSession = null;             // { token, exp } in-memory only
 let _pendingPublishAfterLogin = false;
+let _pendingTelemetryAfterLogin = false;
 
 function hasValidSession() {
   return !!(_adminSession && _adminSession.token && Date.now() < _adminSession.exp - 5000);
@@ -964,15 +964,308 @@ async function submitLogin() {
     showSettingsStatus('Logged in.', 'ok');
     closeSettings();
     if (_pendingPublishAfterLogin) { _pendingPublishAfterLogin = false; publishOverlay(); }
+    if (_pendingTelemetryAfterLogin) { _pendingTelemetryAfterLogin = false; startLiveUsage(); }
   } catch (e) {
-    if (e.status === 503) showSettingsStatus('Server publishing is not configured (set the admin env vars in Vercel).', 'error');
+    if (e.status === 503) showSettingsStatus('Admin authentication is not configured on the server.', 'error');
     else showSettingsStatus(e.status === 401 ? 'Incorrect password.' : `Login failed: ${e.message}`, 'error');
   }
 }
 function adminLogout() {
   _adminSession = null;
   _pendingPublishAfterLogin = false;
+  _pendingTelemetryAfterLogin = false;
+  stopLivePolling();
+  setLiveStatus('Logged out. Connect again to view live usage.', 'warn');
   showSettingsStatus('Logged out.', 'ok');
+}
+
+// Live usage dashboard -------------------------------------------------------
+const LIVE_POLL_MS = 10_000;
+let _liveMap = null;
+let _liveMapReady = false;
+let _livePollTimer = 0;
+let _liveSnapshot = null;
+let _liveSelectedId = null;
+let _liveHasFit = false;
+let _liveLoading = false;
+
+function setLiveStatus(message, kind = '') {
+  const status = document.getElementById('live-status');
+  if (!status) return;
+  status.textContent = message;
+  status.dataset.kind = kind;
+}
+
+function formatSessionDuration(milliseconds) {
+  const seconds = Math.max(0, Math.floor(milliseconds / 1000));
+  if (seconds < 60) return `${seconds}s`;
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return `${minutes}m ${seconds % 60}s`;
+  const hours = Math.floor(minutes / 60);
+  return `${hours}h ${minutes % 60}m`;
+}
+
+function sessionDuration(session, now = Date.now()) {
+  const start = Number(session.startedAt) || now;
+  const end = Number(session.endedAt) || Number(session.lastSeen) || now;
+  return Math.max(0, end - start);
+}
+
+function sessionPlace(session) {
+  const place = session.approximate || {};
+  return [place.city, place.region, place.country].filter(Boolean).join(', ') || 'Location unavailable';
+}
+
+function sessionPoint(session) {
+  if (session.preciseOptIn && session.precise &&
+      Number.isFinite(Number(session.precise.lat)) && Number.isFinite(Number(session.precise.lng))) {
+    return { lng: Number(session.precise.lng), lat: Number(session.precise.lat), precision: 'precise' };
+  }
+  const place = session.approximate || {};
+  if (Number.isFinite(Number(place.lat)) && Number.isFinite(Number(place.lng))) {
+    return { lng: Number(place.lng), lat: Number(place.lat), precision: 'coarse' };
+  }
+  return null;
+}
+
+function ensureLiveMap() {
+  if (_liveMap) {
+    setTimeout(() => _liveMap.resize(), 0);
+    return;
+  }
+  _liveMap = new maplibregl.Map({
+    container: 'live-map',
+    style: window.BasemapStyles.get(false),
+    center: [73.1147, 26.4727],
+    zoom: 13.8,
+    attributionControl: { compact: true },
+  });
+  _liveMap.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right');
+  _liveMap.on('load', () => {
+    _liveMapReady = true;
+    _liveMap.addSource('live-users', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
+    _liveMap.addSource('live-path', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
+    _liveMap.addSource('live-route', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
+    _liveMap.addLayer({
+      id: 'live-route-line', type: 'line', source: 'live-route',
+      paint: { 'line-color': '#ea580c', 'line-width': 4, 'line-opacity': .78, 'line-dasharray': [2, 1.4] },
+    });
+    _liveMap.addLayer({
+      id: 'live-path-line', type: 'line', source: 'live-path',
+      paint: { 'line-color': '#9333ea', 'line-width': 4, 'line-opacity': .9 },
+    });
+    _liveMap.addLayer({
+      id: 'live-users-coarse', type: 'circle', source: 'live-users',
+      filter: ['==', ['get', 'precision'], 'coarse'],
+      paint: {
+        'circle-radius': ['case', ['get', 'selected'], 10, 7],
+        'circle-color': '#2563eb', 'circle-opacity': .82,
+        'circle-stroke-color': '#fff', 'circle-stroke-width': 2,
+      },
+    });
+    _liveMap.addLayer({
+      id: 'live-users-precise', type: 'circle', source: 'live-users',
+      filter: ['==', ['get', 'precision'], 'precise'],
+      paint: {
+        'circle-radius': ['case', ['get', 'selected'], 10, 7],
+        'circle-color': '#16a34a',
+        'circle-stroke-color': '#fff', 'circle-stroke-width': 2.5,
+      },
+    });
+    updateLiveMap(true);
+  });
+}
+
+function lineFeature(coordinates, properties = {}) {
+  return coordinates.length >= 2 ? [{
+    type: 'Feature', properties,
+    geometry: { type: 'LineString', coordinates },
+  }] : [];
+}
+
+function updateLiveMap(forceFit = false) {
+  if (!_liveMapReady || !_liveSnapshot) return;
+  const sessions = _liveSnapshot.sessions || [];
+  const selected = sessions.find((session) => session.sessionId === _liveSelectedId) || null;
+  const visibleSessions = sessions.filter((session) => session.active || session === selected);
+  const points = visibleSessions.map((session) => {
+    const point = sessionPoint(session);
+    if (!point) return null;
+    return {
+      type: 'Feature',
+      properties: {
+        sessionId: session.sessionId,
+        precision: point.precision,
+        active: !!session.active,
+        selected: session === selected,
+      },
+      geometry: { type: 'Point', coordinates: [point.lng, point.lat] },
+    };
+  }).filter(Boolean);
+
+  const pathCoordinates = selected && Array.isArray(selected.path)
+    ? selected.path.map((point) => [Number(point.lng), Number(point.lat)])
+      .filter((point) => point.every(Number.isFinite))
+    : [];
+  const latestRoute = selected && Array.isArray(selected.routes) && selected.routes.length
+    ? selected.routes[selected.routes.length - 1]
+    : null;
+  const routeCoordinates = latestRoute && Array.isArray(latestRoute.geometry)
+    ? latestRoute.geometry.map((point) => [Number(point[0]), Number(point[1])])
+      .filter((point) => point.every(Number.isFinite))
+    : [];
+
+  _liveMap.getSource('live-users').setData({ type: 'FeatureCollection', features: points });
+  _liveMap.getSource('live-path').setData({ type: 'FeatureCollection', features: lineFeature(pathCoordinates) });
+  _liveMap.getSource('live-route').setData({ type: 'FeatureCollection', features: lineFeature(routeCoordinates) });
+
+  if (!forceFit && _liveHasFit) return;
+  const allCoordinates = [...pathCoordinates, ...routeCoordinates, ...points.map((feature) => feature.geometry.coordinates)];
+  if (!allCoordinates.length) return;
+  const bounds = allCoordinates.reduce((box, coordinate) => box.extend(coordinate),
+    new maplibregl.LngLatBounds(allCoordinates[0], allCoordinates[0]));
+  _liveMap.fitBounds(bounds, { padding: 55, duration: 500, maxZoom: 17 });
+  _liveHasFit = true;
+}
+
+function renderLiveSessions() {
+  const container = document.getElementById('live-session-list');
+  if (!container || !_liveSnapshot) return;
+  const sessions = _liveSnapshot.sessions || [];
+  container.replaceChildren();
+  if (!sessions.length) {
+    const empty = document.createElement('div');
+    empty.className = 'live-empty';
+    empty.textContent = 'No sessions recorded yet.';
+    container.appendChild(empty);
+    return;
+  }
+
+  for (const session of sessions) {
+    const row = document.createElement('button');
+    row.type = 'button';
+    row.className = 'live-session-row' + (session.sessionId === _liveSelectedId ? ' is-selected' : '');
+    row.addEventListener('click', () => selectLiveSession(session.sessionId));
+
+    const top = document.createElement('div');
+    top.className = 'live-session-top';
+    const place = document.createElement('span');
+    place.className = 'live-session-place';
+    place.textContent = sessionPlace(session);
+    const state = document.createElement('span');
+    state.className = 'live-session-state' + (session.active ? ' is-active' : '');
+    state.textContent = session.active ? 'Live' : 'Recent';
+    top.append(place, state);
+
+    const meta = document.createElement('div');
+    meta.className = 'live-session-meta';
+    const parts = [formatSessionDuration(sessionDuration(session, _liveSnapshot.now))];
+    if (session.preciseOptIn && session.precise) {
+      parts.push(`${Number(session.precise.lat).toFixed(5)}, ${Number(session.precise.lng).toFixed(5)}`);
+      if (session.precise.accuracy != null) parts.push(`±${Math.round(session.precise.accuracy)}m`);
+    } else {
+      parts.push('approximate location');
+    }
+    parts.push(`#${String(session.sessionId).slice(0, 8)}`);
+    meta.textContent = parts.join(' · ');
+
+    row.append(top, meta);
+    const routes = Array.isArray(session.routes) ? session.routes : [];
+    if (routes.length) {
+      const route = routes[routes.length - 1];
+      const routeEl = document.createElement('div');
+      routeEl.className = 'live-session-route';
+      routeEl.textContent = `${route.mode === 'walk' ? 'Walk' : 'Drive'} · ${route.from} → ${route.to} · ${Math.round(route.distance || 0)}m`;
+      row.appendChild(routeEl);
+    }
+    container.appendChild(row);
+  }
+}
+
+function renderLiveDashboard(snapshot) {
+  _liveSnapshot = snapshot;
+  const sessions = snapshot.sessions || [];
+  const now = Number(snapshot.now) || Date.now();
+  const active = sessions.filter((session) => session.active);
+  const day = sessions.filter((session) => Number(session.startedAt) >= now - 24 * 60 * 60 * 1000);
+  const precise = active.filter((session) => session.preciseOptIn && session.precise);
+  const average = day.length
+    ? day.reduce((total, session) => total + sessionDuration(session, now), 0) / day.length
+    : 0;
+
+  document.getElementById('live-active').textContent = String(active.length);
+  document.getElementById('live-precise').textContent = String(precise.length);
+  document.getElementById('live-day').textContent = String(day.length);
+  document.getElementById('live-duration').textContent = day.length ? formatSessionDuration(average) : '—';
+  document.getElementById('live-updated').textContent = `Updated ${new Date(now).toLocaleTimeString()}`;
+  setLiveStatus(`${active.length} active · ${sessions.length} recent · ${snapshot.retentionDays || 7}-day retention`);
+  document.getElementById('btn-live')?.classList.add('is-connected');
+
+  if (_liveSelectedId && !sessions.some((session) => session.sessionId === _liveSelectedId)) {
+    _liveSelectedId = null;
+  }
+  renderLiveSessions();
+  updateLiveMap(false);
+}
+
+function selectLiveSession(sessionId) {
+  _liveSelectedId = sessionId;
+  _liveHasFit = false;
+  renderLiveSessions();
+  updateLiveMap(true);
+}
+
+async function refreshLiveUsage() {
+  if (_liveLoading || !hasValidSession()) return;
+  _liveLoading = true;
+  try {
+    const snapshot = await adminApi('telemetry', { token: _adminSession.token });
+    renderLiveDashboard(snapshot);
+  } catch (error) {
+    if (error.status === 401) {
+      _adminSession = null;
+      stopLivePolling();
+      document.getElementById('btn-live')?.classList.remove('is-connected');
+      setLiveStatus('Admin session expired. Connect again to resume.', 'warn');
+    } else {
+      setLiveStatus(error.message || 'Could not load live usage.', 'error');
+    }
+  } finally {
+    _liveLoading = false;
+  }
+}
+
+function startLiveUsage() {
+  document.getElementById('live-usage')?.classList.remove('hidden');
+  document.getElementById('btn-live')?.classList.add('is-open');
+  ensureLiveMap();
+  if (!hasValidSession()) {
+    _pendingTelemetryAfterLogin = true;
+    setLiveStatus('Log in to view live usage.', 'warn');
+    openSettings();
+    return;
+  }
+  refreshLiveUsage();
+  stopLivePolling();
+  _livePollTimer = setInterval(refreshLiveUsage, LIVE_POLL_MS);
+}
+
+function stopLivePolling() {
+  if (_livePollTimer) clearInterval(_livePollTimer);
+  _livePollTimer = 0;
+}
+
+function closeLiveUsage() {
+  document.getElementById('live-usage')?.classList.add('hidden');
+  document.getElementById('btn-live')?.classList.remove('is-open');
+  stopLivePolling();
+}
+
+function toggleLiveUsage() {
+  const section = document.getElementById('live-usage');
+  if (!section) return;
+  if (section.classList.contains('hidden')) startLiveUsage();
+  else closeLiveUsage();
 }
 
 // Export / Import overlay
@@ -1067,6 +1360,9 @@ function showToast(msg, type = 'info') {
 function boot() {
   purgeStaleSecrets();
   document.getElementById('app').classList.remove('hidden');
+  document.getElementById('btn-live').addEventListener('click', toggleLiveUsage);
+  document.getElementById('btn-live-refresh').addEventListener('click', refreshLiveUsage);
+  document.getElementById('btn-live-close').addEventListener('click', closeLiveUsage);
   document.getElementById('btn-sync').addEventListener('click', runSync);
   document.getElementById('btn-clear').addEventListener('click', resetLog);
   document.getElementById('btn-export').addEventListener('click', exportOverlay);

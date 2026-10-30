@@ -2,8 +2,8 @@
 
 Smart campus navigation for **IIT Jodhpur** — an interactive, mobile-first map
 with real road-network routing, full-text search, live GPS tracking, optional 3D
-landmarks, and dark mode. The app is fully client-side: all map data ships as
-static files and all routing and search run in the browser.
+landmarks, and dark mode. Map rendering, routing, and search stay client-side;
+small Vercel functions power protected administration and anonymous telemetry.
 
 ## What it does
 
@@ -21,6 +21,27 @@ GL JS and 3D landmarks use Three.js (both self-hosted). The map data is
 pre-generated static GeoJSON/JSON, so routing and search run entirely in the
 browser. The site is hosted as a static deployment on Vercel, with a serverless
 function and edge-middleware auth gate powering the admin overlay tool.
+
+## Live usage dashboard
+
+The protected admin page includes anonymous real-time presence, coarse
+city/region mapping, session duration, and route analytics. Precise GPS and
+movement paths are sent only after the user chooses a location-powered feature,
+accepts the in-app disclosure, and grants the browser's geolocation permission.
+Session IDs are random per browser tab, IP addresses are not stored, and records
+expire after 7 days.
+
+Connect a Vercel KV or Upstash Redis database and set either pair of environment
+variables:
+
+- `KV_REST_API_URL` and `KV_REST_API_TOKEN`
+- `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN`
+
+The existing `ADMIN_PASSWORD` and `ADMIN_SESSION_SECRET` protect dashboard
+reads. `ADMIN_BASIC_USER` and `ADMIN_BASIC_PASS` continue to protect the admin
+page itself. GitHub publishing additionally requires its existing `GITHUB_*`
+variables. If Redis/KV is not configured, the public map keeps working and the
+admin dashboard shows a configuration message.
 
 ## Attribution
 
