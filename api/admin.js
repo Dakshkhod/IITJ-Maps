@@ -9,10 +9,10 @@
  * GITHUB_PATH ("web/data/overlay.json").
  */
 const crypto = require('crypto');
+const telemetryDb = require('../lib/telemetry-db');
 
 const SESSION_TTL_MS = 4 * 60 * 60 * 1000;     // 4 hours
 const MAX_OVERLAY_BYTES = 2_000_000;           // 2 MB hard cap
-const TELEMETRY_INDEX_KEY = 'iitj:telemetry:sessions';
 const TELEMETRY_RETENTION_MS = 7 * 24 * 60 * 60 * 1000;
 const TELEMETRY_ACTIVE_MS = 45 * 1000;
 const TELEMETRY_MAX_SESSIONS = 300;
@@ -54,60 +54,39 @@ function verifyToken(token, secret) {
   } catch (_) { return false; }
 }
 
-function telemetryRedisConfig() {
-  const url = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL;
-  const token = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN;
-  return url && token ? { url: url.replace(/\/$/, ''), token } : null;
-}
-
-async function telemetryRedisCommand(command) {
-  const cfg = telemetryRedisConfig();
-  if (!cfg) {
-    const error = new Error('Live analytics is not configured. Connect a Vercel KV/Upstash Redis store.');
-    error.status = 503;
-    throw error;
-  }
-  const response = await fetch(cfg.url, {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${cfg.token}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(command),
-  });
-  if (!response.ok) throw new Error(`Telemetry store HTTP ${response.status}`);
-  const body = await response.json();
-  if (body && body.error) throw new Error('Telemetry store rejected the request');
-  return body ? body.result : null;
-}
-
 async function telemetrySnapshot() {
   const now = Date.now();
   const oldest = now - TELEMETRY_RETENTION_MS;
-  // Keep the index bounded even when individual session keys have expired.
-  await telemetryRedisCommand(['ZREMRANGEBYSCORE', TELEMETRY_INDEX_KEY, '-inf', oldest]);
-  const ids = await telemetryRedisCommand([
-    'ZREVRANGEBYSCORE', TELEMETRY_INDEX_KEY, '+inf', oldest,
-    'LIMIT', 0, TELEMETRY_MAX_SESSIONS,
-  ]);
-  if (!Array.isArray(ids) || ids.length === 0) {
-    return { now, activeWindowMs: TELEMETRY_ACTIVE_MS, retentionDays: 7, sessions: [] };
-  }
-  const values = await telemetryRedisCommand([
-    'MGET', ...ids.map((id) => `iitj:telemetry:session:${id}`),
-  ]);
-  const sessions = [];
-  for (const value of (Array.isArray(values) ? values : [])) {
-    if (typeof value !== 'string') continue;
-    try {
-      const session = JSON.parse(value);
-      if (session && typeof session === 'object') {
-        session.active = session.visible === true && !session.endedAt &&
-          Number(session.lastSeen) >= now - TELEMETRY_ACTIVE_MS;
-        sessions.push(session);
-      }
-    } catch (_) { /* skip a corrupted entry without breaking the dashboard */ }
-  }
+  await telemetryDb.ensureSchema();
+  const sql = telemetryDb.sql();
+  await sql`DELETE FROM iitj_telemetry_sessions WHERE last_seen < ${oldest}`;
+  const rows = await sql`
+    SELECT session_id, started_at, last_seen, ended_at, visible,
+           approximate, precise_opt_in, precise, path, routes, route_calculations
+    FROM iitj_telemetry_sessions
+    WHERE last_seen >= ${oldest}
+    ORDER BY last_seen DESC
+    LIMIT ${TELEMETRY_MAX_SESSIONS}
+  `;
+  const sessions = (Array.isArray(rows) ? rows : []).map((row) => {
+    const session = {
+      version: 1,
+      sessionId: row.session_id,
+      startedAt: Number(row.started_at),
+      lastSeen: Number(row.last_seen),
+      endedAt: row.ended_at == null ? null : Number(row.ended_at),
+      visible: row.visible === true,
+      approximate: row.approximate || {},
+      preciseOptIn: row.precise_opt_in === true,
+      precise: row.precise || null,
+      path: Array.isArray(row.path) ? row.path : [],
+      routes: Array.isArray(row.routes) ? row.routes : [],
+      routeCalculations: Number(row.route_calculations) || 0,
+    };
+    session.active = session.visible && !session.endedAt &&
+      session.lastSeen >= now - TELEMETRY_ACTIVE_MS;
+    return session;
+  });
   return { now, activeWindowMs: TELEMETRY_ACTIVE_MS, retentionDays: 7, sessions };
 }
 

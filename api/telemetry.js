@@ -5,39 +5,13 @@
  * Reads are deliberately not exposed here; the protected /api/admin endpoint
  * is the only way to retrieve telemetry.
  *
- * Required Vercel env vars (either naming scheme is accepted):
- *   KV_REST_API_URL / KV_REST_API_TOKEN
- *   UPSTASH_REDIS_REST_URL / UPSTASH_REDIS_REST_TOKEN
+ * Required Vercel env var (injected by the Neon integration): DATABASE_URL.
  */
+
+const telemetryDb = require('../lib/telemetry-db');
 
 const MAX_BODY_BYTES = 96_000;
 const SESSION_TTL_SEC = 7 * 24 * 60 * 60;
-const SESSION_INDEX_KEY = 'iitj:telemetry:sessions';
-
-function redisConfig() {
-  const url = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL;
-  const token = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN;
-  return url && token ? { url: url.replace(/\/$/, ''), token } : null;
-}
-
-async function redisPipeline(commands) {
-  const cfg = redisConfig();
-  if (!cfg) return false;
-  const response = await fetch(`${cfg.url}/pipeline`, {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${cfg.token}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(commands),
-  });
-  if (!response.ok) throw new Error(`telemetry store HTTP ${response.status}`);
-  const result = await response.json();
-  if (!Array.isArray(result) || result.some((item) => item && item.error)) {
-    throw new Error('telemetry store rejected a command');
-  }
-  return true;
-}
 
 function safeText(value, max = 120) {
   return typeof value === 'string' ? value.trim().slice(0, max) : '';
@@ -201,14 +175,44 @@ module.exports = async (req, res) => {
   };
 
   try {
-    const stored = await redisPipeline([
-      ['SET', `iitj:telemetry:session:${sessionId}`, JSON.stringify(session), 'EX', SESSION_TTL_SEC],
-      ['ZADD', SESSION_INDEX_KEY, now, sessionId],
-    ]);
     // Telemetry is optional infrastructure: the map must keep working if a
-    // deployment has not connected Redis/KV yet.
-    res.statusCode = stored ? 202 : 204;
-    return res.end(stored ? JSON.stringify({ ok: true }) : '');
+    // deployment has not connected Neon yet.
+    if (!telemetryDb.configured()) {
+      res.statusCode = 204;
+      return res.end('');
+    }
+    await telemetryDb.ensureSchema();
+    const sql = telemetryDb.sql();
+    const oldest = now - SESSION_TTL_SEC * 1000;
+    await sql`
+      WITH expired AS (
+        DELETE FROM iitj_telemetry_sessions
+        WHERE last_seen < ${oldest}
+      )
+      INSERT INTO iitj_telemetry_sessions (
+        session_id, started_at, last_seen, ended_at, visible,
+        approximate, precise_opt_in, precise, path, routes, route_calculations
+      ) VALUES (
+        ${session.sessionId}, ${session.startedAt}, ${session.lastSeen}, ${session.endedAt}, ${session.visible},
+        ${JSON.stringify(session.approximate)}::jsonb,
+        ${session.preciseOptIn}, ${JSON.stringify(session.precise)}::jsonb,
+        ${JSON.stringify(session.path)}::jsonb, ${JSON.stringify(session.routes)}::jsonb,
+        ${session.routeCalculations}
+      )
+      ON CONFLICT (session_id) DO UPDATE SET
+        started_at = EXCLUDED.started_at,
+        last_seen = EXCLUDED.last_seen,
+        ended_at = EXCLUDED.ended_at,
+        visible = EXCLUDED.visible,
+        approximate = EXCLUDED.approximate,
+        precise_opt_in = EXCLUDED.precise_opt_in,
+        precise = EXCLUDED.precise,
+        path = EXCLUDED.path,
+        routes = EXCLUDED.routes,
+        route_calculations = EXCLUDED.route_calculations
+    `;
+    res.statusCode = 202;
+    return res.end(JSON.stringify({ ok: true }));
   } catch (error) {
     console.error('[telemetry/write]', error && error.message ? error.message : error);
     res.statusCode = 503;

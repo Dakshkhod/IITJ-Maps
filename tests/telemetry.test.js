@@ -1,8 +1,15 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 
+const telemetryDb = require('../lib/telemetry-db');
 const telemetryHandler = require('../api/telemetry');
 const adminHandler = require('../api/admin');
+
+const originalDb = {
+  configured: telemetryDb.configured,
+  ensureSchema: telemetryDb.ensureSchema,
+  sql: telemetryDb.sql,
+};
 
 function request(body, headers = {}) {
   return {
@@ -23,39 +30,46 @@ function response() {
   };
 }
 
-function clearRedisEnvironment() {
-  delete process.env.KV_REST_API_URL;
-  delete process.env.KV_REST_API_TOKEN;
-  delete process.env.UPSTASH_REDIS_REST_URL;
-  delete process.env.UPSTASH_REDIS_REST_TOKEN;
+function mockDatabase(results = []) {
+  const calls = [];
+  const queue = [...results];
+  telemetryDb.configured = () => true;
+  telemetryDb.ensureSchema = async () => {};
+  telemetryDb.sql = () => async (strings, ...values) => {
+    calls.push({ text: strings.join('?'), values });
+    return queue.length ? queue.shift() : [];
+  };
+  return calls;
+}
+
+function restoreDatabase() {
+  Object.assign(telemetryDb, originalDb);
 }
 
 test('public telemetry validates anonymous session IDs', async () => {
-  clearRedisEnvironment();
   const res = response();
   await telemetryHandler(request({ sessionId: 'not-valid' }), res);
   assert.equal(res.statusCode, 400);
   assert.match(res.json().error, /Invalid session/);
 });
-test('public map remains available when Redis is not connected', async () => {
-  clearRedisEnvironment();
-  const res = response();
-  await telemetryHandler(request({
-    sessionId: '12345678-1234-1234-1234-123456789abc',
-    startedAt: Date.now(),
-  }), res);
-  assert.equal(res.statusCode, 204);
-  assert.equal(res.body, '');
+
+test('public map remains available when Neon is not connected', async () => {
+  telemetryDb.configured = () => false;
+  try {
+    const res = response();
+    await telemetryHandler(request({
+      sessionId: '12345678-1234-1234-1234-123456789abc',
+      startedAt: Date.now(),
+    }), res);
+    assert.equal(res.statusCode, 204);
+    assert.equal(res.body, '');
+  } finally {
+    restoreDatabase();
+  }
 });
-test('telemetry writes a sanitized expiring session snapshot', async () => {
-  process.env.KV_REST_API_URL = 'https://redis.example';
-  process.env.KV_REST_API_TOKEN = 'test-token';
-  const originalFetch = global.fetch;
-  let commands = null;
-  global.fetch = async (_url, options) => {
-    commands = JSON.parse(options.body);
-    return { ok: true, json: async () => [{ result: 'OK' }, { result: 1 }] };
-  };
+
+test('telemetry writes a sanitized expiring session snapshot to Neon', async () => {
+  const calls = mockDatabase();
   try {
     const res = response();
     await telemetryHandler(request({
@@ -71,26 +85,22 @@ test('telemetry writes a sanitized expiring session snapshot', async () => {
     }), res);
 
     assert.equal(res.statusCode, 202);
-    assert.equal(commands[0][0], 'SET');
-    assert.equal(commands[0][3], 'EX');
-    const stored = JSON.parse(commands[0][2]);
-    assert.equal(stored.approximate.city, 'Jodhpur');
-    assert.equal(stored.precise, null);
-    assert.deepEqual(stored.path, []);
+    assert.equal(calls.length, 1);
+    assert.match(calls[0].text, /ON CONFLICT \(session_id\)/);
+    assert.equal(JSON.parse(calls[0].values[6]).city, 'Jodhpur');
+    assert.equal(JSON.parse(calls[0].values[8]), null);
+    assert.deepEqual(JSON.parse(calls[0].values[9]), []);
   } finally {
-    global.fetch = originalFetch;
-    clearRedisEnvironment();
+    restoreDatabase();
   }
 });
 
-test('admin login works without GitHub publishing variables and reads live sessions', async () => {
+test('admin login works without GitHub variables and reads live Neon sessions', async () => {
   process.env.ADMIN_PASSWORD = 'test-password';
   process.env.ADMIN_SESSION_SECRET = 'a-long-test-secret-that-is-only-for-tests';
   delete process.env.GITHUB_TOKEN;
   delete process.env.GITHUB_OWNER;
   delete process.env.GITHUB_REPO;
-  process.env.KV_REST_API_URL = 'https://redis.example';
-  process.env.KV_REST_API_TOKEN = 'test-token';
 
   const loginRes = response();
   await adminHandler(request({ action: 'login', password: 'test-password' }), loginRes);
@@ -99,27 +109,19 @@ test('admin login works without GitHub publishing variables and reads live sessi
   assert.ok(token);
 
   const now = Date.now();
-  const storedSession = JSON.stringify({
-    sessionId: '12345678-1234-1234-1234-123456789abc',
-    startedAt: now - 10_000,
-    lastSeen: now,
-    endedAt: null,
+  mockDatabase([[], [{
+    session_id: '12345678-1234-1234-1234-123456789abc',
+    started_at: now - 10_000,
+    last_seen: now,
+    ended_at: null,
     visible: true,
     approximate: { city: 'Jodhpur', country: 'IN' },
-    preciseOptIn: false,
+    precise_opt_in: false,
     precise: null,
     path: [],
     routes: [],
-  });
-  const originalFetch = global.fetch;
-  let call = 0;
-  global.fetch = async () => {
-    call++;
-    const result = call === 1 ? 0 : call === 2
-      ? ['12345678-1234-1234-1234-123456789abc']
-      : [storedSession];
-    return { ok: true, json: async () => ({ result }) };
-  };
+    route_calculations: 0,
+  }]]);
   try {
     const liveRes = response();
     await adminHandler(request({ action: 'telemetry', token }), liveRes);
@@ -128,10 +130,8 @@ test('admin login works without GitHub publishing variables and reads live sessi
     assert.equal(snapshot.sessions.length, 1);
     assert.equal(snapshot.sessions[0].active, true);
   } finally {
-    global.fetch = originalFetch;
-    clearRedisEnvironment();
+    restoreDatabase();
     delete process.env.ADMIN_PASSWORD;
     delete process.env.ADMIN_SESSION_SECRET;
   }
 });
-

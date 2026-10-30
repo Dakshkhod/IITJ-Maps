@@ -31,16 +31,15 @@ accepts the in-app disclosure, and grants the browser's geolocation permission.
 Session IDs are random per browser tab, IP addresses are not stored, and records
 expire after 7 days.
 
-Connect a Vercel KV or Upstash Redis database and set either pair of environment
-variables:
-
-- `KV_REST_API_URL` and `KV_REST_API_TOKEN`
-- `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN`
+Connect a Neon Postgres database through the Vercel Marketplace. The integration
+injects `DATABASE_URL` automatically; `POSTGRES_URL` and `NEON_DATABASE_URL` are
+also accepted for compatibility. The telemetry table and index are created on
+first use.
 
 The existing `ADMIN_PASSWORD` and `ADMIN_SESSION_SECRET` protect dashboard
 reads. `ADMIN_BASIC_USER` and `ADMIN_BASIC_PASS` continue to protect the admin
 page itself. GitHub publishing additionally requires its existing `GITHUB_*`
-variables. If Redis/KV is not configured, the public map keeps working and the
+variables. If Neon is not configured, the public map keeps working and the
 admin dashboard shows a configuration message.
 
 ## Attribution
