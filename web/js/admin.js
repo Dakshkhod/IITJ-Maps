@@ -1005,6 +1005,17 @@ function formatSessionDuration(milliseconds) {
   return `${hours}h ${minutes % 60}m`;
 }
 
+function formatIstTime(timestamp) {
+  const value = Number(timestamp) || Date.now();
+  return new Intl.DateTimeFormat('en-IN', {
+    timeZone: 'Asia/Kolkata',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: true,
+  }).format(new Date(value)) + ' IST';
+}
+
 function sessionDuration(session, now = Date.now()) {
   const start = Number(session.startedAt) || now;
   const end = Number(session.endedAt) || Number(session.lastSeen) || now;
@@ -1129,7 +1140,11 @@ function updateLiveMap(forceFit = false) {
 function renderLiveSessions() {
   const container = document.getElementById('live-session-list');
   if (!container || !_liveSnapshot) return;
-  const sessions = _liveSnapshot.sessions || [];
+  const sessions = [...(_liveSnapshot.sessions || [])].sort((a, b) => {
+    const aTime = Number(a.lastSeen || a.startedAt || 0);
+    const bTime = Number(b.lastSeen || b.startedAt || 0);
+    return bTime - aTime;
+  });
   container.replaceChildren();
   if (!sessions.length) {
     const empty = document.createElement('div');
@@ -1157,7 +1172,11 @@ function renderLiveSessions() {
 
     const meta = document.createElement('div');
     meta.className = 'live-session-meta';
-    const parts = [formatSessionDuration(sessionDuration(session, _liveSnapshot.now))];
+    const appearedAt = formatIstTime(session.startedAt || session.lastSeen || _liveSnapshot.now);
+    const parts = [
+      formatSessionDuration(sessionDuration(session, _liveSnapshot.now)),
+      `appeared ${appearedAt}`,
+    ];
     if (session.preciseOptIn && session.precise) {
       parts.push(`${Number(session.precise.lat).toFixed(5)}, ${Number(session.precise.lng).toFixed(5)}`);
       if (session.precise.accuracy != null) parts.push(`±${Math.round(session.precise.accuracy)}m`);
