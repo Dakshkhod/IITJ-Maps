@@ -24,17 +24,17 @@ function and edge-middleware auth gate powering the admin overlay tool.
 
 ## Live usage dashboard
 
-The protected admin page includes anonymous real-time presence, coarse
-city/region mapping, session duration, and route analytics. Precise GPS and
-movement paths are sent only after the user chooses a location-powered feature
-and grants the browser's geolocation permission.
-Session IDs are random per browser tab, IP addresses are not stored, and records
-expire after 7 days.
+The protected admin dashboard includes live sessions, IP-derived city estimates,
+unique browser counts, session duration, and route analytics. Unique counts use
+a random first-party browser ID stored in local storage and HMAC-hashed before
+server storage; it is not generated through fingerprinting. IP addresses are not
+stored, and telemetry records expire after 7 days.
 
 Connect a Neon Postgres database through the Vercel Marketplace. The integration
 injects `DATABASE_URL` automatically; `POSTGRES_URL` and `NEON_DATABASE_URL` are
-also accepted for compatibility. The telemetry table and index are created on
-first use.
+also accepted for compatibility. Set a separate random
+`TELEMETRY_VISITOR_SECRET` (32+ bytes) to enable hashed unique-browser counts.
+The telemetry tables and indexes are created or migrated on first use.
 
 The existing `ADMIN_PASSWORD` and `ADMIN_SESSION_SECRET` protect dashboard
 reads. `ADMIN_BASIC_USER` and `ADMIN_BASIC_PASS` continue to protect the admin

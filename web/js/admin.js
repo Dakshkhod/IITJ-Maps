@@ -1012,20 +1012,11 @@ function sessionDuration(session, now = Date.now()) {
 }
 
 function sessionPlace(session) {
-  const place = session.approximate || {};
-  return [place.city, place.region, place.country].filter(Boolean).join(', ') || 'Location unavailable';
+  return window.IITJAdminTelemetry.sessionPlace(session);
 }
 
 function sessionPoint(session) {
-  if (session.preciseOptIn && session.precise &&
-      Number.isFinite(Number(session.precise.lat)) && Number.isFinite(Number(session.precise.lng))) {
-    return { lng: Number(session.precise.lng), lat: Number(session.precise.lat), precision: 'precise' };
-  }
-  const place = session.approximate || {};
-  if (Number.isFinite(Number(place.lat)) && Number.isFinite(Number(place.lng))) {
-    return { lng: Number(place.lng), lat: Number(place.lat), precision: 'coarse' };
-  }
-  return null;
+  return window.IITJAdminTelemetry.sessionPoint(session);
 }
 
 function ensureLiveMap() {
@@ -1120,7 +1111,14 @@ function updateLiveMap(forceFit = false) {
   _liveMap.getSource('live-route').setData({ type: 'FeatureCollection', features: lineFeature(routeCoordinates) });
 
   if (!forceFit && _liveHasFit) return;
-  const allCoordinates = [...pathCoordinates, ...routeCoordinates, ...points.map((feature) => feature.geometry.coordinates)];
+  const selectedPoint = selected ? sessionPoint(selected) : null;
+  const allCoordinates = window.IITJAdminTelemetry.fitCoordinates({
+    hasSelection: !!selected,
+    selectedPoint: selectedPoint ? [selectedPoint.lng, selectedPoint.lat] : null,
+    allPoints: points.map((feature) => feature.geometry.coordinates),
+    pathCoordinates,
+    routeCoordinates,
+  });
   if (!allCoordinates.length) return;
   const bounds = allCoordinates.reduce((box, coordinate) => box.extend(coordinate),
     new maplibregl.LngLatBounds(allCoordinates[0], allCoordinates[0]));
@@ -1164,7 +1162,7 @@ function renderLiveSessions() {
       parts.push(`${Number(session.precise.lat).toFixed(5)}, ${Number(session.precise.lng).toFixed(5)}`);
       if (session.precise.accuracy != null) parts.push(`±${Math.round(session.precise.accuracy)}m`);
     } else {
-      parts.push('approximate location');
+      parts.push('IP-derived estimate; no device GPS');
     }
     parts.push(`#${String(session.sessionId).slice(0, 8)}`);
     meta.textContent = parts.join(' · ');
@@ -1186,19 +1184,18 @@ function renderLiveDashboard(snapshot) {
   _liveSnapshot = snapshot;
   const sessions = snapshot.sessions || [];
   const now = Number(snapshot.now) || Date.now();
-  const active = sessions.filter((session) => session.active);
-  const day = sessions.filter((session) => Number(session.startedAt) >= now - 24 * 60 * 60 * 1000);
-  const precise = active.filter((session) => session.preciseOptIn && session.precise);
-  const average = day.length
-    ? day.reduce((total, session) => total + sessionDuration(session, now), 0) / day.length
-    : 0;
+  const metrics = window.IITJAdminTelemetry.dashboardMetrics(snapshot);
 
-  document.getElementById('live-active').textContent = String(active.length);
-  document.getElementById('live-precise').textContent = String(precise.length);
-  document.getElementById('live-day').textContent = String(day.length);
-  document.getElementById('live-duration').textContent = day.length ? formatSessionDuration(average) : '—';
+  document.getElementById('live-active').textContent = String(metrics.activeSessions);
+  document.getElementById('live-precise').textContent = String(metrics.activePreciseSessions);
+  document.getElementById('live-unique-today').textContent = metrics.uniqueVisitorsToday;
+  document.getElementById('live-unique-24h').textContent = metrics.uniqueVisitors24h;
+  document.getElementById('live-duration').textContent = metrics.sessions24h
+    ? formatSessionDuration(metrics.averageSessionDurationMs24h)
+    : '—';
+  document.getElementById('live-coverage').textContent = metrics.coverage;
   document.getElementById('live-updated').textContent = `Updated ${new Date(now).toLocaleTimeString()}`;
-  setLiveStatus(`${active.length} active · ${sessions.length} recent · ${snapshot.retentionDays || 7}-day retention`);
+  setLiveStatus(`${metrics.activeSessions} active · ${metrics.sessions24h} sessions/24h · ${sessions.length} recent · ${snapshot.retentionDays || 7}-day retention`);
   document.getElementById('btn-live')?.classList.add('is-connected');
 
   if (_liveSelectedId && !sessions.some((session) => session.sessionId === _liveSelectedId)) {

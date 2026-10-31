@@ -1,17 +1,9 @@
-/**
- * Anonymous usage + consented precise-location telemetry.
- *
- * Public clients can only write their own random, tab-scoped session snapshot.
- * Reads are deliberately not exposed here; the protected /api/admin endpoint
- * is the only way to retrieve telemetry.
- *
- * Required Vercel env var (injected by the Neon integration): DATABASE_URL.
- */
-
+const crypto = require('crypto');
 const telemetryDb = require('../lib/telemetry-db');
 
 const MAX_BODY_BYTES = 96_000;
 const SESSION_TTL_SEC = 7 * 24 * 60 * 60;
+const VISITOR_ID_PATTERN = /^[a-f0-9]{8}-[a-f0-9]{4}-[1-5][a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/;
 
 function safeText(value, max = 120) {
   return typeof value === 'string' ? value.trim().slice(0, max) : '';
@@ -100,6 +92,16 @@ function approximateLocation(req) {
   };
 }
 
+function visitorHash(value) {
+  const visitorId = safeText(value, 64).toLowerCase();
+  const secret = process.env.TELEMETRY_VISITOR_SECRET || '';
+  if (!secret || !VISITOR_ID_PATTERN.test(visitorId)) return null;
+  return crypto.createHmac('sha256', secret)
+    .update('iitj-maps/visitor/v1\0')
+    .update(visitorId)
+    .digest('hex');
+}
+
 function sameOrigin(req) {
   const origin = req.headers.origin;
   if (!origin) return true; // sendBeacon/page-dismiss and some same-origin clients
@@ -159,8 +161,9 @@ module.exports = async (req, res) => {
 
   const now = Date.now();
   const preciseOptIn = body.preciseOptIn === true;
+  const hashedVisitorId = visitorHash(body.visitorId);
   const session = {
-    version: 1,
+    version: 2,
     sessionId,
     startedAt: safeTimestamp(body.startedAt, now),
     lastSeen: now,
@@ -172,6 +175,7 @@ module.exports = async (req, res) => {
     path: preciseOptIn ? safePath(body.path) : [],
     routes: safeRoutes(body.routes),
     routeCalculations: Math.round(finiteNumber(body.routeCalculations, 0, 10_000) || 0),
+    visitorIdPresent: !!hashedVisitorId,
   };
 
   try {
@@ -184,6 +188,18 @@ module.exports = async (req, res) => {
     await telemetryDb.ensureSchema();
     const sql = telemetryDb.sql();
     const oldest = now - SESSION_TTL_SEC * 1000;
+    if (hashedVisitorId) {
+      await sql`
+        WITH expired AS (
+          DELETE FROM iitj_telemetry_visitors
+          WHERE last_seen < ${oldest}
+        )
+        INSERT INTO iitj_telemetry_visitors (visitor_hash, first_seen, last_seen)
+        VALUES (${hashedVisitorId}, ${now}, ${now})
+        ON CONFLICT (visitor_hash) DO UPDATE SET
+          last_seen = EXCLUDED.last_seen
+      `;
+    }
     await sql`
       WITH expired AS (
         DELETE FROM iitj_telemetry_sessions
@@ -191,13 +207,14 @@ module.exports = async (req, res) => {
       )
       INSERT INTO iitj_telemetry_sessions (
         session_id, started_at, last_seen, ended_at, visible,
-        approximate, precise_opt_in, precise, path, routes, route_calculations
+        approximate, precise_opt_in, precise, path, routes, route_calculations,
+        visitor_id_present
       ) VALUES (
         ${session.sessionId}, ${session.startedAt}, ${session.lastSeen}, ${session.endedAt}, ${session.visible},
         ${JSON.stringify(session.approximate)}::jsonb,
         ${session.preciseOptIn}, ${JSON.stringify(session.precise)}::jsonb,
         ${JSON.stringify(session.path)}::jsonb, ${JSON.stringify(session.routes)}::jsonb,
-        ${session.routeCalculations}
+        ${session.routeCalculations}, ${session.visitorIdPresent}
       )
       ON CONFLICT (session_id) DO UPDATE SET
         started_at = EXCLUDED.started_at,
@@ -209,7 +226,8 @@ module.exports = async (req, res) => {
         precise = EXCLUDED.precise,
         path = EXCLUDED.path,
         routes = EXCLUDED.routes,
-        route_calculations = EXCLUDED.route_calculations
+        route_calculations = EXCLUDED.route_calculations,
+        visitor_id_present = EXCLUDED.visitor_id_present
     `;
     res.statusCode = 202;
     return res.end(JSON.stringify({ ok: true }));

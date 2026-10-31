@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "npx serve web -p 3000 --cors",
     "start": "npx serve web -p 3000 --cors",
-    "test": "node --test tests/telemetry.test.js"
+    "test": "node --test tests/*.test.js"
   },
   "devDependencies": {
     "serve": "^14.0.0"

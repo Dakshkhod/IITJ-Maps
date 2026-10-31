@@ -82,15 +82,17 @@
       <div class="live-stats">
         <div class="live-stat"><span>Active now</span><strong id="live-active">—</strong></div>
         <div class="live-stat"><span>Sharing precise GPS</span><strong id="live-precise">—</strong></div>
-        <div class="live-stat"><span>Sessions · 24h</span><strong id="live-day">—</strong></div>
-        <div class="live-stat"><span>Average duration</span><strong id="live-duration">—</strong></div>
+        <div class="live-stat"><span>Unique visitors · today (IST)</span><strong id="live-unique-today">—</strong></div>
+        <div class="live-stat"><span>Unique visitors · 24h</span><strong id="live-unique-24h">—</strong></div>
+        <div class="live-stat"><span>Average session · 24h</span><strong id="live-duration">—</strong></div>
       </div>
+      <p id="live-coverage" class="live-coverage">Unique visitor coverage will appear after refresh.</p>
 
       <div class="live-grid">
         <div class="live-map-panel">
           <div class="live-map-legend">
-            <span><i class="live-key live-key-precise"></i>Precise · opted in</span>
-            <span><i class="live-key live-key-coarse"></i>Approximate city/region</span>
+            <span><i class="live-key live-key-precise"></i>Precise GPS · opted in</span>
+            <span>IP city estimates stay in the list and are not plotted</span>
             <span><i class="live-key live-key-path"></i>Selected movement path</span>
           </div>
           <div id="live-map" class="live-map"></div>
@@ -248,6 +250,7 @@
 
   <script src="js/basemap-styles.js?v=1"></script>
   <script src="js/data-overlay.js?v=3"></script>
-  <script src="js/admin.js?v=13"></script>
+  <script src="js/admin-telemetry.js?v=1"></script>
+  <script src="js/admin.js?v=14"></script>
 </body>
 </html>

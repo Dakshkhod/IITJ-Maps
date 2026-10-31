@@ -4802,9 +4802,6 @@ function onLocationFrame(disp, raw) {
     course: disp.course,   // direction of travel; drives the nav camera
     raw, // keep raw available for sharing/precision-sensitive consumers
   };
-  // A delivered fix means the browser has granted location permission. Mark
-  // precise telemetry as enabled for this tab, then pass the unsnapped fix to
-  // the throttled sampler.
   window.IITJTelemetry?.grantPreciseLocation();
   window.IITJTelemetry?.location({
     lat: raw?.lat ?? disp.lat,

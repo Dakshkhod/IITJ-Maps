@@ -1,10 +1,3 @@
-/**
- * IITJ Maps anonymous usage telemetry.
- *
- * A random ID lives only in this browser tab. Approximate city/region is added
- * server-side from Vercel's request headers; IP addresses are never stored.
- * Precise GPS/path data is included only after the app's clear location opt-in.
- */
 (function () {
   'use strict';
 
@@ -15,6 +8,7 @@
   const SESSION_ID_KEY = 'iitj-telemetry-session-id-v1';
   const SESSION_START_KEY = 'iitj-telemetry-session-start-v1';
   const PRECISE_OPT_IN_KEY = 'iitj-precise-telemetry-opt-in-v1';
+  const visitorId = window.IITJTelemetryIdentity?.getVisitorId(window) || null;
 
   function randomSessionId() {
     const webCrypto = window.crypto;
@@ -81,6 +75,7 @@
   function snapshot(ended) {
     return {
       sessionId,
+      ...(visitorId ? { visitorId } : {}),
       startedAt,
       visible: document.visibilityState === 'visible',
       ended: ended === true,

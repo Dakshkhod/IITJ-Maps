@@ -116,7 +116,7 @@ html, body { margin: 0; padding: 0; height: 100%; background: var(--bg); color: 
 .live-head-actions { display: flex; align-items: center; gap: 8px; }
 .live-updated { color: var(--text-muted); font-size: 11.5px; }
 .live-stats {
-  display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px;
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 1px;
   background: var(--border); border-bottom: 1px solid var(--border);
 }
 .live-stat { padding: 14px 18px; background: var(--bg-elevated); }
@@ -125,6 +125,10 @@ html, body { margin: 0; padding: 0; height: 100%; background: var(--bg); color: 
   font-weight: 700; letter-spacing: .07em; text-transform: uppercase;
 }
 .live-stat strong { display: block; margin-top: 4px; font-size: 21px; letter-spacing: -.02em; }
+.live-coverage {
+  margin: 0; padding: 8px 18px; border-bottom: 1px solid var(--border);
+  background: var(--surface); color: var(--text-muted); font-size: 10.5px;
+}
 .live-grid { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(300px, .75fr); }
 .live-map-panel { min-width: 0; border-right: 1px solid var(--border); }
 .live-map-legend {
@@ -135,7 +139,6 @@ html, body { margin: 0; padding: 0; height: 100%; background: var(--bg); color: 
 .live-map-legend span { display: inline-flex; align-items: center; gap: 6px; }
 .live-key { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
 .live-key-precise { background: #16a34a; }
-.live-key-coarse { background: #2563eb; }
 .live-key-path { width: 16px; height: 3px; border-radius: 99px; background: #9333ea; }
 .live-map { width: 100%; height: 440px; background: var(--surface); }
 .live-session-panel { min-width: 0; background: var(--bg-elevated); }

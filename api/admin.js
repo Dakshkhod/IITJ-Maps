@@ -16,6 +16,8 @@ const MAX_OVERLAY_BYTES = 2_000_000;           // 2 MB hard cap
 const TELEMETRY_RETENTION_MS = 7 * 24 * 60 * 60 * 1000;
 const TELEMETRY_ACTIVE_MS = 45 * 1000;
 const TELEMETRY_MAX_SESSIONS = 300;
+const DAY_MS = 24 * 60 * 60 * 1000;
+const IST_OFFSET_MS = 5.5 * 60 * 60 * 1000;
 
 function constantTimeEquals(a, b) {
   const ab = Buffer.from(String(a), 'utf8');
@@ -57,9 +59,43 @@ function verifyToken(token, secret) {
 async function telemetrySnapshot() {
   const now = Date.now();
   const oldest = now - TELEMETRY_RETENTION_MS;
+  const dayAgo = now - DAY_MS;
+  const dayStart = Math.floor((now + IST_OFFSET_MS) / DAY_MS) * DAY_MS - IST_OFFSET_MS;
+  const activeAfter = now - TELEMETRY_ACTIVE_MS;
   await telemetryDb.ensureSchema();
   const sql = telemetryDb.sql();
   await sql`DELETE FROM iitj_telemetry_sessions WHERE last_seen < ${oldest}`;
+  await sql`DELETE FROM iitj_telemetry_visitors WHERE last_seen < ${oldest}`;
+
+  const sessionMetricRows = await sql`
+    SELECT
+      COUNT(*) FILTER (
+        WHERE visible = TRUE AND ended_at IS NULL AND last_seen >= ${activeAfter}
+      ) AS active_sessions,
+      COUNT(*) FILTER (
+        WHERE visible = TRUE AND ended_at IS NULL AND last_seen >= ${activeAfter}
+          AND precise_opt_in = TRUE AND precise IS NOT NULL
+      ) AS active_precise_sessions,
+      COUNT(*) FILTER (WHERE last_seen >= ${dayAgo}) AS sessions_24h,
+      COUNT(*) FILTER (
+        WHERE last_seen >= ${dayAgo} AND visitor_id_present = TRUE
+      ) AS identified_sessions_24h,
+      COUNT(*) FILTER (
+        WHERE last_seen >= ${dayAgo} AND visitor_id_present = FALSE
+      ) AS legacy_sessions_24h,
+      COALESCE(AVG(GREATEST(0, COALESCE(ended_at, last_seen) - started_at)) FILTER (
+        WHERE last_seen >= ${dayAgo}
+      ), 0) AS average_session_duration_ms_24h
+    FROM iitj_telemetry_sessions
+    WHERE last_seen >= ${oldest}
+  `;
+  const visitorMetricRows = await sql`
+    SELECT
+      COUNT(*) FILTER (WHERE last_seen >= ${dayAgo}) AS unique_visitors_24h,
+      COUNT(*) FILTER (WHERE last_seen >= ${dayStart}) AS unique_visitors_today
+    FROM iitj_telemetry_visitors
+    WHERE last_seen >= ${oldest}
+  `;
   const rows = await sql`
     SELECT session_id, started_at, last_seen, ended_at, visible,
            approximate, precise_opt_in, precise, path, routes, route_calculations
@@ -70,7 +106,7 @@ async function telemetrySnapshot() {
   `;
   const sessions = (Array.isArray(rows) ? rows : []).map((row) => {
     const session = {
-      version: 1,
+      version: 2,
       sessionId: row.session_id,
       startedAt: Number(row.started_at),
       lastSeen: Number(row.last_seen),
@@ -83,11 +119,31 @@ async function telemetrySnapshot() {
       routes: Array.isArray(row.routes) ? row.routes : [],
       routeCalculations: Number(row.route_calculations) || 0,
     };
-    session.active = session.visible && !session.endedAt &&
-      session.lastSeen >= now - TELEMETRY_ACTIVE_MS;
+    session.active = session.visible && !session.endedAt && session.lastSeen >= activeAfter;
     return session;
   });
-  return { now, activeWindowMs: TELEMETRY_ACTIVE_MS, retentionDays: 7, sessions };
+  const sessionMetrics = Array.isArray(sessionMetricRows) && sessionMetricRows[0] || {};
+  const visitorMetrics = Array.isArray(visitorMetricRows) && visitorMetricRows[0] || {};
+  const metrics = {
+    dayTimezone: 'Asia/Kolkata',
+    dayStart,
+    uniqueVisitorsToday: Number(visitorMetrics.unique_visitors_today) || 0,
+    uniqueVisitors24h: Number(visitorMetrics.unique_visitors_24h) || 0,
+    sessions24h: Number(sessionMetrics.sessions_24h) || 0,
+    identifiedSessions24h: Number(sessionMetrics.identified_sessions_24h) || 0,
+    legacySessions24h: Number(sessionMetrics.legacy_sessions_24h) || 0,
+    activeSessions: Number(sessionMetrics.active_sessions) || 0,
+    activePreciseSessions: Number(sessionMetrics.active_precise_sessions) || 0,
+    averageSessionDurationMs24h: Number(sessionMetrics.average_session_duration_ms_24h) || 0,
+  };
+  return {
+    schemaVersion: 2,
+    now,
+    activeWindowMs: TELEMETRY_ACTIVE_MS,
+    retentionDays: 7,
+    metrics,
+    sessions,
+  };
 }
 
 // GitHub's own status + error text, trimmed to something safe to show. Surfaced
