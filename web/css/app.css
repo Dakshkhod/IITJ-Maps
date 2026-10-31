@@ -1533,10 +1533,57 @@ input[type="checkbox"]:checked + .toggle-track .toggle-thumb { transform: transl
 .menu-item-icon svg { width: 18px; height: 18px; }
 
 .menu-footer {
-  padding: 16px 20px;
+  padding: 16px 20px 14px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: var(--bg-elevated);
+}
+
+.menu-footer-report {
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--text-muted);
+  letter-spacing: 0.01em;
+}
+
+.menu-footer-report a {
+  color: var(--text-primary);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.menu-footer-report a:hover {
+  text-decoration: underline;
+}
+
+.menu-footer-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+  min-width: 110px;
+  padding: 9px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-primary);
+  text-decoration: none;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.menu-footer-button:hover {
+  background: var(--surface-hover);
+  border-color: var(--border-strong);
+}
+
+.menu-footer-meta {
   font-size: 11px;
   color: var(--text-muted);
-  border-top: 1px solid var(--border);
   letter-spacing: 0.01em;
 }
 
