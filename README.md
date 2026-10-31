@@ -22,26 +22,6 @@ pre-generated static GeoJSON/JSON, so routing and search run entirely in the
 browser. The site is hosted as a static deployment on Vercel, with a serverless
 function and edge-middleware auth gate powering the admin overlay tool.
 
-## Live usage dashboard
-
-The protected admin dashboard includes live sessions, IP-derived city estimates,
-unique browser counts, session duration, and route analytics. Unique counts use
-a random first-party browser ID stored in local storage and HMAC-hashed before
-server storage; it is not generated through fingerprinting. IP addresses are not
-stored, and telemetry records expire after 7 days.
-
-Connect a Neon Postgres database through the Vercel Marketplace. The integration
-injects `DATABASE_URL` automatically; `POSTGRES_URL` and `NEON_DATABASE_URL` are
-also accepted for compatibility. Set a separate random
-`TELEMETRY_VISITOR_SECRET` (32+ bytes) to enable hashed unique-browser counts.
-The telemetry tables and indexes are created or migrated on first use.
-
-The existing `ADMIN_PASSWORD` and `ADMIN_SESSION_SECRET` protect dashboard
-reads. `ADMIN_BASIC_USER` and `ADMIN_BASIC_PASS` continue to protect the admin
-page itself. GitHub publishing additionally requires its existing `GITHUB_*`
-variables. If Neon is not configured, the public map keeps working and the
-admin dashboard shows a configuration message.
-
 ## Attribution
 
 Map data © OpenStreetMap contributors (ODbL). Base map tiles © CARTO and Esri.
