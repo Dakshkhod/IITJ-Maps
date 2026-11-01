@@ -113,11 +113,11 @@
     "osm_id": "13930640138",
     "gate_name": "LHC entrance"
   },
-  "Old Mess/Cant.": {
+  "Old Mess": {
     "lat": 26.4721079,
     "lng": 73.1168203,
     "osm_id": "12980144605",
-    "gate_name": "Old Mess/Cant. entrance"
+    "gate_name": "Old Mess entrance"
   },
   "Hostel B3": {
     "lat": 26.472375,
