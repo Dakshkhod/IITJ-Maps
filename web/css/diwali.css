@@ -1,0 +1,72 @@
+/* A small seasonal layer; the navigation palette and map stay familiar. */
+.diwali-only { display: none; }
+
+:root[data-diwali] {
+  --diwali-ink: #8a5314;
+  --diwali-line: rgba(181, 119, 33, 0.3);
+  --diwali-wash: rgba(208, 151, 53, 0.07);
+}
+
+:root[data-diwali][data-theme="dark"] {
+  --diwali-ink: #e9bd72;
+  --diwali-line: rgba(233, 189, 114, 0.25);
+  --diwali-wash: rgba(233, 189, 114, 0.06);
+}
+
+[data-diwali] .search-bar {
+  border-color: var(--diwali-line);
+  box-shadow: var(--shadow-md), 0 2px 18px rgba(208, 151, 53, 0.08);
+}
+
+[data-diwali] #menu-btn { color: var(--diwali-ink); }
+[data-diwali] .loader-bar { background: #e9bd72; }
+[data-diwali] .splash-logo { filter: drop-shadow(0 0 18px rgba(233, 189, 114, 0.16)); }
+
+[data-diwali] .diwali-splash-greeting {
+  display: block;
+  margin: -20px 20px 28px;
+  color: #e9bd72;
+  font-size: 11px;
+  line-height: 1.6;
+  letter-spacing: 0.01em;
+}
+
+[data-diwali] .diwali-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: calc(100% - 24px);
+  margin: 6px 12px 10px;
+  padding: 14px 12px;
+  border: 1px solid var(--diwali-line);
+  border-radius: var(--radius-md);
+  background: var(--diwali-wash);
+  color: var(--diwali-ink);
+  font-family: var(--font);
+  text-align: left;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+[data-diwali] .diwali-card:hover { border-color: var(--diwali-ink); }
+[data-diwali] .diwali-card:focus-visible { outline: 2px solid var(--diwali-ink); outline-offset: 3px; }
+[data-diwali] .diwali-lamp { flex-shrink: 0; overflow: visible; }
+[data-diwali] .diwali-card-copy { display: grid; gap: 5px; }
+[data-diwali] .diwali-card-title { font-size: 13px; font-weight: 600; letter-spacing: -0.01em; }
+[data-diwali] .diwali-card-hint { color: var(--text-secondary); font-size: 11px; line-height: 1.6; }
+[data-diwali] .diwali-flame, [data-diwali] .diwali-sparks, [data-diwali] .diwali-halo { opacity: 0; }
+[data-diwali] .diwali-flame { transition: opacity 0.3s ease; }
+[data-diwali] .diwali-card[aria-pressed="true"] .diwali-flame { opacity: 1; }
+[data-diwali] .diwali-card[aria-pressed="true"] .diwali-halo { opacity: 0.08; }
+[data-diwali] .diwali-card[aria-pressed="true"] .diwali-sparks { animation: diwali-twinkle 0.8s ease-out both; }
+
+@keyframes diwali-twinkle {
+  0% { opacity: 0; }
+  35% { opacity: 0.8; }
+  100% { opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-diwali] .diwali-flame { transition: none; }
+  [data-diwali] .diwali-card[aria-pressed="true"] .diwali-sparks { animation: none; }
+}
