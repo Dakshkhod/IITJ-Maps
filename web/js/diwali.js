@@ -13,6 +13,7 @@
     const now = Date.now();
     const active = preview === '1' || (preview !== '0' && now >= startsAt && now < endsAt);
     root.toggleAttribute('data-diwali', active);
+    root.toggleAttribute('data-diwali-paused', document.hidden);
     clearTimeout(expiryTimer);
     // Expire an open tab too; visibilitychange catches suspended mobile tabs.
     if (preview !== '1' && preview !== '0' && now < endsAt) {
@@ -24,6 +25,12 @@
   updateSeason();
   document.addEventListener('visibilitychange', updateSeason);
   document.addEventListener('DOMContentLoaded', function () {
+    const dismiss = document.getElementById('diwali-map-dismiss');
+    if (dismiss) dismiss.addEventListener('click', function () {
+      root.setAttribute('data-diwali-dismissed', '');
+      const menu = document.getElementById('menu-btn');
+      if (menu) menu.focus({ preventScroll: true });
+    });
     const diya = document.getElementById('diwali-diya');
     const wish = document.getElementById('diwali-wish');
     if (!diya || !wish) return;

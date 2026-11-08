@@ -66,7 +66,87 @@
   100% { opacity: 0; }
 }
 
+[data-diwali] .diwali-map-greeting {
+  position: absolute;
+  z-index: 5;
+  left: max(12px, env(safe-area-inset-left, 0px));
+  bottom: calc(64px + env(safe-area-inset-bottom, 0px));
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  max-width: calc(100% - 84px - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px));
+  padding: 10px 6px 10px 10px;
+  border: 1px solid var(--diwali-line);
+  border-radius: var(--radius-lg);
+  background: var(--bg-glass);
+  box-shadow: var(--shadow-md);
+  backdrop-filter: blur(12px);
+  color: var(--diwali-ink);
+  pointer-events: none;
+}
+
+[data-diwali] .diwali-map-greeting .diwali-halo { opacity: 0.1; }
+[data-diwali] .diwali-map-greeting .diwali-card-copy { gap: 2px; }
+[data-diwali] .diwali-map-greeting .diwali-card-hint { font-size: 10px; }
+[data-diwali] .diwali-map-dismiss {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  pointer-events: auto;
+}
+[data-diwali] .diwali-map-dismiss:hover { background: var(--diwali-wash); }
+[data-diwali] .diwali-map-dismiss:focus-visible { outline: 2px solid var(--diwali-ink); }
+
+[data-diwali] .diwali-map-sparkles {
+  display: block;
+  position: absolute;
+  inset: 140px 84px 140px 24px;
+  z-index: 4;
+  pointer-events: none;
+  color: var(--diwali-ink);
+}
+[data-diwali] .diwali-map-spark {
+  position: absolute;
+  left: 18%;
+  top: 18%;
+  opacity: 0;
+  animation: diwali-map-spark 12s ease-out infinite;
+}
+[data-diwali] .diwali-map-spark:nth-child(2) { left: 72%; top: 38%; animation-delay: 4s; }
+[data-diwali] .diwali-map-spark:nth-child(3) { left: 40%; top: 68%; animation-delay: 8s; }
+[data-diwali] .diwali-map-flame { transform-origin: 24px 25px; animation: diwali-flame-glow 4s ease-in-out infinite; }
+
+/* Keep decoration away from every task panel, not just active navigation. */
+body.immersive-nav .diwali-map-greeting,
+body.immersive-nav .diwali-map-sparkles,
+.app:has(#search-results:not(.hidden), #directions-panel:not(.hidden), #place-sheet:not(.hidden), #nav-panel:not(.hidden), #side-menu:not(.hidden), #layer-panel:not(.hidden), #offline-banner:not([hidden])) .diwali-map-greeting,
+.app:has(#search-results:not(.hidden), #directions-panel:not(.hidden), #place-sheet:not(.hidden), #nav-panel:not(.hidden), #side-menu:not(.hidden), #layer-panel:not(.hidden), #offline-banner:not([hidden])) .diwali-map-sparkles,
+[data-diwali-dismissed] .diwali-map-greeting,
+[data-diwali-dismissed] .diwali-map-sparkles { display: none; }
+
+[data-diwali-paused] .diwali-map-spark,
+[data-diwali-paused] .diwali-map-flame { animation-play-state: paused; }
+
+@keyframes diwali-map-spark {
+  0% { opacity: 0; transform: scale(0.55) rotate(-8deg); }
+  5% { opacity: 0.65; }
+  16%, 100% { opacity: 0; transform: scale(1.15) rotate(8deg); }
+}
+@keyframes diwali-flame-glow {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(0.94, 0.97); opacity: 0.82; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   [data-diwali] .diwali-flame { transition: none; }
   [data-diwali] .diwali-card[aria-pressed="true"] .diwali-sparks { animation: none; }
+  [data-diwali] .diwali-map-sparkles { display: none; }
+  [data-diwali] .diwali-map-flame { animation: none; }
 }
