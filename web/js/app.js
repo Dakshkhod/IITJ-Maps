@@ -462,6 +462,7 @@ function isCampusNight(now = new Date()) {
 }
 
 function desiredNightMode() {
+  if (document.documentElement.hasAttribute('data-diwali')) return true;
   if (nightModeManual) return isDark;
   return isCampusNight();
 }
@@ -669,7 +670,7 @@ function setupOfflineBanner() {
 }
 
 async function init() {
-  isDark = isCampusNight();
+  isDark = document.documentElement.hasAttribute('data-diwali') || isCampusNight();
   if (isDark) document.documentElement.setAttribute('data-theme', 'dark');
   applySharedViewMode();   // a shared link's ?v= overrides the default view
 
@@ -701,6 +702,11 @@ async function init() {
   map.addControl(new maplibregl.ScaleControl({ maxWidth: 150, unit: 'metric' }), 'bottom-left');
 
   setupOfflineBanner();
+  window.addEventListener('iitj-diwali-change', event => {
+    if (!event.detail?.active) nightModeManual = false;
+    syncAutoNightMode();
+    updateBaseMapButtons();
+  });
 
   map.dragRotate.enable();
 
@@ -783,11 +789,15 @@ function applySharedViewMode() {
     // Matches toggleSatellite: imagery carries no day/night theme, and leaving
     // it later falls back to this device's auto night mode.
     isDark = false;
-    document.documentElement.removeAttribute('data-theme');
+    if (document.documentElement.hasAttribute('data-diwali')) {
+      document.documentElement.setAttribute('data-theme', 'dark');
+    } else {
+      document.documentElement.removeAttribute('data-theme');
+    }
   } else if (tokens.has('dark') || tokens.has('map')) {
     // The sender's light/dark choice outranks the recipient's clock, and is
     // pinned like a manual tap so the night watcher doesn't undo it.
-    isDark = tokens.has('dark');
+    isDark = document.documentElement.hasAttribute('data-diwali') || tokens.has('dark');
     nightModeManual = true;
     document.documentElement.setAttribute('data-theme', isDark ? 'dark' : '');
   }
@@ -1112,8 +1122,10 @@ async function applyMapStyle() {
 function updateBaseMapButtons() {
   document.getElementById('btn-satellite').classList.toggle('active', isSatellite);
   document.getElementById('btn-dark').classList.toggle('active', isDark && !isSatellite);
-  document.getElementById('btn-dark').disabled = isSatellite;
-  document.getElementById('btn-dark').style.opacity = isSatellite ? '0.45' : '';
+  const diwaliDark = document.documentElement.hasAttribute('data-diwali');
+  document.getElementById('btn-dark').disabled = isSatellite || diwaliDark;
+  document.getElementById('btn-dark').style.opacity = (isSatellite || diwaliDark) ? '0.45' : '';
+  document.getElementById('btn-dark').title = diwaliDark ? 'Dark mode is on for Diwali' : 'Dark Mode';
 }
 
 async function loadMapData() {
@@ -5218,7 +5230,11 @@ async function toggleSatellite() {
   isSatellite = !isSatellite;
   if (isSatellite) {
     isDark = false;
-    document.documentElement.removeAttribute('data-theme');
+    if (document.documentElement.hasAttribute('data-diwali')) {
+      document.documentElement.setAttribute('data-theme', 'dark');
+    } else {
+      document.documentElement.removeAttribute('data-theme');
+    }
     map.setMaxZoom(SATELLITE_MAX_ZOOM);
     if (map.getZoom() > SATELLITE_MAX_ZOOM) map.zoomTo(SATELLITE_MAX_ZOOM);
     // Hide custom 3D models before the style swap so the styledata
@@ -5227,7 +5243,7 @@ async function toggleSatellite() {
   } else {
     setSatCalibration(false);
     map.setMaxZoom(19);
-    if (!nightModeManual) isDark = isCampusNight();
+    if (!nightModeManual) isDark = desiredNightMode();
     document.documentElement.setAttribute('data-theme', isDark ? 'dark' : '');
   }
   showToast(isSatellite ? 'Satellite view' : 'Map view', 'info');
@@ -5236,6 +5252,7 @@ async function toggleSatellite() {
 }
 
 async function toggleDarkMode() {
+  if (document.documentElement.hasAttribute('data-diwali')) return;
   if (isSatellite) {
     isSatellite = false;
     showToast('Switched to map view', 'info');

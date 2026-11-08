@@ -12,7 +12,9 @@
   function updateSeason() {
     const now = Date.now();
     const active = preview === '1' || (preview !== '0' && now >= startsAt && now < endsAt);
+    const changed = root.hasAttribute('data-diwali') !== active;
     root.toggleAttribute('data-diwali', active);
+    if (active) root.setAttribute('data-theme', 'dark');
     root.toggleAttribute('data-diwali-paused', document.hidden);
     clearTimeout(expiryTimer);
     // Expire an open tab too; visibilitychange catches suspended mobile tabs.
@@ -20,6 +22,7 @@
       const nextChange = now < startsAt ? startsAt : endsAt;
       expiryTimer = setTimeout(updateSeason, Math.min(nextChange - now, 2147483647));
     }
+    if (changed) window.dispatchEvent(new CustomEvent('iitj-diwali-change', { detail: { active } }));
   }
 
   updateSeason();

@@ -104,40 +104,113 @@
 [data-diwali] .diwali-map-dismiss:hover { background: var(--diwali-wash); }
 [data-diwali] .diwali-map-dismiss:focus-visible { outline: 2px solid var(--diwali-ink); }
 
-[data-diwali] .diwali-map-sparkles {
+[data-diwali] .diwali-map-fireworks {
   display: block;
   position: absolute;
   inset: 140px 84px 140px 24px;
   z-index: 4;
   pointer-events: none;
-  color: var(--diwali-ink);
+  overflow: hidden;
 }
-[data-diwali] .diwali-map-spark {
+
+[data-diwali] .diwali-firework {
   position: absolute;
-  left: 18%;
-  top: 18%;
-  opacity: 0;
-  animation: diwali-map-spark 12s ease-out infinite;
+  left: 28%;
+  top: 22%;
+  width: 4px;
+  height: 4px;
+  color: #f5c56b;
+  animation: diwali-firework-cycle 10.5s linear infinite;
 }
-[data-diwali] .diwali-map-spark:nth-child(2) { left: 72%; top: 38%; animation-delay: 4s; }
-[data-diwali] .diwali-map-spark:nth-child(3) { left: 40%; top: 68%; animation-delay: 8s; }
+[data-diwali] .diwali-firework:nth-child(2) {
+  left: 76%;
+  top: 36%;
+  color: #f29d7e;
+  animation-delay: 3.5s;
+}
+[data-diwali] .diwali-firework:nth-child(3) {
+  left: 44%;
+  top: 70%;
+  color: #e7d58a;
+  animation-delay: 7s;
+}
+
+/* The rising ember and expanding particle ring share one slow cycle, so only
+   one restrained burst is normally visible at a time. */
+[data-diwali] .diwali-firework::before {
+  content: '';
+  position: absolute;
+  left: 1px;
+  top: 78px;
+  width: 2px;
+  height: 28px;
+  border-radius: 99px;
+  background: linear-gradient(to top, transparent, currentColor);
+  opacity: 0;
+  animation: diwali-firework-rise 10.5s ease-out infinite;
+  animation-delay: inherit;
+}
+[data-diwali] .diwali-firework i,
+[data-diwali] .diwali-firework i::before,
+[data-diwali] .diwali-firework i::after {
+  position: absolute;
+  inset: 0;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: currentColor;
+  box-shadow:
+    0 -31px 0 -1px currentColor,
+    22px -22px 0 -1px currentColor,
+    31px 0 0 -1px currentColor,
+    22px 22px 0 -1px currentColor,
+    0 31px 0 -1px currentColor,
+    -22px 22px 0 -1px currentColor,
+    -31px 0 0 -1px currentColor,
+    -22px -22px 0 -1px currentColor;
+}
+[data-diwali] .diwali-firework i {
+  display: block;
+  opacity: 0;
+  transform: scale(0.15);
+  filter: drop-shadow(0 0 4px currentColor);
+  animation: diwali-firework-burst 10.5s cubic-bezier(.15,.7,.25,1) infinite;
+  animation-delay: inherit;
+}
+[data-diwali] .diwali-firework i::before,
+[data-diwali] .diwali-firework i::after { content: ''; }
+[data-diwali] .diwali-firework i::before { transform: rotate(22.5deg) scale(.82); }
+[data-diwali] .diwali-firework i::after { transform: rotate(11.25deg) scale(.58); opacity: .75; }
 [data-diwali] .diwali-map-flame { transform-origin: 24px 25px; animation: diwali-flame-glow 4s ease-in-out infinite; }
 
 /* Keep decoration away from every task panel, not just active navigation. */
 body.immersive-nav .diwali-map-greeting,
-body.immersive-nav .diwali-map-sparkles,
+body.immersive-nav .diwali-map-fireworks,
 .app:has(#search-results:not(.hidden), #directions-panel:not(.hidden), #place-sheet:not(.hidden), #nav-panel:not(.hidden), #side-menu:not(.hidden), #layer-panel:not(.hidden), #offline-banner:not([hidden])) .diwali-map-greeting,
-.app:has(#search-results:not(.hidden), #directions-panel:not(.hidden), #place-sheet:not(.hidden), #nav-panel:not(.hidden), #side-menu:not(.hidden), #layer-panel:not(.hidden), #offline-banner:not([hidden])) .diwali-map-sparkles,
+.app:has(#search-results:not(.hidden), #directions-panel:not(.hidden), #place-sheet:not(.hidden), #nav-panel:not(.hidden), #side-menu:not(.hidden), #layer-panel:not(.hidden), #offline-banner:not([hidden])) .diwali-map-fireworks,
 [data-diwali-dismissed] .diwali-map-greeting,
-[data-diwali-dismissed] .diwali-map-sparkles { display: none; }
+[data-diwali-dismissed] .diwali-map-fireworks { display: none; }
 
-[data-diwali-paused] .diwali-map-spark,
+[data-diwali-paused] .diwali-firework,
+[data-diwali-paused] .diwali-firework::before,
+[data-diwali-paused] .diwali-firework i,
 [data-diwali-paused] .diwali-map-flame { animation-play-state: paused; }
 
-@keyframes diwali-map-spark {
-  0% { opacity: 0; transform: scale(0.55) rotate(-8deg); }
-  5% { opacity: 0.65; }
-  16%, 100% { opacity: 0; transform: scale(1.15) rotate(8deg); }
+@keyframes diwali-firework-cycle {
+  0%, 100% { visibility: visible; }
+}
+@keyframes diwali-firework-rise {
+  0%, 2% { opacity: 0; transform: translateY(16px) scaleY(.5); }
+  5% { opacity: .7; }
+  10% { opacity: 0; transform: translateY(-78px) scaleY(1); }
+  10.1%, 100% { opacity: 0; }
+}
+@keyframes diwali-firework-burst {
+  0%, 9% { opacity: 0; transform: scale(.15) rotate(-6deg); }
+  11% { opacity: 1; transform: scale(.8) rotate(-2deg); }
+  20% { opacity: .72; transform: scale(1.55) rotate(4deg); }
+  28% { opacity: 0; transform: scale(2.05) rotate(8deg); }
+  28.1%, 100% { opacity: 0; }
 }
 @keyframes diwali-flame-glow {
   0%, 100% { transform: scale(1); opacity: 1; }
@@ -147,6 +220,6 @@ body.immersive-nav .diwali-map-sparkles,
 @media (prefers-reduced-motion: reduce) {
   [data-diwali] .diwali-flame { transition: none; }
   [data-diwali] .diwali-card[aria-pressed="true"] .diwali-sparks { animation: none; }
-  [data-diwali] .diwali-map-sparkles { display: none; }
+  [data-diwali] .diwali-map-fireworks { display: none; }
   [data-diwali] .diwali-map-flame { animation: none; }
 }
