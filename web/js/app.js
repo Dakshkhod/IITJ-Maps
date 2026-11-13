@@ -5342,6 +5342,7 @@ function setupEventListeners() {
   // "About IITJ Maps" is a plain link to about.html — no JS handler needed.
 
   document.addEventListener('keydown', e => {
+    if (document.getElementById('share-link-dialog').open) return;
     if (e.key === 'Escape') {
       closeMenu();
       if (directionsOpen) closeDirectionsPanel();
@@ -5705,16 +5706,67 @@ function buildShareURL(place) {
   return `${shareBase()}?${buildQuery(pairs)}`;
 }
 
+async function copyShareLink(url) {
+  if (!navigator.clipboard?.writeText) return false;
+  try {
+    await navigator.clipboard.writeText(url);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function showShareLinkDialog(url, copiedMessage) {
+  const dialog = document.getElementById('share-link-dialog');
+  const input = document.getElementById('share-link-url');
+  const hint = document.getElementById('share-link-hint');
+  const copyButton = document.getElementById('share-link-copy');
+  const canCopy = typeof navigator.clipboard?.writeText === 'function';
+
+  input.value = url;
+  copyButton.classList.toggle('hidden', !canCopy);
+  hint.classList.toggle('hidden', canCopy);
+  copyButton.onclick = async () => {
+    const copied = await copyShareLink(url);
+    if (!dialog.open || input.value !== url) return;
+    if (copied) {
+      dialog.close();
+      showToast(copiedMessage, 'success');
+    } else {
+      hint.classList.remove('hidden');
+      input.focus();
+      input.select();
+    }
+  };
+  if (!dialog.open) dialog.showModal();
+  input.select();
+}
+
+async function shareLink(data, copiedMessage) {
+  if (navigator.share) {
+    try {
+      await navigator.share(data);
+      return;
+    } catch (error) {
+      // A cancelled share and a device without share targets both use AbortError.
+      // Offer the link without changing the clipboard when the user may have cancelled.
+      if (error?.name === 'AbortError') {
+        showShareLinkDialog(data.url, copiedMessage);
+        return;
+      }
+    }
+  }
+  if (await copyShareLink(data.url)) {
+    showToast(copiedMessage, 'success');
+  } else {
+    showShareLinkDialog(data.url, copiedMessage);
+  }
+}
+
 function sharePlaceOrLocation(place) {
   const url  = buildShareURL(place);
   const text = place.name ? `${place.name} — IITJ Maps` : 'Location on IITJ Maps';
-  if (navigator.share) {
-    navigator.share({ title: text, url }).catch(() => {});
-  } else {
-    navigator.clipboard?.writeText(url)
-      .then(() => showToast('Share link copied!', 'success'))
-      .catch(() => showToast(url, 'info'));
-  }
+  return shareLink({ title: text, url }, 'Share link copied!');
 }
 
 function shareMyLocation() {
@@ -5753,13 +5805,7 @@ function shareRoute() {
   const url  = buildRouteShareURL();
   const dest = directionsTo.name && directionsTo.name !== 'Destination' ? directionsTo.name : 'a place';
   const text = `Directions to ${dest} — IITJ Maps`;
-  if (navigator.share) {
-    navigator.share({ title: text, text, url }).catch(() => {});
-  } else {
-    navigator.clipboard?.writeText(url)
-      .then(() => showToast('Route link copied!', 'success'))
-      .catch(() => showToast(url, 'info'));
-  }
+  return shareLink({ title: text, text, url }, 'Route link copied!');
 }
 
 // A shared-route link (?r=…, or the older ?tlat=&tlng=…): reopen directions and

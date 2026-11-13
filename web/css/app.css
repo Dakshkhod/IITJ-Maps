@@ -1125,6 +1125,31 @@ input[type="checkbox"]:checked + .toggle-track .toggle-thumb { transform: transl
 
 .action-secondary:hover { background: var(--surface); }
 
+.share-link-dialog {
+  width: min(380px, calc(100% - 32px));
+  margin: auto;
+  padding: 16px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-lg);
+  background: var(--bg-elevated);
+  color: var(--text-primary);
+  box-shadow: var(--shadow-lg);
+}
+
+.share-link-dialog::backdrop { background: var(--bg-overlay); }
+.share-link-dialog h2 { margin-bottom: 12px; font-size: 17px; }
+.share-link-dialog input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: inherit;
+  font: inherit;
+}
+.share-link-dialog p { margin-top: 8px; color: var(--text-secondary); font-size: 13px; }
+.share-link-actions { display: flex; gap: 8px; margin-top: 12px; }
+
 /* Navigation Panel */
 /* Navigation Panel — Modern Google Maps style */
 .nav-panel {

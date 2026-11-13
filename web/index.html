@@ -30,7 +30,7 @@
   <!-- Self-hosted fonts (no Google Fonts CDN). -->
   <link rel="stylesheet" href="/fonts/fonts.css?v=1">
 
-  <link rel="stylesheet" href="css/app.css?v=22">
+  <link rel="stylesheet" href="css/app.css?v=23">
   <link rel="stylesheet" href="css/diwali.css?v=3">
   <script src="js/diwali.js?v=3"></script>
 
@@ -467,6 +467,16 @@
 
   </div>
 
+  <dialog id="share-link-dialog" class="share-link-dialog" aria-labelledby="share-link-title">
+    <h2 id="share-link-title">Share link</h2>
+    <input id="share-link-url" type="text" aria-label="Link to share" readonly autofocus>
+    <p id="share-link-hint" class="hidden">Select and copy the link to share it.</p>
+    <form method="dialog" class="share-link-actions">
+      <button class="action-btn action-secondary" type="submit">Done</button>
+      <button class="action-btn action-primary" id="share-link-copy" type="button">Copy link</button>
+    </form>
+  </dialog>
+
   <!-- Detects device graphics capability and picks a rendering tier; MUST run
        before app.js / landmarks-3d.js so both can read window.PerfTier. -->
   <script src="js/perf-tier.js?v=8"></script>
@@ -480,7 +490,7 @@
   <script src="js/landmarks-3d.js?v=59" defer></script>
   <script src="js/telemetry-identity.js?v=1"></script>
   <script src="js/telemetry.js?v=3"></script>
-  <script src="js/app.js?v=109"></script>
+  <script src="js/app.js?v=110"></script>
 
   <script defer src="/_vercel/insights/script.js"></script>
 </body>
